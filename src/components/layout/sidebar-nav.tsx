@@ -85,7 +85,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         router.push(href);
         setTimeout(() => {
             setFocusedBookHref(href);
-        }, 2000); 
+        }, 1000); 
     }
   };
   
