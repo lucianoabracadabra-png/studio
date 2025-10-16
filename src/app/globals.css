@@ -211,6 +211,11 @@
       filter: blur(10px);
     }
   }
+
+  .book-spin-continuous {
+    animation: book-spin-continuous-anim 1s linear infinite;
+    transform-style: preserve-3d;
+  }
 }
 
 @layer utilities {
@@ -282,6 +287,15 @@
     }
     50% {
       filter: drop-shadow(0 0 10px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 5px white);
+    }
+  }
+
+  @keyframes book-spin-continuous-anim {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(360deg);
     }
   }
 
