@@ -54,11 +54,10 @@ export const profileLink = {
 
 type SidebarNavProps = {
   activePath: string | null;
+  onLinkClick: (href: string) => void;
 };
 
-export function SidebarNav({ activePath }: SidebarNavProps) {
-  const router = useRouter();
-  
+export function SidebarNav({ activePath, onLinkClick }: SidebarNavProps) {
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [reverseSpinningBookHref, setReverseSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
@@ -101,7 +100,7 @@ export function SidebarNav({ activePath }: SidebarNavProps) {
     if (activePath !== href) {
         setSpinningBookHref(href);
         setTimeout(() => setSpinningBookHref(null), 1000);
-        setTimeout(() => router.push(href), 250); // Delay navigation slightly
+        onLinkClick(href);
     }
   };
   
