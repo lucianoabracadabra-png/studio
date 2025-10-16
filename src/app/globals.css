@@ -145,7 +145,7 @@
     @apply h-12;
   }
 
-  .book-nav-item:hover {
+  .book-nav-item:hover:not(.active) {
     transform: translateX(5px) scale(1.05);
   }
   
