@@ -79,8 +79,7 @@ export function DiceRoller() {
               <label className="font-medium">Number of Dice</label>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => handleDiceCountChange(-1)}><Minus/></Button>
-                <Input type="number" value={diceCount} onChange={(e) => setDiceCount(parseInt(e.target.value) || 1)} className="text-center" />
-                <Button variant="outline" size="icon" onClick={() => handleDiceCountChange(1)}><Plus/></Button>
+                <Input type="number" value={diceCount} onChange={(e) => setDiceCount(parseInt(e.target.value) || 1)} className="text-center font-mono" />
               </div>
             </div>
 
@@ -88,7 +87,7 @@ export function DiceRoller() {
               <label className="font-medium">Modifier</label>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => handleModifierChange(-1)}><Minus/></Button>
-                <Input type="number" value={modifier} onChange={(e) => setModifier(parseInt(e.target.value) || 0)} className="text-center" />
+                <Input type="number" value={modifier} onChange={(e) => setModifier(parseInt(e.target.value) || 0)} className="text-center font-mono" />
                 <Button variant="outline" size="icon" onClick={() => handleModifierChange(1)}><Plus/></Button>
               </div>
             </div>
@@ -109,7 +108,7 @@ export function DiceRoller() {
                     {lastRoll ? lastRoll.total : '...'}
                 </p>
                 {lastRoll && (
-                    <div className="text-muted-foreground">
+                    <div className="text-muted-foreground font-mono">
                         <span className="font-bold text-accent">{lastRoll.notation}</span> = (
                         {lastRoll.rolls.join(' + ')}) {lastRoll.modifier > 0 ? `+ ${lastRoll.modifier}` : lastRoll.modifier < 0 ? `- ${Math.abs(lastRoll.modifier)}` : ''}
                     </div>
@@ -123,13 +122,13 @@ export function DiceRoller() {
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {results.length > 0 ? results.map((r, i) => (
                   <div key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
-                    <div>
+                    <div className='font-mono'>
                       <span className="font-mono text-accent">{r.notation}</span>
                       <span className="text-muted-foreground ml-2 text-xs">
                         = ({r.rolls.join(', ')}) {r.modifier !== 0 && (r.modifier > 0 ? `+${r.modifier}`: r.modifier)}
                       </span>
                     </div>
-                    <Badge variant="secondary">{r.total}</Badge>
+                    <Badge variant="secondary" className="font-mono">{r.total}</Badge>
                   </div>
                 )) : <p className="text-sm text-muted-foreground text-center pt-4">Your roll history will appear here.</p>}
               </div>

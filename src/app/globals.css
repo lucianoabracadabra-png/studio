@@ -144,10 +144,6 @@
     @apply h-12;
   }
 
-  .book-nav-item:hover:not(.active):not(.book-spin-continuous) {
-    transform: translateX(5px) scale(1.05);
-  }
-  
   .book-nav-item.active {
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
