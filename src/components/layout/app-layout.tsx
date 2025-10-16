@@ -39,8 +39,10 @@ export default function AppLayout({ children, activePath, colorHue }: AppLayoutP
 
   return (
     <div className="min-h-screen w-full bg-background" style={pageStyle}>
-      <SidebarNav activePath={activePath} />
-      <main className="pl-24 h-screen">
+      <div className="relative z-20">
+        <SidebarNav activePath={activePath} />
+      </div>
+      <main className="pl-24 h-screen relative z-10">
         {children}
       </main>
     </div>
