@@ -57,9 +57,9 @@ export function SidebarNav() {
   
   const [activePath, setActivePath] = useState<string | null>(null);
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
-  // Generate stable animation styles on the client-side once to prevent hydration errors.
-  const animationStyles = useMemo(() => {
+  useEffect(() => {
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -73,7 +73,7 @@ export function SidebarNav() {
         '--float-y3': `${(Math.random() * 6 - 3).toFixed(2)}px`,
       } as React.CSSProperties;
     });
-    return styles;
+    setAnimationStyles(styles);
   }, []);
 
   useEffect(() => {
