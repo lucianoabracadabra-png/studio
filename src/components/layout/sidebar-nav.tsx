@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 export const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -78,14 +78,14 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     if (activePath !== href) {
         setSpinningBookHref(href);
         setTimeout(() => {
-          setSpinningBookHref(null);
-          router.push(href);
+            setSpinningBookHref(null);
+            router.push(href);
         }, 2000);
     }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
-    const isActive = activePath === link.href;
+    const isActive = activePath === link.href || spinningBookHref === link.href;
     const isSpinning = spinningBookHref === link.href;
   
     return (
@@ -103,7 +103,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         isSpinning && 'book-glow-anim',
                         !isActive && !isSpinning && 'float-anim'
                         )}
-                        style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
+                        style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
                         <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
                     </Link>

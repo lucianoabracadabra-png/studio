@@ -127,7 +127,7 @@
   }
   
   .active-icon {
-    animation: icon-pulse 2s ease-in-out infinite;
+    animation: active-icon-pulse 2s ease-in-out infinite;
   }
   
   .page-container {
@@ -153,22 +153,22 @@
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
-    border-color: transparent;
+    border-color: var(--page-primary-color);
     filter: drop-shadow(0 0 5px var(--page-primary-color));
   }
 
   .page-container::before {
     top: -4px;
     left: -4px;
-    border-top: 2px solid var(--page-primary-color);
-    border-left: 2px solid var(--page-primary-color);
+    border-top: 2px solid;
+    border-left: 2px solid;
   }
 
   .page-container::after {
     bottom: -4px;
     right: -4px;
-    border-bottom: 2px solid var(--page-primary-color);
-    border-right: 2px solid var(--page-primary-color);
+    border-bottom: 2px solid;
+    border-right: 2px solid;
   }
 
   .spell-effect {
@@ -243,10 +243,10 @@
   }
 
   .book-spin-anim {
-    animation: book-spin 2s ease-in-out forwards;
+    animation: book-spin 2s ease-in-out;
   }
   .book-glow-anim {
-    animation: book-glow 2s ease-in-out forwards;
+    animation: book-glow 2s ease-in-out;
   }
 
 }
@@ -292,25 +292,19 @@
   
   @keyframes active-icon-pulse {
     0% {
+      color: hsl(var(--book-color-hue), 80%, 85%);
+      filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
       box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
     }
     50% {
+      color: hsl(var(--book-color-hue), 90%, 90%);
+      filter: drop-shadow(0 0 8px hsl(var(--book-color-hue), 80%, 85%));
       box-shadow: 0 0 14px 4px hsl(var(--book-color-hue), 80%, 85%), 0 0 28px 7px hsl(var(--book-color-hue), 80%, 85% / 0.7);
     }
     100% {
+      color: hsl(var(--book-color-hue), 80%, 85%);
+      filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
       box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
-    }
-  }
-
-  @keyframes icon-pulse {
-    0% {
-      filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
-    }
-    50% {
-      filter: drop-shadow(0 0 8px hsl(var(--book-color-hue), 80%, 85%));
-    }
-    100% {
-      filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
     }
   }
 

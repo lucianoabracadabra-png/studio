@@ -3,7 +3,6 @@
 import AppLayout from '@/components/layout/app-layout';
 import { usePathname } from 'next/navigation';
 import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
-import { AnimatePresence } from 'framer-motion';
 
 const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
 
@@ -27,13 +26,7 @@ export default function AuthenticatedAppLayout({
         activePath={activePath} 
         colorHue={colorHue}
       >
-          <AnimatePresence mode="wait">
-            {activePath && (
-              <AppLayout.PageContent key={activePath}>
-                {children}
-              </AppLayout.PageContent>
-            )}
-          </AnimatePresence>
+          {children}
       </AppLayout>
   );
 }
