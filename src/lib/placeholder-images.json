@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "campaign-1",
+      "description": "A mystical forest with glowing mushrooms and ancient trees.",
+      "imageUrl": "https://picsum.photos/seed/101/600/400",
+      "imageHint": "mystical forest"
+    },
+    {
+      "id": "campaign-2",
+      "description": "The entrance to a dark, foreboding dungeon carved into a mountainside.",
+      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageHint": "dungeon entrance"
+    },
+    {
+      "id": "campaign-3",
+      "description": "A grand castle hall with high-arched ceilings and ornate tapestries.",
+      "imageUrl": "https://picsum.photos/seed/103/600/400",
+      "imageHint": "castle hall"
+    },
+    {
+      "id": "campaign-4",
+      "description": "A bustling fantasy city market square filled with various races.",
+      "imageUrl": "https://picsum.photos/seed/104/600/400",
+      "imageHint": "fantasy market"
+    },
+    {
+      "id": "campaign-5",
+      "description": "A desolate wasteland under a stormy, purple sky.",
+      "imageUrl": "https://picsum/photos/seed/105/600/400",
+      "imageHint": "desolate wasteland"
+    },
+    {
+      "id": "campaign-6",
+      "description": "A serene elven village built among the treetops.",
+      "imageUrl": "https://picsum.photos/seed/106/600/400",
+      "imageHint": "elven village"
+    }
+  ]
 }
