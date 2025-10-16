@@ -47,9 +47,9 @@ export function SidebarNav() {
        <Link href="/dashboard" className="flex items-center justify-center mb-4 flex-shrink-0">
           <Icons.logo className="h-10 w-10 text-primary" />
         </Link>
-      <ScrollArea className="w-full">
+      <ScrollArea className="w-full" type="never">
         <TooltipProvider>
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 py-4">
             <nav className="flex flex-col items-center gap-2">
               {mainLinks.map((link, index) => (
                 <Tooltip key={link.href}>
@@ -62,7 +62,7 @@ export function SidebarNav() {
                         )}
                         style={{'--book-color-hue': `${200 + index * 40}deg`} as React.CSSProperties}
                       >
-                        <link.icon className="w-6 h-6 text-white/80" />
+                        {link.href === '/dashboard' ? null : <link.icon className="w-6 h-6 text-white/80" />}
                       </div>
                     </Link>
                   </TooltipTrigger>
@@ -74,15 +74,6 @@ export function SidebarNav() {
             </nav>
 
             <div className="h-px w-8 bg-white/20" />
-
-            <Tooltip>
-              <TooltipTrigger>
-                    <WandSparkles className="w-8 h-8 text-accent/80" />
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                    <p>GM Tools</p>
-              </TooltipContent>
-            </Tooltip>
 
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map((link, index) => (
