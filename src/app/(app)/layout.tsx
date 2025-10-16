@@ -2,6 +2,7 @@
 
 import AppLayout from '@/components/layout/app-layout';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 function getPageTitle(pathname: string): string {
     const segment = pathname.split('/').pop() || 'dashboard';
@@ -15,7 +16,19 @@ export default function AuthenticatedAppLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const pageTitle = getPageTitle(pathname);
+  const [pageTitle, setPageTitle] = useState('');
+  const [showContent, setShowContent] = useState(false);
 
-  return <AppLayout pageTitle={pageTitle}>{children}</AppLayout>;
+  useEffect(() => {
+    // pathname will be null on initial load in this setup
+    // We only show content when a path is selected
+    if (pathname && pathname !== '/_error') { // /_error can be a path on initial load sometimes
+        setPageTitle(getPageTitle(pathname));
+        setShowContent(true);
+    } else {
+        setShowContent(false);
+    }
+  }, [pathname]);
+
+  return <AppLayout pageTitle={pageTitle} showContent={showContent}>{children}</AppLayout>;
 }

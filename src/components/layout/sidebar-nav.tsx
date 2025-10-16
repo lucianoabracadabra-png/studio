@@ -44,12 +44,12 @@ export function SidebarNav() {
   const [activePath, setActivePath] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only set the active path after the initial render to prevent the book from being open on load.
-    // A small delay ensures the initial 'closed' state is seen.
-    const timer = setTimeout(() => {
+    // Only set the active path after navigation occurs, not on initial load
+    if (pathname && pathname !== '/_error' && pathname !== '/') {
       setActivePath(pathname);
-    }, 10);
-    return () => clearTimeout(timer);
+    } else {
+      setActivePath(null);
+    }
   }, [pathname]);
 
   const animationStyles = useMemo(() => {
@@ -87,7 +87,7 @@ export function SidebarNav() {
                         )}
                         style={{...animationStyles[link.href], '--book-color-hue': `${200 + index * 40}deg`} as React.CSSProperties}
                       >
-                        <link.icon className="w-6 h-6 text-white/80" />
+                        <link.icon className="w-6 h-6 text-white/80 transition-all" />
                       </div>
                     </Link>
                   </TooltipTrigger>
@@ -112,7 +112,7 @@ export function SidebarNav() {
                         )}
                         style={{...animationStyles[link.href], '--book-color-hue': `${30 + index * 35}deg`} as React.CSSProperties}
                       >
-                        <link.icon className="w-5 h-5 text-white/80" />
+                        <link.icon className="w-5 h-5 text-white/80 transition-all" />
                       </div>
                     </Link>
                   </TooltipTrigger>

@@ -34,7 +34,7 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full font-bold">
+            <Button asChild className="w-full font-bold">
               <Link href="/dashboard">Login</Link>
             </Button>
           </div>
