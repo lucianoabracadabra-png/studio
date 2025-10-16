@@ -85,7 +85,12 @@ export function SidebarNav() {
     
     if (currentPath !== prevPath && prevPath !== null && prevPath !== '/login' && prevPath !== '/signup' && prevPath !== '/_error') {
       setReverseSpinningBookHref(prevPath);
-      setTimeout(() => setReverseSpinningBookHref(null), 2000);
+      setTimeout(() => setReverseSpinningBookHref(null), 1000);
+    }
+    
+    if (currentPath) {
+      setSpinningBookHref(currentPath);
+      setTimeout(() => setSpinningBookHref(null), 1000); 
     }
     
     setActivePath(currentPath);
@@ -97,8 +102,6 @@ export function SidebarNav() {
     e.preventDefault();
     if (activePath !== href) {
         router.push(href);
-        setSpinningBookHref(href);
-        setTimeout(() => setSpinningBookHref(null), 2000); 
     }
   };
   
@@ -106,7 +109,7 @@ export function SidebarNav() {
     const isActive = activePath === link.href;
     const isSpinning = spinningBookHref === link.href;
     const isReverseSpinning = reverseSpinningBookHref === link.href;
-
+  
     return (
       <TooltipProvider key={link.href}>
         <Tooltip>
@@ -116,7 +119,7 @@ export function SidebarNav() {
               onClick={(e) => handleLinkClick(e, link.href)}
               className={cn(
                 'book-nav-item',
-                isTool && 'book-tool',
+                isTool ? 'tool-book' : 'main-book',
                 isActive && 'active',
                 isSpinning && 'book-spin-two-speeds',
                 isReverseSpinning && 'book-reverse-spin-anim',
@@ -143,7 +146,7 @@ export function SidebarNav() {
             {mainLinks.map(link => renderBook(link, false))}
           </nav>
 
-          <nav className="flex flex-col items-center gap-2">
+          <nav className="flex flex-col items-center gap-2 mt-4">
             {gmToolsLinks.map(link => renderBook(link, true))}
           </nav>
         </div>

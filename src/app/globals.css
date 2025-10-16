@@ -116,7 +116,7 @@
   }
 
   .book-nav-item {
-    @apply relative w-12 h-16 flex items-center justify-center cursor-pointer transition-all duration-300 ease-in-out;
+    @apply relative w-12 flex items-center justify-center cursor-pointer transition-all duration-300 ease-in-out;
     background: linear-gradient(to right, hsl(var(--book-color-hue), 20%, 30%), hsl(var(--book-color-hue), 25%, 40%));
     border-left: 3px solid hsl(var(--book-color-hue), 30%, 50%);
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
@@ -126,6 +126,14 @@
     transform-style: preserve-3d;
   }
   
+  .book-nav-item.main-book {
+    @apply h-16;
+  }
+  
+  .book-nav-item.tool-book {
+    @apply h-12;
+  }
+
   .book-nav-item.float-anim {
     animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
   }
@@ -140,10 +148,6 @@
     background: linear-gradient(to bottom, hsl(var(--book-color-hue), 20%, 60%), hsl(var(--book-color-hue), 25%, 40%));
   }
   
-  .book-tool {
-    @apply h-12;
-  }
-
   .book-nav-item.active {
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
@@ -180,9 +184,33 @@
   }
 
   .page-container {
-    @apply rounded-lg p-4 lg:p-6 transition-colors duration-500;
+    @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative;
     background-color: var(--page-bg-color, transparent);
     box-shadow: 0 0 40px var(--page-bg-color, transparent);
+  }
+
+  .page-container::before, .page-container::after {
+    content: '';
+    position: absolute;
+    border-style: solid;
+    border-color: hsl(var(--primary) / 0.3);
+    width: 2rem;
+    height: 2rem;
+    transition: all 0.5s ease-in-out;
+  }
+
+  .page-container::before {
+    top: -4px;
+    left: -4px;
+    border-width: 2px 0 0 2px;
+    border-top-left-radius: var(--radius);
+  }
+
+  .page-container::after {
+    bottom: -4px;
+    right: -4px;
+    border-width: 0 2px 2px 0;
+    border-bottom-right-radius: var(--radius);
   }
 
   .spell-effect {
@@ -333,7 +361,7 @@
     }
     50% {
        box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
+        inset -3px 0 8px rgba(0,0-0,0.3), 
         0 0 60px hsla(var(--book-color-hue), 60%, 70%, 1),
         0 0 30px hsla(var(--book-color-hue), 60%, 70%, 0.7),
         0 0 15px hsl(var(--book-color-hue), 60%, 80%);
