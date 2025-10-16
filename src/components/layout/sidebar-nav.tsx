@@ -60,7 +60,6 @@ export function SidebarNav() {
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
   useEffect(() => {
-    // Generate random animation values only on the client
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -126,7 +125,7 @@ export function SidebarNav() {
 
   return (
     <div className="relative z-50 flex h-full w-20 flex-col items-center bg-transparent py-4">
-      <ScrollArea className="w-full">
+      <ScrollArea className="w-full hide-scrollbar">
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">
             <nav className="flex flex-col items-center gap-2">

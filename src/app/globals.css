@@ -155,7 +155,6 @@
   
   .active-icon, .book-nav-item.active .avatar-glow {
     animation: sonar-pulse 2s ease-in-out infinite;
-    filter: drop-shadow(0 0 8px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 4px white);
   }
   
   .page-content-wrapper {
@@ -215,6 +214,8 @@
   .hide-scrollbar::-webkit-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
