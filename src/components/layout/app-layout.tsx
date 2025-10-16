@@ -15,9 +15,9 @@ type AppLayoutProps = {
 
 export default function AppLayout({ children, pageTitle, showContent, pageColor, isClosing, onAnimationEnd }: AppLayoutProps) {
   return (
-    <div className="flex h-screen bg-background">
+    <div className="relative min-h-screen w-full bg-background">
       <SidebarNav />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col pl-20">
         <div className="spell-effect"></div>
         {showContent && (
           <div 

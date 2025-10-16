@@ -252,11 +252,11 @@
 
 @layer utilities {
   .hide-scrollbar {
-    scrollbar-width: none; /* For Firefox */
-    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
   .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* For Chrome, Safari, and Opera */
+    display: none; /* Chrome, Safari, Opera*/
   }
 
   @keyframes float-animation {
@@ -366,7 +366,7 @@
     }
     100% {
       transform: rotateY(-720deg);
-      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.4), 2px 0 4px rgba(0,0,0,0.4);
     }
   }
 

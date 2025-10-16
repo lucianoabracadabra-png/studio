@@ -136,13 +136,13 @@ export function SidebarNav() {
   }
 
   return (
-    <div className="flex h-full w-20 flex-col items-center bg-transparent py-4 z-50">
-      <ScrollArea className="w-full hide-scrollbar">
+    <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center bg-transparent py-4 z-50">
+      <ScrollArea className="w-full h-full hide-scrollbar">
         <div className="flex flex-col items-center gap-4 py-4">
           <nav className="flex flex-col items-center gap-4">
             {mainLinks.map(link => renderBook(link, false))}
           </nav>
-          <nav className="mt-4 flex flex-col items-center gap-2">
+          <nav className="flex flex-col items-center gap-2">
             {gmToolsLinks.map(link => renderBook(link, true))}
             {renderBook(profileLink, true)}
           </nav>
