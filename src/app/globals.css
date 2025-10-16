@@ -212,11 +212,11 @@
 @layer utilities {
   .hide-scrollbar,
   .hide-scrollbar::-webkit-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
   }
   .hide-scrollbar::-webkit-scrollbar {
-    display: none;
+    display: none; /* For Chrome, Safari, and Opera */
   }
 
   @keyframes float-animation {
@@ -285,34 +285,14 @@
   @keyframes book-spin-two-speeds {
     0% {
       transform: rotateY(0deg);
-      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
-    }
-    17% { /* Peak glow during first spin */
-       box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 15px hsl(var(--book-color-hue), 50%, 80%);
-    }
-    35% { /* End of first spin */
-      transform: rotateY(360deg);
-      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
-    }
-    67% { /* Peak glow during second spin */
-       box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 15px hsl(var(--book-color-hue), 50%, 80%);
     }
     100% {
       transform: rotateY(720deg);
-      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
   }
 
   .book-spin-two-speeds {
-    animation: book-spin-two-speeds 2s ease-out;
+    animation: book-spin-two-speeds 1s ease-out;
   }
 
   @keyframes book-reverse-spin {
@@ -320,12 +300,12 @@
       transform: rotateY(0deg);
     }
     100% {
-      transform: rotateY(-360deg);
+      transform: rotateY(-720deg);
     }
   }
 
   .book-reverse-spin-anim {
-    animation: book-reverse-spin 1s ease-in-out;
+    animation: book-reverse-spin 1s ease-out;
   }
   
   .fade-in {
@@ -350,3 +330,5 @@
     to { opacity: 1; transform: translateY(0); }
   }
 }
+
+    

@@ -95,12 +95,14 @@ export function SidebarNav() {
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
 
-    if (spinningBookHref === null && activePath !== href) {
+    if (activePath !== href) {
         router.push(href);
-        setSpinningBookHref(href);
-        setTimeout(() => {
-            setSpinningBookHref(null);
-        }, 2000);
+        if (spinningBookHref !== href) {
+            setSpinningBookHref(href);
+            setTimeout(() => {
+                setSpinningBookHref(null);
+            }, 1000);
+        }
     }
   };
   
@@ -112,7 +114,7 @@ export function SidebarNav() {
     return (
       <Tooltip key={link.href}>
         <TooltipTrigger asChild>
-          <a
+          <Link
             href={link.href}
             onClick={(e) => handleLinkClick(e, link.href)}
             className={cn(
@@ -126,7 +128,7 @@ export function SidebarNav() {
             style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
           >
             <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
-          </a>
+          </Link>
         </TooltipTrigger>
         <TooltipContent side="right">
           <p>{link.label}</p>
@@ -162,3 +164,5 @@ export function SidebarNav() {
     </div>
   );
 }
+
+    
