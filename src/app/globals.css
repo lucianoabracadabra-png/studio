@@ -175,8 +175,7 @@
   }
   
   .page-content-wrapper {
-    animation: spell-open-animation 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-    transform-origin: left center;
+    animation: spell-open-animation 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .page-content-wrapper.closing {
@@ -226,12 +225,12 @@
   @keyframes spell-open-animation {
     0% {
       opacity: 0;
-      transform: scale(0.95) translateX(-20px);
+      transform: scale(0.9);
       filter: blur(10px);
     }
     100% {
       opacity: 1;
-      transform: scale(1) translateX(0);
+      transform: scale(1);
       filter: blur(0px);
     }
   }
@@ -239,12 +238,12 @@
    @keyframes spell-close-animation {
     0% {
       opacity: 1;
-      transform: scale(1) translateX(0);
+      transform: scale(1);
       filter: blur(0px);
     }
     100% {
       opacity: 0;
-      transform: scale(0.95) translateX(-20px);
+      transform: scale(0.9);
       filter: blur(10px);
     }
   }
@@ -325,7 +324,7 @@
   @keyframes book-spin-two-speeds {
     0% {
       transform: rotateY(0deg);
-      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.4), 2px 0 4px rgba(0,0,0,0.4);
     }
     50% {
        box-shadow: 

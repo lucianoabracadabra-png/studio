@@ -18,22 +18,12 @@ const pathColorMap: { [key: string]: string } = {
     'default': 'transparent'
 };
 
-
-function getPageTitle(pathname: string): string {
-    if (!pathname) return '';
-    if (pathname === '/dashboard') return '';
-    const segment = pathname.split('/').pop() || 'dashboard';
-    const title = segment.replace(/-/g, ' ');
-    return title.charAt(0).toUpperCase() + title.slice(1);
-}
-
 export default function AuthenticatedAppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [pageTitle, setPageTitle] = useState('');
   const [showContent, setShowContent] = useState(false);
   const [pageColor, setPageColor] = useState('transparent');
   const [isClosing, setIsClosing] = useState(false);
@@ -44,7 +34,6 @@ export default function AuthenticatedAppLayout({
     
     if (shouldShowContent) {
         setIsClosing(false);
-        setPageTitle(getPageTitle(pathname));
         setPageColor(pathColorMap[pathname] || pathColorMap.default);
         setShowContent(true);
     } else {
@@ -58,5 +47,5 @@ export default function AuthenticatedAppLayout({
     }
   };
 
-  return <AppLayout pageTitle={pageTitle} showContent={showContent} pageColor={pageColor} isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>{children}</AppLayout>;
+  return <AppLayout showContent={showContent} pageColor={pageColor} isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>{children}</AppLayout>;
 }
