@@ -11,9 +11,10 @@ const pathColorMap: { [key: string]: string } = {
     '/wiki': 'hsl(320 65% 50% / 0.05)',
     '/tools/dice-roller': 'hsl(30 65% 50% / 0.05)',
     '/gm/combat-tracker': 'hsl(65 65% 50% / 0.05)',
-    '/tools/generator': 'hsl(100 65% 50% / A0.05)',
+    '/tools/generator': 'hsl(100 65% 50% / 0.05)',
     '/tools/description-generator': 'hsl(135 65% 50% / 0.05)',
     '/tools/soundboard': 'hsl(170 65% 50% / 0.05)',
+    '/profile': 'hsl(0 0% 50% / 0.05)',
     'default': 'transparent'
 };
 
@@ -38,19 +39,18 @@ export default function AuthenticatedAppLayout({
 
 
   useEffect(() => {
-    if (pathname && pathname !== '/_error' && pathname !== '/') {
+    // A null or invalid pathname means no book is selected.
+    if (pathname && pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && pathname !== '/_error') {
+        setIsClosing(false);
         setPageTitle(getPageTitle(pathname));
         setPageColor(pathColorMap[pathname] || pathColorMap.default);
         setShowContent(true);
-        setIsClosing(false);
     } else {
-        // When no path is active, start the closing animation
         setIsClosing(true);
     }
   }, [pathname]);
 
   const handleAnimationEnd = () => {
-    // Only hide content after closing animation finishes
     if (isClosing) {
       setShowContent(false);
     }

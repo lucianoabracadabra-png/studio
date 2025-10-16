@@ -67,10 +67,40 @@
     background-image: 
       radial-gradient(ellipse at 70% 30%, hsl(265 90% 70% / 0.1), transparent 50%),
       radial-gradient(ellipse at 30% 70%, hsl(300 90% 70% / 0.1), transparent 50%),
-      radial-gradient(ellipse at 50% 50%, hsl(240 10% 3.9% / 0), transparent 100%);
-    background-size: 200% 200%;
-    animation: galaxy-movement 60s ease-in-out infinite;
+      radial-gradient(ellipse at 50% 50%, hsl(240 10% 3.9% / 0), transparent 100%),
+      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+      radial-gradient(2px 2px at 80% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 40% 80%, #fff, transparent),
+      radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 20%, #fff, transparent);
+    background-size: 200% 200%, 200px 200px, 200px 200px, 300px 300px, 400px 400px, 500px 500px;
+    animation: 
+      galaxy-movement 60s ease-in-out infinite,
+      stars-twinkle 5s infinite ease-in-out;
     background-attachment: fixed;
+    overflow: hidden;
+  }
+
+  body.dark::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, #fff, transparent);
+    animation: shooting-star 15s linear infinite;
+  }
+  
+  body.dark::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #fff, transparent);
+    animation: shooting-star-horizontal 12s linear infinite 3s;
   }
 }
 
@@ -85,7 +115,7 @@
   }
 
   .book-nav-item {
-    @apply relative w-12 h-16 flex items-center justify-center rounded-sm cursor-pointer transition-all duration-300 ease-in-out;
+    @apply relative w-12 h-16 flex items-center justify-center cursor-pointer transition-all duration-300 ease-in-out;
     background: linear-gradient(to right, hsl(var(--book-color-hue), 20%, 30%), hsl(var(--book-color-hue), 25%, 40%));
     border-left: 3px solid hsl(var(--book-color-hue), 30%, 50%);
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
@@ -117,11 +147,10 @@
   .book-nav-item.active {
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.7),
-      0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.5),
-      0 0 3px white;
-    animation: pulse-glow-book 2s ease-in-out infinite, float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
-    animation-play-state: paused;
+      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+    animation: pulse-glow-book 2s ease-in-out infinite;
   }
 
   .book-nav-item.active > * > svg, .book-nav-item.active .avatar-glow {
@@ -159,19 +188,19 @@
   
   @keyframes book-spin-open-anim {
     from {
-      transform: rotateX(0deg);
+      transform: rotateY(0deg);
     }
     to {
-      transform: rotateX(360deg);
+      transform: rotateY(360deg);
     }
   }
 
   @keyframes book-spin-close-anim {
     from {
-      transform: rotateX(0deg);
+      transform: rotateY(0deg);
     }
     to {
-      transform: rotateX(360deg);
+      transform: rotateY(360deg);
     }
   }
   
@@ -215,6 +244,22 @@
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  @keyframes stars-twinkle {
+    0% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px; opacity: 0.7; }
+    50% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px; opacity: 1; }
+    100% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px; opacity: 0.7; }
+  }
+
+  @keyframes shooting-star {
+    0% { transform: translateX(300vw) translateY(0); opacity: 1; }
+    100% { transform: translateX(-50vw) translateY(100vh); opacity: 0; }
+  }
+
+  @keyframes shooting-star-horizontal {
+    0% { transform: translateY(100vh) translateX(0); opacity: 1; }
+    100% { transform: translateY(-50vh) translateX(100vw); opacity: 0; }
   }
 
   @keyframes pulse-glow-book {

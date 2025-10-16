@@ -60,6 +60,7 @@ export function SidebarNav() {
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
+    // This code now runs only on the client
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -86,7 +87,12 @@ export function SidebarNav() {
 
     const newPath = activePath === href ? null : href;
     setIsAnimating(href);
-    router.push(newPath || '/');
+    // If we are deselecting, we don't want to navigate, just change state
+    if (newPath === null) {
+      setActivePath(null);
+    } else {
+      router.push(newPath);
+    }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
@@ -95,7 +101,8 @@ export function SidebarNav() {
   
     let animationClass = '';
     if (isSpinning) {
-      animationClass = isActive ? 'book-spin-close' : 'book-spin-open';
+      // The logic for closing is handled by the layout now
+      animationClass = 'book-spin-open';
     }
 
     return (
@@ -136,6 +143,7 @@ export function SidebarNav() {
             </nav>
 
             <div className="h-px w-8 bg-white/20" />
+            <p className="text-xs text-muted-foreground">Tools</p>
 
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => renderBook(link, true))}
