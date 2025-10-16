@@ -83,13 +83,16 @@ export function SidebarNav() {
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
+
     if (spinningBookHref === null) {
-        setSpinningBookHref(href);
-        setTimeout(() => setSpinningBookHref(null), 2000); 
-    }
-    
-    if (activePath !== href) {
-        setTimeout(() => router.push(href), 100);
+      if (activePath !== href) {
+        router.push(href);
+      }
+      
+      setSpinningBookHref(href);
+      setTimeout(() => {
+        setSpinningBookHref(null);
+      }, 2000); 
     }
   };
   
@@ -107,7 +110,7 @@ export function SidebarNav() {
               'book-nav-item',
               isTool && 'book-tool',
               isActive && 'active',
-              isSpinning && 'book-spin-and-glow',
+              isSpinning && 'book-spin-two-speeds',
               !isActive && !isSpinning && 'float-anim'
             )}
             style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
