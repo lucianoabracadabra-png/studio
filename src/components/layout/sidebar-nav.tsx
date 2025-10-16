@@ -142,7 +142,6 @@ export function SidebarNav() {
           <nav className="flex flex-col items-center gap-4">
             {mainLinks.map(link => renderBook(link, false))}
           </nav>
-
           <nav className="mt-4 flex flex-col items-center gap-2">
             {gmToolsLinks.map(link => renderBook(link, true))}
             {renderBook(profileLink, true)}
