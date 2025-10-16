@@ -282,17 +282,26 @@
     }
   }
 
-  @keyframes book-spin-continuous-anim {
-    from {
+  @keyframes book-spin-and-glow {
+    0% {
       transform: rotateY(0deg);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
-    to {
-      transform: rotateY(360deg);
+    50% {
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1), /* 300% glow */
+        0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+        0 0 15px hsl(var(--book-color-hue), 50%, 80%);
+    }
+    100% {
+      transform: rotateY(720deg);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
   }
-  
-  .book-spin-continuous {
-    animation: book-spin-continuous-anim 1.2s linear infinite;
+
+  .book-spin-and-glow {
+    animation: book-spin-and-glow 2s ease-in-out;
   }
   
   .fade-in {

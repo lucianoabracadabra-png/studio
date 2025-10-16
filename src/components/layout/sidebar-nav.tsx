@@ -79,16 +79,18 @@ export function SidebarNav() {
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-    if (spinningBookHref && currentPath === spinningBookHref) {
-      setSpinningBookHref(null);
-    }
-  }, [pathname, spinningBookHref]);
+  }, [pathname]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
+    if (spinningBookHref !== href) {
+        setSpinningBookHref(href);
+        setTimeout(() => setSpinningBookHref(null), 2000); 
+    }
+    
     if (activePath !== href) {
-      setSpinningBookHref(href);
-      router.push(href);
+        // Delay navigation slightly to allow animation to start
+        setTimeout(() => router.push(href), 100);
     }
   };
   
@@ -107,8 +109,8 @@ export function SidebarNav() {
               className={cn(
                 'book-nav-item',
                 isTool && 'book-tool',
-                isSpinning && 'book-spin-continuous',
-                isActive && 'active'
+                isActive && 'active',
+                isSpinning && 'book-spin-and-glow',
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
