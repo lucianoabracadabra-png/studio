@@ -123,6 +123,7 @@
     transform-origin: center;
     will-change: transform;
     border-radius: var(--radius);
+    transform-style: preserve-3d;
   }
   
   .book-nav-item:not(.active) {
@@ -144,6 +145,9 @@
   }
 
   .book-nav-item:hover:not(.active) {
+    animation: 
+      book-hover-spin 2s linear infinite,
+      float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
     transform: translateX(5px) scale(1.05);
   }
   
@@ -214,9 +218,13 @@
 }
 
 @layer utilities {
-  .hide-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+  .hide-scrollbar,
+  .hide-scrollbar-webkit {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar-webkit::-webkit-scrollbar {
+    display: none;
   }
   .hide-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari, and Opera */
@@ -282,6 +290,15 @@
     }
     50% {
       filter: drop-shadow(0 0 10px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 5px white);
+    }
+  }
+
+  @keyframes book-hover-spin {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(-360deg);
     }
   }
 
