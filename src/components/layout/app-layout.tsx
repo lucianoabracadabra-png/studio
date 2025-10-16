@@ -13,17 +13,17 @@ type AppLayoutProps = {
 
 export default function AppLayout({ children, showContent, colorHue, isClosing, onAnimationEnd }: AppLayoutProps) {
   const pageStyle = {
-    '--page-primary-color': `hsl(${colorHue} 90% 70%)`,
-    '--page-accent-color': `hsl(${(colorHue + 40) % 360} 90% 70%)`,
+    '--page-primary-color': `hsl(${colorHue}, 90%, 70%)`,
+    '--page-accent-color': `hsl(${(colorHue + 40) % 360}, 90%, 70%)`,
   } as React.CSSProperties;
 
   return (
     <div className="min-h-screen w-full bg-background relative">
       <SidebarNav />
-      <main className="pl-20">
+      <main className="pl-24">
         {showContent && (
           <div 
-            className={cn("page-content-wrapper", isClosing && "closing", "h-screen w-[calc(100%-5rem)] fixed top-0 left-20 flex items-center justify-center")}
+            className={cn("page-content-wrapper", isClosing && "closing", "h-screen w-[calc(100%-6rem)] fixed top-0 left-24 flex items-center justify-center")}
             onAnimationEnd={onAnimationEnd}
           >
             <div className="flex-1 flex flex-col h-full overflow-y-auto p-4 lg:p-6">
