@@ -56,7 +56,6 @@ export function SidebarNav() {
   const router = useRouter();
   
   const [activePath, setActivePath] = useState(pathname);
-  const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
@@ -80,23 +79,17 @@ export function SidebarNav() {
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-    // Stop spinning when navigation is complete
-    if (spinningBookHref) {
-      setSpinningBookHref(null);
-    }
   }, [pathname]);
 
-  const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
+  const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (activePath === href) return;
-    
-    setSpinningBookHref(href);
-    router.push(href);
-  }, [activePath, router]);
+    if (activePath !== href) {
+      router.push(href);
+    }
+  };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
-    const isSpinning = spinningBookHref === link.href;
 
     return (
       <Tooltip key={link.href}>
@@ -109,8 +102,7 @@ export function SidebarNav() {
               className={cn(
                 'book-nav-item',
                 isTool && 'book-tool',
-                isActive && 'active',
-                isSpinning && 'book-spin-continuous'
+                isActive && 'active'
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
@@ -134,7 +126,7 @@ export function SidebarNav() {
               {mainLinks.map(link => renderBook(link, false))}
             </nav>
 
-            <div className="h-px w-8 bg-white/20 my-2" />
+            <div className="my-2" />
 
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => renderBook(link, true))}
