@@ -59,10 +59,7 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-
-  body.dark {
-    background-color:hsl(var(--background));
+    background-color:black;
     background-image:
       radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
       radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
@@ -70,6 +67,9 @@
       radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
     background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
     background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+  }
+
+  body.dark {
     background-attachment: fixed;
     animation: stars-twinkle 15s infinite ease-in-out;
   }
@@ -204,21 +204,19 @@
   .page-container::before {
     top: -4px;
     left: -4px;
+    border-top: 2px solid var(--page-primary-color);
+    border-left: 2px solid var(--page-primary-color);
     border-top-left-radius: var(--radius);
-    box-shadow: 
-      -2px -2px 0 0 var(--page-primary-color),
-      0 0 10px var(--page-primary-color),
-      inset 0 0 5px var(--page-primary-color);
+    filter: drop-shadow(0 0 5px var(--page-primary-color));
   }
 
   .page-container::after {
     bottom: -4px;
     right: -4px;
+    border-bottom: 2px solid var(--page-primary-color);
+    border-right: 2px solid var(--page-primary-color);
     border-bottom-right-radius: var(--radius);
-    box-shadow: 
-      2px 2px 0 0 var(--page-primary-color),
-      0 0 10px var(--page-primary-color),
-      inset 0 0 5px var(--page-primary-color);
+    filter: drop-shadow(0 0 5px var(--page-primary-color));
   }
 
   .spell-effect {
