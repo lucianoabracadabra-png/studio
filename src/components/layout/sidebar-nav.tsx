@@ -78,15 +78,15 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     if (activePath !== href) {
         setSpinningBookHref(href);
         setTimeout(() => {
-            setSpinningBookHref(null);
             router.push(href);
-        }, 2000);
+            setSpinningBookHref(null);
+        }, 2000); 
     }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
-    const isActive = activePath === link.href || spinningBookHref === link.href;
     const isSpinning = spinningBookHref === link.href;
+    const isActive = activePath === link.href || isSpinning;
   
     return (
       <TooltipProvider key={link.href}>
