@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   BookOpen,
   LayoutDashboard,
@@ -54,8 +54,13 @@ export const profileLink = {
 export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
+  const [focusedBookHref, setFocusedBookHref] = useState<string | null>(activePath);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
+  useEffect(() => {
+    setFocusedBookHref(activePath);
+  }, [activePath]);
+
   useEffect(() => {
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
@@ -75,18 +80,18 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (activePath !== href) {
+    if (focusedBookHref !== href) {
         setSpinningBookHref(href);
+        router.push(href);
         setTimeout(() => {
-            router.push(href);
-            setSpinningBookHref(null);
+            setFocusedBookHref(href);
         }, 2000); 
     }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isSpinning = spinningBookHref === link.href;
-    const isActive = activePath === link.href || isSpinning;
+    const isActive = focusedBookHref === link.href;
   
     return (
       <TooltipProvider key={link.href}>
@@ -99,13 +104,14 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         className={cn(
                         'book-nav-item',
                         isTool ? 'tool-book' : 'main-book',
-                        isActive && 'active',
-                        isSpinning && 'book-glow-anim',
+                         isActive && !isSpinning && 'active',
+                         isSpinning && 'book-glow-anim',
                         !isActive && !isSpinning && 'float-anim'
                         )}
                         style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
+                        onAnimationEnd={() => setSpinningBookHref(null)}
                     >
-                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
+                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && 'active-icon')} />
                     </Link>
                 </div>
             </TooltipTrigger>
