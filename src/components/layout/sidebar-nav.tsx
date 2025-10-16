@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -55,14 +55,12 @@ const profileLink = {
 export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
+  
   const [activePath, setActivePath] = useState<string | null>(null);
-  const [isAnimating, setIsAnimating] = useState<string | null>(null);
-  const [animationDirection, setAnimationDirection] = useState<'open' | 'close' | null>(null);
-  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
-    // This code now runs only on the client
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -81,47 +79,23 @@ export function SidebarNav() {
 
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
-    if (currentPath !== activePath) {
-      setIsPageLoading(false);
-      setIsAnimating(null);
-    }
     setActivePath(currentPath);
-  }, [pathname, activePath]);
+    setIsPageLoading(false);
+  }, [pathname]);
 
-  const handleLinkClick = (e: React.MouseEvent, href: string) => {
+  const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (isAnimating && isAnimating !== href) return;
+    if (isPageLoading) return;
 
     const newPath = activePath === href ? null : href;
-    setAnimationDirection(newPath ? 'open' : 'close');
-    setIsAnimating(href);
-    
-    if (newPath) {
-      setIsPageLoading(true);
-    }
 
-    setTimeout(() => {
-      router.push(newPath || '/dashboard');
-      if (newPath === null) {
-        setIsAnimating(null);
-      }
-    }, 500);
-  };
+    setIsPageLoading(true);
+    router.push(newPath || '/dashboard');
+  }, [activePath, isPageLoading, router]);
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
-    const isSpinning = isAnimating === link.href;
-  
-    let animationClass = '';
-    if (isSpinning) {
-      if (isPageLoading && animationDirection === 'open') {
-        animationClass = 'book-spin-continuous';
-      } else if (animationDirection === 'open') {
-        animationClass = 'book-spin-open';
-      } else {
-        animationClass = 'book-spin-close';
-      }
-    }
+    const isSpinning = isPageLoading && (isActive || activePath === null);
 
     return (
       <Tooltip key={link.href}>
@@ -129,18 +103,13 @@ export function SidebarNav() {
           <a
             href={link.href}
             onClick={(e) => handleLinkClick(e, link.href)}
-            onAnimationEnd={() => {
-                if(isSpinning && !isPageLoading) {
-                    setIsAnimating(null);
-                }
-            }}
           >
             <div
               className={cn(
                 'book-nav-item',
                 isTool && 'book-tool',
                 isActive && 'active',
-                animationClass
+                isSpinning && (activePath !== link.href ? 'book-spin-close' : 'book-spin-open')
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
