@@ -56,10 +56,11 @@ export function SidebarNav() {
   const router = useRouter();
   
   const [activePath, setActivePath] = useState(pathname);
-  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
-
+  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
+  
   useEffect(() => {
+    // Generate random animation values only on the client
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -79,6 +80,7 @@ export function SidebarNav() {
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
+    // Stop spinning when navigation is complete
     if (spinningBookHref && currentPath === spinningBookHref) {
       setSpinningBookHref(null);
     }
