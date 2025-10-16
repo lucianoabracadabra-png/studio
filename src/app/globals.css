@@ -243,7 +243,7 @@
   }
 
   .book-spin-anim {
-    animation: book-spin 0.5s ease-in-out forwards;
+    animation: book-spin 2s ease-in-out forwards;
   }
 }
 
@@ -364,14 +364,14 @@
 @keyframes book-spin {
   0% {
     transform: perspective(1000px) rotateY(0deg);
-    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 5px hsl(var(--book-color-hue), 80%, 75% / 0);
+    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 5px hsl(var(--book-color-hue), 80%, 75% / 0.5);
   }
   50% {
-     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 25px hsl(var(--book-color-hue), 80%, 75%);
+     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 35px hsl(var(--book-color-hue), 80%, 75%);
   }
   100% {
     transform: perspective(1000px) rotateY(360deg);
-     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 5px hsl(var(--book-color-hue), 80%, 75% / 0);
+     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 5px hsl(var(--book-color-hue), 80%, 75% / 0.5);
   }
 }
 
