@@ -43,7 +43,7 @@ export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed left-0 top-0 h-full z-40 flex flex-col items-center w-20 bg-background/30 backdrop-blur-lg border-r border-white/10 py-4">
+    <div className="fixed left-0 top-0 h-full z-40 flex flex-col items-center w-20 py-4">
        <Link href="/dashboard" className="flex items-center justify-center mb-4 flex-shrink-0">
           <Icons.logo className="h-10 w-10 text-primary" />
         </Link>
