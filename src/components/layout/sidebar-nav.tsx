@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -57,8 +57,11 @@ export function SidebarNav() {
   
   const [activePath, setActivePath] = useState(pathname);
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
+  const [reverseSpinningBookHref, setReverseSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
+  const prevPathRef = useRef(pathname);
+
   useEffect(() => {
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
@@ -78,27 +81,33 @@ export function SidebarNav() {
 
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
+    const prevPath = prevPathRef.current;
+    
+    if (currentPath !== prevPath && prevPath !== null && prevPath !== '/login' && prevPath !== '/signup' && prevPath !== '/_error') {
+      setReverseSpinningBookHref(prevPath);
+      setTimeout(() => setReverseSpinningBookHref(null), 1000);
+    }
+    
     setActivePath(currentPath);
+    prevPathRef.current = pathname;
   }, [pathname]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
 
-    if (spinningBookHref === null) {
-      if (activePath !== href) {
+    if (spinningBookHref === null && activePath !== href) {
         router.push(href);
-      }
-      
-      setSpinningBookHref(href);
-      setTimeout(() => {
-        setSpinningBookHref(null);
-      }, 2000); 
+        setSpinningBookHref(href);
+        setTimeout(() => {
+            setSpinningBookHref(null);
+        }, 2000);
     }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
     const isSpinning = spinningBookHref === link.href;
+    const isReverseSpinning = reverseSpinningBookHref === link.href;
 
     return (
       <Tooltip key={link.href}>
@@ -111,7 +120,8 @@ export function SidebarNav() {
               isTool && 'book-tool',
               isActive && 'active',
               isSpinning && 'book-spin-two-speeds',
-              !isActive && !isSpinning && 'float-anim'
+              isReverseSpinning && 'book-reverse-spin-anim',
+              !isActive && !isSpinning && !isReverseSpinning && 'float-anim'
             )}
             style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
           >
