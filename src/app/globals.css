@@ -23,7 +23,7 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 262 88% 66%;
-    --radius: 1rem;
+    --radius: 0.5rem;
     --chart-1: 262 88% 66%;
     --chart-2: 300 89% 60%;
     --chart-3: 198 93% 60%;
@@ -51,7 +51,7 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 262 88% 66%;
-    --radius: 1rem;
+    --radius: 0.5rem;
   }
 }
 
@@ -92,7 +92,7 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: left center;
     will-change: transform;
-    animation: float-animation 6s ease-in-out infinite;
+    animation: float-animation 8s ease-in-out infinite;
   }
 
   .book-nav-item::before {
@@ -152,9 +152,11 @@
 
 @layer utilities {
   @keyframes float-animation {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-5px); }
-    100% { transform: translateY(0px); }
+    0% { transform: translate(0px, 0px); }
+    25% { transform: translate(2px, -3px); }
+    50% { transform: translate(-1px, 2px); }
+    75% { transform: translate(1px, -4px); }
+    100% { transform: translate(0px, 0px); }
   }
 
   @keyframes galaxy-movement {
