@@ -92,6 +92,7 @@
     transform-origin: left center;
     will-change: transform;
     animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
+    border-radius: 2px;
   }
 
   .book-nav-item::before {
@@ -120,12 +121,11 @@
       0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.7),
       0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.5),
       0 0 3px white;
-    animation-play-state: paused;
+    animation: pulse-glow-book 2s ease-in-out infinite, float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
   }
 
   .book-nav-item.active > svg, .book-nav-item.active .avatar-glow {
-    filter: drop-shadow(0 0 8px hsl(var(--accent))) drop-shadow(0 0 3px white);
-    animation: pulse-glow 2s ease-in-out infinite;
+    animation: pulse-glow-icon 2s ease-in-out infinite;
   }
 
   .page-content {
@@ -173,17 +173,39 @@
     100% { background-position: 0% 50%; }
   }
 
-  @keyframes pulse-glow {
+  @keyframes pulse-glow-book {
     0% {
-      filter: drop-shadow(0 0 5px hsl(var(--accent))) drop-shadow(0 0 2px white);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.6),
+        0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.4),
+        0 0 2px white;
     }
     50% {
-      filter: drop-shadow(0 0 15px hsl(var(--accent))) drop-shadow(0 0 7px white);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+        0 0 4px white;
     }
     100% {
-      filter: drop-shadow(0 0 5px hsl(var(--accent))) drop-shadow(0 0 2px white);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.6),
+        0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.4),
+        0 0 2px white;
     }
   }
+  
+  @keyframes pulse-glow-icon {
+    0%, 100% {
+      filter: drop-shadow(0 0 6px hsl(var(--accent))) drop-shadow(0 0 3px white);
+    }
+    50% {
+      filter: drop-shadow(0 0 12px hsl(var(--accent))) drop-shadow(0 0 6px white);
+    }
+  }
+
 
   .fade-in {
     animation: fadeIn 0.5s ease-in-out;

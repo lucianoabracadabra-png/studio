@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { cva } from "class-variance-authority"
+
 
 type Combatant = {
   id: number;
@@ -212,16 +214,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-// Helper for destructive button variant in AlertDialog
-const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-      },
-    },
-  }
-);
-import { cva } from "class-variance-authority"
