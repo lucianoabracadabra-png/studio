@@ -124,11 +124,11 @@
     width: 4px;
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
-    box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+    animation: active-icon-pulse 2s ease-in-out infinite;
   }
   
   .active-icon {
-    animation: icon-pulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
   }
   
   .page-container {
@@ -163,7 +163,6 @@
     left: -4px;
     border-top: 2px solid var(--page-primary-color);
     border-left: 2px solid var(--page-primary-color);
-    border-top-left-radius: var(--radius);
   }
 
   .page-container::after {
@@ -171,7 +170,6 @@
     right: -4px;
     border-bottom: 2px solid var(--page-primary-color);
     border-right: 2px solid var(--page-primary-color);
-    border-bottom-right-radius: var(--radius);
   }
 
   .spell-effect {
@@ -244,6 +242,14 @@
     background: transparent;
     box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
   }
+
+  .book-spin-two-speeds {
+    animation: book-spin 0.5s ease-in-out;
+  }
+
+  .book-reverse-spin-anim {
+    animation: book-spin 1s ease-in-out reverse;
+  }
 }
 
 @layer utilities {
@@ -283,6 +289,18 @@
   @keyframes shooting-star-horizontal {
     0% { transform: translateY(100vh) translateX(0); opacity: 1; }
     100% { transform: translateY(-50vh) translateX(100vw); opacity: 0; }
+  }
+  
+  @keyframes active-icon-pulse {
+    0% {
+      box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+    }
+    50% {
+      box-shadow: 0 0 14px 4px hsl(var(--book-color-hue), 80%, 85%), 0 0 28px 7px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+    }
+    100% {
+      box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+    }
   }
 
   @keyframes icon-pulse {
@@ -347,6 +365,16 @@
   from { transform: translateY(0px); }
   to { transform: translateY(-2000px); }
 }
+
+@keyframes book-spin {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(360deg);
+  }
+}
+
 }
 
     
