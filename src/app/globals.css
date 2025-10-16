@@ -153,6 +153,19 @@
     animation: pulse-glow-book 2s ease-in-out infinite;
   }
   
+  .book-nav-item.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: hsl(var(--book-color-hue), 80%, 85%);
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+    animation: sonar-pulse 2s ease-in-out infinite;
+  }
+  
   .active-icon, .book-nav-item.active .avatar-glow {
     animation: sonar-pulse 2s ease-in-out infinite;
   }
@@ -330,5 +343,3 @@
     to { opacity: 1; transform: translateY(0); }
   }
 }
-
-    
