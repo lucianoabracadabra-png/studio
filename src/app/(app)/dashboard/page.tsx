@@ -43,7 +43,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {campaigns.map((campaign) => (
-          <Card key={campaign.name} className="overflow-hidden flex flex-col group">
+          <Card key={campaign.name} className="glassmorphic-card overflow-hidden flex flex-col group">
             <CardHeader className="p-0">
                 <div className="relative h-48 w-full">
                     <Image

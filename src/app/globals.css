@@ -4,83 +4,57 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
- 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
- 
-    --primary: 283 100% 41%;
-    --primary-foreground: 0 0% 98%;
- 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
- 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 0 0% 63.9%;
- 
-    --accent: 56 100% 50%;
-    --accent-foreground: 56 100% 5%;
- 
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 48 96.1% 50.8%;
+    --accent-foreground: 48 95.8% 11.2%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 283 100% 41%;
-
-    --radius: 0.5rem;
-
-    --chart-1: 283 80% 70%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 56 80% 60%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 210 20% 98%;
+    --radius: 1rem;
+    --chart-1: 210 20% 98%;
+    --chart-2: 48 96.1% 50.8%;
+    --chart-3: 142.1 76.2% 36.3%;
+    --chart-4: 283 100% 41%;
+    --chart-5: 342.1 92.5% 61.4%;
   }
- 
+
   .dark {
-    --background: 0 0% 16%;
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 283 100% 51%;
-    --primary-foreground: 283 100% 98%;
-
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 63.9%;
-
-    --accent: 56 100% 50%;
-    --accent-foreground: 56 100% 5%;
-
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 48 96.1% 50.8%;
+    --accent-foreground: 48 95.8% 11.2%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 283 100% 61%;
-    
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 80%;
-    --sidebar-primary: 283 100% 51%;
-    --sidebar-primary-foreground: 283 100% 98%;
-    --sidebar-accent: 0 0% 20%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 283 100% 61%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 210 20% 98%;
+    --radius: 1rem;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
@@ -88,12 +62,19 @@
   body {
     @apply bg-background text-foreground;
   }
+
   body.dark {
     background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(ellipse at 20% 25%, hsl(283 100% 41% / 0.2), transparent 50%),
-      radial-gradient(circle at 80% 70%, hsl(56 100% 50% / 0.15), transparent 40%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-opacity='0.1'%3E%3Ccircle fill='%239400D3' cx='50' cy='50' r='1'/%3E%3Ccircle fill='%23FFEA00' cx='10' cy='10' r='0.5'/%3E%3Ccircle fill='%23fff' cx='90' cy='90' r='0.5'/%3E%3Ccircle fill='%23fff' cx='10' cy='90' r='1'/%3E%3Ccircle fill='%239400D3' cx='90' cy='10' r='1'/%3E%3Ccircle fill='%23fff' cx='30' cy='70' r='0.5'/%3E%3Ccircle fill='%23fff' cx='70' cy='30'r='1'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: 
+      radial-gradient(at 20% 25%, hsl(283 100% 51% / 0.1), transparent 50%),
+      radial-gradient(at 80% 20%, hsl(48 96.1% 50.8% / 0.1), transparent 50%),
+      radial-gradient(at 50% 80%, hsl(210 20% 98% / 0.05), transparent 50%);
     background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glassmorphic-card {
+    @apply bg-card/50 backdrop-blur-lg border border-white/10 shadow-lg;
   }
 }

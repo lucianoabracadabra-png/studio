@@ -49,7 +49,7 @@ export default function LandingPage() {
 
 function FeatureCard({ title, description }: { title: string; description: string; }) {
   return (
-    <div className="p-6 rounded-lg bg-card border border-border/50 shadow-lg">
+    <div className="p-6 rounded-lg glassmorphic-card">
       <h3 className="font-headline text-xl font-bold text-primary">{title}</h3>
       <p className="mt-2 text-muted-foreground">{description}</p>
     </div>
