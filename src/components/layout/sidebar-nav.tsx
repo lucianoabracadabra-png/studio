@@ -55,13 +55,12 @@ export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
   
-  const [activePath, setActivePath] = useState<string | null>(null);
-  const [isPageLoading, setIsPageLoading] = useState(false);
-  const [targetHref, setTargetHref] = useState<string | null>(null);
+  const [activePath, setActivePath] = useState(pathname);
+  const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
-    // This now only runs on the client, preventing hydration errors.
+    // Generate random animation styles only on the client-side to prevent hydration errors.
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -79,26 +78,28 @@ export function SidebarNav() {
   }, []);
 
   useEffect(() => {
+    // When the path changes, update the active path and stop any spinning books.
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-    if(currentPath === targetHref) {
-      setIsPageLoading(false);
-      setTargetHref(null);
+    if (spinningBookHref && currentPath === spinningBookHref) {
+      setSpinningBookHref(null);
     }
-  }, [pathname, targetHref]);
+  }, [pathname, spinningBookHref]);
 
   const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (activePath === href || isPageLoading) return;
+    // Prevent re-clicking the active link or starting a new spin while one is in progress.
+    if (activePath === href || spinningBookHref) return;
 
-    setIsPageLoading(true);
-    setTargetHref(href);
+    // Start spinning the clicked book.
+    setSpinningBookHref(href);
+    // Navigate to the new page.
     router.push(href);
-  }, [activePath, isPageLoading, router]);
+  }, [activePath, spinningBookHref, router]);
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
-    const isSpinning = isPageLoading && targetHref === link.href;
+    const isSpinning = spinningBookHref === link.href;
 
     return (
       <Tooltip key={link.href}>
