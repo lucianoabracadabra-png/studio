@@ -44,9 +44,6 @@ export function SidebarNav() {
 
   return (
     <div className="fixed left-0 top-0 h-full z-40 flex flex-col items-center w-20 py-4">
-       <Link href="/dashboard" className="flex items-center justify-center mb-4 flex-shrink-0">
-          <Icons.logo className="h-10 w-10 text-primary" />
-        </Link>
       <ScrollArea className="w-full" type="never">
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">
@@ -62,7 +59,7 @@ export function SidebarNav() {
                         )}
                         style={{'--book-color-hue': `${200 + index * 40}deg`} as React.CSSProperties}
                       >
-                        {link.href === '/dashboard' ? null : <link.icon className="w-6 h-6 text-white/80" />}
+                        <link.icon className="w-6 h-6 text-white/80" />
                       </div>
                     </Link>
                   </TooltipTrigger>
