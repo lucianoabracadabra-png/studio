@@ -17,7 +17,7 @@ export default function AppLayout({ children, pageTitle, showContent, pageColor,
   return (
     <div className="flex h-screen bg-background">
       <SidebarNav />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         <div className="spell-effect"></div>
         {showContent && (
           <div 
