@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -51,16 +51,15 @@ const profileLink = {
   colorHue: 0,
 };
 
-
 export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
   
   const [activePath, setActivePath] = useState<string | null>(null);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
-  useEffect(() => {
+  // Generate stable animation styles on the client-side once to prevent hydration errors.
+  const animationStyles = useMemo(() => {
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -74,7 +73,7 @@ export function SidebarNav() {
         '--float-y3': `${(Math.random() * 6 - 3).toFixed(2)}px`,
       } as React.CSSProperties;
     });
-    setAnimationStyles(styles);
+    return styles;
   }, []);
 
   useEffect(() => {
@@ -85,17 +84,15 @@ export function SidebarNav() {
 
   const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (isPageLoading) return;
-
-    const newPath = activePath === href ? null : href;
+    if (activePath === href || isPageLoading) return;
 
     setIsPageLoading(true);
-    router.push(newPath || '/dashboard');
+    router.push(href);
   }, [activePath, isPageLoading, router]);
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
-    const isSpinning = isPageLoading && (isActive || activePath === null);
+    const isSpinning = isPageLoading && !isActive;
 
     return (
       <Tooltip key={link.href}>
@@ -109,11 +106,11 @@ export function SidebarNav() {
                 'book-nav-item',
                 isTool && 'book-tool',
                 isActive && 'active',
-                isSpinning && (activePath !== link.href ? 'book-spin-close' : 'book-spin-open')
+                isSpinning && 'book-spin-continuous'
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
-              <link.icon className="w-6 h-6 text-white/80 transition-all" />
+              <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
             </div>
           </a>
         </TooltipTrigger>
