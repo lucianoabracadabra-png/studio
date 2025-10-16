@@ -1,3 +1,61 @@
+export type BagItem = {
+  name: string;
+  quantity: number;
+  weight: number;
+  extras: string;
+};
+
+export type Armor = {
+  name: string;
+  slashing: number;
+  bludgeoning: number;
+  piercing: number;
+  coverage: string;
+  resistance: number;
+  durability: number;
+  size: 'pp' | 'p' | 'm' | 'g' | 'gg';
+  weight: number;
+  extras: string;
+  equipped: boolean;
+};
+
+export type WeaponAttack = {
+  damage: string;
+  type: string;
+  ap: number;
+  accuracy: number;
+};
+
+export type Weapon = {
+  name: string;
+  thrust?: WeaponAttack;
+  swing?: WeaponAttack;
+  size: 'pp' | 'p' | 'm' | 'g' | 'gg';
+  weight: number;
+  extras: string;
+  equipped: boolean;
+};
+
+export type Accessory = {
+  name: string;
+  typeAndDescription: string;
+  equipped: boolean;
+  weight: number;
+  effect: string;
+};
+
+export type Projectile = {
+  name: string;
+  type: string;
+  ap: number;
+  accuracy: number;
+  quantity: number;
+  weight: number;
+  size: 'pp' | 'p' | 'm' | 'g' | 'gg';
+  extras: string;
+};
+
+
 export type Character = {
   name: string;
   concept: string;
@@ -29,6 +87,15 @@ export type Character = {
     };
     domains: { name: string; level: number }[];
     cracks: number;
+  };
+  inventory: {
+    bag: BagItem[];
+  };
+  equipment: {
+    armors: Armor[];
+    weapons: Weapon[];
+    accessories: Accessory[];
+    projectiles: Projectile[];
   };
 };
 
@@ -106,5 +173,69 @@ export const characterData: Character = {
       { name: 'Espaço', level: 1 },
     ],
     cracks: 3,
+  },
+  inventory: {
+    bag: [
+      { name: 'Corda (15m)', quantity: 1, weight: 2, extras: 'Feita de cânhamo' },
+      { name: 'Ração de Viagem', quantity: 5, weight: 1, extras: 'Para 5 dias' },
+      { name: 'Tocha', quantity: 10, weight: 0.5, extras: 'Dura 1 hora cada' },
+      { name: 'Cantil de Água', quantity: 1, weight: 1.5, extras: 'Cheio' },
+    ],
+  },
+  equipment: {
+    armors: [
+      { 
+        name: 'Jaqueta de Couro Batido',
+        slashing: 1,
+        bludgeoning: 2,
+        piercing: 1,
+        coverage: 'Tronco, Braços',
+        resistance: 10,
+        durability: 12,
+        size: 'm',
+        weight: 4,
+        extras: 'Reforçada com placas de metal',
+        equipped: true,
+      },
+    ],
+    weapons: [
+      {
+        name: 'Faca de Caça',
+        thrust: { damage: '1d4', type: 'Perfurante', ap: 3, accuracy: 1 },
+        swing: { damage: '1d4', type: 'Cortante', ap: 4, accuracy: 0 },
+        size: 'p',
+        weight: 0.5,
+        extras: 'Cabo de osso',
+        equipped: true,
+      },
+      {
+        name: 'Arco Curto',
+        size: 'm',
+        weight: 1,
+        extras: 'Feito de teixo',
+        equipped: true,
+      }
+    ],
+    accessories: [
+      {
+        name: 'Amuleto de Dente de Lobo',
+        typeAndDescription: 'Colar com um dente de lobo',
+        equipped: true,
+        weight: 0.1,
+        effect: '+1 em testes de Intimidação',
+      },
+    ],
+    projectiles: [
+        {
+            name: 'Flechas Comuns',
+            type: 'Perfurante',
+            ap: 3,
+            accuracy: 0,
+            quantity: 20,
+            weight: 1,
+            size: 'm',
+            extras: 'Ponta de ferro',
+        }
+    ],
   },
 };
