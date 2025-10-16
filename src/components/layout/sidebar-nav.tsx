@@ -12,7 +12,6 @@ import {
   Volume2,
   Dices,
   FlaskConical,
-  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -23,8 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect, useMemo } from 'react';
-import { Button } from '../ui/button';
+import { useState, useEffect } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -41,6 +39,19 @@ const gmToolsLinks = [
   { label: 'Soundboard', href: '/tools/soundboard', icon: Volume2, colorHue: 170 },
 ];
 
+const profileLink = {
+  label: 'Profile',
+  href: '/profile',
+  icon: () => (
+    <Avatar className="h-9 w-9 border-2 border-white/50 avatar-glow">
+      <AvatarImage src="https://picsum.photos/seed/avatar/40/40" alt="@shadcn" data-ai-hint="fantasy wizard" />
+      <AvatarFallback>GM</AvatarFallback>
+    </Avatar>
+  ),
+  colorHue: 0,
+};
+
+
 export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -51,7 +62,7 @@ export function SidebarNav() {
   useEffect(() => {
     // Generate styles only on the client-side to prevent hydration mismatch.
     const styles: { [key: string]: React.CSSProperties } = {};
-    [...mainLinks, ...gmToolsLinks].forEach(link => {
+    [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
         '--animation-duration': `${(Math.random() * 4 + 6).toFixed(2)}s`,
         '--animation-delay': `${(Math.random() * -5).toFixed(2)}s`,
@@ -77,30 +88,38 @@ export function SidebarNav() {
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (isAnimating) return;
-
-    if (activePath === href) {
+  
+    const targetIsDifferent = activePath !== href;
+  
+    if (activePath && !targetIsDifferent) {
       // Close the current book
-      setIsAnimating(href);
-      router.push('/'); // Navigate to a neutral state that shows nothing
-      setTimeout(() => setIsAnimating(null), 500); // Animation duration
+      setIsAnimating(activePath);
+      router.push('/'); 
     } else {
-      // Open a new book
+      // Open a new book (or switch from no book to a new one)
       setIsAnimating(href);
       router.push(href);
-      setTimeout(() => setIsAnimating(null), 500); // Animation duration
     }
   };
 
-  const renderBook = (link: typeof mainLinks[0], isTool: boolean) => {
+  const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
     const isSpinning = isAnimating === link.href;
-
+  
     let bookClass = '';
-    if (isSpinning && !isActive) {
+    const isOpening = isSpinning && !isActive;
+    const isClosing = isSpinning && isActive;
+
+    // A book is closing if we click it again, or if we click another book
+    const shouldClose = isClosing || (isAnimating && isActive && isAnimating !== link.href);
+    const shouldOpen = isOpening;
+
+    if (shouldOpen) {
       bookClass = 'book-spin-open';
-    } else if (isSpinning && isActive) {
+    } else if (shouldClose) {
       bookClass = 'book-spin-close';
     }
+
 
     return (
       <Tooltip key={link.href}>
@@ -114,12 +133,13 @@ export function SidebarNav() {
               className={cn(
                 'book-nav-item',
                 isTool && 'book-tool',
-                isActive && 'active',
-                bookClass
+                isActive && 'active'
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
-              <link.icon className="w-6 h-6 text-white/80 transition-all" />
+              <div className={cn(bookClass, 'w-full h-full flex items-center justify-center')}>
+                <link.icon className="w-6 h-6 text-white/80 transition-all" />
+              </div>
             </div>
           </a>
         </TooltipTrigger>
@@ -131,7 +151,7 @@ export function SidebarNav() {
   }
 
   return (
-    <div className="fixed left-0 top-0 h-full z-40 flex flex-col items-center w-20 py-4">
+    <div className="fixed left-0 top-0 h-full z-50 flex flex-col items-center w-20 py-4">
       <ScrollArea className="w-full" scrollHideDelay={0}>
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">
@@ -144,26 +164,16 @@ export function SidebarNav() {
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => renderBook(link, true))}
             </nav>
+
+            <div className="h-px w-8 bg-white/20" />
+            
+            <nav className="flex flex-col items-center gap-2">
+                {renderBook(profileLink, true)}
+            </nav>
+
           </div>
         </TooltipProvider>
       </ScrollArea>
-      <div className="mt-auto flex flex-col items-center gap-4 py-4">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className={cn("book-nav-item book-tool")} style={{ '--book-color-hue': '0deg' } as React.CSSProperties}>
-                <Avatar className="h-9 w-9 border-2 border-white/50 avatar-glow">
-                  <AvatarImage src="https://picsum.photos/seed/avatar/40/40" alt="@shadcn" data-ai-hint="fantasy wizard" />
-                  <AvatarFallback>GM</AvatarFallback>
-                </Avatar>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Profile</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
     </div>
   );
 }
