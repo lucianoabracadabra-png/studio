@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle, CardFooter, CardContent } from "@/components/ui/card";
 import { portals } from "@/lib/wiki-data";
 import { ArrowRight } from "lucide-react";
 
