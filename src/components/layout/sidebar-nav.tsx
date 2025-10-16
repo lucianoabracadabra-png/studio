@@ -92,20 +92,22 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
       <TooltipProvider key={link.href}>
         <Tooltip>
             <TooltipTrigger asChild>
-              <Link
-                href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
-                className={cn(
-                  'book-nav-item',
-                  isTool ? 'tool-book' : 'main-book',
-                  isActive && 'active',
-                  isSpinning && 'book-spin-anim',
-                  !isActive && !isSpinning && 'float-anim'
-                )}
-                style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
-              >
-                <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
-              </Link>
+                <div className={cn("book-wrapper", isSpinning && 'book-spin-anim')}>
+                    <Link
+                        href={link.href}
+                        onClick={(e) => handleLinkClick(e, link.href)}
+                        className={cn(
+                        'book-nav-item',
+                        isTool ? 'tool-book' : 'main-book',
+                        isActive && 'active',
+                        isSpinning && 'book-glow-anim',
+                        !isActive && !isSpinning && 'float-anim'
+                        )}
+                        style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
+                    >
+                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
+                    </Link>
+                </div>
             </TooltipTrigger>
             <TooltipContent side="right">
               <p>{link.label}</p>
