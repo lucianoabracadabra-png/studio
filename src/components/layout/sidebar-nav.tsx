@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -60,6 +60,7 @@ export function SidebarNav() {
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
+    // This now only runs on the client, preventing hydration errors.
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -136,8 +137,8 @@ export function SidebarNav() {
               {gmToolsLinks.map(link => renderBook(link, true))}
             </nav>
 
-            <div className="h-px w-8 bg-white/20 my-2" />
-            
+            <div className="flex-grow"></div>
+
             <nav className="flex flex-col items-center gap-2">
                 {renderBook(profileLink, true)}
             </nav>
