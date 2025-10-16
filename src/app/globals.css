@@ -187,10 +187,6 @@
     text-shadow: 0 0 8px var(--page-primary-color, hsl(var(--primary))), 0 0 16px var(--page-accent-color, hsl(var(--accent)));
   }
 
-  .page-content-wrapper.closing {
-    animation: spell-close-animation 0.5s ease-in-out forwards;
-  }
-
   #stars {
     width: 1px;
     height: 1px;
@@ -308,19 +304,6 @@
     }
   }
 
-  @keyframes spell-close-animation {
-    from {
-        opacity: 1;
-        transform: scale(1);
-        filter: blur(0px);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.9);
-        filter: blur(10px);
-    }
-  }
-
 #title {
   position: absolute;
   top: 50%;
@@ -388,8 +371,10 @@
           0 0 20px 8px hsl(var(--book-color-hue), 90%, 75%);
     }
     100% {
-        box-shadow: none;
+        box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
     }
 }
 
 }
+
+    
