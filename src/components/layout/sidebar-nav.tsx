@@ -91,9 +91,8 @@ export function SidebarNav() {
     setIsAnimating(href);
     
     setTimeout(() => {
-      router.push(newPath || '/');
+      router.push(newPath || '/dashboard');
       if (newPath === null) {
-          // If we are closing a book, update activePath immediately
           setActivePath(null);
       }
     }, 250); // half of animation duration
@@ -138,7 +137,7 @@ export function SidebarNav() {
 
   return (
     <div className="fixed left-0 top-0 h-full z-50 flex flex-col items-center w-20 py-4">
-      <ScrollArea className="w-full" scrollHideDelay={0}>
+      <ScrollArea className="w-full hide-scrollbar" scrollHideDelay={0}>
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">
             <nav className="flex flex-col items-center gap-2">
@@ -146,7 +145,6 @@ export function SidebarNav() {
             </nav>
 
             <div className="h-px w-8 bg-white/20" />
-            <p className="text-xs text-muted-foreground">Tools</p>
 
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => renderBook(link, true))}

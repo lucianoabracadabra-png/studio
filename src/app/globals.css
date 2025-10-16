@@ -60,6 +60,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow: hidden;
   }
 
   body.dark {
@@ -67,18 +68,17 @@
     background-image: 
       radial-gradient(ellipse at 70% 30%, hsl(265 90% 70% / 0.1), transparent 50%),
       radial-gradient(ellipse at 30% 70%, hsl(300 90% 70% / 0.1), transparent 50%),
-      radial-gradient(ellipse at 50% 50%, hsl(240 10% 3.9% / 0), transparent 100%),
-      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
-      radial-gradient(2px 2px at 80% 70%, #fff, transparent),
-      radial-gradient(1px 1px at 40% 80%, #fff, transparent),
-      radial-gradient(1px 1px at 10% 10%, #fff, transparent),
-      radial-gradient(1px 1px at 90% 20%, #fff, transparent);
-    background-size: 200% 200%, 200px 200px, 200px 200px, 300px 300px, 400px 400px, 500px 500px;
+      radial-gradient(ellipse at 50% 50%, hsl(var(--background)), transparent 100%),
+      radial-gradient(1px 1px at 20% 30%, hsl(0 0% 100% / 0.5), transparent),
+      radial-gradient(1px 1px at 80% 70%, hsl(0 0% 100% / 0.5), transparent),
+      radial-gradient(1px 1px at 40% 80%, hsl(0 0% 100% / 0.3), transparent),
+      radial-gradient(1px 1px at 10% 10%, hsl(0 0% 100% / 0.4), transparent),
+      radial-gradient(1px 1px at 90% 20%, hsl(0 0% 100% / 0.3), transparent);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 300px 300px, 400px 400px, 500px 500px, 250px 250px;
     animation: 
       galaxy-movement 60s ease-in-out infinite,
-      stars-twinkle 5s infinite ease-in-out;
+      stars-twinkle 15s infinite ease-in-out;
     background-attachment: fixed;
-    overflow: hidden;
   }
 
   body.dark::before {
@@ -88,8 +88,9 @@
     left: 0;
     width: 2px;
     height: 100%;
-    background: linear-gradient(to bottom, transparent, #fff, transparent);
+    background: linear-gradient(to bottom, transparent, hsl(0 0% 100% / 0.5), transparent);
     animation: shooting-star 15s linear infinite;
+    transform-origin: left;
   }
   
   body.dark::after {
@@ -99,8 +100,9 @@
     left: -50%;
     width: 100%;
     height: 2px;
-    background: linear-gradient(to right, transparent, #fff, transparent);
+    background: linear-gradient(to right, transparent, hsl(0 0% 100% / 0.5), transparent);
     animation: shooting-star-horizontal 12s linear infinite 3s;
+    transform-origin: top;
   }
 }
 
@@ -141,11 +143,9 @@
 
   .book-nav-item:hover {
     transform: translateX(5px) scale(1.05);
-    animation-play-state: paused;
   }
   
   .book-nav-item.active {
-    animation-play-state: paused;
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
@@ -237,6 +237,14 @@
 }
 
 @layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
   @keyframes float-animation {
     0% { transform: translate(0px, 0px); }
     25% { transform: translate(var(--float-x1, 2px), var(--float-y1, -3px)); }
@@ -252,9 +260,9 @@
   }
 
   @keyframes stars-twinkle {
-    0% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px; opacity: 0.7; }
-    50% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px; opacity: 1; }
-    100% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px; opacity: 0.7; }
+    0% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px, 50px 50px, 60px 60px; opacity: 0.7; }
+    50% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px, 50px 50px, 60px 60px; opacity: 1; }
+    100% { background-position: 0 0, 10px 10px, 20px 20px, 30px 30px, 40px 40px, 50px 50px, 60px 60px; opacity: 0.7; }
   }
 
   @keyframes shooting-star {

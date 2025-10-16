@@ -21,6 +21,7 @@ const pathColorMap: { [key: string]: string } = {
 
 function getPageTitle(pathname: string): string {
     if (!pathname) return '';
+    if (pathname === '/dashboard') return '';
     const segment = pathname.split('/').pop() || 'dashboard';
     const title = segment.replace(/-/g, ' ');
     return title.charAt(0).toUpperCase() + title.slice(1);
@@ -39,8 +40,7 @@ export default function AuthenticatedAppLayout({
 
 
   useEffect(() => {
-    // A null or invalid pathname means no book is selected.
-    if (pathname && pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && pathname !== '/_error') {
+    if (pathname && pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && pathname !== '/_error' && pathname !== '/dashboard') {
         setIsClosing(false);
         setPageTitle(getPageTitle(pathname));
         setPageColor(pathColorMap[pathname] || pathColorMap.default);
