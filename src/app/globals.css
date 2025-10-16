@@ -145,6 +145,7 @@
   }
   
   .book-nav-item.active {
+    animation-play-state: paused;
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
@@ -158,15 +159,19 @@
     filter: drop-shadow(0 0 8px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 4px white);
   }
   
-  .page-content {
+  .page-content-wrapper {
     animation: spell-open-animation 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
     transform-origin: left center;
-    background-color: var(--page-bg-color, transparent);
-    transition: background-color 0.5s ease;
   }
 
-  .page-content.closing {
+  .page-content-wrapper.closing {
     animation: spell-close-animation 0.5s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+  }
+
+  .page-container {
+    @apply rounded-lg p-4 lg:p-6 transition-colors duration-500;
+    background-color: var(--page-bg-color, transparent);
+    box-shadow: 0 0 40px var(--page-bg-color, transparent);
   }
 
   .spell-effect {
@@ -180,10 +185,10 @@
   }
 
   .book-spin-open {
-    animation: book-spin-open-anim 0.4s ease-out forwards;
+    animation: book-spin-open-anim 0.5s ease-out forwards;
   }
   .book-spin-close {
-    animation: book-spin-close-anim 0.4s ease-in forwards;
+    animation: book-spin-close-anim 0.5s ease-in forwards;
   }
   
   @keyframes book-spin-open-anim {
@@ -200,7 +205,7 @@
       transform: rotateY(0deg);
     }
     to {
-      transform: rotateY(360deg);
+      transform: rotateY(-360deg);
     }
   }
   

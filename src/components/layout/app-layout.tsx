@@ -20,13 +20,17 @@ export default function AppLayout({ children, pageTitle, showContent, pageColor,
       <div className="spell-effect"></div>
       {showContent && (
         <div 
-          className={cn("page-content", isClosing && "closing")}
+          className={cn("page-content-wrapper", isClosing && "closing", "p-4 lg:p-6")}
           onAnimationEnd={onAnimationEnd}
-          style={{ '--page-bg-color': pageColor } as React.CSSProperties}
         >
           <Header pageTitle={pageTitle} />
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            {children}
+          <main className="flex flex-1 flex-col">
+            <div 
+              className="page-container"
+              style={{ '--page-bg-color': pageColor } as React.CSSProperties}
+            >
+              {children}
+            </div>
           </main>
         </div>
       )}

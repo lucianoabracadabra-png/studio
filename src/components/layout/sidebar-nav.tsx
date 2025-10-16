@@ -57,6 +57,7 @@ export function SidebarNav() {
   const router = useRouter();
   const [activePath, setActivePath] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState<string | null>(null);
+  const [animationDirection, setAnimationDirection] = useState<'open' | 'close' | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
@@ -86,13 +87,16 @@ export function SidebarNav() {
     if (isAnimating) return;
 
     const newPath = activePath === href ? null : href;
+    setAnimationDirection(newPath ? 'open' : 'close');
     setIsAnimating(href);
-    // If we are deselecting, we don't want to navigate, just change state
-    if (newPath === null) {
-      setActivePath(null);
-    } else {
-      router.push(newPath);
-    }
+    
+    setTimeout(() => {
+      router.push(newPath || '/');
+      if (newPath === null) {
+          // If we are closing a book, update activePath immediately
+          setActivePath(null);
+      }
+    }, 250); // half of animation duration
   };
   
   const renderBook = (link: any, isTool: boolean) => {
@@ -101,8 +105,7 @@ export function SidebarNav() {
   
     let animationClass = '';
     if (isSpinning) {
-      // The logic for closing is handled by the layout now
-      animationClass = 'book-spin-open';
+      animationClass = animationDirection === 'open' ? 'book-spin-open' : 'book-spin-close';
     }
 
     return (
