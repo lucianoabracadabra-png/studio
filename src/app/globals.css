@@ -92,7 +92,7 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: left center;
     will-change: transform;
-    animation: float-animation 8s ease-in-out infinite;
+    animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
   }
 
   .book-nav-item::before {
@@ -116,7 +116,7 @@
   
   .book-nav-item.active {
     transform: translateX(10px) scale(1.1);
-    box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 5px 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.4);
+    box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 5px 0 25px hsla(var(--book-color-hue), 50%, 60%, 0.7);
     animation-play-state: paused;
   }
 
@@ -153,9 +153,9 @@
 @layer utilities {
   @keyframes float-animation {
     0% { transform: translate(0px, 0px); }
-    25% { transform: translate(2px, -3px); }
-    50% { transform: translate(-1px, 2px); }
-    75% { transform: translate(1px, -4px); }
+    25% { transform: translate(var(--float-x1, 2px), var(--float-y1, -3px)); }
+    50% { transform: translate(var(--float-x2, -1px), var(--float-y2, 2px)); }
+    75% { transform: translate(var(--float-x3, 1px), var(--float-y3, -4px)); }
     100% { transform: translate(0px, 0px); }
   }
 

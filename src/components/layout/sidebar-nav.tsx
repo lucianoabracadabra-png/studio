@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -52,6 +52,23 @@ export function SidebarNav() {
     return () => clearTimeout(timer);
   }, [pathname]);
 
+  const animationStyles = useMemo(() => {
+    const styles: { [key: string]: React.CSSProperties } = {};
+    [...mainLinks, ...gmToolsLinks].forEach(link => {
+      styles[link.href] = {
+        '--animation-duration': `${(Math.random() * 4 + 6).toFixed(2)}s`,
+        '--animation-delay': `${(Math.random() * -5).toFixed(2)}s`,
+        '--float-x1': `${(Math.random() * 4 - 2).toFixed(2)}px`,
+        '--float-y1': `${(Math.random() * 6 - 3).toFixed(2)}px`,
+        '--float-x2': `${(Math.random() * 4 - 2).toFixed(2)}px`,
+        '--float-y2': `${(Math.random() * 6 - 3).toFixed(2)}px`,
+        '--float-x3': `${(Math.random() * 4 - 2).toFixed(2)}px`,
+        '--float-y3': `${(Math.random() * 6 - 3).toFixed(2)}px`,
+      } as React.CSSProperties;
+    });
+    return styles;
+  }, []);
+
 
   return (
     <div className="fixed left-0 top-0 h-full z-40 flex flex-col items-center w-20 py-4">
@@ -68,7 +85,7 @@ export function SidebarNav() {
                           'book-nav-item',
                           activePath === link.href && 'active'
                         )}
-                        style={{'--book-color-hue': `${200 + index * 40}deg`, animationDelay: `${index * 150}ms`} as React.CSSProperties}
+                        style={{...animationStyles[link.href], '--book-color-hue': `${200 + index * 40}deg`} as React.CSSProperties}
                       >
                         <link.icon className="w-6 h-6 text-white/80" />
                       </div>
@@ -93,7 +110,7 @@ export function SidebarNav() {
                           'book-nav-item book-tool',
                            activePath === link.href && 'active'
                         )}
-                        style={{'--book-color-hue': `${30 + index * 35}deg`, animationDelay: `${(mainLinks.length + index) * 150}ms`} as React.CSSProperties}
+                        style={{...animationStyles[link.href], '--book-color-hue': `${30 + index * 35}deg`} as React.CSSProperties}
                       >
                         <link.icon className="w-5 h-5 text-white/80" />
                       </div>
