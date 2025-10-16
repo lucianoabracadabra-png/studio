@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, Hand, PersonStanding, Weight } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

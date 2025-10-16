@@ -232,7 +232,7 @@ export const characterData: Character = {
             ap: 3,
             accuracy: 0,
             quantity: 20,
-            weight: 1,
+            weight: 0.05,
             size: 'm',
             extras: 'Ponta de ferro',
         }
