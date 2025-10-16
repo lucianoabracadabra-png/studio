@@ -58,10 +58,10 @@ export function CombatTracker() {
   const [animationStyles, setAnimationStyles] = useState<{ [key: number]: React.CSSProperties }>({});
 
   useEffect(() => {
-    const styles: { [key: number]: React.CSSProperties } = {};
+    const newStyles: { [key: number]: React.CSSProperties } = {};
     combatants.forEach(c => {
       if (!animationStyles[c.id]) {
-        styles[c.id] = {
+        newStyles[c.id] = {
             '--animation-duration': `${(Math.random() * 4 + 6).toFixed(2)}s`,
             '--animation-delay': `${(Math.random() * -5).toFixed(2)}s`,
             '--float-x1': `${(Math.random() * 4 - 2).toFixed(2)}px`,
@@ -73,10 +73,10 @@ export function CombatTracker() {
         } as React.CSSProperties;
       }
     });
-    if (Object.keys(styles).length > 0) {
-        setAnimationStyles(prev => ({...prev, ...styles}));
+    if (Object.keys(newStyles).length > 0) {
+        setAnimationStyles(prev => ({...prev, ...newStyles}));
     }
-  }, [combatants]);
+  }, [combatants, animationStyles]);
 
   const addLogEntry = (message: string) => {
     const newEntry: LogEntry = {
@@ -167,7 +167,7 @@ export function CombatTracker() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="relative h-24 w-full bg-background/30 rounded-lg p-2 overflow-x-auto">
+                <div className="relative h-48 w-full bg-background/30 rounded-lg p-2 overflow-x-auto">
                     {/* Markers */}
                     <div className="absolute top-0 left-0 right-0 flex justify-between px-2">
                         {timelineMarkers.map(marker => (
@@ -179,22 +179,22 @@ export function CombatTracker() {
                     </div>
                     {/* Timeline Track */}
                     <div className="relative h-full pt-4">
-                        {sortedCombatants.map(c => {
+                        {sortedCombatants.map((c, index) => {
                             const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
                             const isActive = c.id === activeCombatantId;
+                            const topPosition = `${20 + (index % 4) * 25}%`;
                             return (
                                 <TooltipProvider key={c.id}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                             <div
                                                 className={cn(
-                                                    "absolute top-1/2 -translate-y-1/2 transition-all duration-500 ease-out",
+                                                    "absolute -translate-y-1/2 transition-all duration-500 ease-out",
                                                     !isActive && "float-anim"
                                                 )}
-                                                style={{ left: `calc(${leftPercentage}% - 16px)`, ...animationStyles[c.id] } as React.CSSProperties}
+                                                style={{ left: `calc(${leftPercentage}% - 16px)`, top: topPosition, ...animationStyles[c.id] } as React.CSSProperties}
                                             >
-                                                <Avatar className={`h-10 w-10 border-2 transition-all ${isActive ? 'border-accent shadow-lg scale-110 shadow-accent/50' : 'border-muted-foreground'}`}>
-                                                    <AvatarImage src={`https://picsum.photos/seed/${c.id}/40/40`} />
+                                                <Avatar className={`h-10 w-10 border-2 transition-all ${isActive ? 'border-accent shadow-lg scale-110 shadow-accent/50' : c.isPlayer ? 'border-primary' : 'border-muted-foreground'}`}>
                                                     <AvatarFallback>{c.name.substring(0, 2)}</AvatarFallback>
                                                 </Avatar>
                                                 {isActive && <div className="absolute inset-0 rounded-full border-2 border-accent animate-ping"></div>}
@@ -300,7 +300,6 @@ export function CombatTracker() {
                     [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
                         <div key={c.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://picsum.photos/seed/${c.id}/32/32`} />
                                 <AvatarFallback>{c.name.substring(0, 2)}</AvatarFallback>
                             </Avatar>
                             <span className="flex-grow font-semibold">{c.name}</span>
