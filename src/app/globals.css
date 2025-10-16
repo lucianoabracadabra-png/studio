@@ -111,6 +111,7 @@
 
   .book-nav-item:hover {
     transform: translateX(5px) scale(1.05);
+    animation-play-state: paused;
   }
   
   .book-nav-item.active {
@@ -120,10 +121,12 @@
       0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.5),
       0 0 3px white;
     animation: pulse-glow-book 2s ease-in-out infinite, float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
+    animation-play-state: paused;
   }
 
   .book-nav-item.active > * > svg, .book-nav-item.active .avatar-glow {
-    animation: pulse-glow-icon 2s ease-in-out infinite;
+    animation: sonar-pulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 4px white);
   }
   
   .page-content {
@@ -156,19 +159,19 @@
   
   @keyframes book-spin-open-anim {
     from {
-      transform: scale(1) rotateX(0deg);
+      transform: rotateX(0deg);
     }
     to {
-      transform: scale(1) rotateX(360deg);
+      transform: rotateX(360deg);
     }
   }
 
   @keyframes book-spin-close-anim {
     from {
-      transform: scale(1) rotateX(0deg);
+      transform: rotateX(0deg);
     }
     to {
-      transform: scale(1) rotateX(360deg);
+      transform: rotateX(360deg);
     }
   }
   
@@ -238,14 +241,12 @@
     }
   }
   
-  @keyframes pulse-glow-icon {
+  @keyframes sonar-pulse {
     0%, 100% {
-      filter: drop-shadow(0 0 4px hsla(var(--book-color-hue), 50%, 80%, 0.8)) drop-shadow(0 0 2px white);
-      transform: scale(1);
+      filter: drop-shadow(0 0 4px hsla(var(--book-color-hue), 50%, 80%, 0.7)) drop-shadow(0 0 2px white);
     }
     50% {
-      filter: drop-shadow(0 0 8px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 4px white);
-      transform: scale(1);
+      filter: drop-shadow(0 0 10px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 5px white);
     }
   }
 

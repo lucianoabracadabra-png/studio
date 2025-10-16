@@ -11,7 +11,7 @@ const pathColorMap: { [key: string]: string } = {
     '/wiki': 'hsl(320 65% 50% / 0.05)',
     '/tools/dice-roller': 'hsl(30 65% 50% / 0.05)',
     '/gm/combat-tracker': 'hsl(65 65% 50% / 0.05)',
-    '/tools/generator': 'hsl(100 65% 50% / 0.05)',
+    '/tools/generator': 'hsl(100 65% 50% / A0.05)',
     '/tools/description-generator': 'hsl(135 65% 50% / 0.05)',
     '/tools/soundboard': 'hsl(170 65% 50% / 0.05)',
     'default': 'transparent'
@@ -19,6 +19,7 @@ const pathColorMap: { [key: string]: string } = {
 
 
 function getPageTitle(pathname: string): string {
+    if (!pathname) return '';
     const segment = pathname.split('/').pop() || 'dashboard';
     const title = segment.replace(/-/g, ' ');
     return title.charAt(0).toUpperCase() + title.slice(1);
@@ -43,11 +44,13 @@ export default function AuthenticatedAppLayout({
         setShowContent(true);
         setIsClosing(false);
     } else {
+        // When no path is active, start the closing animation
         setIsClosing(true);
     }
   }, [pathname]);
 
   const handleAnimationEnd = () => {
+    // Only hide content after closing animation finishes
     if (isClosing) {
       setShowContent(false);
     }

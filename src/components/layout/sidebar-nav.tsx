@@ -60,7 +60,6 @@ export function SidebarNav() {
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
-    // Generate styles only on the client-side to prevent hydration mismatch.
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -78,48 +77,26 @@ export function SidebarNav() {
   }, []);
 
   useEffect(() => {
-    if (pathname && pathname !== '/_error' && pathname !== '/') {
-      setActivePath(pathname);
-    } else {
-      setActivePath(null);
-    }
+    setActivePath(pathname === '/' ? null : pathname);
   }, [pathname]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (isAnimating) return;
-  
-    const targetIsDifferent = activePath !== href;
-  
-    if (activePath && !targetIsDifferent) {
-      // Close the current book
-      setIsAnimating(activePath);
-      router.push('/'); 
-    } else {
-      // Open a new book (or switch from no book to a new one)
-      setIsAnimating(href);
-      router.push(href);
-    }
-  };
 
+    const newPath = activePath === href ? null : href;
+    setIsAnimating(href);
+    router.push(newPath || '/');
+  };
+  
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
     const isSpinning = isAnimating === link.href;
   
-    let bookClass = '';
-    const isOpening = isSpinning && !isActive;
-    const isClosing = isSpinning && isActive;
-
-    // A book is closing if we click it again, or if we click another book
-    const shouldClose = isClosing || (isAnimating && isActive && isAnimating !== link.href);
-    const shouldOpen = isOpening;
-
-    if (shouldOpen) {
-      bookClass = 'book-spin-open';
-    } else if (shouldClose) {
-      bookClass = 'book-spin-close';
+    let animationClass = '';
+    if (isSpinning) {
+      animationClass = isActive ? 'book-spin-close' : 'book-spin-open';
     }
-
 
     return (
       <Tooltip key={link.href}>
@@ -133,13 +110,12 @@ export function SidebarNav() {
               className={cn(
                 'book-nav-item',
                 isTool && 'book-tool',
-                isActive && 'active'
+                isActive && 'active',
+                animationClass
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
-              <div className={cn(bookClass, 'w-full h-full flex items-center justify-center')}>
-                <link.icon className="w-6 h-6 text-white/80 transition-all" />
-              </div>
+              <link.icon className="w-6 h-6 text-white/80 transition-all" />
             </div>
           </a>
         </TooltipTrigger>
