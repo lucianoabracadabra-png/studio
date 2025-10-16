@@ -33,19 +33,19 @@ const campaigns = [
 export default function DashboardPage() {
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-in fade-in-down">
         <div/>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
+        <Button className="group">
+          <PlusCircle className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
           Create Campaign
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {campaigns.map((campaign) => (
-          <Card key={campaign.name} className="glassmorphic-card overflow-hidden flex flex-col group">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in-up">
+        {campaigns.map((campaign, i) => (
+          <Card key={campaign.name} className="glassmorphic-card overflow-hidden flex flex-col group" style={{ animationDelay: `${i * 100}ms` }}>
             <CardHeader className="p-0">
-                <div className="relative h-48 w-full">
+                <div className="relative h-48 w-full overflow-hidden">
                     <Image
                         src={campaign.image.imageUrl}
                         alt={campaign.image.description}
