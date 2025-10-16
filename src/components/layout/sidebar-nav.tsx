@@ -88,21 +88,21 @@ export function SidebarNav() {
       setTimeout(() => setReverseSpinningBookHref(null), 1000);
     }
     
+    if (currentPath && spinningBookHref === currentPath) {
+        setTimeout(() => setSpinningBookHref(null), 1000);
+    }
+    
     setActivePath(currentPath);
     prevPathRef.current = pathname;
-  }, [pathname]);
+
+  }, [pathname, spinningBookHref]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
 
     if (activePath !== href) {
         router.push(href);
-        if (spinningBookHref !== href) {
-            setSpinningBookHref(href);
-            setTimeout(() => {
-                setSpinningBookHref(null);
-            }, 1000);
-        }
+        setSpinningBookHref(href);
     }
   };
   
@@ -113,26 +113,28 @@ export function SidebarNav() {
 
     return (
       <Tooltip key={link.href}>
-        <TooltipTrigger asChild>
-          <Link
-            href={link.href}
-            onClick={(e) => handleLinkClick(e, link.href)}
-            className={cn(
-              'book-nav-item',
-              isTool && 'book-tool',
-              isActive && 'active',
-              isSpinning && 'book-spin-two-speeds',
-              isReverseSpinning && 'book-reverse-spin-anim',
-              !isActive && !isSpinning && !isReverseSpinning && 'float-anim'
-            )}
-            style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
-          >
-            <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p>{link.label}</p>
-        </TooltipContent>
+        <TooltipProvider>
+          <TooltipTrigger asChild>
+            <Link
+              href={link.href}
+              onClick={(e) => handleLinkClick(e, link.href)}
+              className={cn(
+                'book-nav-item',
+                isTool && 'book-tool',
+                isActive && 'active',
+                isSpinning && 'book-spin-two-speeds',
+                isReverseSpinning && 'book-reverse-spin-anim',
+                !isActive && !isSpinning && !isReverseSpinning && 'float-anim'
+              )}
+              style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
+            >
+              <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p>{link.label}</p>
+          </TooltipContent>
+        </TooltipProvider>
       </Tooltip>
     );
   }
@@ -140,24 +142,20 @@ export function SidebarNav() {
   return (
     <div className="flex h-full w-20 flex-col items-center bg-transparent py-4 z-50">
       <ScrollArea className="w-full hide-scrollbar">
-        <TooltipProvider>
-          <div className="flex flex-col items-center gap-4 py-4">
-            <nav className="flex flex-col items-center gap-2">
-              {mainLinks.map(link => renderBook(link, false))}
-            </nav>
+        <div className="flex flex-col items-center gap-4 py-4">
+          <nav className="flex flex-col items-center gap-2">
+            {mainLinks.map(link => renderBook(link, false))}
+          </nav>
 
-            <nav className="flex flex-col items-center gap-2">
-              {gmToolsLinks.map(link => renderBook(link, true))}
-            </nav>
-            
-            <div className="flex-grow"></div>
+          <nav className="flex flex-col items-center gap-2">
+            {gmToolsLinks.map(link => renderBook(link, true))}
+          </nav>
 
-            <nav className="flex flex-col items-center gap-2 mt-4">
-                {renderBook(profileLink, true)}
-            </nav>
+          <nav className="flex flex-col items-center gap-2">
+              {renderBook(profileLink, true)}
+          </nav>
 
-          </div>
-        </TooltipProvider>
+        </div>
       </ScrollArea>
     </div>
   );
