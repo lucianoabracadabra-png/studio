@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, UserPlus, Crown, Play, History } from 'lucide-react';
+import { PlusCircle, Trash2, UserPlus, Crown, Play, History, Check } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
 
 type Combatant = {
   id: number;
@@ -37,6 +38,7 @@ type Combatant = {
   maxHp: number;
   isPlayer: boolean;
   reactionModifier: number; // Vigilância + Raciocínio
+  colorHue: number;
 };
 
 type LogEntry = {
@@ -47,11 +49,36 @@ type LogEntry = {
 
 const MAX_AP_ON_TIMELINE = 50;
 
+const bookColors = [...mainLinks, ...gmToolsLinks].map(link => link.colorHue);
+
+const ColorSelector = ({ selectedHue, onSelect }: { selectedHue: number, onSelect: (hue: number) => void }) => {
+    return (
+        <div className='flex flex-wrap gap-2'>
+            {bookColors.map(hue => (
+                <button
+                    key={hue}
+                    type="button"
+                    onClick={() => onSelect(hue)}
+                    className={cn(
+                        'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center',
+                        selectedHue === hue ? 'border-foreground scale-110' : 'border-transparent'
+                    )}
+                    style={{ backgroundColor: `hsl(${hue}, 60%, 50%)` }}
+                    aria-label={`Select color hue ${hue}`}
+                >
+                    {selectedHue === hue && <Check className='h-5 w-5 text-white' />}
+                </button>
+            ))}
+        </div>
+    );
+};
+
+
 export function CombatTracker() {
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [nextId, setNextId] = useState(1);
   const [activeCombatantId, setActiveCombatantId] = useState<number | null>(null);
-  const [newCombatant, setNewCombatant] = useState({ name: '', hp: '', reactionModifier: '0', isPlayer: false });
+  const [newCombatant, setNewCombatant] = useState({ name: '', hp: '', reactionModifier: '0', isPlayer: false, colorHue: 240 });
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
@@ -110,11 +137,12 @@ export function CombatTracker() {
       hp: parseInt(newCombatant.hp, 10),
       maxHp: parseInt(newCombatant.hp, 10),
       isPlayer: newCombatant.isPlayer,
-      reactionModifier: parseInt(newCombatant.reactionModifier, 10)
+      reactionModifier: parseInt(newCombatant.reactionModifier, 10),
+      colorHue: newCombatant.colorHue,
     };
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
-    setNewCombatant({ name: '', hp: '', reactionModifier: '0', isPlayer: false });
+    setNewCombatant({ name: '', hp: '', reactionModifier: '0', isPlayer: false, colorHue: 240 });
     addLogEntry(`${combatant.name} has been added to the encounter.`);
   };
   
@@ -194,8 +222,19 @@ export function CombatTracker() {
                                                 )}
                                                 style={{ left: `calc(${leftPercentage}% - 16px)`, top: topPosition, ...animationStyles[c.id] } as React.CSSProperties}
                                             >
-                                                <Avatar className={`h-10 w-10 border-2 transition-all ${isActive ? 'border-accent shadow-lg scale-110 shadow-accent/50' : c.isPlayer ? 'border-primary' : 'border-muted-foreground'}`}>
-                                                    <AvatarFallback>{c.name.substring(0, 2)}</AvatarFallback>
+                                                <Avatar 
+                                                  className={cn(
+                                                    'h-10 w-10 border-2 transition-all', 
+                                                    isActive ? 'border-accent shadow-lg scale-110 shadow-accent/50' : 'border-transparent'
+                                                  )}
+                                                  style={{ '--combatant-hue': c.colorHue } as React.CSSProperties}
+                                                >
+                                                    <AvatarFallback 
+                                                      className={cn(c.isPlayer ? 'font-bold' : '')}
+                                                      style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`, border: `2px solid hsl(${c.colorHue}, 60%, 50%)` }}
+                                                    >
+                                                      {c.name.substring(0, 2)}
+                                                    </AvatarFallback>
                                                 </Avatar>
                                                 {isActive && <div className="absolute inset-0 rounded-full border-2 border-accent animate-ping"></div>}
                                             </div>
@@ -285,6 +324,10 @@ export function CombatTracker() {
                   <Input id="reaction" type="number" placeholder="5" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
               </div>
             </div>
+             <div className="space-y-2">
+                <Label>Color</Label>
+                <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} />
+            </div>
             <div className="flex items-center space-x-2 pt-2">
               <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
               <Label htmlFor="is-player">Player Character</Label>
@@ -300,7 +343,11 @@ export function CombatTracker() {
                     [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
                         <div key={c.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
                             <Avatar className="h-8 w-8">
-                                <AvatarFallback>{c.name.substring(0, 2)}</AvatarFallback>
+                                <AvatarFallback
+                                  style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`, border: `1px solid hsl(${c.colorHue}, 60%, 50%)` }}
+                                >
+                                  {c.name.substring(0, 2)}
+                                </AvatarFallback>
                             </Avatar>
                             <span className="flex-grow font-semibold">{c.name}</span>
                              <AlertDialog>
@@ -330,5 +377,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-    
