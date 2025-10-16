@@ -202,22 +202,25 @@
     position: absolute;
     border-style: solid;
     border-color: var(--page-primary-color);
-    opacity: 0.3;
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
+    filter: 
+      drop-shadow(0 0 2px var(--page-primary-color))
+      drop-shadow(0 0 5px var(--page-primary-color))
+      drop-shadow(0 0 10px var(--page-accent-color));
   }
 
   .page-container::before {
     top: -4px;
-    left: -4px;
+    left: 30px;
     border-width: 2px 0 0 2px;
     border-top-left-radius: var(--radius);
   }
 
   .page-container::after {
     bottom: -4px;
-    right: -4px;
+    right: 30px;
     border-width: 0 2px 2px 0;
     border-bottom-right-radius: var(--radius);
   }
