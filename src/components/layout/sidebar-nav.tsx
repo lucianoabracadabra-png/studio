@@ -85,12 +85,7 @@ export function SidebarNav() {
     
     if (currentPath !== prevPath && prevPath !== null && prevPath !== '/login' && prevPath !== '/signup' && prevPath !== '/_error') {
       setReverseSpinningBookHref(prevPath);
-      setTimeout(() => setReverseSpinningBookHref(null), 1000);
-    }
-    
-    if (currentPath) {
-      setSpinningBookHref(currentPath);
-      setTimeout(() => setSpinningBookHref(null), 1000); 
+      setTimeout(() => setReverseSpinningBookHref(null), 1000); 
     }
     
     setActivePath(currentPath);
@@ -101,6 +96,8 @@ export function SidebarNav() {
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (activePath !== href) {
+        setSpinningBookHref(href);
+        setTimeout(() => setSpinningBookHref(null), 1000);
         router.push(href);
     }
   };
@@ -113,26 +110,26 @@ export function SidebarNav() {
     return (
       <TooltipProvider key={link.href}>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Link
-              href={link.href}
-              onClick={(e) => handleLinkClick(e, link.href)}
-              className={cn(
-                'book-nav-item',
-                isTool ? 'tool-book' : 'main-book',
-                isActive && 'active',
-                isSpinning && 'book-spin-two-speeds',
-                isReverseSpinning && 'book-reverse-spin-anim',
-                !isActive && !isSpinning && !isReverseSpinning && 'float-anim'
-              )}
-              style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
-            >
-              <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            <p>{link.label}</p>
-          </TooltipContent>
+            <TooltipTrigger asChild>
+              <Link
+                href={link.href}
+                onClick={(e) => handleLinkClick(e, link.href)}
+                className={cn(
+                  'book-nav-item',
+                  isTool ? 'tool-book' : 'main-book',
+                  isActive && 'active',
+                  isSpinning && 'book-spin-two-speeds',
+                  isReverseSpinning && 'book-reverse-spin-anim',
+                  !isActive && !isSpinning && !isReverseSpinning && 'float-anim'
+                )}
+                style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
+              >
+                <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>{link.label}</p>
+            </TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
@@ -146,7 +143,7 @@ export function SidebarNav() {
             {mainLinks.map(link => renderBook(link, false))}
           </nav>
 
-          <nav className="flex flex-col items-center gap-2 mt-4">
+          <nav className="flex flex-col items-center gap-2">
             {gmToolsLinks.map(link => renderBook(link, true))}
           </nav>
         </div>
