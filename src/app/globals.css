@@ -201,7 +201,8 @@
     content: '';
     position: absolute;
     border-style: solid;
-    border-color: var(--page-primary-color) / 0.3;
+    border-color: var(--page-primary-color);
+    opacity: 0.3;
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
@@ -402,3 +403,5 @@
     to { opacity: 1; transform: translateY(0); }
   }
 }
+
+    

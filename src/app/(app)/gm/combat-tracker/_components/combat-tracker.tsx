@@ -97,6 +97,7 @@ export function CombatTracker() {
   };
   
   const startCombat = () => {
+    if (combatants.length === 0) return;
     setCombatants(combatants.map(c => {
       const reactionRoll = Math.floor(Math.random() * 10) + 1;
       const startAp = 20 - (reactionRoll + c.reactionModifier);
@@ -127,6 +128,7 @@ export function CombatTracker() {
   };
 
   const timelineMarkers = Array.from({ length: MAX_AP_ON_TIMELINE / 5 + 1 }, (_, i) => i * 5);
+  const activeCombatant = useMemo(() => sortedCombatants.find(c => c.id === activeCombatantId), [sortedCombatants, activeCombatantId]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -156,7 +158,7 @@ export function CombatTracker() {
                     </div>
                     {/* Timeline Track */}
                     <div className="relative h-full pt-4">
-                        {combatants.map(c => {
+                        {sortedCombatants.map(c => {
                             const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
                             const isActive = c.id === activeCombatantId;
                             return (
@@ -206,7 +208,7 @@ export function CombatTracker() {
                 <Input id="hp" type="number" placeholder="10" value={newCombatant.hp} onChange={e => setNewCombatant({ ...newCombatant, hp: e.target.value })} disabled={combatStarted}/>
               </div>
               <div className="space-y-2">
-                  <Label htmlFor="reaction">Reaction Mod</Label>
+                  <Label htmlFor="reaction">Reaction Test</Label>
                   <Input id="reaction" type="number" placeholder="5" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
               </div>
             </div>
@@ -222,7 +224,7 @@ export function CombatTracker() {
                 {combatants.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
                 ) : (
-                    combatants.map(c => (
+                    [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
                         <div key={c.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
                             <Avatar className="h-8 w-8">
                                 <AvatarImage src={`https://picsum.photos/seed/${c.id}/32/32`} />
@@ -231,7 +233,7 @@ export function CombatTracker() {
                             <span className="flex-grow font-semibold">{c.name}</span>
                              <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><Trash2 className="h-4 w-4"/></Button>
+                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8" disabled={combatStarted}><Trash2 className="h-4 w-4"/></Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -255,11 +257,11 @@ export function CombatTracker() {
 
         {/* ACTIVE CHARACTER & LOG */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-            {activeCombatantId !== null && sortedCombatants.length > 0 ? (
+            {activeCombatant ? (
                 <Card className="glassmorphic-card">
                     <CardHeader>
-                        <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {sortedCombatants[0].name}</CardTitle>
-                        <CardDescription>AP: {sortedCombatants[0].ap} | HP: {sortedCombatants[0].hp}/{sortedCombatants[0].maxHp}</CardDescription>
+                        <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
+                        <CardDescription>AP: {activeCombatant.ap} | HP: {activeCombatant.hp}/{activeCombatant.maxHp}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-end gap-4">
                         <div className="flex-grow space-y-2">
