@@ -80,7 +80,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         setTimeout(() => {
           setSpinningBookHref(null);
           router.push(href);
-        }, 500);
+        }, 2000);
     }
   };
   
