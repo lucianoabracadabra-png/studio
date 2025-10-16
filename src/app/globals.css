@@ -185,19 +185,6 @@
     pointer-events: none;
     z-index: 9999;
   }
-
-  .book-spin-continuous {
-    animation: book-spin-continuous-anim 1.5s linear infinite;
-  }
-  
-  @keyframes book-spin-continuous-anim {
-    from {
-      transform: rotateY(0deg);
-    }
-    to {
-      transform: rotateY(360deg);
-    }
-  }
   
   @keyframes spell-open-animation {
     0% {

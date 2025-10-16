@@ -56,7 +56,6 @@ export function SidebarNav() {
   const router = useRouter();
   
   const [activePath, setActivePath] = useState(pathname);
-  const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
@@ -78,28 +77,18 @@ export function SidebarNav() {
   }, []);
 
   useEffect(() => {
-    // When the path changes, update the active path and stop any spinning books.
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-    if (spinningBookHref && currentPath === spinningBookHref) {
-      setSpinningBookHref(null);
-    }
-  }, [pathname, spinningBookHref]);
+  }, [pathname]);
 
   const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    // Prevent re-clicking the active link or starting a new spin while one is in progress.
-    if (activePath === href || spinningBookHref) return;
-
-    // Start spinning the clicked book.
-    setSpinningBookHref(href);
-    // Navigate to the new page.
+    if (activePath === href) return;
     router.push(href);
-  }, [activePath, spinningBookHref, router]);
+  }, [activePath, router]);
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
-    const isSpinning = spinningBookHref === link.href;
 
     return (
       <Tooltip key={link.href}>
@@ -112,8 +101,7 @@ export function SidebarNav() {
               className={cn(
                 'book-nav-item',
                 isTool && 'book-tool',
-                isActive && 'active',
-                isSpinning && 'book-spin-continuous'
+                isActive && 'active'
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
