@@ -4,8 +4,9 @@ import { NpcGenerator } from "./_components/npc-generator";
 
 export default function GeneratorPage() {
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <Tabs defaultValue="item">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+      <h1 className="text-3xl font-headline magical-glow text-center animate-in fade-in-down">AI Generators</h1>
+      <Tabs defaultValue="item" className="animate-in fade-in-up">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="item">Item & Loot</TabsTrigger>
           <TabsTrigger value="npc">NPC</TabsTrigger>

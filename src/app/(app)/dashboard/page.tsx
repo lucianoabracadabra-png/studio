@@ -34,7 +34,7 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center justify-between animate-in fade-in-down">
-        <div/>
+        <h1 className="text-3xl font-headline magical-glow">Dashboard</h1>
         <Button className="group">
           <PlusCircle className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
           Create Campaign

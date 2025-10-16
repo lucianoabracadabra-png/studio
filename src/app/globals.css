@@ -184,8 +184,12 @@
 
   .page-container {
     @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative;
-    background-color: var(--page-bg-color, transparent);
-    box-shadow: 0 0 40px var(--page-bg-color, transparent);
+    background: 
+      radial-gradient(ellipse at 100% 0%, hsl(var(--primary) / 0.15), transparent 50%),
+      radial-gradient(ellipse at 0% 100%, hsl(var(--accent) / 0.15), transparent 50%),
+      hsl(var(--background) / 0.5);
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.1);
+    backdrop-filter: blur(12px);
   }
 
   .page-container::before, .page-container::after {
@@ -246,6 +250,11 @@
       transform: scale(0.9);
       filter: blur(10px);
     }
+  }
+
+  .magical-glow {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent;
+    text-shadow: 0 0 8px hsl(var(--primary) / 0.5), 0 0 16px hsl(var(--accent) / 0.3);
   }
 }
 
@@ -335,11 +344,7 @@
     }
     100% {
       transform: rotateY(720deg);
-       box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1), 0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7), 0 0 5px hsl(var(--book-color-hue), 50%, 80%);
     }
   }
 
@@ -347,14 +352,10 @@
     animation: book-spin-two-speeds 1s ease-out forwards;
   }
 
-  @keyframes book-reverse-spin {
+  @keyframes book-reverse-spin-anim {
     0% {
       transform: rotateY(0deg);
-       box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1), 0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7), 0 0 5px hsl(var(--book-color-hue), 50%, 80%);
     }
     50% {
        box-shadow: 
@@ -370,7 +371,7 @@
   }
 
   .book-reverse-spin-anim {
-    animation: book-reverse-spin 1s ease-out forwards;
+    animation: book-reverse-spin-anim 1s ease-out forwards;
   }
   
   .fade-in {

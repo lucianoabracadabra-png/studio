@@ -3,8 +3,9 @@ import { BookOpen } from "lucide-react";
 
 export default function WikiPage() {
   return (
-    <div className="flex items-center justify-center flex-1">
-      <Card className="w-full max-w-md text-center">
+    <div className="flex items-center justify-center flex-1 flex-col">
+       <h1 className="text-3xl font-headline magical-glow mb-8 animate-in fade-in-down">Campaign Wiki</h1>
+      <Card className="w-full max-w-md text-center animate-in fade-in-up">
         <CardHeader>
           <div className="flex justify-center mb-4">
             <BookOpen className="h-16 w-16 text-primary" />
