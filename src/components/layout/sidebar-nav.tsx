@@ -81,7 +81,7 @@ export function SidebarNav() {
     if (activePath === href) {
       // Close the current book
       setIsAnimating(href);
-      router.push('/');
+      router.push('/'); // Navigate to a neutral state that shows nothing
       setTimeout(() => setIsAnimating(null), 500); // Animation duration
     } else {
       // Open a new book
