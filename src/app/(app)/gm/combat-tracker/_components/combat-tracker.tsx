@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, UserPlus, Shield, Swords, ChevronsUpDown, Crown, Play, History } from 'lucide-react';
+import { PlusCircle, Trash2, UserPlus, Crown, Play, History } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 type Combatant = {
   id: number;
@@ -54,6 +55,28 @@ export function CombatTracker() {
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
+  const [animationStyles, setAnimationStyles] = useState<{ [key: number]: React.CSSProperties }>({});
+
+  useEffect(() => {
+    const styles: { [key: number]: React.CSSProperties } = {};
+    combatants.forEach(c => {
+      if (!animationStyles[c.id]) {
+        styles[c.id] = {
+            '--animation-duration': `${(Math.random() * 4 + 6).toFixed(2)}s`,
+            '--animation-delay': `${(Math.random() * -5).toFixed(2)}s`,
+            '--float-x1': `${(Math.random() * 4 - 2).toFixed(2)}px`,
+            '--float-y1': `${(Math.random() * 6 - 3).toFixed(2)}px`,
+            '--float-x2': `${(Math.random() * 4 - 2).toFixed(2)}px`,
+            '--float-y2': `${(Math.random() * 6 - 3).toFixed(2)}px`,
+            '--float-x3': `${(Math.random() * 4 - 2).toFixed(2)}px`,
+            '--float-y3': `${(Math.random() * 6 - 3).toFixed(2)}px`,
+        } as React.CSSProperties;
+      }
+    });
+    if (Object.keys(styles).length > 0) {
+        setAnimationStyles(prev => ({...prev, ...styles}));
+    }
+  }, [combatants]);
 
   const addLogEntry = (message: string) => {
     const newEntry: LogEntry = {
@@ -164,8 +187,11 @@ export function CombatTracker() {
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                             <div
-                                                className="absolute top-1/2 -translate-y-1/2 transition-all duration-500 ease-out"
-                                                style={{ left: `calc(${leftPercentage}% - 16px)`}}
+                                                className={cn(
+                                                    "absolute top-1/2 -translate-y-1/2 transition-all duration-500 ease-out",
+                                                    !isActive && "float-anim"
+                                                )}
+                                                style={{ left: `calc(${leftPercentage}% - 16px)`, ...animationStyles[c.id] } as React.CSSProperties}
                                             >
                                                 <Avatar className={`h-10 w-10 border-2 transition-all ${isActive ? 'border-accent shadow-lg scale-110 shadow-accent/50' : 'border-muted-foreground'}`}>
                                                     <AvatarImage src={`https://picsum.photos/seed/${c.id}/40/40`} />
@@ -305,3 +331,5 @@ export function CombatTracker() {
     </div>
   );
 }
+
+    

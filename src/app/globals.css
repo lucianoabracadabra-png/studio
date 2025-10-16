@@ -125,7 +125,6 @@
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
     box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
-    animation: sonar-pulse 2s ease-in-out infinite;
   }
   
   .active-icon, .book-nav-item.active .avatar-glow {
@@ -352,3 +351,5 @@
   to { transform: translateY(-2000px); }
 }
 }
+
+    
