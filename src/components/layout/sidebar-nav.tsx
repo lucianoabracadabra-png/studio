@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   LayoutDashboard,
@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -51,16 +52,18 @@ export const profileLink = {
   colorHue: 0,
 };
 
-export function SidebarNav() {
-  const pathname = usePathname();
+type SidebarNavProps = {
+  activePath: string | null;
+};
+
+export function SidebarNav({ activePath }: SidebarNavProps) {
   const router = useRouter();
   
-  const [activePath, setActivePath] = useState(pathname);
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [reverseSpinningBookHref, setReverseSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
-  const prevPathRef = useRef(pathname);
+  const prevActivePathRef = useRef(activePath);
 
   useEffect(() => {
     const styles: { [key: string]: React.CSSProperties } = {};
@@ -80,25 +83,25 @@ export function SidebarNav() {
   }, []);
 
   useEffect(() => {
-    const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
-    const prevPath = prevPathRef.current;
+    const prevPath = prevActivePathRef.current;
     
-    if (currentPath !== prevPath && prevPath !== null && prevPath !== '/login' && prevPath !== '/signup' && prevPath !== '/_error') {
-      setReverseSpinningBookHref(prevPath);
-      setTimeout(() => setReverseSpinningBookHref(null), 1000); 
+    if (activePath !== prevPath) {
+      if (prevPath) {
+        setReverseSpinningBookHref(prevPath);
+        setTimeout(() => setReverseSpinningBookHref(null), 1000); 
+      }
     }
     
-    setActivePath(currentPath);
-    prevPathRef.current = pathname;
+    prevActivePathRef.current = activePath;
 
-  }, [pathname]);
+  }, [activePath]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (activePath !== href) {
         setSpinningBookHref(href);
         setTimeout(() => setSpinningBookHref(null), 1000);
-        router.push(href);
+        setTimeout(() => router.push(href), 250); // Delay navigation slightly
     }
   };
   
