@@ -21,6 +21,7 @@ import {
   WandSparkles,
   FileText,
   Volume2,
+  Dices,
 } from 'lucide-react';
 import { Icons } from '../icons';
 
@@ -48,6 +49,11 @@ const links = [
 ];
 
 const gmTools = [
+  {
+    label: 'Dice Roller',
+    href: '/tools/dice-roller',
+    icon: Dices,
+  },
   {
     label: 'Combat Tracker',
     href: '/gm/combat-tracker',
@@ -90,12 +96,9 @@ export function SidebarNav() {
                 <SidebarMenuButton
                   isActive={pathname === link.href}
                   tooltip={link.label}
-                  asChild
                 >
-                  <span>
-                    <link.icon />
-                    <span>{link.label}</span>
-                  </span>
+                  <link.icon />
+                  <span>{link.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -114,12 +117,9 @@ export function SidebarNav() {
                   <SidebarMenuButton
                     isActive={pathname === link.href}
                     tooltip={link.label}
-                    asChild
                   >
-                    <span>
-                      <link.icon />
-                      <span>{link.label}</span>
-                    </span>
+                    <link.icon />
+                    <span>{link.label}</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
