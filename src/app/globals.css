@@ -197,32 +197,33 @@
     --ring: var(--page-primary-color) !important;
   }
 
-  .page-container::before, .page-container::after {
+  .page-container::before,
+  .page-container::after {
     content: '';
     position: absolute;
-    border-style: solid;
-    border-color: var(--page-primary-color);
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
-    filter: 
-      drop-shadow(0 0 2px var(--page-primary-color))
-      drop-shadow(0 0 5px var(--page-primary-color))
-      drop-shadow(0 0 10px var(--page-accent-color));
   }
 
   .page-container::before {
     top: -4px;
     left: 30px;
-    border-width: 2px 0 0 2px;
     border-top-left-radius: var(--radius);
+    box-shadow: 
+      -2px -2px 0 0 var(--page-primary-color),
+      0 0 10px var(--page-primary-color),
+      inset 0 0 10px var(--page-primary-color);
   }
 
   .page-container::after {
     bottom: -4px;
     right: 30px;
-    border-width: 0 2px 2px 0;
     border-bottom-right-radius: var(--radius);
+    box-shadow: 
+      2px 2px 0 0 var(--page-primary-color),
+      0 0 10px var(--page-primary-color),
+      inset 0 0 10px var(--page-primary-color);
   }
 
   .spell-effect {
