@@ -129,8 +129,8 @@ export function SidebarNav() {
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div className="book-nav-item book-tool" style={{'--book-color-hue': '0deg'} as React.CSSProperties}>
-                         <Avatar className="h-9 w-9 border-2 border-white/50">
+                    <div className={cn("book-nav-item book-tool")} style={{'--book-color-hue': '0deg'} as React.CSSProperties}>
+                         <Avatar className="h-9 w-9 border-2 border-white/50 avatar-glow">
                             <AvatarImage src="https://picsum.photos/seed/avatar/40/40" alt="@shadcn" data-ai-hint="fantasy wizard" />
                             <AvatarFallback>GM</AvatarFallback>
                         </Avatar>
