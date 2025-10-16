@@ -83,13 +83,12 @@ export function SidebarNav() {
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (spinningBookHref !== href) {
+    if (spinningBookHref === null) {
         setSpinningBookHref(href);
         setTimeout(() => setSpinningBookHref(null), 2000); 
     }
     
     if (activePath !== href) {
-        // Delay navigation slightly to allow animation to start
         setTimeout(() => router.push(href), 100);
     }
   };
@@ -104,18 +103,16 @@ export function SidebarNav() {
           <a
             href={link.href}
             onClick={(e) => handleLinkClick(e, link.href)}
+            className={cn(
+              'book-nav-item',
+              isTool && 'book-tool',
+              isActive && 'active',
+              isSpinning && 'book-spin-and-glow',
+              !isActive && !isSpinning && 'float-anim'
+            )}
+            style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
           >
-            <div
-              className={cn(
-                'book-nav-item',
-                isTool && 'book-tool',
-                isActive && 'active',
-                isSpinning && 'book-spin-and-glow',
-              )}
-              style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
-            >
-              <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
-            </div>
+            <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && "active-icon")} />
           </a>
         </TooltipTrigger>
         <TooltipContent side="right">
@@ -126,7 +123,7 @@ export function SidebarNav() {
   }
 
   return (
-    <div className="relative z-50 flex h-full w-20 flex-col items-center bg-transparent py-4">
+    <div className="flex h-full w-20 flex-col items-center bg-transparent py-4 z-50">
       <ScrollArea className="w-full hide-scrollbar">
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">

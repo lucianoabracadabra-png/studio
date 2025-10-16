@@ -126,7 +126,7 @@
     transform-style: preserve-3d;
   }
   
-  .book-nav-item:not(.active) {
+  .book-nav-item.float-anim {
     animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
   }
 
