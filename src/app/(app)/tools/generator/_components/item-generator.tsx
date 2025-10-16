@@ -57,7 +57,7 @@ export function ItemGenerator() {
   };
 
   return (
-    <Card>
+    <Card className="glassmorphic-card">
       <CardHeader>
         <CardTitle className="font-headline">Item & Loot Generator</CardTitle>
         <CardDescription>Create unique items and loot for your campaigns.</CardDescription>
@@ -116,7 +116,9 @@ export function ItemGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Game Setting</FormLabel>
-                    <Input placeholder="e.g., Forgotten Realms, Eberron" {...field} />
+                    <FormControl>
+                      <Input placeholder="e.g., Forgotten Realms, Eberron" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -127,7 +129,9 @@ export function ItemGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Additional Details</FormLabel>
-                    <Textarea placeholder="e.g., made of dragonscale, pulses with faint light" {...field} />
+                    <FormControl>
+                      <Textarea placeholder="e.g., made of dragonscale, pulses with faint light" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -138,7 +142,7 @@ export function ItemGenerator() {
               </Button>
             </form>
           </Form>
-          <div className="rounded-lg border bg-background/50 p-4 space-y-4 min-h-[300px]">
+          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
             <h3 className="font-headline text-xl text-center">Generated Item</h3>
             {isLoading && (
               <div className="space-y-4">
@@ -160,7 +164,7 @@ export function ItemGenerator() {
             )}
             {!isLoading && !result && (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
-                    <WandSparkles className="h-12 w-12 mb-4" />
+                    <WandSparkles className="h-12 w-12 mb-4 text-accent" />
                     <p>Your magical item will appear here.</p>
                 </div>
             )}

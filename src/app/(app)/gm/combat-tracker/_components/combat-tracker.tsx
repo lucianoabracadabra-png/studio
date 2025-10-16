@@ -110,7 +110,7 @@ export function CombatTracker() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <Card className="lg:col-span-1">
+      <Card className="lg:col-span-1 glassmorphic-card">
         <CardHeader>
           <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Add Combatant</CardTitle>
           <CardDescription>Add a new player or monster to the encounter.</CardDescription>
@@ -140,7 +140,7 @@ export function CombatTracker() {
         </CardContent>
       </Card>
       
-      <Card className="lg:col-span-2">
+      <Card className="lg:col-span-2 glassmorphic-card">
         <CardHeader>
             <div className="flex justify-between items-start">
                 <div>
@@ -153,25 +153,25 @@ export function CombatTracker() {
         <CardContent>
             <div className="flex gap-2 mb-4">
                 <Button onClick={sortByInitiative} variant="outline" className="w-full"><ChevronsUpDown className="mr-2"/> Sort by Initiative</Button>
-                <Button onClick={prevTurn} variant="outline" className="w-full"><ChevronUp className="mr-2"/> Prev Turn</Button>
-                <Button onClick={nextTurn} className="w-full font-bold"><ChevronDown className="mr-2"/> Next Turn</Button>
+                <Button onClick={prevTurn} variant="outline" className="w-full"><ChevronUp className="mr-2"/> Prev</Button>
+                <Button onClick={nextTurn} variant="outline" className="w-full"><ChevronDown className="mr-2"/> Next</Button>
             </div>
             <Separator />
             <div className="space-y-2 mt-4">
             {combatants.length === 0 ? (
                  <div className="text-center text-muted-foreground py-12">
-                    <Swords className="mx-auto h-12 w-12 mb-4" />
+                    <Swords className="mx-auto h-12 w-12 text-accent mb-4" />
                     <p>No combatants yet. Add some to get started!</p>
                 </div>
             ) : (
                 combatants.map((c, index) => (
                 <div key={c.id} className={
                     `flex items-center gap-4 p-3 rounded-lg transition-all ${
-                    index === currentTurn ? 'bg-accent/30 border-accent border' : 'bg-muted/30'
+                    index === currentTurn ? 'bg-primary/20 border-primary border' : 'bg-muted/30'
                     } ${c.hp === 0 ? 'opacity-50' : ''}`
                 }>
-                    {index === currentTurn && <Crown className="h-6 w-6 text-accent flex-shrink-0" />}
-                    <div className={`text-2xl font-bold w-12 text-center flex-shrink-0 ${c.isPlayer ? 'text-primary' : ''}`}>
+                    {index === currentTurn && <Crown className="h-6 w-6 text-primary flex-shrink-0" />}
+                    <div className={`text-2xl font-bold w-12 text-center flex-shrink-0 ${c.isPlayer ? 'text-accent' : ''}`}>
                         {c.initiative}
                     </div>
                     <div className="flex-grow">

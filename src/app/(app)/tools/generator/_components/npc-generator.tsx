@@ -56,7 +56,7 @@ export function NpcGenerator() {
   };
 
   return (
-    <Card>
+    <Card className="glassmorphic-card">
       <CardHeader>
         <CardTitle className="font-headline">NPC Generator</CardTitle>
         <CardDescription>Create memorable Non-Player Characters for your world.</CardDescription>
@@ -71,7 +71,9 @@ export function NpcGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Race</FormLabel>
-                    <Input placeholder="e.g., Elf, Dwarf, Orc" {...field} />
+                    <FormControl>
+                      <Input placeholder="e.g., Elf, Dwarf, Orc" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -82,7 +84,9 @@ export function NpcGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Occupation</FormLabel>
-                    <Input placeholder="e.g., Merchant, Guard, Wizard" {...field} />
+                    <FormControl>
+                      <Input placeholder="e.g., Merchant, Guard, Wizard" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -93,7 +97,9 @@ export function NpcGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Game Setting</FormLabel>
-                    <Input placeholder="e.g., High-fantasy kingdom, Sci-fi metropolis" {...field} />
+                    <FormControl>
+                      <Input placeholder="e.g., High-fantasy kingdom, Sci-fi metropolis" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -104,7 +110,9 @@ export function NpcGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Additional Details</FormLabel>
-                    <Textarea placeholder="e.g., missing an eye, always humming a tune" {...field} />
+                    <FormControl>
+                      <Textarea placeholder="e.g., missing an eye, always humming a tune" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -115,7 +123,7 @@ export function NpcGenerator() {
               </Button>
             </form>
           </Form>
-          <div className="rounded-lg border bg-background/50 p-4 space-y-4 min-h-[300px]">
+          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
             <h3 className="font-headline text-xl text-center">Generated NPC</h3>
             {isLoading && (
               <div className="space-y-4">
@@ -146,7 +154,7 @@ export function NpcGenerator() {
             )}
             {!isLoading && !result && (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
-                    <User className="h-12 w-12 mb-4" />
+                    <User className="h-12 w-12 mb-4 text-accent" />
                     <p>Your generated character will appear here.</p>
                 </div>
             )}

@@ -191,6 +191,12 @@
     box-shadow: 0 0 40px var(--page-primary-color) / 0.1;
     backdrop-filter: blur(12px);
   }
+  
+  .page-container > * {
+    --primary: var(--page-primary-color);
+    --accent: var(--page-accent-color);
+    --ring: var(--page-primary-color);
+  }
 
   .page-container::before, .page-container::after {
     content: '';

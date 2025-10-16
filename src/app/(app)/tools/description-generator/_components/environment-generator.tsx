@@ -54,7 +54,7 @@ export function EnvironmentGenerator() {
   };
 
   return (
-    <Card>
+    <Card className="glassmorphic-card">
       <CardHeader>
         <CardTitle className="font-headline">Environment Describer</CardTitle>
         <CardDescription>Generate rich, atmospheric descriptions for your game world.</CardDescription>
@@ -69,7 +69,9 @@ export function EnvironmentGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Environment Type</FormLabel>
-                    <Input placeholder="e.g., Dungeon, City, Forest" {...field} />
+                    <FormControl>
+                      <Input placeholder="e.g., Dungeon, City, Forest" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -80,7 +82,9 @@ export function EnvironmentGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Style</FormLabel>
-                    <Input placeholder="e.g., Ruined, Cyberpunk, Mystical" {...field} />
+                    <FormControl>
+                      <Input placeholder="e.g., Ruined, Cyberpunk, Mystical" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -91,7 +95,9 @@ export function EnvironmentGenerator() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Additional Details</FormLabel>
-                    <Textarea placeholder="e.g., Covered in snow, during a festival" {...field} />
+                    <FormControl>
+                      <Textarea placeholder="e.g., Covered in snow, during a festival" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -102,7 +108,7 @@ export function EnvironmentGenerator() {
               </Button>
             </form>
           </Form>
-          <div className="rounded-lg border bg-background/50 p-4 space-y-4 min-h-[300px]">
+          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
             <h3 className="font-headline text-xl text-center">Generated Description</h3>
             {isLoading && (
               <div className="space-y-2 pt-4">
@@ -121,7 +127,7 @@ export function EnvironmentGenerator() {
             )}
             {!isLoading && !result && (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
-                    <Mountain className="h-12 w-12 mb-4" />
+                    <Mountain className="h-12 w-12 mb-4 text-accent" />
                     <p>Your generated description will appear here.</p>
                 </div>
             )}

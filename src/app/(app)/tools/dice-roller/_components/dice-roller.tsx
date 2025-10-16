@@ -62,7 +62,7 @@ export function DiceRoller() {
   };
 
   return (
-    <Card>
+    <Card className="glassmorphic-card">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Dices className="h-6 w-6" />
@@ -80,6 +80,7 @@ export function DiceRoller() {
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => handleDiceCountChange(-1)}><Minus/></Button>
                 <Input type="number" value={diceCount} onChange={(e) => setDiceCount(parseInt(e.target.value) || 1)} className="text-center font-mono" />
+                 <Button variant="outline" size="icon" onClick={() => handleDiceCountChange(1)}><Plus/></Button>
               </div>
             </div>
 
@@ -101,10 +102,10 @@ export function DiceRoller() {
             </div>
           </div>
 
-          <div className="md:col-span-2 rounded-lg border bg-background/50 p-4 space-y-4 min-h-[300px]">
+          <div className="md:col-span-2 rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
             <div className="text-center space-y-2">
                 <p className="text-muted-foreground">Result</p>
-                <p className="font-headline text-7xl font-bold text-primary">
+                <p className="font-headline text-7xl font-bold magical-glow">
                     {lastRoll ? lastRoll.total : '...'}
                 </p>
                 {lastRoll && (
