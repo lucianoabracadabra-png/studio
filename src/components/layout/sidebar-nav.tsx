@@ -143,14 +143,12 @@ export function SidebarNav() {
             {mainLinks.map(link => renderBook(link, false))}
           </nav>
 
-          <nav className="flex flex-col items-center gap-2">
+          <nav className="mt-4 flex flex-col items-center gap-2">
             {gmToolsLinks.map(link => renderBook(link, true))}
+            {renderBook(profileLink, true)}
           </nav>
         </div>
       </ScrollArea>
-      <div className="mt-auto flex flex-col items-center gap-2 py-4">
-        {renderBook(profileLink, true)}
-      </div>
     </div>
   );
 }
