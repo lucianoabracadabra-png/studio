@@ -51,7 +51,6 @@ export function CombatTracker() {
   const [nextId, setNextId] = useState(1);
   const [activeCombatantId, setActiveCombatantId] = useState<number | null>(null);
   const [newCombatant, setNewCombatant] = useState({ name: '', hp: '', reactionModifier: '0', isPlayer: false });
-  const [actionCost, setActionCost] = useState('5');
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
@@ -113,10 +112,9 @@ export function CombatTracker() {
     setCombatants(combatants.filter(c => c.id !== id));
   };
   
-  const confirmAction = () => {
+  const confirmAction = (cost: number) => {
     if (activeCombatantId === null) return;
     
-    const cost = parseInt(actionCost) || 0;
     const actor = combatants.find(c => c.id === activeCombatantId);
 
     if (actor) {
@@ -132,7 +130,7 @@ export function CombatTracker() {
 
   return (
     <div className="flex flex-col gap-6">
-        {/* TIMELINE VIEW */}
+        {/* 1. TIMELINE VIEW */}
         <Card className="glassmorphic-card w-full">
             <CardHeader>
                 <CardTitle className="font-headline flex items-center justify-between">
@@ -190,12 +188,61 @@ export function CombatTracker() {
             </CardContent>
         </Card>
 
+        {/* 2. ACTIVE TURN */}
+        {combatStarted ? (
+            activeCombatant ? (
+                <Card className="glassmorphic-card">
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
+                        <CardDescription>AP: {activeCombatant.ap} | HP: {activeCombatant.hp}/{activeCombatant.maxHp}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                         <div className="flex-grow space-y-2">
+                           <Label>Action Cost (AP)</Label>
+                            <div className='flex flex-wrap gap-2'>
+                                {Array.from({length: 10}, (_, i) => i + 1).map(cost => (
+                                    <Button key={cost} onClick={() => confirmAction(cost)} variant="outline" size="sm" className="font-mono">
+                                        {cost}
+                                    </Button>
+                                ))}
+                           </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                 <Card className="glassmorphic-card">
+                     <CardContent className="py-12 text-center text-muted-foreground">
+                        <p>{combatants.length > 0 ? "No one is in combat." : "Add combatants and start combat."}</p>
+                     </CardContent>
+                 </Card>
+            )
+        ) : null }
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* ADD/MANAGE COMBATANT */}
+        {/* 3. COMBAT LOG */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+            <Card className="glassmorphic-card flex-grow">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><History /> Combat Log</CardTitle>
+                </CardHeader>
+                <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
+                    {log.length > 0 ? log.map(entry => (
+                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50">
+                            <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
+                            <span>{entry.message}</span>
+                        </div>
+                    )) : (
+                        <p className="text-center text-muted-foreground py-8">Log is empty.</p>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* 4. MANAGE COMBATANTS */}
         <Card className="lg:col-span-1 glassmorphic-card">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Manage Combatants</CardTitle>
-            <CardDescription>Add new combatants before starting.</CardDescription>
+            <CardDescription>Add or remove combatants.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -233,7 +280,7 @@ export function CombatTracker() {
                             <span className="flex-grow font-semibold">{c.name}</span>
                              <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8" disabled={combatStarted}><Trash2 className="h-4 w-4"/></Button>
+                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><Trash2 className="h-4 w-4"/></Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
@@ -254,50 +301,7 @@ export function CombatTracker() {
             </div>
           </CardContent>
         </Card>
-
-        {/* ACTIVE CHARACTER & LOG */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
-            {activeCombatant ? (
-                <Card className="glassmorphic-card">
-                    <CardHeader>
-                        <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
-                        <CardDescription>AP: {activeCombatant.ap} | HP: {activeCombatant.hp}/{activeCombatant.maxHp}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex items-end gap-4">
-                        <div className="flex-grow space-y-2">
-                           <Label htmlFor="action-cost">Action Cost (AP)</Label>
-                           <Input id="action-cost" type="number" value={actionCost} onChange={e => setActionCost(e.target.value)} />
-                        </div>
-                        <Button onClick={confirmAction} className="font-bold">Confirm Action</Button>
-                    </CardContent>
-                </Card>
-            ) : (
-                 <Card className="glassmorphic-card">
-                     <CardContent className="py-12 text-center text-muted-foreground">
-                        <p>{combatStarted ? "No one is in combat." : "Start combat to see the active character."}</p>
-                     </CardContent>
-                 </Card>
-            )}
-
-            <Card className="glassmorphic-card flex-grow">
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><History /> Combat Log</CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
-                    {log.length > 0 ? log.map(entry => (
-                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50">
-                            <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
-                            <span>{entry.message}</span>
-                        </div>
-                    )) : (
-                        <p className="text-center text-muted-foreground py-8">Log is empty.</p>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
       </div>
     </div>
   );
 }
-
-    
