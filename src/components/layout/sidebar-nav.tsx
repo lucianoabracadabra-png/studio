@@ -85,24 +85,20 @@ export function SidebarNav() {
     
     if (currentPath !== prevPath && prevPath !== null && prevPath !== '/login' && prevPath !== '/signup' && prevPath !== '/_error') {
       setReverseSpinningBookHref(prevPath);
-      setTimeout(() => setReverseSpinningBookHref(null), 1000);
-    }
-    
-    if (currentPath && spinningBookHref === currentPath) {
-        setTimeout(() => setSpinningBookHref(null), 1000);
+      setTimeout(() => setReverseSpinningBookHref(null), 2000);
     }
     
     setActivePath(currentPath);
     prevPathRef.current = pathname;
 
-  }, [pathname, spinningBookHref]);
+  }, [pathname]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-
     if (activePath !== href) {
         router.push(href);
         setSpinningBookHref(href);
+        setTimeout(() => setSpinningBookHref(null), 2000); 
     }
   };
   
@@ -112,8 +108,8 @@ export function SidebarNav() {
     const isReverseSpinning = reverseSpinningBookHref === link.href;
 
     return (
-      <Tooltip key={link.href}>
-        <TooltipProvider>
+      <TooltipProvider key={link.href}>
+        <Tooltip>
           <TooltipTrigger asChild>
             <Link
               href={link.href}
@@ -134,8 +130,8 @@ export function SidebarNav() {
           <TooltipContent side="right">
             <p>{link.label}</p>
           </TooltipContent>
-        </TooltipProvider>
-      </Tooltip>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
@@ -143,20 +139,18 @@ export function SidebarNav() {
     <div className="flex h-full w-20 flex-col items-center bg-transparent py-4 z-50">
       <ScrollArea className="w-full hide-scrollbar">
         <div className="flex flex-col items-center gap-4 py-4">
-          <nav className="flex flex-col items-center gap-2">
+          <nav className="flex flex-col items-center gap-4">
             {mainLinks.map(link => renderBook(link, false))}
           </nav>
 
           <nav className="flex flex-col items-center gap-2">
             {gmToolsLinks.map(link => renderBook(link, true))}
           </nav>
-
-          <nav className="flex flex-col items-center gap-2">
-              {renderBook(profileLink, true)}
-          </nav>
-
         </div>
       </ScrollArea>
+      <div className="mt-auto flex flex-col items-center gap-2 py-4">
+        {renderBook(profileLink, true)}
+      </div>
     </div>
   );
 }
