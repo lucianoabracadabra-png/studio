@@ -14,7 +14,6 @@ import {
   Dices,
   FlaskConical
 } from 'lucide-react';
-import { Icons } from '../icons';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -23,6 +22,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useState, useEffect } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -41,6 +42,17 @@ const gmToolsLinks = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const [activePath, setActivePath] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Only set the active path after the initial render to prevent the book from being open on load.
+    // A small delay ensures the initial 'closed' state is seen.
+    const timer = setTimeout(() => {
+      setActivePath(pathname);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
 
   return (
     <div className="fixed left-0 top-0 h-full z-40 flex flex-col items-center w-20 py-4">
@@ -55,7 +67,7 @@ export function SidebarNav() {
                       <div
                         className={cn(
                           'book-nav-item',
-                          pathname === link.href && 'active'
+                          activePath === link.href && 'active'
                         )}
                         style={{'--book-color-hue': `${200 + index * 40}deg`} as React.CSSProperties}
                       >
@@ -80,7 +92,7 @@ export function SidebarNav() {
                       <div
                         className={cn(
                           'book-nav-item book-tool',
-                          pathname === link.href && 'active'
+                           activePath === link.href && 'active'
                         )}
                         style={{'--book-color-hue': `${30 + index * 35}deg`} as React.CSSProperties}
                       >
@@ -97,6 +109,23 @@ export function SidebarNav() {
           </div>
         </TooltipProvider>
       </ScrollArea>
+      <div className="mt-auto flex flex-col items-center gap-4 py-4">
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div className="book-nav-item book-tool" style={{'--book-color-hue': '0deg'} as React.CSSProperties}>
+                         <Avatar className="h-9 w-9 border-2 border-white/50">
+                            <AvatarImage src="https://picsum.photos/seed/avatar/40/40" alt="@shadcn" data-ai-hint="fantasy wizard" />
+                            <AvatarFallback>GM</AvatarFallback>
+                        </Avatar>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                    <p>Profile</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 }
