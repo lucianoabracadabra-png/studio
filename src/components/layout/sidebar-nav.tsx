@@ -77,7 +77,7 @@ export function SidebarNav() {
   }, []);
 
   useEffect(() => {
-    setActivePath(pathname === '/' ? null : pathname);
+    setActivePath(pathname === '/' || pathname === '/login' || pathname === '/signup' ? null : pathname);
   }, [pathname]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
