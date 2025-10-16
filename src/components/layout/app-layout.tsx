@@ -12,7 +12,7 @@ type AppLayoutProps = {
 const PageContent = ({ children }: { children: React.ReactNode }) => {
   return (
     <motion.div
-      className="page-content-wrapper h-screen w-full absolute top-0 left-0 flex items-center justify-center"
+      className="page-content-wrapper h-full w-full flex items-center justify-center"
       initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
       animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
@@ -38,13 +38,13 @@ export default function AppLayout({ children, activePath, colorHue }: AppLayoutP
 
 
   return (
-    <div className="min-h-screen w-full bg-background" style={pageStyle}>
-      <div className="relative z-20">
-        <SidebarNav activePath={activePath} />
-      </div>
-      <main className="pl-24 h-screen relative z-10">
-        {children}
-      </main>
+    <div className="min-h-screen w-full bg-background relative" style={pageStyle}>
+        <div className='relative z-20'>
+            <SidebarNav activePath={activePath} />
+        </div>
+        <main className="pl-24 h-screen relative z-10">
+            {children}
+        </main>
     </div>
   );
 }
