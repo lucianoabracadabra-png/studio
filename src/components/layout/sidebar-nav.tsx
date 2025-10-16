@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -60,7 +60,6 @@ export function SidebarNav() {
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
 
   useEffect(() => {
-    // Generate random animation styles only on the client-side to prevent hydration errors.
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
       styles[link.href] = {
@@ -80,8 +79,7 @@ export function SidebarNav() {
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-    // Stop spinning when navigation is complete
-    if (spinningBookHref === pathname) {
+    if (spinningBookHref && currentPath === spinningBookHref) {
       setSpinningBookHref(null);
     }
   }, [pathname, spinningBookHref]);
@@ -110,6 +108,7 @@ export function SidebarNav() {
                 'book-nav-item',
                 isTool && 'book-tool',
                 isSpinning && 'book-spin-continuous',
+                isActive && 'active'
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
@@ -125,7 +124,7 @@ export function SidebarNav() {
   }
 
   return (
-    <div className="fixed left-0 top-0 h-full z-50 flex flex-col items-center w-20 py-4">
+    <div className="relative z-50 flex h-full w-20 flex-col items-center py-4">
       <ScrollArea className="w-full hide-scrollbar" scrollHideDelay={0}>
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">

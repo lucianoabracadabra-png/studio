@@ -15,25 +15,27 @@ type AppLayoutProps = {
 
 export default function AppLayout({ children, pageTitle, showContent, pageColor, isClosing, onAnimationEnd }: AppLayoutProps) {
   return (
-    <div className="pl-20">
+    <div className="flex h-screen">
       <SidebarNav />
-      <div className="spell-effect"></div>
-      {showContent && (
-        <div 
-          className={cn("page-content-wrapper", isClosing && "closing", "p-4 lg:p-6")}
-          onAnimationEnd={onAnimationEnd}
-        >
-          <Header pageTitle={pageTitle} />
-          <main className="flex flex-1 flex-col">
-            <div 
-              className="page-container"
-              style={{ '--page-bg-color': pageColor } as React.CSSProperties}
-            >
-              {children}
-            </div>
-          </main>
-        </div>
-      )}
+      <div className="flex-1 flex flex-col">
+        <div className="spell-effect"></div>
+        {showContent && (
+          <div 
+            className={cn("page-content-wrapper", isClosing && "closing", "flex-1 flex flex-col p-4 lg:p-6")}
+            onAnimationEnd={onAnimationEnd}
+          >
+            <Header pageTitle={pageTitle} />
+            <main className="flex flex-1 flex-col overflow-y-auto">
+              <div 
+                className="page-container flex-1 flex flex-col"
+                style={{ '--page-bg-color': pageColor } as React.CSSProperties}
+              >
+                {children}
+              </div>
+            </main>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
