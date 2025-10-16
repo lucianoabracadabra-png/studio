@@ -352,8 +352,8 @@
 }
 
 @keyframes book-glow {
-    0% {
-        box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+    0%, 100% {
+        box-shadow: 0 0 14px 4px hsl(var(--book-color-hue), 80%, 85%), 0 0 28px 7px hsl(var(--book-color-hue), 80%, 85% / 0.7);
     }
     50% {
         box-shadow: 0 0 15px hsl(var(--book-color-hue), 70%, 60%), 0 0 30px hsl(var(--book-color-hue), 70%, 60% / 0.7);
@@ -364,17 +364,7 @@
           0 0 30px 15px #fff,
           0 0 15px 5px hsl(var(--book-color-hue), 90%, 75%);
     }
-    95% {
-        box-shadow: 
-          0 0 90px 45px hsl(var(--book-col or-hue), 90%, 75%), 
-          0 0 45px 22px #fff,
-          0 0 20px 8px hsl(var(--book-color-hue), 90%, 75%);
-    }
-    100% {
-        box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
-    }
 }
 
 }
-
     
