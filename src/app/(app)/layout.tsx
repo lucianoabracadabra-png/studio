@@ -2,8 +2,8 @@
 
 import AppLayout from '@/components/layout/app-layout';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
 import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
+import { AnimatePresence } from 'framer-motion';
 
 const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
 
@@ -19,50 +19,21 @@ export default function AuthenticatedAppLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [activePath, setActivePath] = useState<string | null>(null);
-  const [content, setContent] = useState<React.ReactNode>(null);
-  const [colorHue, setColorHue] = useState(0);
-  const [isClosing, setIsClosing] = useState(false);
-  const previousPathnameRef = useRef<string | null>(null);
-
-
-  useEffect(() => {
-    const newPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
-    const oldPath = previousPathnameRef.current;
-
-    if (newPath !== oldPath) {
-      if (oldPath) {
-        setIsClosing(true);
-        // Wait for the closing animation to finish before changing content
-        const timer = setTimeout(() => {
-          setContent(children);
-          setActivePath(newPath);
-          setColorHue(pathColorMap[newPath || ''] || 0);
-          setIsClosing(false);
-        }, 500); // This duration should match your CSS animation
-        return () => clearTimeout(timer);
-      } else {
-        // First load or coming from a non-app page
-        setContent(children);
-        setActivePath(newPath);
-        setColorHue(pathColorMap[newPath || ''] || 0);
-      }
-    } else {
-        // If the path is the same, but children might have updated (e.g. HMR)
-        setContent(children);
-    }
-    previousPathnameRef.current = newPath;
-
-  }, [pathname, children]);
-
+  const activePath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
+  const colorHue = pathColorMap[activePath || ''] || 0;
 
   return (
       <AppLayout 
         activePath={activePath} 
-        colorHue={colorHue} 
-        isClosing={isClosing}
+        colorHue={colorHue}
       >
-        {content}
+          <AnimatePresence mode="wait">
+            {activePath && (
+              <AppLayout.PageContent key={activePath}>
+                {children}
+              </AppLayout.PageContent>
+            )}
+          </AnimatePresence>
       </AppLayout>
   );
 }
