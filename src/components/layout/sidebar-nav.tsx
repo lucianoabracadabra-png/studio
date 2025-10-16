@@ -23,7 +23,6 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 export const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -55,11 +54,8 @@ export const profileLink = {
 export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
-  const [reverseSpinningBookHref, setReverseSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
-  const prevActivePathRef = useRef(activePath);
-
   useEffect(() => {
     const styles: { [key: string]: React.CSSProperties } = {};
     [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
@@ -77,20 +73,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setAnimationStyles(styles);
   }, []);
 
-  useEffect(() => {
-    const prevPath = prevActivePathRef.current;
-    
-    if (activePath !== prevPath) {
-      if (prevPath) {
-        setReverseSpinningBookHref(prevPath);
-        setTimeout(() => setReverseSpinningBookHref(null), 1000); 
-      }
-    }
-    
-    prevActivePathRef.current = activePath;
-
-  }, [activePath]);
-
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (activePath !== href) {
@@ -105,7 +87,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
     const isSpinning = spinningBookHref === link.href;
-    const isReverseSpinning = reverseSpinningBookHref === link.href;
   
     return (
       <TooltipProvider key={link.href}>
@@ -118,9 +99,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                   'book-nav-item',
                   isTool ? 'tool-book' : 'main-book',
                   isActive && 'active',
-                  isSpinning && 'book-spin-two-speeds',
-                  isReverseSpinning && 'book-reverse-spin-anim',
-                  !isActive && !isSpinning && !isReverseSpinning && 'float-anim'
+                  isSpinning && 'book-spin-anim',
+                  !isActive && !isSpinning && 'float-anim'
                 )}
                 style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
               >

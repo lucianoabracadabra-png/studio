@@ -23,7 +23,6 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
-    --radius: 0.5rem;
     --chart-1: 265 90% 70%;
     --chart-2: 300 90% 70%;
     --chart-3: 198 93% 60%;
@@ -128,7 +127,7 @@
   }
   
   .active-icon {
-    filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
+    animation: icon-pulse 2s ease-in-out infinite;
   }
   
   .page-container {
@@ -243,12 +242,8 @@
     box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
   }
 
-  .book-spin-two-speeds {
-    animation: book-spin 0.5s ease-in-out;
-  }
-
-  .book-reverse-spin-anim {
-    animation: book-spin 1s ease-in-out reverse;
+  .book-spin-anim {
+    animation: book-spin 0.5s ease-in-out forwards;
   }
 }
 
@@ -369,12 +364,15 @@
 @keyframes book-spin {
   0% {
     transform: perspective(1000px) rotateY(0deg);
+    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 5px hsl(var(--book-color-hue), 80%, 75% / 0);
+  }
+  50% {
+     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 25px hsl(var(--book-color-hue), 80%, 75%);
   }
   100% {
     transform: perspective(1000px) rotateY(360deg);
+     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4), 0 0 5px hsl(var(--book-color-hue), 80%, 75% / 0);
   }
 }
 
 }
-
-    
