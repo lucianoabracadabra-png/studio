@@ -4,6 +4,20 @@ import AppLayout from '@/components/layout/app-layout';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+const pathColorMap: { [key: string]: string } = {
+    '/dashboard': 'hsl(200 65% 50% / 0.05)',
+    '/characters': 'hsl(240 65% 50% / 0.05)',
+    '/vtt': 'hsl(280 65% 50% / 0.05)',
+    '/wiki': 'hsl(320 65% 50% / 0.05)',
+    '/tools/dice-roller': 'hsl(30 65% 50% / 0.05)',
+    '/gm/combat-tracker': 'hsl(65 65% 50% / 0.05)',
+    '/tools/generator': 'hsl(100 65% 50% / 0.05)',
+    '/tools/description-generator': 'hsl(135 65% 50% / 0.05)',
+    '/tools/soundboard': 'hsl(170 65% 50% / 0.05)',
+    'default': 'transparent'
+};
+
+
 function getPageTitle(pathname: string): string {
     const segment = pathname.split('/').pop() || 'dashboard';
     const title = segment.replace(/-/g, ' ');
@@ -18,17 +32,26 @@ export default function AuthenticatedAppLayout({
   const pathname = usePathname();
   const [pageTitle, setPageTitle] = useState('');
   const [showContent, setShowContent] = useState(false);
+  const [pageColor, setPageColor] = useState('transparent');
+  const [isClosing, setIsClosing] = useState(false);
+
 
   useEffect(() => {
-    // pathname will be null on initial load in this setup
-    // We only show content when a path is selected
-    if (pathname && pathname !== '/_error') { // /_error can be a path on initial load sometimes
+    if (pathname && pathname !== '/_error' && pathname !== '/') {
         setPageTitle(getPageTitle(pathname));
+        setPageColor(pathColorMap[pathname] || pathColorMap.default);
         setShowContent(true);
+        setIsClosing(false);
     } else {
-        setShowContent(false);
+        setIsClosing(true);
     }
   }, [pathname]);
 
-  return <AppLayout pageTitle={pageTitle} showContent={showContent}>{children}</AppLayout>;
+  const handleAnimationEnd = () => {
+    if (isClosing) {
+      setShowContent(false);
+    }
+  };
+
+  return <AppLayout pageTitle={pageTitle} showContent={showContent} pageColor={pageColor} isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>{children}</AppLayout>;
 }

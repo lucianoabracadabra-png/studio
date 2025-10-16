@@ -23,7 +23,7 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
-    --radius: 0.3rem;
+    --radius: 0.1rem;
     --chart-1: 265 90% 70%;
     --chart-2: 300 90% 70%;
     --chart-3: 198 93% 60%;
@@ -92,7 +92,7 @@
     transform-origin: left center;
     will-change: transform;
     animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
-    border-radius: 2px;
+    border-radius: var(--radius);
   }
 
   .book-nav-item::before {
@@ -127,10 +127,16 @@
   .book-nav-item.active > svg, .book-nav-item.active .avatar-glow {
     animation: pulse-glow-icon 2s ease-in-out infinite;
   }
-
+  
   .page-content {
     animation: spell-open-animation 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
     transform-origin: left center;
+    background-color: var(--page-bg-color, transparent);
+    transition: background-color 0.5s ease;
+  }
+
+  .page-content.closing {
+    animation: spell-close-animation 0.5s cubic-bezier(0.7, 0, 0.84, 0) forwards;
   }
 
   .spell-effect {
@@ -141,6 +147,25 @@
     height: 100%;
     pointer-events: none;
     z-index: 9999;
+  }
+
+  .book-spin-open {
+    animation: book-spin-open-anim 0.4s ease-out forwards;
+  }
+  .book-spin-close {
+    animation: book-spin-close-anim 0.4s ease-in forwards;
+  }
+  
+  @keyframes book-spin-open-anim {
+    0% { transform: translateX(0) scale(1) rotateY(0deg); }
+    50% { transform: translateX(20px) scale(1.2) rotateY(180deg); }
+    100% { transform: translateX(10px) scale(1.1) rotateY(360deg); }
+  }
+
+  @keyframes book-spin-close-anim {
+    0% { transform: translateX(10px) scale(1.1) rotateY(0deg); }
+    50% { transform: translateX(20px) scale(1.2) rotateY(180deg); }
+    100% { transform: translateX(0) scale(1) rotateY(360deg); }
   }
   
   @keyframes spell-open-animation {
@@ -156,6 +181,18 @@
     }
   }
 
+   @keyframes spell-close-animation {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+      filter: blur(0px);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.95) translateX(-20px);
+      filter: blur(10px);
+    }
+  }
 }
 
 @layer utilities {
@@ -179,30 +216,32 @@
         inset -3px 0 8px rgba(0,0,0,0.3), 
         0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.6),
         0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.4),
-        0 0 2px white;
+        0 0 3px hsl(var(--book-color-hue), 50%, 80%);
     }
     50% {
       box-shadow: 
         inset -3px 0 8px rgba(0,0,0,0.3), 
         0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
         0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 4px white;
+        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
     }
     100% {
       box-shadow: 
         inset -3px 0 8px rgba(0,0,0,0.3), 
         0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.6),
         0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.4),
-        0 0 2px white;
+        0 0 3px hsl(var(--book-color-hue), 50%, 80%);
     }
   }
   
   @keyframes pulse-glow-icon {
     0%, 100% {
-      filter: drop-shadow(0 0 6px hsl(var(--accent))) drop-shadow(0 0 3px white);
+      filter: drop-shadow(0 0 4px hsla(var(--book-color-hue), 50%, 80%, 0.8)) drop-shadow(0 0 2px white);
+      transform: scale(1);
     }
     50% {
-      filter: drop-shadow(0 0 12px hsl(var(--accent))) drop-shadow(0 0 6px white);
+      filter: drop-shadow(0 0 8px hsla(var(--book-color-hue), 50%, 80%, 1)) drop-shadow(0 0 4px white);
+      transform: scale(1.1);
     }
   }
 
