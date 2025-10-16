@@ -52,12 +52,8 @@ export const profileLink = {
   colorHue: 0,
 };
 
-type SidebarNavProps = {
-  activePath: string | null;
-  onLinkClick: (href: string) => void;
-};
-
-export function SidebarNav({ activePath, onLinkClick }: SidebarNavProps) {
+export function SidebarNav({ activePath }: { activePath: string | null }) {
+  const router = useRouter();
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [reverseSpinningBookHref, setReverseSpinningBookHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
@@ -99,8 +95,10 @@ export function SidebarNav({ activePath, onLinkClick }: SidebarNavProps) {
     e.preventDefault();
     if (activePath !== href) {
         setSpinningBookHref(href);
-        setTimeout(() => setSpinningBookHref(null), 1000);
-        onLinkClick(href);
+        setTimeout(() => {
+          setSpinningBookHref(null);
+          router.push(href);
+        }, 500);
     }
   };
   
