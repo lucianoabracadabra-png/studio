@@ -123,9 +123,13 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: center;
     will-change: transform;
-    animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
     border-radius: var(--radius);
   }
+  
+  .book-nav-item:not(.active) {
+    animation: float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
+  }
+
 
   .book-nav-item::before {
     content: '';
@@ -190,8 +194,20 @@
   .book-spin-close {
     animation: book-spin-close-anim 0.5s ease-in forwards;
   }
+  .book-spin-continuous {
+    animation: book-spin-continuous-anim 1s linear infinite;
+  }
   
   @keyframes book-spin-open-anim {
+    from {
+      transform: rotateY(0deg);
+    }
+    to {
+      transform: rotateY(-360deg);
+    }
+  }
+
+  @keyframes book-spin-close-anim {
     from {
       transform: rotateY(0deg);
     }
@@ -200,7 +216,7 @@
     }
   }
 
-  @keyframes book-spin-close-anim {
+  @keyframes book-spin-continuous-anim {
     from {
       transform: rotateY(0deg);
     }

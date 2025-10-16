@@ -59,6 +59,7 @@ export function SidebarNav() {
   const [isAnimating, setIsAnimating] = useState<string | null>(null);
   const [animationDirection, setAnimationDirection] = useState<'open' | 'close' | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
+  const [isPageLoading, setIsPageLoading] = useState(false);
 
   useEffect(() => {
     // This code now runs only on the client
@@ -79,23 +80,32 @@ export function SidebarNav() {
   }, []);
 
   useEffect(() => {
-    setActivePath(pathname === '/' || pathname === '/login' || pathname === '/signup' ? null : pathname);
-  }, [pathname]);
+    const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
+    if (currentPath !== activePath) {
+      setIsPageLoading(false);
+      setIsAnimating(null);
+    }
+    setActivePath(currentPath);
+  }, [pathname, activePath]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (isAnimating) return;
+    if (isAnimating && isAnimating !== href) return;
 
     const newPath = activePath === href ? null : href;
     setAnimationDirection(newPath ? 'open' : 'close');
     setIsAnimating(href);
     
+    if (newPath) {
+      setIsPageLoading(true);
+    }
+
     setTimeout(() => {
       router.push(newPath || '/dashboard');
       if (newPath === null) {
-          setActivePath(null);
+        setIsAnimating(null);
       }
-    }, 250); // half of animation duration
+    }, 500);
   };
   
   const renderBook = (link: any, isTool: boolean) => {
@@ -104,7 +114,13 @@ export function SidebarNav() {
   
     let animationClass = '';
     if (isSpinning) {
-      animationClass = animationDirection === 'open' ? 'book-spin-open' : 'book-spin-close';
+      if (isPageLoading && animationDirection === 'open') {
+        animationClass = 'book-spin-continuous';
+      } else if (animationDirection === 'open') {
+        animationClass = 'book-spin-open';
+      } else {
+        animationClass = 'book-spin-close';
+      }
     }
 
     return (
@@ -113,7 +129,11 @@ export function SidebarNav() {
           <a
             href={link.href}
             onClick={(e) => handleLinkClick(e, link.href)}
-            onAnimationEnd={() => isAnimating === link.href && setIsAnimating(null)}
+            onAnimationEnd={() => {
+                if(isSpinning && !isPageLoading) {
+                    setIsAnimating(null);
+                }
+            }}
           >
             <div
               className={cn(
@@ -144,13 +164,13 @@ export function SidebarNav() {
               {mainLinks.map(link => renderBook(link, false))}
             </nav>
 
-            <div className="h-px w-8 bg-white/20" />
+            <div className="h-px w-8 bg-white/20 my-2" />
 
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => renderBook(link, true))}
             </nav>
 
-            <div className="h-px w-8 bg-white/20" />
+            <div className="h-px w-8 bg-white/20 my-2" />
             
             <nav className="flex flex-col items-center gap-2">
                 {renderBook(profileLink, true)}

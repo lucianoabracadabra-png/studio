@@ -40,7 +40,9 @@ export default function AuthenticatedAppLayout({
 
 
   useEffect(() => {
-    if (pathname && pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && pathname !== '/_error' && pathname !== '/dashboard') {
+    const shouldShowContent = pathname && pathname !== '/' && pathname !== '/login' && pathname !== '/signup' && pathname !== '/_error';
+    
+    if (shouldShowContent) {
         setIsClosing(false);
         setPageTitle(getPageTitle(pathname));
         setPageColor(pathColorMap[pathname] || pathColorMap.default);
