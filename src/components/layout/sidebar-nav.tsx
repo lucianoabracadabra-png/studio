@@ -57,6 +57,7 @@ export function SidebarNav() {
   
   const [activePath, setActivePath] = useState(pathname);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
+  const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
 
   useEffect(() => {
     // Generate random animation styles only on the client-side to prevent hydration errors.
@@ -79,17 +80,23 @@ export function SidebarNav() {
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-  }, [pathname]);
+    // Stop spinning when navigation is complete
+    if (spinningBookHref === pathname) {
+      setSpinningBookHref(null);
+    }
+  }, [pathname, spinningBookHref]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (activePath !== href) {
+      setSpinningBookHref(href);
       router.push(href);
     }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
+    const isSpinning = spinningBookHref === link.href;
 
     return (
       <Tooltip key={link.href}>
@@ -101,7 +108,8 @@ export function SidebarNav() {
             <div
               className={cn(
                 'book-nav-item',
-                isTool && 'book-tool'
+                isTool && 'book-tool',
+                isSpinning && 'book-spin-continuous',
               )}
               style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}deg` } as React.CSSProperties}
             >
@@ -118,7 +126,7 @@ export function SidebarNav() {
 
   return (
     <div className="fixed left-0 top-0 h-full z-50 flex flex-col items-center w-20 py-4">
-      <ScrollArea className="w-full hide-scrollbar-webkit" scrollHideDelay={0}>
+      <ScrollArea className="w-full hide-scrollbar" scrollHideDelay={0}>
         <TooltipProvider>
           <div className="flex flex-col items-center gap-4 py-4">
             <nav className="flex flex-col items-center gap-2">

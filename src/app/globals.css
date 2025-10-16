@@ -144,10 +144,7 @@
     @apply h-12;
   }
 
-  .book-nav-item:hover:not(.active) {
-    animation: 
-      book-hover-spin 2s linear infinite,
-      float-animation var(--animation-duration, 8s) ease-in-out infinite var(--animation-delay, 0s);
+  .book-nav-item:hover:not(.active):not(.book-spin-continuous) {
     transform: translateX(5px) scale(1.05);
   }
   
@@ -219,15 +216,10 @@
 
 @layer utilities {
   .hide-scrollbar,
-  .hide-scrollbar-webkit {
+  .hide-scrollbar::-webkit-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-  .hide-scrollbar-webkit::-webkit-scrollbar {
     display: none;
-  }
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Opera */
   }
 
   @keyframes float-animation {
@@ -293,15 +285,19 @@
     }
   }
 
-  @keyframes book-hover-spin {
+  @keyframes book-spin-continuous-anim {
     from {
       transform: rotateY(0deg);
     }
     to {
-      transform: rotateY(-360deg);
+      transform: rotateY(360deg);
     }
   }
-
+  
+  .book-spin-continuous {
+    animation: book-spin-continuous-anim 1.2s linear infinite;
+  }
+  
   .fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
