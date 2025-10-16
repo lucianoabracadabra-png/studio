@@ -8,7 +8,6 @@ import {
   Map,
   Swords,
   Users,
-  WandSparkles,
   FileText,
   Volume2,
   Dices,
@@ -69,7 +68,7 @@ export function SidebarNav() {
                           'book-nav-item',
                           activePath === link.href && 'active'
                         )}
-                        style={{'--book-color-hue': `${200 + index * 40}deg`} as React.CSSProperties}
+                        style={{'--book-color-hue': `${200 + index * 40}deg`, animationDelay: `${index * 150}ms`} as React.CSSProperties}
                       >
                         <link.icon className="w-6 h-6 text-white/80" />
                       </div>
@@ -94,7 +93,7 @@ export function SidebarNav() {
                           'book-nav-item book-tool',
                            activePath === link.href && 'active'
                         )}
-                        style={{'--book-color-hue': `${30 + index * 35}deg`} as React.CSSProperties}
+                        style={{'--book-color-hue': `${30 + index * 35}deg`, animationDelay: `${(mainLinks.length + index) * 150}ms`} as React.CSSProperties}
                       >
                         <link.icon className="w-5 h-5 text-white/80" />
                       </div>

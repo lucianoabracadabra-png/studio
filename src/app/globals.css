@@ -90,6 +90,7 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: left center;
     will-change: transform;
+    animation: float-animation 6s ease-in-out infinite;
   }
 
   .book-nav-item::before {
@@ -108,11 +109,13 @@
 
   .book-nav-item:hover {
     transform: translateX(5px) scale(1.05);
+    animation-play-state: paused;
   }
   
   .book-nav-item.active {
     transform: translateX(10px) scale(1.1);
     box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 5px 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.4);
+    animation-play-state: paused;
   }
 
   .page-content {
@@ -146,6 +149,12 @@
 }
 
 @layer utilities {
+  @keyframes float-animation {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+  }
+
   .fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
