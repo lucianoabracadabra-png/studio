@@ -23,6 +23,7 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
+    --radius: 0.5rem;
     --chart-1: 265 90% 70%;
     --chart-2: 300 90% 70%;
     --chart-3: 198 93% 60%;
@@ -112,7 +113,6 @@
       0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
       0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
       0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-    animation: pulse-glow-book 2s ease-in-out infinite;
   }
   
   .book-nav-item.active::after {
@@ -123,7 +123,7 @@
     bottom: 0;
     width: 4px;
     background-color: hsl(var(--book-color-hue), 80%, 85%);
-    border-radius: 0 2px 2px 0;
+    border-radius: inherit;
     box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
     animation: sonar-pulse 2s ease-in-out infinite;
   }
@@ -155,29 +155,23 @@
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
-    border-color: var(--page-primary-color);
+    border-color: transparent;
     filter: drop-shadow(0 0 5px var(--page-primary-color));
   }
 
   .page-container::before {
     top: -4px;
     left: -4px;
-    border-top: 2px solid;
-    border-left: 2px solid;
-    border-color: transparent;
-    border-top-color: var(--page-primary-color);
-    border-left-color: var(--page-primary-color);
+    border-top: 2px solid var(--page-primary-color);
+    border-left: 2px solid var(--page-primary-color);
     border-top-left-radius: var(--radius);
   }
 
   .page-container::after {
     bottom: -4px;
     right: -4px;
-    border-bottom: 2px solid;
-    border-right: 2px solid;
-    border-color: transparent;
-    border-bottom-color: var(--page-primary-color);
-    border-right-color: var(--page-primary-color);
+    border-bottom: 2px solid var(--page-primary-color);
+    border-right: 2px solid var(--page-primary-color);
     border-bottom-right-radius: var(--radius);
   }
 
@@ -290,30 +284,6 @@
   @keyframes shooting-star-horizontal {
     0% { transform: translateY(100vh) translateX(0); opacity: 1; }
     100% { transform: translateY(-50vh) translateX(100vw); opacity: 0; }
-  }
-
-  @keyframes pulse-glow-book {
-    0% {
-      box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.6),
-        0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.4),
-        0 0 3px hsl(var(--book-color-hue), 50%, 80%);
-    }
-    50% {
-      box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-    }
-    100% {
-      box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 15px hsla(var(--book-color-hue), 50%, 60%, 0.6),
-        0 0 8px hsla(var(--book-color-hue), 50%, 60%, 0.4),
-        0 0 3px hsl(var(--book-color-hue), 50%, 80%);
-    }
   }
 
   @keyframes sonar-pulse {
