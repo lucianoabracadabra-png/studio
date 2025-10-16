@@ -185,10 +185,10 @@
   .page-container {
     @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative;
     background: 
-      radial-gradient(ellipse at 100% 0%, hsl(var(--primary) / 0.15), transparent 50%),
-      radial-gradient(ellipse at 0% 100%, hsl(var(--accent) / 0.15), transparent 50%),
+      radial-gradient(ellipse at 100% 0%, var(--page-primary-color) / 0.25),
+      radial-gradient(ellipse at 0% 100%, var(--page-accent-color) / 0.25),
       hsl(var(--background) / 0.5);
-    box-shadow: 0 0 40px hsl(var(--primary) / 0.1);
+    box-shadow: 0 0 40px var(--page-primary-color) / 0.1;
     backdrop-filter: blur(12px);
   }
 
@@ -196,7 +196,7 @@
     content: '';
     position: absolute;
     border-style: solid;
-    border-color: hsl(var(--primary) / 0.3);
+    border-color: var(--page-primary-color) / 0.3;
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
@@ -253,8 +253,9 @@
   }
 
   .magical-glow {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent;
-    text-shadow: 0 0 8px hsl(var(--primary) / 0.5), 0 0 16px hsl(var(--accent) / 0.3);
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(to right, var(--page-primary-color), var(--page-accent-color));
+    text-shadow: 0 0 8px var(--page-primary-color, hsl(var(--primary))), 0 0 16px var(--page-accent-color, hsl(var(--accent)));
   }
 }
 

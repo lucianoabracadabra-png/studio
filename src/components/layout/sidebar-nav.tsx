@@ -24,14 +24,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect, useRef } from 'react';
 
-const mainLinks = [
+export const mainLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
   { label: 'Characters', href: '/characters', icon: Users, colorHue: 240 },
   { label: 'Virtual Tabletop', href: '/vtt', icon: Map, colorHue: 280 },
   { label: 'Wiki', href: '/wiki', icon: BookOpen, colorHue: 320 },
 ];
 
-const gmToolsLinks = [
+export const gmToolsLinks = [
   { label: 'Dice Roller', href: '/tools/dice-roller', icon: Dices, colorHue: 30 },
   { label: 'Combat Tracker', href: '/gm/combat-tracker', icon: Swords, colorHue: 65 },
   { label: 'Generators', href: '/tools/generator', icon: FlaskConical, colorHue: 100 },
@@ -39,7 +39,7 @@ const gmToolsLinks = [
   { label: 'Soundboard', href: '/tools/soundboard', icon: Volume2, colorHue: 170 },
 ];
 
-const profileLink = {
+export const profileLink = {
   label: 'Profile',
   href: '/profile',
   icon: () => (

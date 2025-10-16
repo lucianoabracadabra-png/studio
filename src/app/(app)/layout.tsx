@@ -3,20 +3,15 @@
 import AppLayout from '@/components/layout/app-layout';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
 
-const pathColorMap: { [key: string]: string } = {
-    '/dashboard': 'hsl(200 65% 50% / 0.05)',
-    '/characters': 'hsl(240 65% 50% / 0.05)',
-    '/vtt': 'hsl(280 65% 50% / 0.05)',
-    '/wiki': 'hsl(320 65% 50% / 0.05)',
-    '/tools/dice-roller': 'hsl(30 65% 50% / 0.05)',
-    '/gm/combat-tracker': 'hsl(65 65% 50% / 0.05)',
-    '/tools/generator': 'hsl(100 65% 50% / 0.05)',
-    '/tools/description-generator': 'hsl(135 65% 50% / 0.05)',
-    '/tools/soundboard': 'hsl(170 65% 50% / 0.05)',
-    '/profile': 'hsl(0 0% 50% / 0.05)',
-    'default': 'transparent'
-};
+const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
+
+const pathColorMap: { [key: string]: number } = allLinks.reduce((acc, link) => {
+    acc[link.href] = link.colorHue;
+    return acc;
+}, {} as { [key: string]: number });
+
 
 export default function AuthenticatedAppLayout({
   children,
@@ -25,7 +20,7 @@ export default function AuthenticatedAppLayout({
 }) {
   const pathname = usePathname();
   const [showContent, setShowContent] = useState(false);
-  const [pageColor, setPageColor] = useState('transparent');
+  const [colorHue, setColorHue] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
 
 
@@ -34,7 +29,7 @@ export default function AuthenticatedAppLayout({
     
     if (shouldShowContent) {
         setIsClosing(false);
-        setPageColor(pathColorMap[pathname] || pathColorMap.default);
+        setColorHue(pathColorMap[pathname] || 0);
         setShowContent(true);
     } else {
         setIsClosing(true);
@@ -47,5 +42,5 @@ export default function AuthenticatedAppLayout({
     }
   };
 
-  return <AppLayout showContent={showContent} pageColor={pageColor} isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>{children}</AppLayout>;
+  return <AppLayout showContent={showContent} colorHue={colorHue} isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>{children}</AppLayout>;
 }
