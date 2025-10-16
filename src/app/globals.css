@@ -208,7 +208,7 @@
 
   .page-container::before {
     top: -4px;
-    left: 30px;
+    left: -4px;
     border-top-left-radius: var(--radius);
     box-shadow: 
       -2px -2px 0 0 var(--page-primary-color),
@@ -218,7 +218,7 @@
 
   .page-container::after {
     bottom: -4px;
-    right: 30px;
+    right: -4px;
     border-bottom-right-radius: var(--radius);
     box-shadow: 
       2px 2px 0 0 var(--page-primary-color),
