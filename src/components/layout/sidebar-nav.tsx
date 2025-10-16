@@ -57,6 +57,7 @@ export function SidebarNav() {
   
   const [activePath, setActivePath] = useState<string | null>(null);
   const [isPageLoading, setIsPageLoading] = useState(false);
+  const [targetHref, setTargetHref] = useState<string | null>(null);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
 
   useEffect(() => {
@@ -80,20 +81,24 @@ export function SidebarNav() {
   useEffect(() => {
     const currentPath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
     setActivePath(currentPath);
-    setIsPageLoading(false);
-  }, [pathname]);
+    if(currentPath === targetHref) {
+      setIsPageLoading(false);
+      setTargetHref(null);
+    }
+  }, [pathname, targetHref]);
 
   const handleLinkClick = useCallback((e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (activePath === href || isPageLoading) return;
 
     setIsPageLoading(true);
+    setTargetHref(href);
     router.push(href);
   }, [activePath, isPageLoading, router]);
   
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activePath === link.href;
-    const isSpinning = isPageLoading && !isActive;
+    const isSpinning = isPageLoading && targetHref === link.href;
 
     return (
       <Tooltip key={link.href}>
@@ -136,10 +141,10 @@ export function SidebarNav() {
             <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => renderBook(link, true))}
             </nav>
-
+            
             <div className="flex-grow"></div>
 
-            <nav className="flex flex-col items-center gap-2">
+            <nav className="flex flex-col items-center gap-2 mt-4">
                 {renderBook(profileLink, true)}
             </nav>
 
