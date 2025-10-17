@@ -131,6 +131,7 @@
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
     box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
+    animation: active-border-pulse 2s ease-in-out infinite;
   }
   
   .active-icon {
@@ -193,7 +194,7 @@
   .magical-glow {
     @apply text-transparent bg-clip-text select-none;
     background-image: linear-gradient(to right, hsl(var(--page-primary-color, var(--primary))), hsl(var(--page-accent-color, var(--accent))));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent)));
+    text-shadow: 0 0 8px hsla(var(--page-primary-color, var(--primary)), 0.8), 0 0 16px hsla(var(--page-accent-color, var(--accent)), 0.8);
   }
   #stars {
     width: 1px;
@@ -312,6 +313,18 @@
     }
   }
 
+  @keyframes active-border-pulse {
+    0% {
+      box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
+    }
+    50% {
+      box-shadow: 0 0 16px hsl(var(--book-color-hue), 80%, 85%);
+    }
+    100% {
+      box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
+    }
+  }
+
 @keyframes book-spin {
   0% {
     transform: perspective(1000px) rotateY(0deg);
@@ -334,15 +347,7 @@
       0 0 45px hsl(var(--book-color-hue), 50%, 80%);
     background-color: hsla(var(--book-color-hue), 80%, 85%, 1);
   }
-  95% {
-    background-color: hsl(var(--book-color-hue), 80%, 85%);
-    box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-  }
-  100% {
+  90%, 100% {
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
