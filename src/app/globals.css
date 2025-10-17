@@ -91,7 +91,6 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: center;
     will-change: transform;
-    border-radius: 0;
     transform-style: preserve-3d;
     transition: box-shadow 0.5s ease-out;
   }

@@ -19,7 +19,15 @@ export default function AuthenticatedAppLayout({
 }) {
   const pathname = usePathname();
   const activePath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
-  const colorHue = pathColorMap[activePath || ''] || 0;
+  
+  const getActiveColorHue = () => {
+    const matchedLink = allLinks.find(link => pathname.startsWith(link.href) && link.href !== '/');
+    if (matchedLink) return matchedLink.colorHue;
+    if (pathname === '/dashboard') return pathColorMap['/dashboard'];
+    return 0;
+  }
+  
+  const colorHue = getActiveColorHue();
   
   const pageStyle = {
     '--page-primary-color': `${colorHue}`,
@@ -29,15 +37,9 @@ export default function AuthenticatedAppLayout({
   return (
       <AppLayout 
         activePath={activePath}
+        style={pageStyle}
       >
-          <div 
-              className="page-container h-full"
-              style={pageStyle}
-          >
-              <div className='p-4 lg:p-6 flex-1 flex flex-col'>
-                  {children}
-              </div>
-          </div>
+        {children}
       </AppLayout>
   );
 }

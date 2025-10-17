@@ -17,10 +17,9 @@ export default function AppLayout({ children, activePath, style }: AppLayoutProp
         </div>
         <main className="pl-24 h-screen relative z-10">
             <div 
-                className="page-container h-full overflow-y-auto"
-                style={style}
+                className="h-full overflow-y-auto"
             >
-                <div className='p-4 lg:p-6 flex-1 flex flex-col'>
+                <div className='page-container h-full p-4 lg:p-6 flex-1 flex flex-col' style={style}>
                     {children}
                 </div>
             </div>
