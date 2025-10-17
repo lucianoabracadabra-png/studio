@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   BookOpen,
   LayoutDashboard,
@@ -52,20 +52,18 @@ export const profileLink = [{
 }];
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
-  const [activeBook, setActiveBook] = useState<string | null>(activePath);
-  const [previousBook, setPreviousBook] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
-  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(pathname);
+  const [previousBook, setPreviousBook] = useState<string | null>(null);
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (href === activeBook || animatingHref) {
+    if (href === pathname || animatingHref) {
       return;
     }
 
@@ -73,47 +71,27 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
       clearTimeout(timeoutRef.current);
     }
     
-    setPreviousBook(activeBook);
+    setPreviousBook(pathname);
     setSpinCompleteHref(null);
     setAnimatingHref(href);
-    setActiveBook(href);
     
     timeoutRef.current = setTimeout(() => {
+      router.push(href);
       setAnimatingHref(null);
       setSpinCompleteHref(href);
       setPreviousBook(null);
-
-      // Navigate after animation completes
-      window.history.pushState(null, '', href);
-      const navEvent = new PopStateEvent('popstate');
-      window.dispatchEvent(navEvent);
     }, 2000); 
   };
   
   useEffect(() => {
-    // This effect ensures that browser back/forward navigation updates the UI state.
-    const handlePopState = () => {
-       const newPath = window.location.pathname;
-       if (newPath !== activeBook) {
-         setActiveBook(newPath);
-         setSpinCompleteHref(newPath);
-         setAnimatingHref(null);
-         setPreviousBook(null);
-       }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [activeBook]);
+    setSpinCompleteHref(pathname);
+    setAnimatingHref(null);
+    setPreviousBook(null);
+  }, [pathname]);
 
 
   const renderBook = (link: any, isTool: boolean) => {
-    const isActive = activeBook === link.href;
+    const isActive = pathname === link.href;
     const isPrevious = previousBook === link.href;
     const isAnimating = animatingHref === link.href;
     const isSpinComplete = spinCompleteHref === link.href;
@@ -166,15 +144,9 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   return (
     <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
-      {isClient ? (
-         <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
-          {navContent}
-        </ScrollArea>
-      ) : (
-        <div className="w-full h-full hide-scrollbar overflow-visible">
-          {navContent}
-        </div>
-      )}
+       <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
+        {navContent}
+      </ScrollArea>
     </div>
   );
 }
