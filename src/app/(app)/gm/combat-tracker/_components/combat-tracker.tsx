@@ -88,9 +88,9 @@ const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: numbe
                         onClick={() => !disabled && onSelect(hue)}
                         disabled={disabled}
                         className={cn(
-                            'w-8 h-8 rounded-full transition-all flex items-center justify-center border-transparent',
-                            isSelected ? 'scale-110' : '',
-                            disabled ? 'cursor-not-allowed' : 'hover:border-foreground/70'
+                            'w-8 h-8 rounded-full transition-all flex items-center justify-center',
+                            isSelected ? 'scale-110' : 'hover:scale-105',
+                            disabled ? 'cursor-not-allowed' : ''
                         )}
                         style={{ 
                             backgroundColor: `hsl(${hue}, 90%, 70%)`,
@@ -204,7 +204,6 @@ export function CombatTracker() {
     
     const newAp = actor.ap + cost;
     
-    // Add new trail for this action
     const newTrail: ActionTrail = {
         combatantId: activeCombatantId,
         fromAp: actor.ap,
@@ -214,7 +213,6 @@ export function CombatTracker() {
     };
     setActionTrails(prevTrails => [...prevTrails, newTrail]);
     
-    // Increment turn count for next action
     setTurnCount(prev => prev + 1);
 
     setCombatants(combatants.map(c => 
@@ -226,58 +224,49 @@ export function CombatTracker() {
   const activeCombatant = useMemo(() => sortedCombatants.find(c => c.id === activeCombatantId), [sortedCombatants, activeCombatantId]);
   
   
-  const ActionTrailDots = ({ combatantId, isPlayer, currentTurn }: { combatantId: number, isPlayer: boolean, currentTurn: number }) => {
-    const relevantTrails = actionTrails.filter(t => t.combatantId === combatantId).slice(-3);
-
+  const ActionTrailDots = ({ combatantId, isPlayer }: { combatantId: number, isPlayer: boolean }) => {
+    const relevantTrails = actionTrails.filter(t => t.combatantId === combatantId);
+    const lastThreeTurns = Array.from(new Set(actionTrails.map(t => t.turn))).sort((a,b) => b-a).slice(0, 3);
+    
     return (
       <>
         {relevantTrails.map((trail, index) => {
             const distance = trail.toAp - trail.fromAp;
             if (distance <= 0) return null;
         
-            const trailWidthPercent = (distance / MAX_AP_ON_TIMELINE) * 100;
-            const startPercent = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
-            
-            const turnsAgo = currentTurn - trail.turn;
+            const turnIndex = lastThreeTurns.indexOf(trail.turn);
             let opacity = 0;
-
-            // This logic is based on the turn history, not the position in the array
-            if (turnsAgo === 0) opacity = 1; // Current turn action
-            else if (turnsAgo === 1) opacity = 0.5; // Last turn
-            else if (turnsAgo === 2) opacity = 0.1; // 2 turns ago
-            else return null; // Older than 2 turns ago
+            if (turnIndex === 0) opacity = 1; // Current turn action
+            else if (turnIndex === 1) opacity = 0.5; // Last turn
+            else if (turnIndex === 2) opacity = 0.1; // 2 turns ago
+            else return null;
 
             const DotComponent = isPlayer ? Circle : Square;
-            const stepSizePercent = (1 / MAX_AP_ON_TIMELINE) * 100;
             const dotSize = 4; // size in pixels
 
             return (
-            <div
-                key={`${trail.combatantId}-${trail.turn}`}
-                className="absolute h-full top-0 flex items-center z-0"
-                style={{
-                left: `${startPercent}%`,
-                width: `${trailWidthPercent}%`,
-                height: '1.5rem', // Match half of the avatar container height
-                opacity: opacity,
-                }}
-            >
-                {Array.from({length: distance}).map((_, i) => (
-                    <DotComponent 
-                        key={i} 
-                        className="absolute"
-                        style={{
-                            color: `hsl(${trail.colorHue}, 90%, 70%)`,
-                            fill: `hsl(${trail.colorHue}, 90%, 70%)`,
-                            height: `${dotSize}px`,
-                            width: `${dotSize}px`,
-                            left: `calc(${i * stepSizePercent}% + ${dotSize/2}px)`,
-                            top: '50%',
-                            transform: 'translateY(-50%)'
-                        }}
-                    />
-                ))}
-            </div>
+              <div key={`${trail.combatantId}-${trail.turn}-${index}`} className="absolute h-full top-0 left-0 right-0">
+                {Array.from({length: distance}).map((_, i) => {
+                    const apStep = trail.fromAp + i;
+                    const leftPercent = (apStep / MAX_AP_ON_TIMELINE) * 100;
+                    return (
+                        <DotComponent 
+                            key={i} 
+                            className="absolute"
+                            style={{
+                                color: `hsl(${trail.colorHue}, 90%, 70%)`,
+                                fill: `hsl(${trail.colorHue}, 90%, 70%)`,
+                                height: `${dotSize}px`,
+                                width: `${dotSize}px`,
+                                left: `calc(${leftPercent}% + ${dotSize/2}px)`,
+                                top: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                opacity: opacity,
+                            }}
+                        />
+                    );
+                })}
+              </div>
             );
         })}
       </>
@@ -306,7 +295,6 @@ export function CombatTracker() {
             </CardHeader>
             <CardContent>
                  <div className="relative w-full rounded-lg p-2 overflow-x-auto">
-                    {/* TIMELINE MARKERS */}
                      <div className="relative h-4 mb-2">
                         {timelineMarkers.map(marker => (
                             <div key={marker} className="absolute h-full flex flex-col items-center" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
@@ -315,12 +303,10 @@ export function CombatTracker() {
                         ))}
                     </div>
                     
-                    {/* COMBATANT LANES */}
                     <div className="relative space-y-2" style={{minHeight: `${rosterOrder.length * 3.5}rem`}}>
-                         {/* Grid Lines */}
                         <div className="absolute top-0 bottom-0 left-0 right-0">
                             {timelineMarkers.map(marker => (
-                                <div key={marker} className="absolute h-full w-px bg-white/10" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%`, top: 0, bottom: 0, height: `${rosterOrder.length * 3.5}rem` }}></div>
+                                <div key={marker} className="absolute h-full w-px bg-white/10" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%`, top: 0, bottom: 0 }}></div>
                             ))}
                         </div>
 
@@ -335,10 +321,8 @@ export function CombatTracker() {
                             
                             return (
                                 <div key={c.id} className="absolute w-full" style={{ top: topPosition, height: '3rem' }}>
-                                    {/* Action Trail */}
-                                    {combatStarted && <ActionTrailDots combatantId={c.id} isPlayer={c.isPlayer} currentTurn={turnCount} />}
+                                    {combatStarted && <ActionTrailDots combatantId={c.id} isPlayer={c.isPlayer} />}
 
-                                    {/* Avatar */}
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -346,7 +330,7 @@ export function CombatTracker() {
                                                     className="absolute -translate-y-1/2 transition-all duration-500 ease-out z-10"
                                                     style={{ left: `calc(${leftPercentage}% - 8px)`, top: '50%' }}
                                                 >
-                                                    <Avatar 
+                                                     <Avatar 
                                                         className={cn(
                                                             "h-4 w-4 transition-all",
                                                             c.isPlayer ? 'rounded-full' : '',
@@ -355,7 +339,7 @@ export function CombatTracker() {
                                                      >
                                                       <AvatarFallback 
                                                         className={cn(
-                                                          'h-full w-full',
+                                                          'h-full w-full p-0',
                                                           c.isPlayer ? 'rounded-full' : 'rounded-none',
                                                           isActive ? 'bg-transparent' : ''
                                                           )}
@@ -437,6 +421,7 @@ export function CombatTracker() {
                         style={{
                             backgroundColor: `hsl(${newCombatant.colorHue}, 90%, 70%)`,
                             color: `hsl(${newCombatant.colorHue}, 10%, 15%)`,
+                            boxShadow: `0 0 15px hsla(${newCombatant.colorHue}, 90%, 70%, 0.6)`
                         }}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
