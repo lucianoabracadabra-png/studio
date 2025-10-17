@@ -99,7 +99,7 @@
     transform-origin: center;
     will-change: transform;
     transform-style: preserve-3d;
-    transition: box-shadow 0.5s ease-out;
+    transition: box-shadow 0.5s ease-out, transform 0.5s ease-out;
     animation: book-float 20s ease-in-out infinite;
   }
   
@@ -130,11 +130,7 @@
     animation: none;
   }
 
-  .book-nav-item.active .active-icon {
-     animation: active-icon-pulse 2s ease-in-out infinite;
-  }
-  
-  .spin-complete::after {
+  .book-nav-item.active::after {
     content: '';
     position: absolute;
     right: 0;
@@ -144,6 +140,35 @@
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
     box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
+  }
+
+  .book-nav-item.active .active-icon {
+     animation: active-icon-pulse 2s ease-in-out infinite;
+  }
+
+  .book-title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    font-size: 10px;
+    font-weight: bold;
+    color: hsl(var(--book-color-hue), 20%, 85%);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+  }
+
+  .book-nav-item:hover .book-title {
+    opacity: 1;
+  }
+
+  .book-nav-item.active .book-title,
+  .book-spin-and-ignite .book-title {
+    opacity: 0 !important;
   }
   
   .page-container-visuals {
@@ -223,33 +248,10 @@
     box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
   }
 
-  .book-spin-and-ignite > .book-nav-item,
-  .book-spin-and-ignite > .book-nav-item > svg,
-  .book-spin-and-ignite > .book-nav-item::after {
-    animation-duration: 2s;
-    animation-timing-function: ease-in-out;
-    animation-fill-mode: forwards;
-  }
-  
   .book-spin-and-ignite > .book-nav-item {
-    animation-name: book-spin, book-ignite-glow;
-  }
-  
-  .book-spin-and-ignite > .book-nav-item > svg {
-    animation-name: icon-ignite-glow;
+    animation: book-spin-and-ignite 2s ease-in-out forwards;
   }
 
-  .book-spin-and-ignite > .book-nav-item::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    border-radius: inherit;
-    animation-name: page-ignite-glow;
-  }
-  
   .book-decaying > .book-nav-item {
     animation: book-decay 1s ease-in-out forwards;
   }
@@ -297,84 +299,49 @@
     }
   }
 
-@keyframes book-spin {
-  0% { transform: perspective(1000px) rotateY(0deg); }
-  100% { transform: perspective(1000px) rotateY(1440deg); }
-}
+  @keyframes book-spin-and-ignite {
+    0% {
+      transform: perspective(1000px) rotateY(0deg);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+    }
+    70% {
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.4), 
+        0 0 30px hsla(var(--book-color-hue), 50%, 70%, 1),
+        0 0 18px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+        0 0 10px hsl(var(--book-color-hue), 50%, 80%);
+    }
+    85% {
+      box-shadow: 
+        inset -3px 0 12px rgba(0,0,0,0.5), 
+        0 0 50px hsla(var(--book-color-hue), 60%, 75%, 1),
+        0 0 25px hsla(var(--book-color-hue), 60%, 75%, 0.8),
+        0 0 15px hsl(var(--book-color-hue), 60%, 85%);
+    }
+    100% {
+      transform: perspective(1000px) rotateY(1440deg);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+    }
+  }
 
-@keyframes book-decay {
-  from {
-    transform: perspective(1000px) rotateY(0deg);
-    box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+  @keyframes book-decay {
+    from {
+      transform: perspective(1000px) rotateY(0deg);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+    }
+    to {
+      transform: perspective(1000px) rotateY(-90deg);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+    }
   }
-  to {
-    transform: perspective(1000px) rotateY(360deg);
-    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
-  }
-}
-
-@keyframes book-ignite-glow {
-  0% { box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); }
-  70% { 
-    box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.4), 
-      0 0 30px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 18px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 10px hsl(var(--book-color-hue), 50%, 80%);
-  }
-  85% { 
-    box-shadow: 
-      inset -3px 0 12px rgba(0,0,0,0.5), 
-      0 0 50px hsla(var(--book-color-hue), 60%, 75%, 1),
-      0 0 25px hsla(var(--book-color-hue), 60%, 75%, 0.8),
-      0 0 15px hsl(var(--book-color-hue), 60%, 85%);
-  }
-  100% { 
-    box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-  }
-}
-
-@keyframes icon-ignite-glow {
-  0% { 
-    color: hsl(var(--book-color-hue), 20%, 80%);
-    filter: none;
-  }
-  70% {
-    color: hsl(var(--book-color-hue), 80%, 85%);
-    filter: drop-shadow(0 0 4px hsl(var(--book-color-hue), 80%, 85%));
-  }
-  85% {
-    color: hsl(var(--book-color-hue), 95%, 90%);
-    filter: drop-shadow(0 0 10px hsl(var(--book-color-hue), 85%, 90%));
-  }
-  100% {
-    color: hsl(var(--book-color-hue), 80%, 85%);
-    filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
-  }
-}
-
-@keyframes page-ignite-glow {
-  0%, 10% {
-    background-color: transparent;
-    box-shadow: none;
-  }
-  85% {
-    background-color: hsla(var(--book-color-hue), 80%, 95%, 1);
-    box-shadow: 0 0 15px hsla(var(--book-color-hue), 80%, 95%, 1), 0 0 8px hsla(var(--book-color-hue), 80%, 95%, 0.8);
-  }
-  100% {
-    background-color: hsl(var(--book-color-hue), 80%, 85%);
-    box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
-  }
-}
 
 @keyframes book-float {
     0% { transform: translateY(0px) translateX(0px); }

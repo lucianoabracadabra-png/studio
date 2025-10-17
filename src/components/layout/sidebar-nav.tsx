@@ -24,18 +24,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect, useRef } from 'react';
 
 export const mainLinks = [
-  { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
-  { label: 'Personagens', href: '/characters', icon: Users, colorHue: 240 },
-  { label: 'Mesa Virtual', href: '/vtt', icon: Map, colorHue: 280 },
-  { label: 'Wiki', href: '/wiki', icon: BookOpen, colorHue: 320 },
+  { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200, title: 'Painel' },
+  { label: 'Personagens', href: '/characters', icon: Users, colorHue: 240, title: 'Personagens' },
+  { label: 'Mesa Virtual', href: '/vtt', icon: Map, colorHue: 280, title: 'Mesa' },
+  { label: 'Wiki', href: '/wiki', icon: BookOpen, colorHue: 320, title: 'Wiki' },
 ];
 
 export const gmToolsLinks = [
-  { label: 'Rolador de Dados', href: '/tools/dice-roller', icon: Dices, colorHue: 30 },
-  { label: 'Rastreador de Combate', href: '/gm/combat-tracker', icon: Swords, colorHue: 65 },
-  { label: 'Geradores', href: '/tools/generator', icon: FlaskConical, colorHue: 100 },
-  { label: 'Descritor de Cenas', href: '/tools/description-generator', icon: FileText, colorHue: 135 },
-  { label: 'Mesa de Som', href: '/tools/soundboard', icon: Volume2, colorHue: 170 },
+  { label: 'Rolador de Dados', href: '/tools/dice-roller', icon: Dices, colorHue: 30, title: 'Dados' },
+  { label: 'Rastreador de Combate', href: '/gm/combat-tracker', icon: Swords, colorHue: 65, title: 'Combate' },
+  { label: 'Geradores', href: '/tools/generator', icon: FlaskConical, colorHue: 100, title: 'Gerador' },
+  { label: 'Descritor de Cenas', href: '/tools/description-generator', icon: FileText, colorHue: 135, title: 'Cenas' },
+  { label: 'Mesa de Som', href: '/tools/soundboard', icon: Volume2, colorHue: 170, title: 'Som' },
 ];
 
 export const profileLink = [{
@@ -48,6 +48,7 @@ export const profileLink = [{
     </Avatar>
   ),
   colorHue: 0,
+  title: 'Perfil'
 }];
 
 const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }: any) => {
@@ -55,7 +56,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }
     const bookRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-      setAnimationDelay(`-${Math.random() * 20}s`);
+        setAnimationDelay(`-${Math.random() * 20}s`);
     }, []);
 
     const isActive = activeBook?.startsWith(link.href);
@@ -78,11 +79,11 @@ const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }
                     )}>
                         <Link
                             href={link.href}
-                            onClick={(e) => handleLinkClick(link.href, e, bookRef.current)}
+                            onClick={(e) => handleLinkClick(link.href, e)}
                             className={cn(
                               'book-nav-item',
                               isTool ? 'tool-book' : 'main-book',
-                              isActive && !isAnimating && 'active',
+                               isActive && !isAnimating && 'active',
                             )}
                             style={{ 
                               '--book-color-hue': `${link.colorHue}`,
@@ -94,6 +95,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }
                                 "w-6 h-6 text-white/80 transition-all", 
                                 isActive && !isAnimating && 'active-icon'
                             )} />
+                             <span className="book-title">{link.title}</span>
                         </Link>
                     </div>
                 </TooltipTrigger>
@@ -114,7 +116,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   
   const activeBook = activePath;
 
-  const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>, bookElement: HTMLDivElement | null) => {
+  const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     if (animatingHref || href === activeBook) {
       e.preventDefault();
       return;
@@ -124,18 +126,20 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setPreviousBook(activeBook);
     setAnimatingHref(href);
     
-    const onAnimationEnd = () => {
-        setAnimatingHref(null);
-        bookElement?.removeEventListener('animationend', onAnimationEnd);
-    };
-
-    bookElement?.addEventListener('animationend', onAnimationEnd);
-
     setTimeout(() => {
         router.push(href);
     }, 1000);
   };
   
+  useEffect(() => {
+    if (animatingHref) {
+      const timer = setTimeout(() => {
+        setAnimatingHref(null);
+      }, 2000); // Animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [animatingHref]);
+
   const renderBook = (link: any) => {
       return <Book 
           key={link.href}
