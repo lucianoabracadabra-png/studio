@@ -58,11 +58,15 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
 
   useEffect(() => {
-    if (!animatingHref) {
-      setActiveBook(activePath);
-      setSpinCompleteHref(activePath);
+    if (animatingHref) return;
+
+    if(activePath !== activeBook) {
+        setActiveBook(activePath);
     }
-  }, [activePath, animatingHref]);
+    if(activePath !== spinCompleteHref) {
+        setSpinCompleteHref(activePath);
+    }
+  }, [activePath]);
 
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
@@ -121,8 +125,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }
 
   return (
-    <div className="fixed top-0 left-0 h-full flex flex-col items-center bg-transparent z-50 px-4">
-      <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
+    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
+      <ScrollArea className="w-full h-full hide-scrollbar">
         <nav className="flex flex-col items-center gap-4 py-4">
             {mainLinks.map(link => renderBook(link, false))}
             {gmToolsLinks.map(link => renderBook(link, true))}
