@@ -145,7 +145,7 @@
   }
 
   .page-container-content {
-      @apply relative z-10 h-full flex-1 flex flex-col;
+      @apply relative z-10 h-full;
   }
   
   .page-container-content > * {
@@ -301,24 +301,24 @@
 
 @keyframes book-ignite-glow {
   0%, 10% {
-    box-shadow: none;
     background-color: transparent;
+    box-shadow: none;
   }
   80% {
-    box-shadow: 
+    background-color: hsla(var(--book-color-hue), 80%, 85%, 1);
+     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 35px hsla(var(--book-color-hue), 50%, 70%, 1),
       0 0 22px hsla(var(--book-color-hue), 50%, 70%, 0.7),
       0 0 15px hsl(var(--book-color-hue), 50%, 80%);
-    background-color: hsla(var(--book-color-hue), 80%, 85%, 1);
   }
   85%, 100% {
+    background-color: hsl(var(--book-color-hue), 80%, 85%);
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3),
       0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
       0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
       0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-    background-color: hsl(var(--book-color-hue), 80%, 85%);
   }
 }
 
@@ -360,3 +360,5 @@
   to { transform: translateY(-2000px); }
 }
 }
+
+    
