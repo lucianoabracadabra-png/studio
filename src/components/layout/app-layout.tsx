@@ -17,7 +17,7 @@ export default function AppLayout({ children, activePath, colorHue }: AppLayoutP
 
 
   return (
-    <div className="min-h-screen w-full bg-background relative" style={pageStyle}>
+    <div className="min-h-screen w-full bg-background relative">
         <div className='relative z-20'>
             <SidebarNav activePath={activePath} />
         </div>
@@ -25,6 +25,7 @@ export default function AppLayout({ children, activePath, colorHue }: AppLayoutP
             <div className="flex-1 flex flex-col h-full overflow-y-auto p-4 lg:p-6">
                 <div 
                     className="page-container flex-1 flex flex-col"
+                    style={pageStyle}
                 >
                     {children}
                 </div>
