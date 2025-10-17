@@ -76,11 +76,6 @@ const Book = ({
 }) => {
     const Icon = link.icon;
     const isTool = gmToolsLinks.some(l => l.href === link.href) || profileLink.some(l => l.href === link.href);
-    const [animationDelay, setAnimationDelay] = useState('0s');
-
-    useEffect(() => {
-        setAnimationDelay(`${Math.random() * 0.5}s`);
-    }, []);
     
     return (
         <TooltipProvider key={link.href}>
@@ -104,7 +99,6 @@ const Book = ({
                             <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
                                 <Icon />
                             </div>
-                            <span className="book-title">{link.title}</span>
                         </Link>
                     </div>
                 </TooltipTrigger>
