@@ -127,15 +127,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   return (
     <div className="fixed top-0 left-0 h-full flex flex-col items-center bg-transparent py-4 z-50 px-12">
       <ScrollArea className="w-full h-full hide-scrollbar">
-        <div className="flex flex-col items-center gap-4 py-4">
-          <nav className="flex flex-col items-center gap-4">
-            {mainLinks.map(link => renderBook(link, false))}
-          </nav>
-          <nav className="flex flex-col items-center gap-2">
-            {gmToolsLinks.map(link => renderBook(link, true))}
-            {profileLink.map(link => renderBook(link, true))}
-          </nav>
-        </div>
+        <nav className="flex flex-col items-center gap-4 py-4">
+          {mainLinks.map(link => renderBook(link, false))}
+        </nav>
+        <nav className="flex flex-col items-center gap-2 pb-4">
+          {gmToolsLinks.map(link => renderBook(link, true))}
+          {profileLink.map(link => renderBook(link, true))}
+        </nav>
       </ScrollArea>
     </div>
   );
