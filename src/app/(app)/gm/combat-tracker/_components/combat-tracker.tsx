@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, UserPlus, Crown, Play, History, Check, RefreshCw, X } from 'lucide-react';
+import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,22 +39,24 @@ type Combatant = {
   colorHue: number;
 };
 
-type MovementTrail = {
-  id: number;
+type ActionTrail = {
+  combatantId: number;
   fromAp: number;
   toAp: number;
   colorHue: number;
-}
+};
+
 
 type LogEntry = {
   id: number;
   message: string;
   timestamp: string;
+  colorHue?: number;
 }
 
 const MAX_AP_ON_TIMELINE = 50;
 
-const bookColors = [...mainLinks, ...gmToolsLinks].map(link => link.colorHue);
+const bookColors = [...mainLinks, ...gmToolsLinks, profileLink].filter(l => l.colorHue > 0).map(link => link.colorHue);
 
 const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: number, onSelect: (hue: number) => void, disabled?: boolean }) => {
     return (
@@ -88,21 +90,14 @@ export function CombatTracker() {
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
-  const [movementTrails, setMovementTrails] = useState<MovementTrail[]>([]);
-  const combatantApRef = useRef<Map<number, number>>(new Map());
+  const [actionTrails, setActionTrails] = useState<ActionTrail[]>([]);
 
-  useEffect(() => {
-    const newApMap = new Map<number, number>();
-    combatants.forEach(c => newApMap.set(c.id, c.ap));
-    combatantApRef.current = newApMap;
-  }, [combatants]);
-  
-
-  const addLogEntry = (message: string) => {
+  const addLogEntry = (message: string, colorHue?: number) => {
     const newEntry: LogEntry = {
       id: nextLogId,
       message,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: new Date().toLocaleTimeString(),
+      colorHue,
     };
     setLog(prev => [newEntry, ...prev]);
     setNextLogId(prev => prev + 1);
@@ -139,11 +134,22 @@ export function CombatTracker() {
   
   const startCombat = () => {
     if (combatants.length === 0) return;
-    setCombatants(combatants.map(c => {
+    const updatedCombatants = combatants.map(c => {
       const reactionRoll = Math.floor(Math.random() * 10) + 1;
       const startAp = 20 - (reactionRoll + c.reactionModifier);
       return { ...c, ap: startAp < 0 ? 0 : startAp };
+    });
+    setCombatants(updatedCombatants);
+    
+    // Initialize trails
+    const initialTrails = updatedCombatants.map(c => ({
+      combatantId: c.id,
+      fromAp: c.ap,
+      toAp: c.ap,
+      colorHue: c.colorHue,
     }));
+    setActionTrails(initialTrails);
+
     setCombatStarted(true);
     addLogEntry("Combat has started! Reaction tests rolled.");
   };
@@ -152,6 +158,8 @@ export function CombatTracker() {
     setCombatStarted(false);
     setActiveCombatantId(null);
     setCombatants(combatants.map(c => ({...c, ap: 0})));
+    setActionTrails([]);
+    setLog([]);
     addLogEntry("Combat has been reset.");
   }
 
@@ -159,31 +167,33 @@ export function CombatTracker() {
     const combatant = combatants.find(c => c.id === id);
     if(combatant) addLogEntry(`${combatant.name} has been removed from the encounter.`);
     setCombatants(combatants.filter(c => c.id !== id));
+    setActionTrails(actionTrails.filter(t => t.combatantId !== id));
   };
   
   const confirmAction = (cost: number) => {
     if (activeCombatantId === null) return;
     
     const actor = combatants.find(c => c.id === activeCombatantId);
-    const prevAp = combatantApRef.current.get(activeCombatantId);
+    if (!actor) return;
 
-    if (actor && prevAp !== undefined) {
-      addLogEntry(`[AP ${actor.ap}] ${actor.name} performs an action with cost ${cost}.`);
-      
-      const newAp = actor.ap + cost;
-      
-      const newTrail: MovementTrail = {
-        id: Date.now(),
-        fromAp: prevAp,
-        toAp: newAp,
-        colorHue: actor.colorHue,
-      };
-      setMovementTrails(prev => [...prev, newTrail]);
+    addLogEntry(`[AP ${actor.ap}] ${actor.name} performs an action with cost ${cost}.`, actor.colorHue);
+    
+    const newAp = actor.ap + cost;
+    
+    setActionTrails(prevTrails => {
+        const otherTrails = prevTrails.filter(t => t.combatantId !== activeCombatantId);
+        const newTrail: ActionTrail = {
+            combatantId: activeCombatantId,
+            fromAp: actor.ap,
+            toAp: newAp,
+            colorHue: actor.colorHue,
+        };
+        return [...otherTrails, newTrail];
+    });
 
-      setCombatants(combatants.map(c => 
-        c.id === activeCombatantId ? { ...c, ap: newAp } : c
-      ));
-    }
+    setCombatants(combatants.map(c => 
+      c.id === activeCombatantId ? { ...c, ap: newAp } : c
+    ));
   };
 
   const timelineMarkers = Array.from({ length: MAX_AP_ON_TIMELINE / 5 + 1 }, (_, i) => i * 5);
@@ -219,19 +229,19 @@ export function CombatTracker() {
                         ))}
                     </div>
                     <div className="relative h-full pt-4">
-                        {movementTrails.map(trail => {
+                        {actionTrails.map(trail => {
                              const from = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
                              const to = (trail.toAp / MAX_AP_ON_TIMELINE) * 100;
+                             if(from === to) return null;
                              return (
                                 <div
-                                    key={trail.id}
-                                    className="absolute h-1 top-1/2 -translate-y-1/2 opacity-50 animate-expand-out"
+                                    key={trail.combatantId}
+                                    className="absolute h-2 top-1/2 -translate-y-1/2 opacity-50"
                                     style={{
                                         left: `${from}%`,
                                         width: `${to - from}%`,
                                         backgroundColor: `hsl(${trail.colorHue}, 60%, 50%)`,
                                     }}
-                                    onAnimationEnd={() => setMovementTrails(trails => trails.filter(t => t.id !== trail.id))}
                                 />
                              )
                         })}
@@ -239,19 +249,22 @@ export function CombatTracker() {
                             const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
                             const isActive = c.id === activeCombatantId;
                             const topPosition = `${20 + (index % 4) * 25}%`;
+                            const glowStyle = {
+                                boxShadow: `0 0 12px hsl(${c.colorHue}, 80%, 70%), 0 0 5px hsl(${c.colorHue}, 80%, 70%)`
+                            };
                             return (
                                 <TooltipProvider key={c.id}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                             <div
                                                 className="absolute -translate-y-1/2 transition-all duration-500 ease-out"
-                                                style={{ left: `calc(${leftPercentage}% - 16px)`, top: topPosition }}
+                                                style={{ left: `calc(${leftPercentage}% - 20px)`, top: topPosition }}
                                             >
                                                 <Avatar 
                                                   className={cn(
-                                                    'h-10 w-10 border-2 transition-all', 
-                                                    isActive ? 'scale-125 shadow-lg shadow-accent/50 z-10' : 'z-0',
-                                                    c.isPlayer ? 'border-primary' : 'border-muted-foreground/50'
+                                                    'h-10 w-10 border-4 transition-all relative', 
+                                                    isActive ? 'scale-125 z-10' : 'z-0',
+                                                    c.isPlayer ? 'border-white' : 'border-destructive'
                                                   )}
                                                 >
                                                     <AvatarFallback 
@@ -260,8 +273,8 @@ export function CombatTracker() {
                                                     >
                                                       {c.name.substring(0, 2)}
                                                     </AvatarFallback>
+                                                    {isActive && <div className="absolute -inset-1 rounded-full" style={glowStyle}></div>}
                                                 </Avatar>
-                                                {isActive && <div className="absolute inset-0 rounded-full border-2 border-accent animate-ping"></div>}
                                             </div>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -307,75 +320,31 @@ export function CombatTracker() {
         ) : null }
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <Card className="lg:col-span-1 glassmorphic-card">
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Manage Combatants</CardTitle>
-            <CardDescription>Add new combatants to the encounter.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="reaction">Reaction Modifier</Label>
-                <Input id="reaction" type="number" placeholder="0" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
-            </div>
-             <div className="space-y-3">
-                <Label>Color</Label>
-                <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
-            </div>
-            <div className="flex items-center space-x-2 pt-2">
-              <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
-              <Label htmlFor="is-player">Player Character</Label>
-            </div>
-            <Button onClick={addCombatant} className="w-full font-bold" disabled={combatStarted}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
-            </Button>
-          </CardContent>
-        </Card>
-
-        <div className="lg:col-span-2 flex flex-col gap-6">
-            <Card className="glassmorphic-card flex-grow">
+        <div className="lg:col-span-1 flex flex-col gap-6">
+            <Card className="glassmorphic-card">
                 <CardHeader>
-                    <CardTitle className='font-headline'>Encounter</CardTitle>
+                    <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Add Combatant</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                        {combatants.length === 0 ? (
-                            <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
-                        ) : (
-                            [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
-                                <div key={c.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
-                                    <Avatar className={cn('h-8 w-8 border-2', c.isPlayer ? 'border-primary' : 'border-muted-foreground/50')}>
-                                        <AvatarFallback
-                                          style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
-                                        >
-                                          {c.name.substring(0, 2)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="flex-grow font-semibold">{c.name}</span>
-                                     <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This will permanently remove {c.name} from the encounter.
-                                            </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} className={buttonVariants({ variant: "destructive" })}>Remove</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                            ))
-                        )}
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
                     </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="reaction">Reaction Modifier</Label>
+                        <Input id="reaction" type="number" placeholder="0" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
+                    </div>
+                    <div className="space-y-3">
+                        <Label>Color</Label>
+                        <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
+                    </div>
+                    <div className="flex items-center space-x-2 pt-2">
+                    <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
+                    <Label htmlFor="is-player">Player Character</Label>
+                    </div>
+                    <Button onClick={addCombatant} className="w-full font-bold" disabled={combatStarted}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
+                    </Button>
                 </CardContent>
             </Card>
 
@@ -383,9 +352,10 @@ export function CombatTracker() {
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><History /> Combat Log</CardTitle>
                 </CardHeader>
-                <CardContent className="max-h-64 overflow-y-auto space-y-2 pr-2">
+                <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
                     {log.length > 0 ? log.map(entry => (
-                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50">
+                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50 relative overflow-hidden"
+                            style={entry.colorHue !== undefined ? { borderLeft: `4px solid hsl(${entry.colorHue}, 60%, 50%)`} : {}}>
                             <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
                             <span>{entry.message}</span>
                         </div>
@@ -395,7 +365,57 @@ export function CombatTracker() {
                 </CardContent>
             </Card>
         </div>
+
+
+        <Card className="lg:col-span-2 glassmorphic-card">
+            <CardHeader>
+                <CardTitle className='font-headline'>Encounter Roster</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-2 max-h-[30rem] overflow-y-auto">
+                    {combatants.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
+                    ) : (
+                        [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
+                            <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/30 rounded-md">
+                                <Avatar className={cn('h-9 w-9 border-2', c.isPlayer ? 'border-white' : 'border-destructive')}>
+                                    <AvatarFallback
+                                        style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
+                                    >
+                                        {c.name.substring(0, 2)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <span className="flex-grow font-semibold">{c.name}</span>
+                                <div className='text-xs text-muted-foreground font-mono'>
+                                    <p>AP: {c.ap}</p>
+                                    <p>React Mod: {c.reactionModifier}</p>
+                                </div>
+                                    <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will permanently remove {c.name} from the encounter.
+                                        </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => removeCombatant(c.id)} className={buttonVariants({ variant: "destructive" })}>Remove</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+
+    

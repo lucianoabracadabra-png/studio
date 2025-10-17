@@ -58,8 +58,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   
   useEffect(() => {
-    // When route changes, update the focused and completed states to match
-    // without triggering click animations.
     setFocusedBookHref(activePath);
     setSpinCompleteHref(activePath);
   }, [activePath]);
@@ -67,18 +65,15 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    // Prevent re-triggering animation if one is already in progress for this book
     if (spinningBookHref === href || focusedBookHref === href) return;
 
     setSpinningBookHref(href);
     router.push(href);
     
-    // Set focus state mid-animation
     setTimeout(() => {
         setFocusedBookHref(href);
     }, 1000);
 
-    // Set spin complete state at the end of the animation
     setTimeout(() => {
         setSpinCompleteHref(href);
     }, 2000);
@@ -139,3 +134,5 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     </div>
   );
 }
+
+    
