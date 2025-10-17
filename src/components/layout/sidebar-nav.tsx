@@ -77,12 +77,6 @@ const Book = ({
     const Icon = link.icon;
     const isTool = gmToolsLinks.some(l => l.href === link.href) || profileLink.some(l => l.href === link.href);
     
-    const [animationDelay, setAnimationDelay] = useState('0s');
-
-    useEffect(() => {
-        setAnimationDelay(`${Math.random() * 2}s`);
-    }, []);
-
     return (
         <TooltipProvider key={link.href}>
             <Tooltip>
