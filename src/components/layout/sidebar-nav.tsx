@@ -20,7 +20,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export const mainLinks = [
@@ -75,8 +75,14 @@ const Book = ({
     onClick: (href: string) => void,
 }) => {
     const Icon = link.icon;
-    const isTool = gmToolsLinks.includes(link) || profileLink.includes(link);
+    const isTool = gmToolsLinks.some(l => l.href === link.href) || profileLink.some(l => l.href === link.href);
     
+    const [animationDelay, setAnimationDelay] = useState('0s');
+
+    useEffect(() => {
+        setAnimationDelay(`${Math.random() * 2}s`);
+    }, []);
+
     return (
         <TooltipProvider key={link.href}>
             <Tooltip>
@@ -116,39 +122,60 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
     const [isPageLoading, setIsPageLoading] = useState(false);
 
+    // Effect to set initial state based on path, and handle manual url changes
     useEffect(() => {
         setBookStates(getInitialState(pathname));
     }, [pathname]);
 
-    useEffect(() => {
-        // This effect manages the animation state transitions after page load
-        if (!isPageLoading && pathname) {
-            const holdingBook = Object.keys(bookStates).find(href => bookStates[href] === 'holding');
-            if (holdingBook && pathname.startsWith(holdingBook)) {
-                // Page has loaded, move from holding to climax
-                setBookStates(prev => ({ ...prev, [holdingBook]: 'climax' }));
 
-                setTimeout(() => {
-                    // After climax, move to decaying
-                    setBookStates(prev => ({ ...prev, [holdingBook]: 'decaying-on' }));
-                    setTimeout(() => {
-                        // After decaying, settle to on
-                        setBookStates(prev => ({ ...prev, [holdingBook]: 'on' }));
-                    }, 1000);
+    // Effect to manage animation state machine
+    useEffect(() => {
+        const timeouts: NodeJS.Timeout[] = [];
+
+        Object.entries(bookStates).forEach(([href, state]) => {
+            if (state === 'growing') {
+                const t = setTimeout(() => {
+                    setBookStates(prev => ({...prev, [href]: 'holding'}));
                 }, 1000);
-            }
-            
-            const decayingBook = Object.keys(bookStates).find(href => bookStates[href] === 'decaying-off');
-            if(decayingBook && !pathname.startsWith(decayingBook)) {
-                 setTimeout(() => {
-                    setBookStates(prev => ({ ...prev, [decayingBook]: 'off' }));
+                timeouts.push(t);
+            } else if (state === 'climax') {
+                const t = setTimeout(() => {
+                    setBookStates(prev => ({...prev, [href]: 'decaying-on'}));
                 }, 1000);
+                timeouts.push(t);
+            } else if (state === 'decaying-on') {
+                const t = setTimeout(() => {
+                    setBookStates(prev => ({...prev, [href]: 'on'}));
+                }, 1000);
+                 timeouts.push(t);
+            } else if (state === 'decaying-off') {
+                 const t = setTimeout(() => {
+                    setBookStates(prev => ({...prev, [href]: 'off'}));
+                }, 1000);
+                 timeouts.push(t);
             }
+        });
+
+        return () => {
+            timeouts.forEach(clearTimeout);
+        };
+
+    }, [bookStates]);
+
+     // Effect to trigger climax after page load
+    useEffect(() => {
+        if (isPageLoading) return; // Don't run on the initial page load event
+        
+        const holdingBookHref = Object.keys(bookStates).find(href => bookStates[href] === 'holding');
+
+        if (holdingBookHref && pathname.startsWith(holdingBookHref)) {
+             setBookStates(prev => ({ ...prev, [holdingBookHref]: 'climax' }));
         }
+
     }, [isPageLoading, pathname, bookStates]);
     
     const handleLinkClick = (href: string) => {
-        if (pathname.startsWith(href)) return;
+        if (pathname.startsWith(href) || isPageLoading) return;
 
         setIsPageLoading(true);
         router.push(href);
@@ -161,21 +188,18 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                 newStates[currentOnBook] = 'decaying-off';
             }
             newStates[href] = 'growing';
-
-            // Set up the transition from 'growing' to 'holding'
-            setTimeout(() => {
-                setBookStates(current => ({ ...current, [href]: 'holding' }));
-            }, 1000);
-
+            
             return newStates;
         });
     };
 
     useEffect(() => {
+        // This effect runs when the page navigation is complete.
         if (isPageLoading) {
             setIsPageLoading(false);
         }
     }, [pathname, isPageLoading]);
+
 
     const renderBook = (link: any) => {
       return <Book 
