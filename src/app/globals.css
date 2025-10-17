@@ -149,7 +149,7 @@
       @apply relative z-10 h-full flex-1 flex flex-col;
   }
   
-  .page-container-content > div {
+  .page-container-content > * {
     --primary: hsl(var(--page-primary-color));
     --accent: hsl(var(--page-accent-color));
     --ring: hsl(var(--page-primary-color));
@@ -356,6 +356,7 @@
       0 0 5px hsl(var(--book-color-hue), 50%, 80%);
   }
 }
+
 
 #title {
   position: absolute;
