@@ -58,8 +58,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
 
   useEffect(() => {
-    // When the page path changes (after navigation), update the visual state.
-    // This ensures that browser back/forward buttons work correctly.
     if (!animatingHref) {
       setActiveBook(activePath);
       setSpinCompleteHref(activePath);
@@ -75,12 +73,10 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setSpinCompleteHref(null);
     setAnimatingHref(href);
     
-    // Mid-animation: apply the active styles for the glow
     setTimeout(() => {
         setActiveBook(href);
     }, 1000); 
 
-    // End of animation: navigate and set final state
     setTimeout(() => {
         router.push(href);
         setAnimatingHref(null);
@@ -125,12 +121,12 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }
 
   return (
-    <div className="fixed top-0 left-0 h-full flex flex-col items-center bg-transparent z-50 px-4">
+    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50">
       <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
         <nav className="flex flex-col items-center gap-4 py-4">
-          {mainLinks.map(link => renderBook(link, false))}
-          {gmToolsLinks.map(link => renderBook(link, true))}
-          {profileLink.map(link => renderBook(link, true))}
+            {mainLinks.map(link => renderBook(link, false))}
+            {gmToolsLinks.map(link => renderBook(link, true))}
+            {profileLink.map(link => renderBook(link, true))}
         </nav>
       </ScrollArea>
     </div>

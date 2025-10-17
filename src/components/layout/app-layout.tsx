@@ -12,9 +12,9 @@ type AppLayoutProps = {
 export default function AppLayout({ children, activePath, style }: AppLayoutProps) {
 
   return (
-    <div className="grid grid-cols-[auto_1fr] min-h-screen w-full bg-background relative">
+    <div className="min-h-screen w-full bg-background relative">
         <SidebarNav activePath={activePath} />
-        <main className="h-screen relative z-10">
+        <main className="pl-24 h-screen relative z-10">
             <div className="h-full w-full">
                 <div 
                     className='p-4 lg:p-6 h-full w-full'
