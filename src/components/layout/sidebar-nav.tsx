@@ -64,7 +64,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
       setActiveBook(activePath);
       setSpinCompleteHref(activePath);
     }
-  }, [activePath]);
+  }, [activePath, animatingHref]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -77,14 +77,15 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     // Set a timer for the animation duration
     setTimeout(() => {
         // This runs after the animation is complete.
-        router.push(href); // Navigate to the new page
+        router.push(href);
         setAnimatingHref(null); // End the animation state
-        
-        // Forcefully set the final active states after navigation and animation.
-        // The useEffect above will handle this, but we can be explicit.
-        setActiveBook(href); 
         setSpinCompleteHref(href); 
     }, 2000); // Animation duration: 2 seconds
+    
+    // Apply the active state for the icon glow mid-animation
+    setTimeout(() => {
+        setActiveBook(href);
+    }, 1000);
   };
   
   const renderBook = (link: any, isTool: boolean) => {
@@ -111,7 +112,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
-                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && 'active-icon')} />
+                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", (isActive || (isCurrentlyAnimating && activeBook === link.href)) && 'active-icon')} />
                     </Link>
                 </div>
             </TooltipTrigger>

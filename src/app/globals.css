@@ -23,7 +23,7 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
-    --radius: 0.5rem;
+    --radius: 0rem;
     --chart-1: 265 90% 70%;
     --chart-2: 300 90% 70%;
     --chart-3: 198 93% 60%;
@@ -51,7 +51,7 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
-    --radius: 0.5rem;
+    --radius: 0rem;
   }
 }
 
@@ -140,10 +140,7 @@
   .page-container {
     @apply rounded-lg relative;
     background: 
-      radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15)),
-      radial-gradient(ellipse at 0% 100%, hsla(var(--page-accent-color, 300), 90%, 70%, 0.15)),
-      hsl(var(--background) / 0.5);
-    box-shadow: 0 0 40px hsla(var(--page-primary-color, 265), 90%, 70%, 0.1);
+      radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15));
     backdrop-filter: blur(12px);
   }
   
@@ -162,7 +159,6 @@
     transition: all 0.5s ease-in-out;
     border-color: hsla(var(--page-primary-color, 265), 90%, 70%, 1);
     filter: drop-shadow(0 0 5px hsla(var(--page-primary-color, 265), 90%, 70%, 1));
-    border-radius: var(--radius);
   }
 
   .page-container::before {
@@ -363,15 +359,15 @@
 }
 
 @keyframes book-ignite-glow {
-  0%, 40% { 
-    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); 
+  0% {
+    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
   }
   80% {
     box-shadow: 
       inset -3px 0 24px rgba(0,0,0,0.4), 
-      0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 15px hsl(var(--book-color-hue), 50%, 80%);
+      0 0 225px hsla(var(--book-color-hue), 50%, 70%, 1),
+      0 0 108px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+      0 0 45px hsl(var(--book-color-hue), 50%, 80%);
   }
   100% {
     box-shadow: 
