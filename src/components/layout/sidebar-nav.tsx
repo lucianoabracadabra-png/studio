@@ -50,19 +50,17 @@ export const profileLink = [{
   colorHue: 0,
 }];
 
-const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref, handleLinkClick }: any) => {
+const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }: any) => {
     const [animationDelay, setAnimationDelay] = useState('0s');
+    const bookRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-      // This will only run on the client, after hydration, preventing mismatch
       setAnimationDelay(`-${Math.random() * 20}s`);
     }, []);
-
 
     const isActive = activeBook?.startsWith(link.href);
     const isPrevious = previousBook?.startsWith(link.href);
     const isAnimating = animatingHref === link.href;
-    const isSpinComplete = spinCompleteHref?.startsWith(link.href);
 
     const Icon = link.icon;
     const isTool = gmToolsLinks.includes(link) || profileLink.includes(link);
@@ -71,19 +69,20 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
         <TooltipProvider key={link.href}>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div className={cn(
+                    <div 
+                        ref={bookRef}
+                        className={cn(
                         "book-wrapper", 
                         isAnimating && 'book-spin-and-ignite',
                         isPrevious && !isAnimating && 'book-decaying',
                     )}>
                         <Link
                             href={link.href}
-                            onClick={(e) => handleLinkClick(link.href, e)}
+                            onClick={(e) => handleLinkClick(link.href, e, bookRef.current)}
                             className={cn(
                               'book-nav-item',
                               isTool ? 'tool-book' : 'main-book',
                               isActive && !isAnimating && 'active',
-                              isSpinComplete && !isAnimating && 'spin-complete'
                             )}
                             style={{ 
                               '--book-color-hue': `${link.colorHue}`,
@@ -93,7 +92,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
                         >
                             <Icon className={cn(
                                 "w-6 h-6 text-white/80 transition-all", 
-                                (isActive || isSpinComplete) && !isAnimating && 'active-icon'
+                                isActive && !isAnimating && 'active-icon'
                             )} />
                         </Link>
                     </div>
@@ -114,39 +113,27 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [previousBook, setPreviousBook] = useState<string | null>(null);
   
   const activeBook = activePath;
-  const spinCompleteHref = activePath; 
 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (animatingHref && activePath === animatingHref) {
-        if(timeoutRef.current) clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(() => {
-            setAnimatingHref(null);
-        }, 1000);
-    }
-    
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [activePath, animatingHref]);
-  
-  const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (animatingHref) {
+  const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>, bookElement: HTMLDivElement | null) => {
+    if (animatingHref || href === activeBook) {
       e.preventDefault();
       return;
     }
-
-    if (href === activeBook) {
-      return;
-    }
     
+    e.preventDefault();
     setPreviousBook(activeBook);
     setAnimatingHref(href);
     
-    if(timeoutRef.current) clearTimeout(timeoutRef.current);
+    const onAnimationEnd = () => {
+        setAnimatingHref(null);
+        bookElement?.removeEventListener('animationend', onAnimationEnd);
+    };
+
+    bookElement?.addEventListener('animationend', onAnimationEnd);
+
+    setTimeout(() => {
+        router.push(href);
+    }, 1000);
   };
   
   const renderBook = (link: any) => {
@@ -156,7 +143,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
           activeBook={activeBook}
           previousBook={previousBook}
           animatingHref={animatingHref}
-          spinCompleteHref={spinCompleteHref}
           handleLinkClick={handleLinkClick}
       />
   };
