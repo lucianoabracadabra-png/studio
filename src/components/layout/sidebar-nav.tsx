@@ -54,8 +54,8 @@ export const profileLink = [{
 export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
-  const [activeBook, setActiveBook] = useState<string | null>(null);
-  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(null);
+  const [activeBook, setActiveBook] = useState<string | null>(activePath);
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
 
   useEffect(() => {
     // When the page path changes (after navigation), update the visual state.
