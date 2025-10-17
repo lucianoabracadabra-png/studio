@@ -102,8 +102,6 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: center;
     will-change: transform, box-shadow;
-    transform-style: preserve-3d;
-    transform: perspective(1000px) rotateY(0deg);
   }
 
   .book-nav-item.main-book {
@@ -136,7 +134,7 @@
   .book-nav-item.holding,
   .book-nav-item.climax,
   .book-nav-item.decaying-on {
-    transform: perspective(1000px) rotateY(20deg);
+    transform: rotateY(20deg);
   }
 
   .book-nav-item.on::before,
@@ -178,7 +176,7 @@
 
   .book-icon {
     @apply text-white/80 transition-opacity duration-300;
-    opacity: 0;
+    opacity: 0.7;
   }
 
   .book-nav-item.on .book-icon,
@@ -251,57 +249,57 @@
 
   @keyframes book-growing {
     from {
-      transform: perspective(1000px) rotateY(0deg);
+      transform: rotateY(0deg);
       box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
     to {
-      transform: perspective(1000px) rotateY(740deg); /* 2 spins + 20deg */
+      transform: rotateY(740deg); /* 2 spins + 20deg */
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
 
   @keyframes book-holding {
     0%, 100% {
-      transform: perspective(1000px) rotateY(740deg);
+      transform: rotateY(740deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 12.5px hsla(var(--book-color-hue), 50%, 70%, 0.5);
     }
     50% {
-      transform: perspective(1000px) rotateY(740deg);
+      transform: rotateY(740deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 37.5px hsla(var(--book-color-hue), 50%, 70%, 1.5);
     }
   }
 
   @keyframes book-climax {
     from {
-      transform: perspective(1000px) rotateY(740deg);
+      transform: rotateY(740deg);
     }
     50% {
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 75px hsla(var(--book-color-hue), 50%, 70%, 3);
     }
     to {
-      transform: perspective(1000px) rotateY(2180deg); /* 740 + 1440 */
+      transform: rotateY(2180deg); /* 740 + 1440 */
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
 
   @keyframes book-decaying-on {
     from {
-      transform: perspective(1000px) rotateY(2180deg);
+      transform: rotateY(2180deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
     to {
-      transform: perspective(1000px) rotateY(2540deg); /* 2180 + 360 */
+      transform: rotateY(2540deg); /* 2180 + 360 */
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
 
   @keyframes book-decaying-off {
     from {
-      transform: perspective(1000px) rotateY(20deg);
+      transform: rotateY(20deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
     to {
-      transform: perspective(1000px) rotateY(-340deg); /* 20 - 360 */
+      transform: rotateY(-340deg); /* 20 - 360 */
       box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
   }
