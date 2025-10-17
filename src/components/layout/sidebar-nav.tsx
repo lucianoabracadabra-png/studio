@@ -66,7 +66,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     if(activePath !== spinCompleteHref) {
         setSpinCompleteHref(activePath);
     }
-  }, [activePath]);
+  }, [activePath, animatingHref, activeBook, spinCompleteHref]);
 
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
@@ -126,7 +126,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   return (
     <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
-      <ScrollArea className="w-full h-full hide-scrollbar">
+      <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
         <nav className="flex flex-col items-center gap-4 py-4">
             {mainLinks.map(link => renderBook(link, false))}
             {gmToolsLinks.map(link => renderBook(link, true))}
