@@ -57,40 +57,40 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
 
-   useEffect(() => {
-    // This effect runs only on initial load or when the path changes via browser history.
-    // It immediately sets the visual state without animation.
+  useEffect(() => {
+    // When the page path changes (after navigation), update the visual state.
+    // This ensures that browser back/forward buttons work correctly.
     if (!animatingHref) {
       setActiveBook(activePath);
       setSpinCompleteHref(activePath);
     }
-  }, [activePath, animatingHref]);
+  }, [activePath]);
+
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (href === activePath || animatingHref) return; // Don't re-run on same link or while animating
+    if (href === activePath || animatingHref) return;
 
-    setActiveBook(null); // Remove active state from current book
-    setSpinCompleteHref(null); // Remove pulse from old active book immediately
-    setAnimatingHref(href); // Start new animation
+    setActiveBook(null); 
+    setSpinCompleteHref(null);
+    setAnimatingHref(href);
     
-    // Set a timer for the animation duration
-    setTimeout(() => {
-        // This runs after the animation is complete.
-        router.push(href);
-        setAnimatingHref(null); // End the animation state
-        setSpinCompleteHref(href); 
-    }, 2000); // Animation duration: 2 seconds
-    
-    // Apply the active state for the icon glow mid-animation
+    // Mid-animation: apply the active styles for the glow
     setTimeout(() => {
         setActiveBook(href);
-    }, 1000);
+    }, 1000); 
+
+    // End of animation: navigate and set final state
+    setTimeout(() => {
+        router.push(href);
+        setAnimatingHref(null);
+        setSpinCompleteHref(href); 
+    }, 2000); 
   };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isCurrentlyAnimating = animatingHref === link.href;
-    const isActive = activeBook === link.href && !isCurrentlyAnimating;
+    const isActive = activeBook === link.href;
     const isSpinComplete = spinCompleteHref === link.href;
   
     return (
@@ -112,7 +112,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
-                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", (isActive || (isCurrentlyAnimating && activeBook === link.href)) && 'active-icon')} />
+                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && 'active-icon')} />
                     </Link>
                 </div>
             </TooltipTrigger>
