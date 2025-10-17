@@ -194,7 +194,7 @@
   .magical-glow {
     @apply text-transparent bg-clip-text select-none;
     background-image: linear-gradient(to right, hsl(var(--page-primary-color, var(--primary))), hsl(var(--page-accent-color, var(--accent))));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent))));
+    text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent)));
   }
 
   #stars {
