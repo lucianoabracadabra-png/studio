@@ -138,14 +138,12 @@
   }
   
   .page-container-visuals {
-     @apply relative h-full w-full;
-    background: 
-      radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15));
+     @apply relative w-full;
     backdrop-filter: blur(12px);
   }
 
   .page-container-content {
-      @apply relative z-10 h-full;
+      @apply relative z-10;
   }
   
   .page-container-content > * {
