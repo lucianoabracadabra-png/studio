@@ -56,22 +56,23 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
-  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(null);
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
+  const [activeBook, setActiveBook] = useState<string | null>(activePath);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setSpinCompleteHref(pathname);
-    const animationTimer = setTimeout(() => {
-        setAnimatingHref(null);
-    }, 2000);
-    return () => clearTimeout(animationTimer);
-  }, [pathname]);
-
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+  
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (href === pathname || animatingHref) {
+    if (href === activeBook || animatingHref) {
       return;
     }
 
@@ -79,17 +80,20 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
       clearTimeout(timeoutRef.current);
     }
     
-    setPreviousBook(pathname);
+    setPreviousBook(activeBook);
     setSpinCompleteHref(null);
     setAnimatingHref(href);
+    setActiveBook(href);
     
     timeoutRef.current = setTimeout(() => {
       router.push(href);
+      setAnimatingHref(null);
+      setSpinCompleteHref(href);
     }, 2000); 
   };
   
   const renderBook = (link: any, isTool: boolean) => {
-    const isActive = activePath?.startsWith(link.href);
+    const isActive = activeBook?.startsWith(link.href);
     const isPrevious = previousBook?.startsWith(link.href);
     const isAnimating = animatingHref === link.href;
     const isSpinComplete = spinCompleteHref?.startsWith(link.href);

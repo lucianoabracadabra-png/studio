@@ -12,7 +12,7 @@ type AppLayoutProps = {
 export default function AppLayout({ children, activePath, style }: AppLayoutProps) {
 
   return (
-    <div className="min-h-screen w-full relative overflow-visible">
+    <div className="grid grid-cols-[auto_1fr] min-h-screen w-full bg-background relative">
         <SidebarNav activePath={activePath} />
         <main 
             className={cn('ml-24 relative min-h-screen p-4 lg:p-6 page-container-visuals')}
