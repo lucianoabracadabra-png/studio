@@ -54,7 +54,8 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
     const [animationDelay, setAnimationDelay] = useState('0s');
 
     useEffect(() => {
-        setAnimationDelay(`-${Math.random() * 20}s`);
+      // This will only run on the client, after hydration
+      setAnimationDelay(`-${Math.random() * 20}s`);
     }, []);
 
 
@@ -118,22 +119,22 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if(activePath !== spinCompleteHref) {
+    // This effect ensures that if navigation happens externally (e.g. browser back/forward), the animation states are reset correctly.
+    if(activePath !== spinCompleteHref && !animatingHref) {
       setSpinCompleteHref(activePath);
-      setAnimatingHref(null);
       setPreviousBook(null);
     }
-
+    
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [activePath, spinCompleteHref]);
+  }, [activePath, spinCompleteHref, animatingHref]);
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
     if (href === activeBook || animatingHref) {
-      e.preventDefault();
       return;
     }
 
@@ -146,9 +147,10 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setAnimatingHref(href);
     
     timeoutRef.current = setTimeout(() => {
-      // Navigation is handled by the Link component, we just manage animation states
+      router.push(href);
       setAnimatingHref(null);
       setSpinCompleteHref(href);
+      setPreviousBook(null);
     }, 2000); 
   };
   
