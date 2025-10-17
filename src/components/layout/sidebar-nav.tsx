@@ -56,44 +56,32 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [focusedBookHref, setFocusedBookHref] = useState<string | null>(activePath);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
-  const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
   useEffect(() => {
+    // When route changes, update the focused and completed states to match
+    // without triggering click animations.
     setFocusedBookHref(activePath);
     setSpinCompleteHref(activePath);
   }, [activePath]);
 
-  useEffect(() => {
-    const styles: { [key: string]: React.CSSProperties } = {};
-    [...mainLinks, ...gmToolsLinks, profileLink].forEach(link => {
-      styles[link.href] = {
-        '--animation-duration': `${(Math.random() * 4 + 6).toFixed(2)}s`,
-        '--animation-delay': `${(Math.random() * -5).toFixed(2)}s`,
-        '--float-x1': `${(Math.random() * 4 - 2).toFixed(2)}px`,
-        '--float-y1': `${(Math.random() * 6 - 3).toFixed(2)}px`,
-        '--float-x2': `${(Math.random() * 4 - 2).toFixed(2)}px`,
-        '--float-y2': `${(Math.random() * 6 - 3).toFixed(2)}px`,
-        '--float-x3': `${(Math.random() * 4 - 2).toFixed(2)}px`,
-        '--float-y3': `${(Math.random() * 6 - 3).toFixed(2)}px`,
-      } as React.CSSProperties;
-    });
-    setAnimationStyles(styles);
-  }, []);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (focusedBookHref !== href) {
-        setSpinningBookHref(href);
-        router.push(href);
-        
-        setTimeout(() => {
-            setFocusedBookHref(href);
-        }, 1000);
+    // Prevent re-triggering animation if one is already in progress for this book
+    if (spinningBookHref === href || focusedBookHref === href) return;
 
-        setTimeout(() => {
-            setSpinCompleteHref(href);
-        }, 2000);
-    }
+    setSpinningBookHref(href);
+    router.push(href);
+    
+    // Set focus state mid-animation
+    setTimeout(() => {
+        setFocusedBookHref(href);
+    }, 1000);
+
+    // Set spin complete state at the end of the animation
+    setTimeout(() => {
+        setSpinCompleteHref(href);
+    }, 2000);
   };
   
   const renderBook = (link: any, isTool: boolean) => {
@@ -114,11 +102,14 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         isTool ? 'tool-book' : 'main-book',
                          isActive && !isSpinning && 'active',
                          isSpinning && 'book-ignite-anim',
-                        !isActive && !isSpinning && 'float-anim',
                         isSpinComplete && 'spin-complete'
                         )}
-                        style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
-                        onAnimationEnd={() => setSpinningBookHref(null)}
+                        style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
+                        onAnimationEnd={() => {
+                            if (isSpinning) {
+                                setSpinningBookHref(null);
+                            }
+                        }}
                     >
                         <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && 'active-icon')} />
                     </Link>
