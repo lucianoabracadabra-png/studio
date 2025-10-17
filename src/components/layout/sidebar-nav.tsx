@@ -121,7 +121,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }
 
   return (
-    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50">
+    <div className="fixed top-0 left-0 h-full flex flex-col items-center bg-transparent z-50 px-4">
       <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
         <nav className="flex flex-col items-center gap-4 py-4">
             {mainLinks.map(link => renderBook(link, false))}
