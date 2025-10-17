@@ -126,7 +126,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         }, 1000);
     }
     
-    // Cleanup timeout on unmount or if dependencies change
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -141,18 +140,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     }
 
     if (href === activeBook) {
-      e.preventDefault();
       return;
     }
     
-    e.preventDefault();
     setPreviousBook(activeBook);
     setAnimatingHref(href);
     
     if(timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      router.push(href);
-    }, 1000);
   };
   
   const renderBook = (link: any) => {
