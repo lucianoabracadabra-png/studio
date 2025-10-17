@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, UserPlus, Crown, Play, History, Check } from 'lucide-react';
+import { PlusCircle, Trash2, UserPlus, Crown, Play, History, Check, RefreshCw, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
@@ -34,12 +34,17 @@ type Combatant = {
   id: number;
   name: string;
   ap: number;
-  hp: number;
-  maxHp: number;
   isPlayer: boolean;
-  reactionModifier: number; // Vigilância + Raciocínio
+  reactionModifier: number; 
   colorHue: number;
 };
+
+type MovementTrail = {
+  id: number;
+  fromAp: number;
+  toAp: number;
+  colorHue: number;
+}
 
 type LogEntry = {
   id: number;
@@ -51,17 +56,19 @@ const MAX_AP_ON_TIMELINE = 50;
 
 const bookColors = [...mainLinks, ...gmToolsLinks].map(link => link.colorHue);
 
-const ColorSelector = ({ selectedHue, onSelect }: { selectedHue: number, onSelect: (hue: number) => void }) => {
+const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: number, onSelect: (hue: number) => void, disabled?: boolean }) => {
     return (
-        <div className='flex flex-wrap gap-2'>
+        <div className={cn('flex flex-wrap gap-2', disabled && 'opacity-50')}>
             {bookColors.map(hue => (
                 <button
                     key={hue}
                     type="button"
                     onClick={() => onSelect(hue)}
+                    disabled={disabled}
                     className={cn(
                         'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center',
-                        selectedHue === hue ? 'border-foreground scale-110' : 'border-transparent'
+                        selectedHue === hue ? 'border-foreground scale-110' : 'border-transparent',
+                        disabled ? 'cursor-not-allowed' : 'hover:border-foreground/70'
                     )}
                     style={{ backgroundColor: `hsl(${hue}, 60%, 50%)` }}
                     aria-label={`Select color hue ${hue}`}
@@ -73,37 +80,23 @@ const ColorSelector = ({ selectedHue, onSelect }: { selectedHue: number, onSelec
     );
 };
 
-
 export function CombatTracker() {
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [nextId, setNextId] = useState(1);
   const [activeCombatantId, setActiveCombatantId] = useState<number | null>(null);
-  const [newCombatant, setNewCombatant] = useState({ name: '', hp: '', reactionModifier: '0', isPlayer: false, colorHue: 240 });
+  const [newCombatant, setNewCombatant] = useState({ name: '', reactionModifier: '0', isPlayer: false, colorHue: bookColors[0] });
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
-  const [animationStyles, setAnimationStyles] = useState<{ [key: number]: React.CSSProperties }>({});
+  const [movementTrails, setMovementTrails] = useState<MovementTrail[]>([]);
+  const combatantApRef = useRef<Map<number, number>>(new Map());
 
   useEffect(() => {
-    const newStyles: { [key: number]: React.CSSProperties } = {};
-    combatants.forEach(c => {
-      if (!animationStyles[c.id]) {
-        newStyles[c.id] = {
-            '--animation-duration': `${(Math.random() * 4 + 6).toFixed(2)}s`,
-            '--animation-delay': `${(Math.random() * -5).toFixed(2)}s`,
-            '--float-x1': `${(Math.random() * 4 - 2).toFixed(2)}px`,
-            '--float-y1': `${(Math.random() * 6 - 3).toFixed(2)}px`,
-            '--float-x2': `${(Math.random() * 4 - 2).toFixed(2)}px`,
-            '--float-y2': `${(Math.random() * 6 - 3).toFixed(2)}px`,
-            '--float-x3': `${(Math.random() * 4 - 2).toFixed(2)}px`,
-            '--float-y3': `${(Math.random() * 6 - 3).toFixed(2)}px`,
-        } as React.CSSProperties;
-      }
-    });
-    if (Object.keys(newStyles).length > 0) {
-        setAnimationStyles(prev => ({...prev, ...newStyles}));
-    }
-  }, [combatants, animationStyles]);
+    const newApMap = new Map<number, number>();
+    combatants.forEach(c => newApMap.set(c.id, c.ap));
+    combatantApRef.current = newApMap;
+  }, [combatants]);
+  
 
   const addLogEntry = (message: string) => {
     const newEntry: LogEntry = {
@@ -128,21 +121,19 @@ export function CombatTracker() {
   }, [combatStarted, sortedCombatants]);
 
   const addCombatant = () => {
-    if (!newCombatant.name || !newCombatant.hp) return;
+    if (!newCombatant.name) return;
 
     const combatant: Combatant = {
       id: nextId,
       name: newCombatant.name,
       ap: 0,
-      hp: parseInt(newCombatant.hp, 10),
-      maxHp: parseInt(newCombatant.hp, 10),
       isPlayer: newCombatant.isPlayer,
-      reactionModifier: parseInt(newCombatant.reactionModifier, 10),
+      reactionModifier: parseInt(newCombatant.reactionModifier, 10) || 0,
       colorHue: newCombatant.colorHue,
     };
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
-    setNewCombatant({ name: '', hp: '', reactionModifier: '0', isPlayer: false, colorHue: 240 });
+    setNewCombatant({ name: '', reactionModifier: '0', isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
     addLogEntry(`${combatant.name} has been added to the encounter.`);
   };
   
@@ -151,15 +142,22 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => {
       const reactionRoll = Math.floor(Math.random() * 10) + 1;
       const startAp = 20 - (reactionRoll + c.reactionModifier);
-      return { ...c, ap: startAp };
+      return { ...c, ap: startAp < 0 ? 0 : startAp };
     }));
     setCombatStarted(true);
     addLogEntry("Combat has started! Reaction tests rolled.");
   };
 
+  const resetCombat = () => {
+    setCombatStarted(false);
+    setActiveCombatantId(null);
+    setCombatants(combatants.map(c => ({...c, ap: 0})));
+    addLogEntry("Combat has been reset.");
+  }
+
   const removeCombatant = (id: number) => {
     const combatant = combatants.find(c => c.id === id);
-    if(combatant) addLogEntry(`${combatant.name} has been removed from combat.`);
+    if(combatant) addLogEntry(`${combatant.name} has been removed from the encounter.`);
     setCombatants(combatants.filter(c => c.id !== id));
   };
   
@@ -167,11 +165,23 @@ export function CombatTracker() {
     if (activeCombatantId === null) return;
     
     const actor = combatants.find(c => c.id === activeCombatantId);
+    const prevAp = combatantApRef.current.get(activeCombatantId);
 
-    if (actor) {
+    if (actor && prevAp !== undefined) {
       addLogEntry(`[AP ${actor.ap}] ${actor.name} performs an action with cost ${cost}.`);
+      
+      const newAp = actor.ap + cost;
+      
+      const newTrail: MovementTrail = {
+        id: Date.now(),
+        fromAp: prevAp,
+        toAp: newAp,
+        colorHue: actor.colorHue,
+      };
+      setMovementTrails(prev => [...prev, newTrail]);
+
       setCombatants(combatants.map(c => 
-        c.id === activeCombatantId ? { ...c, ap: c.ap + cost } : c
+        c.id === activeCombatantId ? { ...c, ap: newAp } : c
       ));
     }
   };
@@ -181,12 +191,16 @@ export function CombatTracker() {
 
   return (
     <div className="flex flex-col gap-6">
-        {/* 1. TIMELINE VIEW */}
         <Card className="glassmorphic-card w-full">
             <CardHeader>
                 <CardTitle className="font-headline flex items-center justify-between">
                     <span>Action Point Timeline</span>
-                    {!combatStarted && (
+                     {combatStarted ? (
+                        <Button onClick={resetCombat} variant="destructive">
+                            <RefreshCw className="mr-2" />
+                            Reset Combat
+                        </Button>
+                    ) : (
                         <Button onClick={startCombat} disabled={combatants.length === 0}>
                             <Play className="mr-2" />
                             Start Combat
@@ -196,7 +210,6 @@ export function CombatTracker() {
             </CardHeader>
             <CardContent>
                 <div className="relative h-48 w-full bg-background/30 rounded-lg p-2 overflow-x-auto">
-                    {/* Markers */}
                     <div className="absolute top-0 left-0 right-0 flex justify-between px-2">
                         {timelineMarkers.map(marker => (
                             <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground">
@@ -205,8 +218,23 @@ export function CombatTracker() {
                             </div>
                         ))}
                     </div>
-                    {/* Timeline Track */}
                     <div className="relative h-full pt-4">
+                        {movementTrails.map(trail => {
+                             const from = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
+                             const to = (trail.toAp / MAX_AP_ON_TIMELINE) * 100;
+                             return (
+                                <div
+                                    key={trail.id}
+                                    className="absolute h-1 top-1/2 -translate-y-1/2 opacity-50 animate-expand-out"
+                                    style={{
+                                        left: `${from}%`,
+                                        width: `${to - from}%`,
+                                        backgroundColor: `hsl(${trail.colorHue}, 60%, 50%)`,
+                                    }}
+                                    onAnimationEnd={() => setMovementTrails(trails => trails.filter(t => t.id !== trail.id))}
+                                />
+                             )
+                        })}
                         {sortedCombatants.map((c, index) => {
                             const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
                             const isActive = c.id === activeCombatantId;
@@ -216,22 +244,19 @@ export function CombatTracker() {
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                             <div
-                                                className={cn(
-                                                    "absolute -translate-y-1/2 transition-all duration-500 ease-out",
-                                                    !isActive && "float-anim"
-                                                )}
-                                                style={{ left: `calc(${leftPercentage}% - 16px)`, top: topPosition, ...animationStyles[c.id] } as React.CSSProperties}
+                                                className="absolute -translate-y-1/2 transition-all duration-500 ease-out"
+                                                style={{ left: `calc(${leftPercentage}% - 16px)`, top: topPosition }}
                                             >
                                                 <Avatar 
                                                   className={cn(
                                                     'h-10 w-10 border-2 transition-all', 
-                                                    isActive ? 'border-accent shadow-lg scale-110 shadow-accent/50' : 'border-transparent'
+                                                    isActive ? 'scale-125 shadow-lg shadow-accent/50 z-10' : 'z-0',
+                                                    c.isPlayer ? 'border-primary' : 'border-muted-foreground/50'
                                                   )}
-                                                  style={{ '--combatant-hue': c.colorHue } as React.CSSProperties}
                                                 >
                                                     <AvatarFallback 
-                                                      className={cn(c.isPlayer ? 'font-bold' : '')}
-                                                      style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`, border: `2px solid hsl(${c.colorHue}, 60%, 50%)` }}
+                                                      className={cn(c.isPlayer && 'font-bold')}
+                                                      style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
                                                     >
                                                       {c.name.substring(0, 2)}
                                                     </AvatarFallback>
@@ -242,7 +267,6 @@ export function CombatTracker() {
                                         <TooltipContent>
                                             <p className="font-bold">{c.name}</p>
                                             <p>AP: {c.ap}</p>
-                                            <p>HP: {c.hp}/{c.maxHp}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
@@ -253,13 +277,12 @@ export function CombatTracker() {
             </CardContent>
         </Card>
 
-        {/* 2. ACTIVE TURN */}
         {combatStarted ? (
             activeCombatant ? (
                 <Card className="glassmorphic-card">
                     <CardHeader>
                         <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
-                        <CardDescription>AP: {activeCombatant.ap} | HP: {activeCombatant.hp}/{activeCombatant.maxHp}</CardDescription>
+                        <CardDescription>Current AP: {activeCombatant.ap}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
                          <div className="flex-grow space-y-2">
@@ -277,20 +300,90 @@ export function CombatTracker() {
             ) : (
                  <Card className="glassmorphic-card">
                      <CardContent className="py-12 text-center text-muted-foreground">
-                        <p>{combatants.length > 0 ? "No one is in combat." : "Add combatants and start combat."}</p>
+                        <p>{combatants.length > 0 ? "All actions resolved or timeline is empty." : "Add combatants and start combat."}</p>
                      </CardContent>
                  </Card>
             )
         ) : null }
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* 3. COMBAT LOG */}
+        <Card className="lg:col-span-1 glassmorphic-card">
+          <CardHeader>
+            <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Manage Combatants</CardTitle>
+            <CardDescription>Add new combatants to the encounter.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="reaction">Reaction Modifier</Label>
+                <Input id="reaction" type="number" placeholder="0" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
+            </div>
+             <div className="space-y-3">
+                <Label>Color</Label>
+                <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
+            </div>
+            <div className="flex items-center space-x-2 pt-2">
+              <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
+              <Label htmlFor="is-player">Player Character</Label>
+            </div>
+            <Button onClick={addCombatant} className="w-full font-bold" disabled={combatStarted}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
+            </Button>
+          </CardContent>
+        </Card>
+
         <div className="lg:col-span-2 flex flex-col gap-6">
+            <Card className="glassmorphic-card flex-grow">
+                <CardHeader>
+                    <CardTitle className='font-headline'>Encounter</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {combatants.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
+                        ) : (
+                            [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
+                                <div key={c.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
+                                    <Avatar className={cn('h-8 w-8 border-2', c.isPlayer ? 'border-primary' : 'border-muted-foreground/50')}>
+                                        <AvatarFallback
+                                          style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
+                                        >
+                                          {c.name.substring(0, 2)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <span className="flex-grow font-semibold">{c.name}</span>
+                                     <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This will permanently remove {c.name} from the encounter.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} className={buttonVariants({ variant: "destructive" })}>Remove</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+
             <Card className="glassmorphic-card flex-grow">
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><History /> Combat Log</CardTitle>
                 </CardHeader>
-                <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
+                <CardContent className="max-h-64 overflow-y-auto space-y-2 pr-2">
                     {log.length > 0 ? log.map(entry => (
                         <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50">
                             <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
@@ -302,77 +395,6 @@ export function CombatTracker() {
                 </CardContent>
             </Card>
         </div>
-
-        {/* 4. MANAGE COMBATANTS */}
-        <Card className="lg:col-span-1 glassmorphic-card">
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Manage Combatants</CardTitle>
-            <CardDescription>Add or remove combatants.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="hp">HP</Label>
-                <Input id="hp" type="number" placeholder="10" value={newCombatant.hp} onChange={e => setNewCombatant({ ...newCombatant, hp: e.target.value })} disabled={combatStarted}/>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="reaction">Reaction Test</Label>
-                  <Input id="reaction" type="number" placeholder="5" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
-              </div>
-            </div>
-             <div className="space-y-2">
-                <Label>Color</Label>
-                <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} />
-            </div>
-            <div className="flex items-center space-x-2 pt-2">
-              <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
-              <Label htmlFor="is-player">Player Character</Label>
-            </div>
-            <Button onClick={addCombatant} className="w-full font-bold" disabled={combatStarted}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
-            </Button>
-            <Separator />
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-                {combatants.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
-                ) : (
-                    [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
-                        <div key={c.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded-md">
-                            <Avatar className="h-8 w-8">
-                                <AvatarFallback
-                                  style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`, border: `1px solid hsl(${c.colorHue}, 60%, 50%)` }}
-                                >
-                                  {c.name.substring(0, 2)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <span className="flex-grow font-semibold">{c.name}</span>
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><Trash2 className="h-4 w-4"/></Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This will permanently remove {c.name} from the combat tracker.
-                                    </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => removeCombatant(c.id)} className={buttonVariants({ variant: "destructive" })}>Remove</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </div>
-                    ))
-                )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
