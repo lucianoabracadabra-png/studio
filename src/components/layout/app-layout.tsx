@@ -1,7 +1,6 @@
 'use client';
 
 import { SidebarNav } from './sidebar-nav';
-import { motion } from 'framer-motion';
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -14,7 +13,6 @@ export default function AppLayout({ children, activePath, colorHue }: AppLayoutP
     '--page-primary-color': `hsl(${colorHue}, 90%, 70%)`,
     '--page-accent-color': `hsl(${(colorHue + 40) % 360}, 90%, 70%)`,
   } as React.CSSProperties;
-
 
   return (
     <div className="min-h-screen w-full bg-background relative">
