@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { useState, useEffect, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X, Minus, Plus, Square, Circle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +29,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
+import { Circle, Square } from 'lucide-react';
 
 type Combatant = {
   id: number;
@@ -44,7 +45,7 @@ type ActionTrail = {
   fromAp: number;
   toAp: number;
   colorHue: number;
-  turn: number;
+  turn: number; // The turn number this trail was created on
 };
 
 
@@ -87,8 +88,8 @@ const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: numbe
                         onClick={() => !disabled && onSelect(hue)}
                         disabled={disabled}
                         className={cn(
-                            'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center',
-                            isSelected ? 'border-transparent scale-110' : 'border-transparent',
+                            'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center border-transparent',
+                            isSelected ? 'scale-110' : '',
                             disabled ? 'cursor-not-allowed' : 'hover:border-foreground/70'
                         )}
                         style={{ 
@@ -163,6 +164,7 @@ export function CombatTracker() {
   
   const startCombat = () => {
     if (combatants.length === 0) return;
+    setTurnCount(1);
     const updatedCombatants = combatants.map(c => {
       const reactionRoll = Math.floor(Math.random() * 10) + 1;
       const startAp = 20 - (reactionRoll + c.reactionModifier);
@@ -170,15 +172,7 @@ export function CombatTracker() {
     });
     setCombatants(updatedCombatants);
     
-    const initialTrails = updatedCombatants.map(c => ({
-      combatantId: c.id,
-      fromAp: c.ap,
-      toAp: c.ap,
-      colorHue: c.colorHue,
-      turn: 0,
-    }));
-    setActionTrails(initialTrails);
-    setTurnCount(1);
+    setActionTrails([]); // Clear previous trails
     setCombatStarted(true);
     addLogEntry("Combat has started! Reaction tests rolled.");
   };
@@ -210,18 +204,17 @@ export function CombatTracker() {
     
     const newAp = actor.ap + cost;
     
-    setActionTrails(prevTrails => {
-        const olderTrails = prevTrails.map(t => ({...t, turn: t.turn + 1}));
-
-        const newTrail: ActionTrail = {
-            combatantId: activeCombatantId,
-            fromAp: actor.ap,
-            toAp: newAp,
-            colorHue: actor.colorHue,
-            turn: 0, // This is the current turn's trail
-        };
-        return [...olderTrails, newTrail];
-    });
+    // Add new trail for this action
+    const newTrail: ActionTrail = {
+        combatantId: activeCombatantId,
+        fromAp: actor.ap,
+        toAp: newAp,
+        colorHue: actor.colorHue,
+        turn: turnCount,
+    };
+    setActionTrails(prevTrails => [...prevTrails, newTrail]);
+    
+    // Increment turn count for next action
     setTurnCount(prev => prev + 1);
 
     setCombatants(combatants.map(c => 
@@ -233,18 +226,23 @@ export function CombatTracker() {
   const activeCombatant = useMemo(() => sortedCombatants.find(c => c.id === activeCombatantId), [sortedCombatants, activeCombatantId]);
   
   
-  const ActionTrailDots = ({ trail, isPlayer }: { trail: ActionTrail, isPlayer: boolean }) => {
+  const ActionTrailDots = ({ trail, isPlayer, currentTurn }: { trail: ActionTrail, isPlayer: boolean, currentTurn: number }) => {
     const distance = trail.toAp - trail.fromAp;
     if (distance <= 0) return null;
   
     const trailWidthPercent = (distance / MAX_AP_ON_TIMELINE) * 100;
     const startPercent = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
     
+    const turnsAgo = currentTurn - trail.turn;
     let opacity = 0;
-    if (trail.turn === 0) opacity = 1;
-    if (trail.turn === 1) opacity = 0.5;
-    if (trail.turn === 2) opacity = 0.1;
-    if (trail.turn > 2) return null;
+    if (turnsAgo === 0) opacity = 1; // Current turn action
+    else if (turnsAgo === 1) opacity = 0.5; // Last turn
+    else if (turnsAgo === 2) opacity = 0.1; // 2 turns ago
+    else return null; // Older than 2 turns ago
+
+    const DotComponent = isPlayer ? Circle : Square;
+    const stepSizePercent = (1 / MAX_AP_ON_TIMELINE) * 100;
+    const dotSize = 4; // size in pixels
 
     return (
       <div
@@ -252,14 +250,24 @@ export function CombatTracker() {
         style={{
           left: `${startPercent}%`,
           width: `${trailWidthPercent}%`,
+          height: '1.5rem', // Match half of the avatar container height
           opacity: opacity,
         }}
       >
         {Array.from({length: distance}).map((_, i) => (
-            isPlayer ? 
-            <Circle key={i} className="h-1 w-1" style={{color: `hsl(${trail.colorHue}, 90%, 70%)`}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
-            :
-            <Square key={i} className="h-1 w-1" style={{color: `hsl(${trail.colorHue}, 90%, 70%)`}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
+             <DotComponent 
+                key={i} 
+                className="absolute"
+                style={{
+                    color: `hsl(${trail.colorHue}, 90%, 70%)`,
+                    fill: `hsl(${trail.colorHue}, 90%, 70%)`,
+                    height: `${dotSize}px`,
+                    width: `${dotSize}px`,
+                    left: `calc(${i * stepSizePercent}% + ${dotSize/2}px)`,
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                }}
+             />
         ))}
       </div>
     );
@@ -271,7 +279,7 @@ export function CombatTracker() {
         <Card className="glassmorphic-card w-full">
             <CardHeader>
                 <CardTitle className="font-headline flex items-center justify-between">
-                    <span>Action Point Timeline</span>
+                    <span className="magical-glow">Action Point Timeline</span>
                      {combatStarted ? (
                         <Button onClick={resetCombat} variant="destructive">
                             <RefreshCw className="mr-2" />
@@ -306,7 +314,7 @@ export function CombatTracker() {
                         </div>
 
                         {rosterOrder.map((c, index) => {
-                            const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
+                            const leftPercentage = Math.min(100, (c.ap / MAX_AP_ON_TIMELINE) * 100);
                             const isActive = c.id === activeCombatantId;
                             const topPosition = `${index * 3.5}rem`;
 
@@ -319,7 +327,7 @@ export function CombatTracker() {
                             return (
                                 <div key={c.id} className="absolute w-full" style={{ top: topPosition, height: '3rem' }}>
                                     {/* Action Trail */}
-                                    {combatStarted && trails.map(trail => <ActionTrailDots key={`${trail.combatantId}-${trail.fromAp}-${trail.toAp}-${trail.turn}`} trail={trail} isPlayer={c.isPlayer} />)}
+                                    {combatStarted && trails.map(trail => <ActionTrailDots key={`${trail.combatantId}-${trail.turn}`} trail={trail} isPlayer={c.isPlayer} currentTurn={turnCount} />)}
 
                                     {/* Avatar */}
                                     <TooltipProvider>
@@ -327,25 +335,24 @@ export function CombatTracker() {
                                             <TooltipTrigger asChild>
                                                 <div
                                                     className="absolute -translate-y-1/2 transition-all duration-500 ease-out z-10"
-                                                    style={{ left: `calc(${leftPercentage}% - 5px)`, top: '50%' }}
+                                                    style={{ left: `calc(${leftPercentage}% - 8px)`, top: '50%' }}
                                                 >
                                                     <div 
                                                         className={cn(
-                                                            "h-2.5 w-2.5 transition-all relative",
-                                                            c.isPlayer ? 'rounded-full' : 'rounded-none'
+                                                            "h-4 w-4 transition-all relative",
+                                                            c.isPlayer ? 'rounded-full' : ''
                                                         )}
                                                         style={isActive ? glowStyle : {}}
                                                      >
-                                                        <Avatar className="h-full w-full">
-                                                          <AvatarFallback 
-                                                            className={cn(
-                                                              c.isPlayer ? 'rounded-full' : 'rounded-none',
-                                                              isActive ? 'bg-transparent' : ''
-                                                              )}
-                                                            style={{ backgroundColor: !isActive ? `hsl(${c.colorHue}, 90%, 70%)` : undefined }}
-                                                          >
-                                                          </AvatarFallback>
-                                                        </Avatar>
+                                                      <AvatarFallback 
+                                                        className={cn(
+                                                            'h-full w-full',
+                                                          c.isPlayer ? 'rounded-full' : 'rounded-none',
+                                                          isActive ? 'bg-transparent' : ''
+                                                          )}
+                                                        style={{ backgroundColor: !isActive ? `hsl(${c.colorHue}, 90%, 70%)` : undefined }}
+                                                      >
+                                                      </AvatarFallback>
                                                     </div>
                                                 </div>
                                             </TooltipTrigger>
@@ -364,33 +371,25 @@ export function CombatTracker() {
             </CardContent>
         </Card>
 
-        {combatStarted ? (
-            activeCombatant ? (
-                <Card className="glassmorphic-card">
-                    <CardHeader>
-                        <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
-                        <CardDescription>Current AP: {activeCombatant.ap}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-4">
-                         <div className="flex-grow space-y-2">
-                           <Label>Action Cost (AP)</Label>
-                            <div className='flex flex-wrap gap-2'>
-                                {Array.from({length: 10}, (_, i) => i + 1).map(cost => (
-                                    <Button key={cost} onClick={() => confirmAction(cost)} variant="outline" size="sm" className="font-mono">
-                                        {cost}
-                                    </Button>
-                                ))}
-                           </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            ) : (
-                 <Card className="glassmorphic-card">
-                     <CardContent className="py-12 text-center text-muted-foreground">
-                        <p>{combatants.length > 0 ? "All actions resolved or timeline is empty." : "Add combatants and start combat."}</p>
-                     </CardContent>
-                 </Card>
-            )
+        {combatStarted && activeCombatant ? (
+            <Card className="glassmorphic-card">
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
+                    <CardDescription>Current AP: {activeCombatant.ap}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                     <div className="flex-grow space-y-2">
+                       <Label>Action Cost (AP)</Label>
+                        <div className='flex flex-wrap gap-2'>
+                            {Array.from({length: 10}, (_, i) => i + 1).map(cost => (
+                                <Button key={cost} onClick={() => confirmAction(cost)} variant="outline" size="sm" className="font-mono">
+                                    {cost}
+                                </Button>
+                            ))}
+                       </div>
+                    </div>
+                </CardContent>
+            </Card>
         ) : null }
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -400,7 +399,7 @@ export function CombatTracker() {
                     <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Add Combatant</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
                             <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
@@ -496,7 +495,7 @@ export function CombatTracker() {
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => removeCombatant(c.id)} className={buttonVariants({ variant: "destructive" })}>Remove</AlertDialogAction>
+                                        <AlertDialogAction onClick={() => removeCombatant(c.id)} >Remove</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
