@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   LayoutDashboard,
@@ -113,7 +113,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         'book-nav-item',
                         isTool ? 'tool-book' : 'main-book',
                          isActive && !isSpinning && 'active',
-                         isSpinning && 'book-glow-anim',
+                         isSpinning && 'book-ignite-anim',
                         !isActive && !isSpinning && 'float-anim',
                         isSpinComplete && 'spin-complete'
                         )}

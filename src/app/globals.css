@@ -241,8 +241,8 @@
   .book-spin-anim {
     animation: book-spin 2s ease-in-out;
   }
-  .book-glow-anim {
-    animation: book-glow 2s ease-in-out;
+  .book-ignite-anim {
+    animation: book-ignite-glow 2s ease-in-out forwards;
   }
 
 }
@@ -348,23 +348,30 @@
   }
 }
 
-@keyframes book-glow {
+@keyframes book-ignite-glow {
     0% {
-        box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
+      box-shadow: none;
+    }
+    25% {
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 17.5px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+        0 0 8.4px hsla(var(--book-color-hue), 50%, 70%, 0.49),
+        0 0 3.5px hsl(var(--book-color-hue), 50%, 80%);
     }
     50% {
         box-shadow: 
-          0 0 60px 30px hsl(var(--book-color-hue), 90%, 75%), 
-          0 0 30px 15px #fff,
-          0 0 15px 5px hsl(var(--book-color-hue), 90%, 75%);
-    }
-    90% {
-        box-shadow: 
-          0 0 20px 10px hsl(var(--book-color-hue), 85%, 80%), 
-          0 0 35px 15px hsl(var(--book-color-hue), 85%, 80% / 0.7);
+          inset -3px 0 8px rgba(0,0,0,0.3), 
+          0 0 75px hsla(var(--book-color-hue), 50%, 70%, 3),
+          0 0 36px hsla(var(--book-color-hue), 50%, 70%, 2.1),
+          0 0 15px hsl(var(--book-color-hue), 50%, 80%);
     }
     100% {
-        box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1), 0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7), 0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+        box-shadow: 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
+          0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+          0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+          0 0 5px hsl(var(--book-color-hue), 50%, 80%);
     }
 }
 
