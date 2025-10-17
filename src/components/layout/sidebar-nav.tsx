@@ -56,6 +56,12 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   useEffect(() => {
     if (animatingHref) return;
@@ -124,15 +130,25 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     );
   }
 
+  const navContent = (
+    <nav className="flex flex-col items-center gap-4 py-4">
+        {mainLinks.map(link => renderBook(link, false))}
+        {gmToolsLinks.map(link => renderBook(link, true))}
+        {profileLink.map(link => renderBook(link, true))}
+    </nav>
+  )
+
   return (
     <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
-      <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
-        <nav className="flex flex-col items-center gap-4 py-4">
-            {mainLinks.map(link => renderBook(link, false))}
-            {gmToolsLinks.map(link => renderBook(link, true))}
-            {profileLink.map(link => renderBook(link, true))}
-        </nav>
-      </ScrollArea>
+      {isClient ? (
+         <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
+          {navContent}
+        </ScrollArea>
+      ) : (
+        <div className="w-full h-full hide-scrollbar overflow-visible">
+          {navContent}
+        </div>
+      )}
     </div>
   );
 }
