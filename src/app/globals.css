@@ -56,13 +56,15 @@
 }
 
 @layer base {
+  html {
+    @apply bg-background;
+  }
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    background: radial-gradient(ellipse at bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.9) 40%, transparent 80%),
-                radial-gradient(ellipse at top, transparent 40%, hsl(var(--background) / 0.8) 80%);
+    background: radial-gradient(ellipse at bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.9) 70%, transparent 100%);
   }
 
   .hide-number-arrows {
@@ -406,3 +408,5 @@
   to { transform: translateY(-2000px); }
 }
 }
+
+    
