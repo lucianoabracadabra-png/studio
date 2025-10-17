@@ -12,7 +12,7 @@ type AppLayoutProps = {
 export default function AppLayout({ children, activePath, style }: AppLayoutProps) {
 
   return (
-    <div className="min-h-screen w-full bg-background relative overflow-visible">
+    <div className="min-h-screen w-full relative overflow-visible">
         <SidebarNav activePath={activePath} />
         <main className="pl-24 relative min-h-screen p-4 lg:p-6">
             <div className="page-container-visuals" style={style}>
