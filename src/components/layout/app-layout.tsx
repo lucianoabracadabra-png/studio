@@ -1,6 +1,7 @@
 'use client';
 
 import { SidebarNav } from './sidebar-nav';
+import { cn } from '@/lib/utils';
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -16,11 +17,13 @@ export default function AppLayout({ children, activePath, style }: AppLayoutProp
             <SidebarNav activePath={activePath} />
         </div>
         <main className="pl-24 h-screen relative z-10">
-            <div 
-                className="h-full overflow-y-auto p-4 lg:p-6"
-            >
-                <div className='page-container h-full flex-1 flex flex-col' style={style}>
-                    {children}
+            <div className="p-4 lg:p-6 h-full w-full">
+                <div 
+                    className='page-container-visuals' style={style}
+                >
+                    <div className={cn('page-container-content', 'h-full flex-1 flex flex-col')}>
+                         {children}
+                    </div>
                 </div>
             </div>
         </main>
