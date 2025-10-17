@@ -157,15 +157,15 @@
   .page-container::before {
     top: -4px;
     left: -4px;
-    border-top: 2px solid;
-    border-left: 2px solid;
+    border-top: 2px solid var(--page-primary-color);
+    border-left: 2px solid var(--page-primary-color);
   }
 
   .page-container::after {
     bottom: -4px;
     right: -4px;
-    border-bottom: 2px solid;
-    border-right: 2px solid;
+    border-bottom: 2px solid var(--page-primary-color);
+    border-right: 2px solid var(--page-primary-color);
   }
 
   .spell-effect {

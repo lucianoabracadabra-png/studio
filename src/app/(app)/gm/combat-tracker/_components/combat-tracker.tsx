@@ -52,6 +52,7 @@ type LogEntry = {
   message: string;
   timestamp: string;
   colorHue?: number;
+  isPlayer?: boolean;
 }
 
 const MAX_AP_ON_TIMELINE = 50;
@@ -65,7 +66,7 @@ const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: numbe
                 <button
                     key={hue}
                     type="button"
-                    onClick={() => onSelect(hue)}
+                    onClick={() => !disabled && onSelect(hue)}
                     disabled={disabled}
                     className={cn(
                         'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center',
@@ -92,12 +93,13 @@ export function CombatTracker() {
   const [nextLogId, setNextLogId] = useState(1);
   const [actionTrails, setActionTrails] = useState<ActionTrail[]>([]);
 
-  const addLogEntry = (message: string, colorHue?: number) => {
+  const addLogEntry = (message: string, combatant?: Combatant) => {
     const newEntry: LogEntry = {
       id: nextLogId,
       message,
       timestamp: new Date().toLocaleTimeString(),
-      colorHue,
+      colorHue: combatant?.colorHue,
+      isPlayer: combatant?.isPlayer,
     };
     setLog(prev => [newEntry, ...prev]);
     setNextLogId(prev => prev + 1);
@@ -179,7 +181,7 @@ export function CombatTracker() {
     const actor = combatants.find(c => c.id === activeCombatantId);
     if (!actor) return;
 
-    addLogEntry(`[AP ${actor.ap}] ${actor.name} performs an action with cost ${cost}.`, actor.colorHue);
+    addLogEntry(`[AP ${actor.ap}] ${actor.name} performs an action with cost ${cost}.`, actor);
     
     const newAp = actor.ap + cost;
     
@@ -205,6 +207,39 @@ export function CombatTracker() {
   const handleReactionModifierChange = (amount: number) => {
     setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + amount }));
   }
+  
+  const ActionTrailDots = ({ trail, isPlayer }: { trail: ActionTrail, isPlayer: boolean }) => {
+    const distance = trail.toAp - trail.fromAp;
+    if (distance <= 0) return null;
+
+    const trailWidthPercent = (distance / MAX_AP_ON_TIMELINE) * 100;
+    const startPercent = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
+    const dotSize = 4; // size in pixels
+    const containerWidth = 800; // Estimated width, needs to be dynamic for better results
+    const trailWidthPx = (trailWidthPercent / 100) * containerWidth;
+    const numDots = Math.floor(trailWidthPx / (dotSize * 2));
+  
+    return (
+      <div
+        className="absolute h-2 top-1/2 -translate-y-1/2 flex items-center z-0"
+        style={{
+          left: `${startPercent}%`,
+          width: `${trailWidthPercent}%`,
+        }}
+      >
+        <div className="w-full h-full flex justify-between items-center">
+            {Array.from({ length: distance }).map((_, i) => (
+                 isPlayer ? (
+                    <Circle key={i} className="h-1 w-1" style={{ color: `hsl(${trail.colorHue}, 90%, 70%)`}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
+                 ) : (
+                    <Square key={i} className="h-1 w-1" style={{ color: `hsl(${trail.colorHue}, 90%, 70%)`}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
+                 )
+            ))}
+        </div>
+      </div>
+    );
+  };
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -228,11 +263,12 @@ export function CombatTracker() {
             <CardContent>
                 <div className="relative w-full bg-background/30 rounded-lg p-2 overflow-x-auto space-y-2">
                     {/* TIMELINE MARKERS */}
-                    <div className="relative h-6">
-                        <div className="absolute top-0 left-0 right-0 flex justify-between px-2">
+                    <div className="relative h-6 border-b border-white/10">
+                        <div className="absolute top-0 left-0 right-0 flex justify-between px-2 h-full">
                             {timelineMarkers.map(marker => (
-                                <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground" style={{ position: 'absolute', left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
-                                    <span>{marker}</span>
+                                <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground h-full" style={{ position: 'absolute', left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
+                                    <span className='-translate-y-full'>{marker}</span>
+                                    <div className="h-full w-px bg-white/10"></div>
                                 </div>
                             ))}
                         </div>
@@ -250,21 +286,11 @@ export function CombatTracker() {
                             };
                             
                             const trail = actionTrails.find(t => t.combatantId === c.id);
-                            const AvatarShape = c.isPlayer ? Circle : Square;
                             
                             return (
                                 <div key={c.id} className="absolute w-full" style={{ top: topPosition, height: '3rem' }}>
                                     {/* Action Trail */}
-                                    {trail && trail.fromAp !== trail.toAp && (
-                                        <div
-                                            className="absolute h-4 top-1/2 -translate-y-1/2 opacity-50 z-0"
-                                            style={{
-                                                left: `${(trail.fromAp / MAX_AP_ON_TIMELINE) * 100}%`,
-                                                width: `${((trail.toAp - trail.fromAp) / MAX_AP_ON_TIMELINE) * 100}%`,
-                                                backgroundColor: `hsl(${trail.colorHue}, 90%, 70%)`,
-                                            }}
-                                        />
-                                    )}
+                                    {trail && combatStarted && <ActionTrailDots trail={trail} isPlayer={c.isPlayer} />}
 
                                     {/* Avatar */}
                                     <TooltipProvider>
@@ -281,7 +307,11 @@ export function CombatTracker() {
                                                       )}
                                                     >
                                                         <AvatarFallback 
-                                                          className={cn(c.isPlayer ? 'rounded-full' : 'rounded-md')}
+                                                          className={cn(
+                                                            'border-2',
+                                                            c.isPlayer ? 'rounded-full border-white' : 'rounded-md border-destructive',
+                                                            isActive && 'border-transparent'
+                                                            )}
                                                           style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
                                                         >
                                                           {c.name.substring(0, 2)}
@@ -377,7 +407,8 @@ export function CombatTracker() {
                         disabled={combatStarted || !newCombatant.name}
                          style={{ 
                             backgroundColor: `hsl(${newCombatant.colorHue}, 90%, 70%)`,
-                            color: `hsl(${newCombatant.colorHue}, 100%, 95%)`,
+                            color: `hsl(${newCombatant.colorHue}, 10%, 15%)`,
+                            boxShadow: !combatStarted && newCombatant.name ? `0 0 15px hsl(${newCombatant.colorHue}, 90%, 70%)` : 'none'
                         }}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
@@ -391,10 +422,18 @@ export function CombatTracker() {
                 </CardHeader>
                 <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
                     {log.length > 0 ? log.map(entry => (
-                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50 relative overflow-hidden"
-                            style={entry.colorHue !== undefined ? { borderLeft: `4px solid hsl(${entry.colorHue}, 90%, 70%)`} : {}}>
+                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50 relative flex items-center gap-3">
+                           {entry.colorHue !== undefined && (
+                             entry.isPlayer ? (
+                               <Circle className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
+                             ) : (
+                                <Square className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
+                             )
+                           )}
+                           <div>
                             <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
                             <span>{entry.message}</span>
+                           </div>
                         </div>
                     )) : (
                         <p className="text-center text-muted-foreground py-8">Log is empty.</p>
@@ -415,9 +454,9 @@ export function CombatTracker() {
                     ) : (
                         rosterOrder.map(c => (
                             <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/30 rounded-md">
-                                <Avatar className={cn('h-9 w-9 border-2', c.isPlayer ? 'rounded-full border-white' : 'rounded-md border-destructive')}>
+                                <Avatar className={cn('h-9 w-9', c.isPlayer ? 'rounded-full' : 'rounded-md')}>
                                     <AvatarFallback
-                                        className={c.isPlayer ? 'rounded-full' : 'rounded-md'}
+                                        className={cn(c.isPlayer ? 'rounded-full' : 'rounded-md')}
                                         style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
                                     >
                                         {c.name.substring(0, 2)}
