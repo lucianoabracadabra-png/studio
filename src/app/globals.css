@@ -143,7 +143,7 @@
   }
 
   .page-container-content {
-      @apply relative z-10;
+      @apply relative;
   }
   
   .page-container-content > * {
@@ -230,6 +230,10 @@
     animation-name: book-spin;
   }
 
+  .book-decaying .book-nav-item {
+    animation: book-decay 1s ease-in-out forwards;
+  }
+
   .book-spin-and-ignite .book-nav-item::after {
     content: '';
     position: absolute;
@@ -297,6 +301,21 @@
   }
 }
 
+@keyframes book-decay {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+    box-shadow: 
+      inset -3px 0 8px rgba(0,0,0,0.3), 
+      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(180deg);
+    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+  }
+}
+
 @keyframes book-ignite-glow {
   0%, 10% {
     background-color: transparent;
@@ -358,5 +377,3 @@
   to { transform: translateY(-2000px); }
 }
 }
-
-    
