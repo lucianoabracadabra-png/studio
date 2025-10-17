@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   LayoutDashboard,
@@ -51,7 +51,6 @@ export const profileLink = [{
 }];
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
-  const pathname = usePathname();
   const router = useRouter();
   
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
@@ -63,12 +62,20 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // When the active path changes via browser history, update the spin complete state
+    if(activePath !== spinCompleteHref) {
+      setSpinCompleteHref(activePath);
+      // Reset other states that might conflict
+      setAnimatingHref(null);
+      setPreviousBook(null);
+    }
+
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, []);
+  }, [activePath, spinCompleteHref]);
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -91,13 +98,15 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     }, 2000); 
   };
   
-  const renderBook = (link: any, isTool: boolean) => {
+  const renderBook = (link: any, index: number) => {
     const isActive = activeBook?.startsWith(link.href);
     const isPrevious = previousBook?.startsWith(link.href);
     const isAnimating = animatingHref === link.href;
     const isSpinComplete = spinCompleteHref?.startsWith(link.href);
 
     const Icon = link.icon;
+    const isTool = gmToolsLinks.includes(link) || profileLink.includes(link);
+    const animationDelay = `-${Math.random() * 20}s`;
 
     return (
       <TooltipProvider key={link.href}>
@@ -117,7 +126,10 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                           isActive && !isAnimating && 'active',
                           isSpinComplete && !isAnimating && 'spin-complete'
                         )}
-                        style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
+                        style={{ 
+                          '--book-color-hue': `${link.colorHue}`,
+                          animationDelay: animationDelay,
+                        } as React.CSSProperties}
                         aria-current={isActive ? 'page' : undefined}
                     >
                         <Icon className={cn(
@@ -136,11 +148,11 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }
 
   return (
-    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible py-4">
+    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible py-4">
       <nav className="flex flex-col items-center gap-4">
-          {mainLinks.map(link => renderBook(link, false))}
-          {gmToolsLinks.map(link => renderBook(link, true))}
-          {profileLink.map(link => renderBook(link, true))}
+          {mainLinks.map((link, i) => renderBook(link, i))}
+          {gmToolsLinks.map((link, i) => renderBook(link, mainLinks.length + i))}
+          {profileLink.map((link, i) => renderBook(link, mainLinks.length + gmToolsLinks.length + i))}
       </nav>
     </div>
   );
