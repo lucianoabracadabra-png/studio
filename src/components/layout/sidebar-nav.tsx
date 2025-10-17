@@ -20,7 +20,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, CSSProperties } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export const mainLinks = [
@@ -76,9 +76,44 @@ const Book = ({
     onClick: (href: string) => void,
 }) => {
     const Icon = link.icon;
-    const isTool = gmToolsLinks.some(l => l.href === link.href) || profileLink.some(l => l.href === link.href);
     const isProfile = profileLink.some(l => l.href === link.href);
+
+    const animationStyle: CSSProperties = {};
+    let isSpinning = false;
     
+    switch(animationState) {
+        case 'growing':
+            isSpinning = true;
+            animationStyle['--book-rotation-duration'] = '1s';
+            animationStyle['--book-rotation-count'] = '2';
+            animationStyle['--book-animation-state'] = 'running';
+            break;
+        case 'climax':
+            isSpinning = true;
+            animationStyle['--book-rotation-duration'] = '1s';
+            animationStyle['--book-rotation-count'] = '4';
+            animationStyle['--book-animation-state'] = 'running';
+            break;
+        case 'decaying-on':
+            isSpinning = true;
+            animationStyle['--book-rotation-duration'] = '1s';
+            animationStyle['--book-rotation-count'] = '1';
+            animationStyle['--book-animation-state'] = 'running';
+            break;
+        case 'decaying-off':
+            isSpinning = true;
+            animationStyle['--book-rotation-duration'] = '1s';
+            animationStyle['--book-rotation-count'] = '1';
+            animationStyle['--book-animation-state'] = 'running';
+            break;
+        case 'holding':
+        case 'on':
+        case 'off':
+            isSpinning = false;
+            animationStyle['--book-animation-state'] = 'paused';
+            break;
+    }
+
     return (
         <TooltipProvider key={link.href}>
             <Tooltip>
@@ -92,16 +127,19 @@ const Book = ({
                             }}
                             className={cn(
                               'book-nav-item',
-                              isTool ? 'tool-book' : 'main-book',
                               animationState,
+                              isSpinning && 'spinning'
                             )}
-                            style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
+                            style={{ 
+                                '--book-color-hue': `${link.colorHue}`,
+                                ...animationStyle 
+                            } as React.CSSProperties}
                             aria-current={animationState === 'on' ? 'page' : undefined}
                         >
                            <div className='book-cover'>
-                             <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
-                                {isProfile ? <Icon /> : <Icon />}
-                             </div>
+                               <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
+                                   {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
+                               </div>
                            </div>
                         </Link>
                     </div>
@@ -120,22 +158,9 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     const pathname = usePathname();
     const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
     const [isPageLoading, setIsPageLoading] = useState(false);
-    const holdingBookRef = useRef<string | null>(null);
+    const destinationRef = useRef<string | null>(null);
 
-    useEffect(() => {
-        const newInitialState = getInitialState(pathname);
-        if (holdingBookRef.current && !isPageLoading) {
-            setBookStates(prev => ({
-                ...newInitialState,
-                [holdingBookRef.current!]: 'climax'
-            }));
-            holdingBookRef.current = null;
-        } else {
-            setBookStates(newInitialState);
-        }
-    }, [pathname, isPageLoading]);
-
-
+    // Effect to handle navigation and state changes after animations
     useEffect(() => {
         const timeouts: NodeJS.Timeout[] = [];
 
@@ -143,22 +168,22 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
             if (state === 'growing') {
                 const t = setTimeout(() => {
                     setBookStates(prev => ({...prev, [href]: 'holding'}));
-                }, 1000);
+                }, 1000); // Duration of 'growing'
                 timeouts.push(t);
             } else if (state === 'climax') {
                 const t = setTimeout(() => {
                     setBookStates(prev => ({...prev, [href]: 'decaying-on'}));
-                }, 1000);
+                }, 1000); // Duration of 'climax'
                 timeouts.push(t);
             } else if (state === 'decaying-on') {
                 const t = setTimeout(() => {
                     setBookStates(prev => ({...prev, [href]: 'on'}));
-                }, 1000);
+                }, 1000); // Duration of 'decaying-on'
                  timeouts.push(t);
             } else if (state === 'decaying-off') {
                  const t = setTimeout(() => {
                     setBookStates(prev => ({...prev, [href]: 'off'}));
-                }, 1000);
+                }, 1000); // Duration of 'decaying-off'
                  timeouts.push(t);
             }
         });
@@ -166,39 +191,54 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         return () => {
             timeouts.forEach(clearTimeout);
         };
-
     }, [bookStates]);
 
+    // Effect to trigger climax after page load
+    useEffect(() => {
+        if (isPageLoading) {
+            // Page has finished loading
+            setIsPageLoading(false);
+            if (destinationRef.current) {
+                setBookStates(prev => {
+                    const newStates = { ...prev };
+                    const currentHolding = Object.keys(newStates).find(key => newStates[key] === 'holding');
+                    if (currentHolding) {
+                         newStates[currentHolding] = 'climax';
+                    }
+                    // Finalize old book's state
+                    Object.keys(newStates).forEach(key => {
+                        if (key !== currentHolding && newStates[key] === 'decaying-off') {
+                             newStates[key] = 'off';
+                        }
+                    });
+                    return newStates;
+                });
+                destinationRef.current = null;
+            }
+        }
+    }, [pathname, isPageLoading]);
+
+
     const handleLinkClick = (href: string) => {
-        if (pathname.startsWith(href) || isPageLoading) return;
+        if (pathname === href || isPageLoading) return;
         
         setIsPageLoading(true);
-        holdingBookRef.current = href;
-        router.push(href);
+        destinationRef.current = href;
 
         setBookStates(prevStates => {
             const newStates = { ...prevStates };
             const currentOnBook = Object.keys(prevStates).find(key => prevStates[key] === 'on');
             
-            Object.keys(newStates).forEach(key => {
-                if (newStates[key] !== 'off') newStates[key] = 'decaying-off';
-            });
-            
             if (currentOnBook) {
                 newStates[currentOnBook] = 'decaying-off';
             }
-
-            newStates[href] = 'growing';
             
+            newStates[href] = 'growing';
             return newStates;
         });
-    };
 
-    useEffect(() => {
-        if (isPageLoading) {
-            setIsPageLoading(false);
-        }
-    }, [pathname]);
+        router.push(href);
+    };
 
     const renderBook = (link: any) => {
       return <Book 
@@ -213,7 +253,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible">
             <nav className="flex flex-col items-center gap-4 py-4">
                 {mainLinks.map(renderBook)}
-                {gmToolsLinks.map(renderBook)}
+            </nav>
+            <div className="my-4 w-8 border-t border-white/20"></div>
+            <nav className="flex flex-col items-center gap-4">
+                 {gmToolsLinks.map(renderBook)}
+            </nav>
+            <div className='flex-grow'></div>
+            <nav className="flex flex-col items-center gap-4 py-4">
                 {profileLink.map(renderBook)}
             </nav>
         </div>
