@@ -56,10 +56,23 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
-  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(pathname);
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(null);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    setSpinCompleteHref(pathname);
+    const animationTimer = setTimeout(() => {
+        setAnimatingHref(null);
+    }, 2000);
+    return () => clearTimeout(animationTimer);
+  }, [pathname]);
 
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -80,27 +93,11 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     }, 2000); 
   };
   
-  useEffect(() => {
-    if(animatingHref) {
-        const animationTimer = setTimeout(() => {
-            setAnimatingHref(null);
-            setSpinCompleteHref(pathname);
-            setPreviousBook(null);
-        }, 2000);
-        return () => clearTimeout(animationTimer);
-    } else {
-        setSpinCompleteHref(pathname);
-        setAnimatingHref(null);
-        setPreviousBook(null);
-    }
-  }, [pathname]);
-
-
   const renderBook = (link: any, isTool: boolean) => {
-    const isActive = pathname.startsWith(link.href);
-    const isPrevious = previousBook && previousBook.startsWith(link.href);
+    const isActive = activePath?.startsWith(link.href);
+    const isPrevious = previousBook?.startsWith(link.href);
     const isAnimating = animatingHref === link.href;
-    const isSpinComplete = spinCompleteHref && spinCompleteHref.startsWith(link.href);
+    const isSpinComplete = spinCompleteHref?.startsWith(link.href);
 
     const Icon = link.icon;
 
@@ -120,7 +117,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                           'book-nav-item',
                           isTool ? 'tool-book' : 'main-book',
                           isActive && !isAnimating && 'active',
-                          isSpinComplete && 'spin-complete'
+                          isSpinComplete && !isAnimating && 'spin-complete'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                         aria-current={isActive ? 'page' : undefined}
@@ -150,9 +147,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   return (
     <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
-       <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
-        {navContent}
-      </ScrollArea>
+       {isClient ? (
+        <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
+          {navContent}
+        </ScrollArea>
+      ) : (
+        navContent
+      )}
     </div>
   );
 }
