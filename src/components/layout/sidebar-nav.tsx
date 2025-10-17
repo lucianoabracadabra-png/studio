@@ -76,6 +76,11 @@ const Book = ({
 }) => {
     const Icon = link.icon;
     const isTool = gmToolsLinks.some(l => l.href === link.href) || profileLink.some(l => l.href === link.href);
+    const [animationDelay, setAnimationDelay] = useState('0s');
+
+    useEffect(() => {
+        setAnimationDelay(`${Math.random() * 0.5}s`);
+    }, []);
     
     return (
         <TooltipProvider key={link.href}>
@@ -96,8 +101,10 @@ const Book = ({
                             style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                             aria-current={animationState === 'on' ? 'page' : undefined}
                         >
-                            <Icon className={cn( "w-6 h-6 text-white/80 transition-all", animationState !== 'off' && 'active-icon' )} />
-                             <span className="book-title">{link.title}</span>
+                            <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
+                                <Icon />
+                            </div>
+                            <span className="book-title">{link.title}</span>
                         </Link>
                     </div>
                 </TooltipTrigger>
@@ -116,13 +123,18 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
     const [isPageLoading, setIsPageLoading] = useState(false);
 
-    // Effect to set initial state based on path, and handle manual url changes
     useEffect(() => {
-        setBookStates(getInitialState(pathname));
+        const initialState = getInitialState(pathname);
+        const holdingBookHref = Object.keys(bookStates).find(href => bookStates[href] === 'holding');
+
+        if(holdingBookHref && !isPageLoading) {
+             setBookStates(prev => ({ ...initialState, [holdingBookHref]: 'climax' }));
+        } else {
+            setBookStates(initialState);
+        }
     }, [pathname]);
 
 
-    // Effect to manage animation state machine
     useEffect(() => {
         const timeouts: NodeJS.Timeout[] = [];
 
@@ -156,18 +168,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
     }, [bookStates]);
 
-     // Effect to trigger climax after page load
-    useEffect(() => {
-        if (isPageLoading) return; // Don't run on the initial page load event
-        
-        const holdingBookHref = Object.keys(bookStates).find(href => bookStates[href] === 'holding');
-
-        if (holdingBookHref && pathname.startsWith(holdingBookHref)) {
-             setBookStates(prev => ({ ...prev, [holdingBookHref]: 'climax' }));
-        }
-
-    }, [isPageLoading, pathname, bookStates]);
-    
     const handleLinkClick = (href: string) => {
         if (pathname.startsWith(href) || isPageLoading) return;
 
@@ -188,7 +188,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     };
 
     useEffect(() => {
-        // This effect runs when the page navigation is complete.
         if (isPageLoading) {
             setIsPageLoading(false);
         }

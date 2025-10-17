@@ -158,13 +158,23 @@
     width: 4px;
   }
 
-  .book-nav-item.on .active-icon,
-  .book-nav-item.growing .active-icon,
-  .book-nav-item.holding .active-icon,
-  .book-nav-item.climax .active-icon,
-  .book-nav-item.decaying-on .active-icon {
+  .book-icon {
+    @apply text-white/80 transition-opacity duration-300;
+    opacity: 0;
+  }
+
+  .book-nav-item.on .book-icon,
+  .book-nav-item.growing .book-icon,
+  .book-nav-item.holding .book-icon,
+  .book-nav-item.climax .book-icon,
+  .book-nav-item.decaying-on .book-icon {
+     opacity: 1;
      animation: active-icon-pulse 2s ease-in-out infinite;
   }
+  .book-nav-item.on .book-icon {
+    animation: none; /* No pulse in final ON state */
+  }
+
 
   .book-title {
     position: absolute;
