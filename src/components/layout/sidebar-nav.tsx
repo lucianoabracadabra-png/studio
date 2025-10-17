@@ -55,10 +55,12 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
   const [focusedBookHref, setFocusedBookHref] = useState<string | null>(activePath);
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   const [animationStyles, setAnimationStyles] = useState<{ [key: string]: React.CSSProperties }>({});
   
   useEffect(() => {
     setFocusedBookHref(activePath);
+    setSpinCompleteHref(activePath);
   }, [activePath]);
 
   useEffect(() => {
@@ -83,15 +85,21 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     if (focusedBookHref !== href) {
         setSpinningBookHref(href);
         router.push(href);
+        
         setTimeout(() => {
             setFocusedBookHref(href);
-        }, 1000); 
+        }, 1000);
+
+        setTimeout(() => {
+            setSpinCompleteHref(href);
+        }, 2000);
     }
   };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isSpinning = spinningBookHref === link.href;
     const isActive = focusedBookHref === link.href;
+    const isSpinComplete = spinCompleteHref === link.href;
   
     return (
       <TooltipProvider key={link.href}>
@@ -106,7 +114,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         isTool ? 'tool-book' : 'main-book',
                          isActive && !isSpinning && 'active',
                          isSpinning && 'book-glow-anim',
-                        !isActive && !isSpinning && 'float-anim'
+                        !isActive && !isSpinning && 'float-anim',
+                        isSpinComplete && 'spin-complete'
                         )}
                         style={{ ...animationStyles[link.href], '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                         onAnimationEnd={() => setSpinningBookHref(null)}
