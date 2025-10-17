@@ -39,7 +39,7 @@ export const gmToolsLinks = [
   { label: 'Soundboard', href: '/tools/soundboard', icon: Volume2, colorHue: 170 },
 ];
 
-export const profileLink = {
+export const profileLink = [{
   label: 'Profile',
   href: '/profile',
   icon: () => (
@@ -49,7 +49,7 @@ export const profileLink = {
     </Avatar>
   ),
   colorHue: 0,
-};
+}];
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
@@ -135,7 +135,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
           </nav>
           <nav className="flex flex-col items-center gap-2">
             {gmToolsLinks.map(link => renderBook(link, true))}
-            {renderBook(profileLink, true)}
+            {profileLink.map(link => renderBook(link, true))}
           </nav>
         </div>
       </ScrollArea>

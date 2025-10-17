@@ -44,6 +44,7 @@ type ActionTrail = {
   fromAp: number;
   toAp: number;
   colorHue: number;
+  turn: number;
 };
 
 
@@ -57,7 +58,7 @@ type LogEntry = {
 
 const MAX_AP_ON_TIMELINE = 50;
 
-const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
+const allLinks = [...mainLinks, ...gmToolsLinks, ...profileLink];
 const bookColors = allLinks.filter(l => l.colorHue > 0).map(link => link.colorHue);
 const hueToNameMap = allLinks.reduce((acc, link) => {
     if (link.colorHue > 0) {
@@ -100,6 +101,7 @@ export function CombatTracker() {
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
   const [actionTrails, setActionTrails] = useState<ActionTrail[]>([]);
+  const [turnCount, setTurnCount] = useState(0);
 
   const addLogEntry = (message: string, combatant?: Combatant) => {
     const newEntry: LogEntry = {
@@ -160,9 +162,10 @@ export function CombatTracker() {
       fromAp: c.ap,
       toAp: c.ap,
       colorHue: c.colorHue,
+      turn: 0,
     }));
     setActionTrails(initialTrails);
-
+    setTurnCount(1);
     setCombatStarted(true);
     addLogEntry("Combat has started! Reaction tests rolled.");
   };
@@ -173,6 +176,7 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
     setLog([]);
+    setTurnCount(0);
     addLogEntry("Combat has been reset.");
   }
 
@@ -194,15 +198,18 @@ export function CombatTracker() {
     const newAp = actor.ap + cost;
     
     setActionTrails(prevTrails => {
-        const otherTrails = prevTrails.filter(t => t.combatantId !== activeCombatantId);
+        const olderTrails = prevTrails.map(t => ({...t, turn: t.turn + 1}));
+
         const newTrail: ActionTrail = {
             combatantId: activeCombatantId,
             fromAp: actor.ap,
             toAp: newAp,
             colorHue: actor.colorHue,
+            turn: 0, // This is the current turn's trail
         };
-        return [...otherTrails, newTrail];
+        return [...olderTrails, newTrail];
     });
+    setTurnCount(prev => prev + 1);
 
     setCombatants(combatants.map(c => 
       c.id === activeCombatantId ? { ...c, ap: newAp } : c
@@ -219,31 +226,28 @@ export function CombatTracker() {
   
     const trailWidthPercent = (distance / MAX_AP_ON_TIMELINE) * 100;
     const startPercent = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
-  
+    
+    let opacity = 0;
+    if (trail.turn === 0) opacity = 1;
+    if (trail.turn === 1) opacity = 0.5;
+    if (trail.turn === 2) opacity = 0.1;
+    if (trail.turn > 2) return null;
+
     return (
       <div
-        className="absolute h-0.5 top-1/2 -translate-y-1/2 flex items-center z-0"
+        className="absolute h-full top-0 flex items-center z-0"
         style={{
           left: `${startPercent}%`,
           width: `${trailWidthPercent}%`,
+          opacity: opacity,
         }}
       >
-        <div className="w-full h-full flex justify-between items-center">
-            {Array.from({ length: distance }).map((_, i) => {
-                let opacity = 1;
-                const reverseIndex = distance - 1 - i;
-                if (reverseIndex === 1) opacity = 0.5;
-                if (reverseIndex === 2) opacity = 0.1;
-                if (reverseIndex > 2) opacity = 0;
-
-
-                 return isPlayer ? (
-                    <Circle key={i} className="h-1 w-1" style={{ color: `hsl(${trail.colorHue}, 90%, 70%)`, opacity }} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
-                 ) : (
-                    <Square key={i} className="h-1 w-1" style={{ color: `hsl(${trail.colorHue}, 90%, 70%)`, opacity}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
-                 )
-            })}
-        </div>
+        {Array.from({length: distance}).map((_, i) => (
+            isPlayer ? 
+            <Circle key={i} className="h-1 w-1" style={{color: `hsl(${trail.colorHue}, 90%, 70%)`}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
+            :
+            <Square key={i} className="h-1 w-1" style={{color: `hsl(${trail.colorHue}, 90%, 70%)`}} fill={`hsl(${trail.colorHue}, 90%, 70%)`} />
+        ))}
       </div>
     );
   };
@@ -269,7 +273,7 @@ export function CombatTracker() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                 <div className="relative w-full bg-background/30 rounded-lg p-2 overflow-x-auto">
+                 <div className="relative w-full rounded-lg p-2 overflow-x-auto">
                     {/* TIMELINE MARKERS */}
                      <div className="relative h-4 mb-2">
                         {timelineMarkers.map(marker => (
@@ -297,12 +301,12 @@ export function CombatTracker() {
                                 boxShadow: `0 0 12px hsl(${c.colorHue}, 90%, 70%), 0 0 5px hsl(${c.colorHue}, 90%, 70%)`
                             };
                             
-                            const trail = actionTrails.find(t => t.combatantId === c.id);
+                            const trails = actionTrails.filter(t => t.combatantId === c.id);
                             
                             return (
                                 <div key={c.id} className="absolute w-full" style={{ top: topPosition, height: '3rem' }}>
                                     {/* Action Trail */}
-                                    {trail && combatStarted && <ActionTrailDots trail={trail} isPlayer={c.isPlayer} />}
+                                    {combatStarted && trails.map(trail => <ActionTrailDots key={`${trail.combatantId}-${trail.fromAp}-${trail.toAp}-${trail.turn}`} trail={trail} isPlayer={c.isPlayer} />)}
 
                                     {/* Avatar */}
                                     <TooltipProvider>
@@ -315,14 +319,12 @@ export function CombatTracker() {
                                                     <Avatar 
                                                       className={cn(
                                                         'h-2.5 w-2.5 transition-all relative', 
-                                                        c.isPlayer ? 'rounded-full' : 'rounded-md',
+                                                        c.isPlayer ? 'rounded-full' : 'rounded-none',
                                                       )}
                                                     >
                                                         <AvatarFallback 
                                                           className={cn(
-                                                            'border-2',
-                                                            c.isPlayer ? 'rounded-full border-white' : 'rounded-md border-destructive',
-                                                             isActive && 'border-transparent'
+                                                            c.isPlayer ? 'rounded-full' : 'rounded-none'
                                                             )}
                                                           style={{ backgroundColor: `hsl(${c.colorHue}, 90%, 70%)`}}
                                                         >
@@ -330,8 +332,8 @@ export function CombatTracker() {
                                                         {isActive && 
                                                           <div 
                                                             className={cn(
-                                                              "absolute -inset-1 border-2",
-                                                              c.isPlayer ? 'rounded-full' : 'rounded-md'
+                                                              "absolute -inset-1",
+                                                              c.isPlayer ? 'rounded-full' : 'rounded-none'
                                                             )} 
                                                             style={{ borderColor: `hsl(${c.colorHue}, 90%, 70%)`, ...glowStyle }}
                                                           ></div>
@@ -399,7 +401,7 @@ export function CombatTracker() {
                             <Label htmlFor="reaction">Reaction Mod</Label>
                              <div className="flex items-center gap-2">
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
-                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-full" disabled={combatStarted}/>
+                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-full hide-number-arrows" disabled={combatStarted}/>
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
                             </div>
                         </div>
@@ -460,9 +462,9 @@ export function CombatTracker() {
                     ) : (
                         rosterOrder.map(c => (
                             <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/30 rounded-md">
-                                <Avatar className={cn('h-9 w-9', c.isPlayer ? 'rounded-full' : 'rounded-md')}>
+                                <Avatar className={cn('h-9 w-9', c.isPlayer ? 'rounded-full' : 'rounded-none')}>
                                     <AvatarFallback
-                                        className={cn(c.isPlayer ? 'rounded-full' : 'rounded-md', "border-0")}
+                                        className={cn(c.isPlayer ? 'rounded-full' : 'rounded-none')}
                                         style={{ backgroundColor: `hsl(${c.colorHue}, 90%, 70%)`, color: `hsl(${c.colorHue}, 10%, 15%)`}}
                                     >
                                         {c.name.substring(0, 2)}
