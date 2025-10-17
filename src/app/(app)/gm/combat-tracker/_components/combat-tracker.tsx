@@ -231,7 +231,7 @@ export function CombatTracker() {
                     <div className="relative h-6">
                         <div className="absolute top-0 left-0 right-0 flex justify-between px-2">
                             {timelineMarkers.map(marker => (
-                                <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
+                                <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground" style={{ position: 'absolute', left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
                                     <span>{marker}</span>
                                 </div>
                             ))}
@@ -256,7 +256,7 @@ export function CombatTracker() {
                                     {/* Action Trail */}
                                     {trail && trail.fromAp !== trail.toAp && (
                                         <div
-                                            className="absolute h-4 top-1/2 -translate-y-1/2 opacity-50"
+                                            className="absolute h-8 top-1/2 -translate-y-1/2 opacity-50"
                                             style={{
                                                 left: `${(trail.fromAp / MAX_AP_ON_TIMELINE) * 100}%`,
                                                 width: `${((trail.toAp - trail.fromAp) / MAX_AP_ON_TIMELINE) * 100}%`,
@@ -343,33 +343,37 @@ export function CombatTracker() {
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Add Combatant</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="reaction">Reaction Modifier</Label>
-                         <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(-1)} disabled={combatStarted}><Minus/></Button>
-                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg" disabled={combatStarted}/>
-                            <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(1)} disabled={combatStarted}><Plus/></Button>
+                <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Name</Label>
+                            <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="reaction">Reaction Mod</Label>
+                             <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(-1)} disabled={combatStarted}><Minus className="h-4 w-4"/></Button>
+                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-16" disabled={combatStarted}/>
+                                <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(1)} disabled={combatStarted}><Plus className="h-4 w-4"/></Button>
+                            </div>
                         </div>
                     </div>
                     <div className="space-y-3">
                         <Label>Color</Label>
                         <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
                     </div>
-                    <div className="flex items-center space-x-2 pt-2">
-                    <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
-                    <Label htmlFor="is-player">Player Character</Label>
+                    <div className="flex items-center space-x-4 pt-2">
+                        <Label htmlFor="is-player" className='flex-grow'>Player Character</Label>
+                        <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
                     </div>
                     <Button 
                         onClick={addCombatant} 
                         className="w-full font-bold transition-all" 
                         disabled={combatStarted}
-                        style={{
-                            boxShadow: `0 0 15px hsl(${newCombatant.colorHue}, 80%, 70%)`
+                         style={{ 
+                            backgroundColor: `hsl(${newCombatant.colorHue}, 60%, 50%)`,
+                            color: `hsl(${newCombatant.colorHue}, 100%, 95%)`,
+                            '--ring-color': `hsl(${newCombatant.colorHue}, 60%, 50%)`
                         } as React.CSSProperties}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
@@ -421,7 +425,7 @@ export function CombatTracker() {
                                 </div>
                                     <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
+                                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8" disabled={combatStarted}><X className="h-4 w-4"/></Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
@@ -446,5 +450,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-    
