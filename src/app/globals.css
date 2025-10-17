@@ -58,7 +58,13 @@
 @layer base {
   html {
     @apply bg-background;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
   * {
     @apply border-border;
   }
@@ -408,3 +414,5 @@
   to { transform: translateY(-2000px); }
 }
 }
+
+    
