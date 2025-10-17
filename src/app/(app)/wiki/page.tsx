@@ -18,8 +18,8 @@ export default function WikiPage() {
             <Link href={`/wiki/${portal.id}`} key={portal.id} className="block group">
               <Card className="glassmorphic-card h-full flex flex-col" style={{ animationDelay: `${i * 100}ms`}}>
                 <CardHeader className="flex-row items-center gap-4">
-                  <div className="p-3 rounded-md" style={{ backgroundColor: `hsl(${portal.colorHue}, 60%, 50%)`}}>
-                    <Icon className="h-8 w-8 text-white" />
+                  <div className="p-3 rounded-md bg-primary/20">
+                    <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="font-headline text-2xl group-hover:text-primary transition-colors">{portal.title}</CardTitle>
