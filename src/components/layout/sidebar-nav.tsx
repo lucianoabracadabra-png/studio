@@ -54,12 +54,14 @@ export const profileLink = {
 export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   const [spinningBookHref, setSpinningBookHref] = useState<string | null>(null);
+  const [glowingBookHref, setGlowingBookHref] = useState<string | null>(null);
   const [focusedBookHref, setFocusedBookHref] = useState<string | null>(activePath);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   
   useEffect(() => {
     setFocusedBookHref(activePath);
     setSpinCompleteHref(activePath);
+    setGlowingBookHref(null);
   }, [activePath]);
 
 
@@ -71,6 +73,10 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     router.push(href);
     
     setTimeout(() => {
+        setGlowingBookHref(href);
+    }, 1600); // 80% of 2s spin
+
+    setTimeout(() => {
         setFocusedBookHref(href);
     }, 1000);
 
@@ -80,8 +86,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     }, 2000);
   };
   
+  const onGlowAnimationEnd = () => {
+    setGlowingBookHref(null);
+  }
+
   const renderBook = (link: any, isTool: boolean) => {
     const isSpinning = spinningBookHref === link.href;
+    const isGlowing = glowingBookHref === link.href;
     const isActive = focusedBookHref === link.href;
     const isSpinComplete = spinCompleteHref === link.href;
   
@@ -93,11 +104,12 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                     <Link
                         href={link.href}
                         onClick={(e) => handleLinkClick(e, link.href)}
+                        onAnimationEnd={onGlowAnimationEnd}
                         className={cn(
                         'book-nav-item',
                         isTool ? 'tool-book' : 'main-book',
                          isActive && !isSpinning && 'active',
-                         isSpinning && 'book-ignite-anim',
+                         isGlowing && 'book-ignite-anim',
                         isSpinComplete && 'spin-complete'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}

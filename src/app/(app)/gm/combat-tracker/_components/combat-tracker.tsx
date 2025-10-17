@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X, Minus, Plus, Square, Circle } from 'lucide-react';
+import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X, Minus, Plus, Square, Circle, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -263,19 +263,25 @@ export function CombatTracker() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="relative w-full bg-background/30 rounded-lg p-2 overflow-x-auto space-y-2">
+                 <div className="relative w-full bg-background/30 rounded-lg p-2 overflow-x-auto">
                     {/* TIMELINE MARKERS */}
-                     <div className="absolute top-0 bottom-0 left-0 right-0">
+                     <div className="relative h-4 mb-2">
                         {timelineMarkers.map(marker => (
-                            <div key={marker} className="absolute h-full" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
-                                <div className="h-full w-px bg-white/10"></div>
-                                <span className='absolute -top-5 -translate-x-1/2 text-xs text-muted-foreground'>{marker}</span>
+                            <div key={marker} className="absolute h-full flex flex-col items-center" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
+                                <span className='text-xs text-muted-foreground -translate-x-1/2'>{marker}</span>
                             </div>
                         ))}
                     </div>
                     
                     {/* COMBATANT LANES */}
                     <div className="relative space-y-2" style={{minHeight: `${rosterOrder.length * 3.5}rem`}}>
+                         {/* Grid Lines */}
+                        <div className="absolute top-0 bottom-0 left-0 right-0">
+                            {timelineMarkers.map(marker => (
+                                <div key={marker} className="absolute h-full w-px bg-white/10" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}></div>
+                            ))}
+                        </div>
+
                         {rosterOrder.map((c, index) => {
                             const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
                             const isActive = c.id === activeCombatantId;
@@ -312,7 +318,7 @@ export function CombatTracker() {
                                                             c.isPlayer ? 'rounded-full border-white' : 'rounded-md border-destructive',
                                                             isActive && 'border-transparent'
                                                             )}
-                                                          style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
+                                                          style={{ backgroundColor: `hsl(${c.colorHue}, 90%, 70%)`}}
                                                         >
                                                         </AvatarFallback>
                                                         {isActive && 
@@ -386,7 +392,9 @@ export function CombatTracker() {
                         <div className="space-y-2">
                             <Label htmlFor="reaction">Reaction Mod</Label>
                              <div className="flex items-center gap-2">
+                                <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
                                 <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-full" disabled={combatStarted}/>
+                                <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
                             </div>
                         </div>
                     </div>
@@ -402,10 +410,6 @@ export function CombatTracker() {
                         onClick={addCombatant} 
                         className="w-full font-bold transition-all" 
                         disabled={combatStarted}
-                         style={{ 
-                            backgroundColor: `hsl(${newCombatant.colorHue}, 90%, 70%)`,
-                            color: `hsl(${newCombatant.colorHue}, 10%, 15%)`,
-                        }}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
                     </Button>
@@ -453,7 +457,7 @@ export function CombatTracker() {
                                 <Avatar className={cn('h-9 w-9', c.isPlayer ? 'rounded-full' : 'rounded-md')}>
                                     <AvatarFallback
                                         className={cn(c.isPlayer ? 'rounded-full' : 'rounded-md')}
-                                        style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
+                                        style={{ backgroundColor: `hsl(${c.colorHue}, 90%, 70%)`, color: `hsl(${c.colorHue}, 10%, 15%)`}}
                                     >
                                         {c.name.substring(0, 2)}
                                     </AvatarFallback>
