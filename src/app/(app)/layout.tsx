@@ -39,9 +39,7 @@ export default function AuthenticatedAppLayout({
         activePath={activePath}
         style={pageStyle}
       >
-        <div className='p-4 lg:p-6 h-full w-full border border-[hsla(var(--page-primary-color,265),90%,70%,0.3)]'>
-          {children}
-        </div>
+        {children}
       </AppLayout>
   );
 }

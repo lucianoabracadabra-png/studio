@@ -64,7 +64,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
       setActiveBook(activePath);
       setSpinCompleteHref(activePath);
     }
-  }, [activePath]);
+  }, [activePath, animatingHref]);
 
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
@@ -125,7 +125,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }
 
   return (
-    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent py-4 z-50">
+    <div className="fixed top-0 left-0 h-full flex flex-col items-center bg-transparent py-4 z-50 px-12">
       <ScrollArea className="w-full h-full hide-scrollbar">
         <div className="flex flex-col items-center gap-4 py-4">
           <nav className="flex flex-col items-center gap-4">
