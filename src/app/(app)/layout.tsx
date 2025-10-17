@@ -39,7 +39,12 @@ export default function AuthenticatedAppLayout({
         activePath={activePath}
         style={pageStyle}
       >
-        {children}
+        <div
+          className="page-container-visuals"
+          style={pageStyle}
+        >
+          {children}
+        </div>
       </AppLayout>
   );
 }

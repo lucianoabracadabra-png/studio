@@ -1,4 +1,3 @@
-
 import { BookCopy, User, DraftingCompass, ScrollText, type LucideIcon } from "lucide-react";
 
 export type WikiPage = {
