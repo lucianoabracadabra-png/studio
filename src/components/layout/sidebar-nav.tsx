@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   LayoutDashboard,
@@ -21,7 +20,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const mainLinks = [
   { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200, title: 'Painel' },
@@ -51,18 +50,14 @@ export const profileLink = [{
   title: 'Perfil'
 }];
 
-const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }: any) => {
+const Book = ({ link, activePath }: { link: (typeof mainLinks)[0], activePath: string | null }) => {
     const [animationDelay, setAnimationDelay] = useState('0s');
-    const bookRef = useRef<HTMLDivElement>(null);
-
+    
     useEffect(() => {
         setAnimationDelay(`-${Math.random() * 20}s`);
     }, []);
 
-    const isActive = activeBook?.startsWith(link.href);
-    const isPrevious = previousBook?.startsWith(link.href);
-    const isAnimating = animatingHref === link.href;
-
+    const isActive = activePath?.startsWith(link.href);
     const Icon = link.icon;
     const isTool = gmToolsLinks.includes(link) || profileLink.includes(link);
     
@@ -70,20 +65,13 @@ const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }
         <TooltipProvider key={link.href}>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div 
-                        ref={bookRef}
-                        className={cn(
-                        "book-wrapper", 
-                        isAnimating && 'book-spin-and-ignite',
-                        isPrevious && !isAnimating && 'book-decaying',
-                    )}>
+                    <div className="book-wrapper">
                         <Link
                             href={link.href}
-                            onClick={(e) => handleLinkClick(link.href, e)}
                             className={cn(
                               'book-nav-item',
                               isTool ? 'tool-book' : 'main-book',
-                               isActive && !isAnimating && 'active',
+                              isActive && 'active',
                             )}
                             style={{ 
                               '--book-color-hue': `${link.colorHue}`,
@@ -93,7 +81,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }
                         >
                             <Icon className={cn(
                                 "w-6 h-6 text-white/80 transition-all", 
-                                isActive && !isAnimating && 'active-icon'
+                                isActive && 'active-icon'
                             )} />
                              <span className="book-title">{link.title}</span>
                         </Link>
@@ -109,45 +97,12 @@ const Book = ({ link, activeBook, previousBook, animatingHref, handleLinkClick }
 
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
-  const router = useRouter();
   
-  const [animatingHref, setAnimatingHref] = useState<string | null>(null);
-  const [previousBook, setPreviousBook] = useState<string | null>(null);
-  
-  const activeBook = activePath;
-
-  const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (animatingHref || href === activeBook) {
-      e.preventDefault();
-      return;
-    }
-    
-    e.preventDefault();
-    setPreviousBook(activeBook);
-    setAnimatingHref(href);
-    
-    setTimeout(() => {
-        router.push(href);
-    }, 1000);
-  };
-  
-  useEffect(() => {
-    if (animatingHref) {
-      const timer = setTimeout(() => {
-        setAnimatingHref(null);
-      }, 2000); // Animation duration
-      return () => clearTimeout(timer);
-    }
-  }, [animatingHref]);
-
   const renderBook = (link: any) => {
       return <Book 
           key={link.href}
           link={link}
-          activeBook={activeBook}
-          previousBook={previousBook}
-          animatingHref={animatingHref}
-          handleLinkClick={handleLinkClick}
+          activePath={activePath}
       />
   };
 
