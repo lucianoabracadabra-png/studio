@@ -74,7 +74,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
                     <div className={cn(
                         "book-wrapper", 
                         isAnimating && 'book-spin-and-ignite',
-                        isPrevious && 'book-decaying',
+                        isPrevious && !isAnimating && 'book-decaying',
                     )}>
                         <Link
                             href={link.href}
@@ -119,10 +119,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // If the page has loaded (activePath has updated) and it matches the one we're animating,
+    // we can stop the animation.
     if (animatingHref && activePath === animatingHref) {
       setAnimatingHref(null);
     }
     
+    // Cleanup timeout on unmount
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -132,6 +135,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     if (href === activeBook || animatingHref) {
+      e.preventDefault();
       return;
     }
     setPreviousBook(activeBook);
