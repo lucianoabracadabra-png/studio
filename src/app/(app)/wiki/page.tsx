@@ -18,7 +18,7 @@ export default function WikiPage() {
             <Link href={`/wiki/${portal.id}`} key={portal.id} className="block group">
               <Card className="glassmorphic-card h-full flex flex-col" style={{ animationDelay: `${i * 100}ms`}}>
                 <CardHeader className="flex-row items-center gap-4">
-                  <div className="p-3 rounded-md bg-primary/20">
+                  <div className="p-3 rounded-md">
                     <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <div>
