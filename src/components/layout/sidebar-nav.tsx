@@ -120,12 +120,14 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   useEffect(() => {
     // If the page has loaded (activePath has updated) and it matches the one we're animating,
-    // we can stop the animation.
+    // start a timer to turn off the animation, allowing for an overlap.
     if (animatingHref && activePath === animatingHref) {
-      setAnimatingHref(null);
+      timeoutRef.current = setTimeout(() => {
+        setAnimatingHref(null);
+      }, 1000); // Let animation continue for 1s after page load
     }
     
-    // Cleanup timeout on unmount
+    // Cleanup timeout on unmount or if dependencies change
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -134,12 +136,23 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }, [activePath, animatingHref]);
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (href === activeBook || animatingHref) {
+    // Prevent navigation if an animation is already in progress
+    if (animatingHref) {
       e.preventDefault();
       return;
     }
+
+    // Don't do anything if clicking the active link
+    if (href === activeBook) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Set state for the new animation
     setPreviousBook(activeBook);
     setAnimatingHref(href);
+    
+    // The <Link> component will handle the navigation.
   };
   
   const renderBook = (link: any) => {
@@ -155,8 +168,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   };
 
   return (
-    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible py-4">
-      <nav className="flex flex-col items-center gap-4">
+    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible">
+      <nav className="flex flex-col items-center gap-4 py-4">
           {mainLinks.map(renderBook)}
           {gmToolsLinks.map(renderBook)}
           {profileLink.map(renderBook)}
