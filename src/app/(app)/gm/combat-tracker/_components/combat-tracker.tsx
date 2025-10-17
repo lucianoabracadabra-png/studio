@@ -225,18 +225,21 @@ export function CombatTracker() {
   
   
   const ActionTrailDots = ({ combatantId, isPlayer }: { combatantId: number, isPlayer: boolean }) => {
-    const relevantTrails = actionTrails.filter(t => t.combatantId === combatantId);
-    const lastThreeTurns = Array.from(new Set(actionTrails.map(t => t.turn))).sort((a,b) => b-a).slice(0, 3);
+    const allTrailsForCombatant = actionTrails
+        .filter(t => t.combatantId === combatantId)
+        .sort((a, b) => b.turn - a.turn);
     
+    const lastThreeUniqueTurns = Array.from(new Set(allTrailsForCombatant.map(t => t.turn))).slice(0, 3);
+
     return (
       <>
-        {relevantTrails.map((trail, index) => {
+        {allTrailsForCombatant.map((trail, index) => {
             const distance = trail.toAp - trail.fromAp;
             if (distance <= 0) return null;
         
-            const turnIndex = lastThreeTurns.indexOf(trail.turn);
+            const turnIndex = lastThreeUniqueTurns.indexOf(trail.turn);
             let opacity = 0;
-            if (turnIndex === 0) opacity = 1; // Current turn action
+            if (turnIndex === 0) opacity = 1;      // Current turn action
             else if (turnIndex === 1) opacity = 0.5; // Last turn
             else if (turnIndex === 2) opacity = 0.1; // 2 turns ago
             else return null;
@@ -507,5 +510,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-    
