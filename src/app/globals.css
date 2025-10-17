@@ -130,7 +130,7 @@
     width: 4px;
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
-    animation: active-icon-pulse 2s ease-in-out infinite;
+    animation: active-border-pulse 2s ease-in-out infinite;
   }
   
   .active-icon {
@@ -138,9 +138,10 @@
   }
   
   .page-container {
-    @apply rounded-lg relative;
+    @apply relative overflow-hidden;
     background: 
-      radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15));
+      radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15)),
+      hsl(var(--background) / 0.5);
     backdrop-filter: blur(12px);
   }
   
@@ -281,16 +282,34 @@
   
   @keyframes active-icon-pulse {
     0% {
+      transform: scale(1);
       color: hsl(var(--book-color-hue), 80%, 85%);
       filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
     }
     50% {
+      transform: scale(1.1);
       color: hsl(var(--book-color-hue), 90%, 90%);
       filter: drop-shadow(0 0 8px hsl(var(--book-color-hue), 80%, 85%));
     }
     100% {
+       transform: scale(1);
       color: hsl(var(--book-color-hue), 80%, 85%);
       filter: drop-shadow(0 0 3px hsl(var(--book-color-hue), 80%, 85%));
+    }
+  }
+
+  @keyframes active-border-pulse {
+    0% {
+      background-color: hsl(var(--book-color-hue), 80%, 85%);
+      box-shadow: 0 0 3px hsl(var(--book-color-hue), 80%, 85%);
+    }
+    50% {
+      background-color: hsl(var(--book-color-hue), 90%, 90%);
+      box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
+    }
+    100% {
+      background-color: hsl(var(--book-color-hue), 80%, 85%);
+      box-shadow: 0 0 3px hsl(var(--book-color-hue), 80%, 85%);
     }
   }
 
