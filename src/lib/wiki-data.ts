@@ -19,14 +19,6 @@ export type Portal = {
     pages: WikiPage[];
 };
 
-// Este mapa é usado para buscar o componente de ícone real no lado do cliente
-export const iconMap: { [key: string]: LucideIcon } = {
-    BookCopy,
-    User,
-    DraftingCompass,
-    ScrollText,
-};
-
 export const portals: Portal[] = [
     {
         id: 'grimorio-do-mundo',
@@ -189,3 +181,11 @@ export const portals: Portal[] = [
         ],
     },
 ];
+
+// Este mapa é usado para buscar o componente de ícone real no lado do cliente
+export const iconMap: { [key: string]: LucideIcon } = {
+    BookCopy,
+    User,
+    DraftingCompass,
+    ScrollText,
+};
