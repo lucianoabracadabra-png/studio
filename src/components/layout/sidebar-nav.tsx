@@ -57,6 +57,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
         setAnimationDelay(`-${Math.random() * 20}s`);
     }, []);
 
+
     const isActive = activeBook?.startsWith(link.href);
     const isPrevious = previousBook?.startsWith(link.href);
     const isAnimating = animatingHref === link.href;
@@ -91,7 +92,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
                         >
                             <Icon className={cn(
                                 "w-6 h-6 text-white/80 transition-all", 
-                                isActive && !isAnimating && !isSpinComplete && 'active-icon'
+                                (isActive || isSpinComplete) && !isAnimating && 'active-icon'
                             )} />
                         </Link>
                     </div>
@@ -131,8 +132,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }, [activePath, spinCompleteHref]);
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
     if (href === activeBook || animatingHref) {
+      e.preventDefault();
       return;
     }
 
@@ -145,7 +146,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setAnimatingHref(href);
     
     timeoutRef.current = setTimeout(() => {
-      router.push(href);
+      // Navigation is handled by the Link component, we just manage animation states
       setAnimatingHref(null);
       setSpinCompleteHref(href);
     }, 2000); 
@@ -165,7 +166,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   return (
     <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible py-4">
-        <nav className="flex flex-col items-center gap-4">
+      <nav className="flex flex-col items-center gap-4">
           {mainLinks.map(renderBook)}
           {gmToolsLinks.map(renderBook)}
           {profileLink.map(renderBook)}
