@@ -52,7 +52,6 @@ export const profileLink = [{
 }];
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
-  const pathname = usePathname();
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -63,43 +62,43 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  useEffect(() => {
-    if (pathname !== activeBook) {
-      setPreviousBook(activeBook);
-      setActiveBook(pathname);
-    }
-  }, [pathname, activeBook]);
-
+  
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (href === activeBook) {
-      e.preventDefault();
+    e.preventDefault();
+    if (href === activeBook || animatingHref) {
       return;
     }
-    
-    e.preventDefault(); 
-    setAnimatingHref(href);
-    setSpinCompleteHref(null);
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-
-    window.history.pushState(null, '', href);
-    const navEvent = new PopStateEvent('popstate');
-    window.dispatchEvent(navEvent);
-
+    
+    setPreviousBook(activeBook);
+    setSpinCompleteHref(null);
+    setAnimatingHref(href);
+    setActiveBook(href);
+    
     timeoutRef.current = setTimeout(() => {
       setAnimatingHref(null);
       setSpinCompleteHref(href);
+      setPreviousBook(null);
+
+      // Navigate after animation completes
+      window.history.pushState(null, '', href);
+      const navEvent = new PopStateEvent('popstate');
+      window.dispatchEvent(navEvent);
     }, 2000); 
   };
   
   useEffect(() => {
+    // This effect ensures that browser back/forward navigation updates the UI state.
     const handlePopState = () => {
-       if (window.location.pathname !== activeBook) {
-         setPreviousBook(activeBook);
-         setActiveBook(window.location.pathname);
+       const newPath = window.location.pathname;
+       if (newPath !== activeBook) {
+         setActiveBook(newPath);
+         setSpinCompleteHref(newPath);
+         setAnimatingHref(null);
+         setPreviousBook(null);
        }
     };
 
@@ -128,7 +127,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                 <div className={cn(
                     "book-wrapper", 
                     isAnimating && 'book-spin-and-ignite',
-                    isPrevious && !isAnimating && 'book-decaying',
+                    isPrevious && 'book-decaying',
                 )}>
                     <Link
                         href={link.href}
@@ -140,8 +139,12 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                           isSpinComplete && 'spin-complete'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
+                        aria-current={isActive ? 'page' : undefined}
                     >
-                        <Icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && !isAnimating && !isSpinComplete && 'active-icon')} />
+                        <Icon className={cn(
+                            "w-6 h-6 text-white/80 transition-all", 
+                            isActive && !isAnimating && !isSpinComplete && 'active-icon'
+                        )} />
                     </Link>
                 </div>
             </TooltipTrigger>
