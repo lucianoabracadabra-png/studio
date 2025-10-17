@@ -15,7 +15,7 @@ export default function AppLayout({ children, activePath, style }: AppLayoutProp
     <div className="min-h-screen w-full relative overflow-visible">
         <SidebarNav activePath={activePath} />
         <main 
-            className={cn('pl-24 relative min-h-screen p-4 lg:p-6 page-container-visuals')}
+            className={cn('ml-24 relative min-h-screen p-4 lg:p-6 page-container-visuals')}
             style={style}
         >
           {children}

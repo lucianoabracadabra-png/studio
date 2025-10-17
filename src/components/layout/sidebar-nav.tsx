@@ -58,15 +58,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(null);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsClient(true);
-    }
-  }, []);
 
   useEffect(() => {
     setSpinCompleteHref(pathname);
@@ -149,13 +142,9 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   return (
     <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
-       {isClient ? (
         <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
           {navContent}
         </ScrollArea>
-      ) : (
-        navContent
-      )}
     </div>
   );
 }
