@@ -20,7 +20,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 export const mainLinks = [
   { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200, title: 'Painel' },
@@ -50,14 +51,29 @@ export const profileLink = [{
   title: 'Perfil'
 }];
 
-const Book = ({ link, activePath }: { link: (typeof mainLinks)[0], activePath: string | null }) => {
-    const [animationDelay, setAnimationDelay] = useState('0s');
-    
-    useEffect(() => {
-        setAnimationDelay(`-${Math.random() * 20}s`);
-    }, []);
+type AnimationState = 'off' | 'growing' | 'holding' | 'climax' | 'decaying-on' | 'decaying-off' | 'on';
+type BookStates = Record<string, AnimationState>;
 
-    const isActive = activePath?.startsWith(link.href);
+const allLinks = [...mainLinks, ...gmToolsLinks, ...profileLink];
+
+const getInitialState = (activePath: string | null): BookStates => {
+    const initialState: BookStates = {};
+    allLinks.forEach(link => {
+        const isActive = activePath?.startsWith(link.href);
+        initialState[link.href] = isActive ? 'on' : 'off';
+    });
+    return initialState;
+}
+
+const Book = ({ 
+    link, 
+    animationState,
+    onClick 
+}: { 
+    link: (typeof mainLinks)[0], 
+    animationState: AnimationState,
+    onClick: (href: string) => void,
+}) => {
     const Icon = link.icon;
     const isTool = gmToolsLinks.includes(link) || profileLink.includes(link);
     
@@ -68,21 +84,19 @@ const Book = ({ link, activePath }: { link: (typeof mainLinks)[0], activePath: s
                     <div className="book-wrapper">
                         <Link
                             href={link.href}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onClick(link.href);
+                            }}
                             className={cn(
                               'book-nav-item',
                               isTool ? 'tool-book' : 'main-book',
-                              isActive && 'active',
+                              animationState,
                             )}
-                            style={{ 
-                              '--book-color-hue': `${link.colorHue}`,
-                              animationDelay: animationDelay,
-                            } as React.CSSProperties}
-                            aria-current={isActive ? 'page' : undefined}
+                            style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
+                            aria-current={animationState === 'on' ? 'page' : undefined}
                         >
-                            <Icon className={cn(
-                                "w-6 h-6 text-white/80 transition-all", 
-                                isActive && 'active-icon'
-                            )} />
+                            <Icon className={cn( "w-6 h-6 text-white/80 transition-all", animationState !== 'off' && 'active-icon' )} />
                              <span className="book-title">{link.title}</span>
                         </Link>
                     </div>
@@ -97,22 +111,88 @@ const Book = ({ link, activePath }: { link: (typeof mainLinks)[0], activePath: s
 
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
-  
-  const renderBook = (link: any) => {
+    const router = useRouter();
+    const pathname = usePathname();
+    const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
+    const [isPageLoading, setIsPageLoading] = useState(false);
+
+    useEffect(() => {
+        setBookStates(getInitialState(pathname));
+    }, [pathname]);
+
+    useEffect(() => {
+        // This effect manages the animation state transitions after page load
+        if (!isPageLoading && pathname) {
+            const holdingBook = Object.keys(bookStates).find(href => bookStates[href] === 'holding');
+            if (holdingBook && pathname.startsWith(holdingBook)) {
+                // Page has loaded, move from holding to climax
+                setBookStates(prev => ({ ...prev, [holdingBook]: 'climax' }));
+
+                setTimeout(() => {
+                    // After climax, move to decaying
+                    setBookStates(prev => ({ ...prev, [holdingBook]: 'decaying-on' }));
+                    setTimeout(() => {
+                        // After decaying, settle to on
+                        setBookStates(prev => ({ ...prev, [holdingBook]: 'on' }));
+                    }, 1000);
+                }, 1000);
+            }
+            
+            const decayingBook = Object.keys(bookStates).find(href => bookStates[href] === 'decaying-off');
+            if(decayingBook && !pathname.startsWith(decayingBook)) {
+                 setTimeout(() => {
+                    setBookStates(prev => ({ ...prev, [decayingBook]: 'off' }));
+                }, 1000);
+            }
+        }
+    }, [isPageLoading, pathname, bookStates]);
+    
+    const handleLinkClick = (href: string) => {
+        if (pathname.startsWith(href)) return;
+
+        setIsPageLoading(true);
+        router.push(href);
+
+        setBookStates(prevStates => {
+            const newStates = { ...prevStates };
+            const currentOnBook = Object.keys(prevStates).find(key => prevStates[key] === 'on');
+            
+            if (currentOnBook) {
+                newStates[currentOnBook] = 'decaying-off';
+            }
+            newStates[href] = 'growing';
+
+            // Set up the transition from 'growing' to 'holding'
+            setTimeout(() => {
+                setBookStates(current => ({ ...current, [href]: 'holding' }));
+            }, 1000);
+
+            return newStates;
+        });
+    };
+
+    useEffect(() => {
+        if (isPageLoading) {
+            setIsPageLoading(false);
+        }
+    }, [pathname, isPageLoading]);
+
+    const renderBook = (link: any) => {
       return <Book 
           key={link.href}
           link={link}
-          activePath={activePath}
+          animationState={bookStates[link.href] || 'off'}
+          onClick={handleLinkClick}
       />
-  };
+    };
 
-  return (
-    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible">
-      <nav className="flex flex-col items-center gap-4 py-4">
-          {mainLinks.map(renderBook)}
-          {gmToolsLinks.map(renderBook)}
-          {profileLink.map(renderBook)}
-      </nav>
-    </div>
-  );
+    return (
+        <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible">
+            <nav className="flex flex-col items-center gap-4 py-4">
+                {mainLinks.map(renderBook)}
+                {gmToolsLinks.map(renderBook)}
+                {profileLink.map(renderBook)}
+            </nav>
+        </div>
+    );
 }

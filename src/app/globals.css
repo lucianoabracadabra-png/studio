@@ -23,7 +23,6 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
-    --radius: 0rem;
     --chart-1: 265 90% 70%;
     --chart-2: 300 90% 70%;
     --chart-3: 198 93% 60%;
@@ -97,12 +96,11 @@
     border-left: 3px solid hsl(var(--book-color-hue), 30%, 50%);
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: center;
-    will-change: transform;
+    will-change: transform, box-shadow;
     transform-style: preserve-3d;
-    transition: box-shadow 0.5s ease-out, transform 0.5s ease-out;
-    animation: book-float 20s ease-in-out infinite;
+    transform: perspective(1000px) rotateY(0deg);
   }
-  
+
   .book-nav-item.main-book {
     @apply h-16;
   }
@@ -119,30 +117,52 @@
     left: 2px;
     width: 2px;
     background: linear-gradient(to bottom, hsl(var(--book-color-hue), 20%, 60%), hsl(var(--book-color-hue), 25%, 40%));
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
   }
   
-  .book-nav-item.active {
+  .book-nav-item.on,
+  .book-nav-item.growing,
+  .book-nav-item.holding,
+  .book-nav-item.climax,
+  .book-nav-item.decaying-on {
+    transform: perspective(1000px) rotateY(20deg);
+  }
+
+  .book-nav-item.on::before {
+    opacity: 1;
+  }
+  
+  .book-nav-item.on {
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
       0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
       0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-    animation: book-spin-and-ignite 2s ease-in-out, book-float 20s ease-in-out infinite;
   }
 
-  .book-nav-item.active::after {
+  .book-nav-item::after {
     content: '';
     position: absolute;
     right: 0;
     top: 0;
     bottom: 0;
-    width: 4px;
+    width: 0px;
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
     box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
+    transition: width 0.5s ease-out;
+  }
+  
+  .book-nav-item.on::after {
+    width: 4px;
   }
 
-  .book-nav-item.active .active-icon {
+  .book-nav-item.on .active-icon,
+  .book-nav-item.growing .active-icon,
+  .book-nav-item.holding .active-icon,
+  .book-nav-item.climax .active-icon,
+  .book-nav-item.decaying-on .active-icon {
      animation: active-icon-pulse 2s ease-in-out infinite;
   }
 
@@ -158,16 +178,16 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
     white-space: nowrap;
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.3s ease-out;
   }
-
-  .book-nav-item:hover .book-title {
-    opacity: 1;
-  }
-
-  .book-nav-item.active .book-title {
-    opacity: 0 !important;
+  
+  .book-nav-item.on .book-title,
+  .book-nav-item.growing .book-title,
+  .book-nav-item.holding .book-title,
+  .book-nav-item.climax .book-title,
+  .book-nav-item.decaying-on .book-title {
+    opacity: 0;
   }
   
   .page-container-visuals {
@@ -196,57 +216,13 @@
     text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent)));
     @apply bg-clip-text select-none;
   }
-  #stars {
-    width: 1px;
-    height: 1px;
-    background: transparent;
-    box-shadow: 
-      1889px 1381px #FFF, 1581px 1869px #FFF, 129px 1279px #FFF, 1877px 308px #FFF, 73px 1438px #FFF, 1943px 1083px #FFF, 1374px 137px #FFF, 483px 184px #FFF, 1591px 1533px #FFF, 915px 1572px #FFF, 646px 1318px #FFF, 163px 1588px #FFF, 1490px 1032px #FFF, 891px 156px #FFF, 333px 1238px #FFF, 989px 835px #FFF, 114px 1017px #FFF, 1316px 1488px #FFF, 571px 1282px #FFF, 1827px 1868px #FFF, 127px 1137px #FFF, 1339px 269px #FFF, 1307px 1904px #FFF, 1989px 1957px #FFF, 1025px 1305px #FFF, 1378px 129px #FFF, 1845px 339px #FFF, 1828px 1599px #FFF, 319px 1930px #FFF, 1156px 1384px #FFF, 1933px 666px #FFF, 1424px 1729px #FFF, 609px 1459px #FFF, 866px 1386px #FFF, 1269px 74px #FFF, 1331px 1746px #FFF, 1529px 165px #FFF, 1819px 1813px #FFF, 1603px 1098px #FFF, 1493px 895px #FFF;
-    animation: animStar 50s linear infinite;
-  }
-  #stars:after {
-    content: " ";
-    position: absolute;
-    top: 2000px;
-    width: 1px;
-    height: 1px;
-    background: transparent;
-    box-shadow: 
-      1889px 1381px #FFF, 1581px 1869px #FFF, 129px 1279px #FFF, 1877px 308px #FFF, 73px 1438px #FFF, 1943px 1083px #FFF, 1374px 137px #FFF, 483px 184px #FFF, 1591px 1533px #FFF, 915px 1572px #FFF, 646px 1318px #FFF, 163px 1588px #FFF, 1490px 1032px #FFF, 891px 156px #FFF, 333px 1238px #FFF, 989px 835px #FFF, 114px 1017px #FFF, 1316px 1488px #FFF, 571px 1282px #FFF, 1827px 1868px #FFF, 127px 1137px #FFF, 1339px 269px #FFF, 1307px 1904px #FFF, 1989px 1957px #FFF, 1025px 1305px #FFF, 1378px 129px #FFF, 1845px 339px #FFF, 1828px 1599px #FFF, 319px 1930px #FFF, 1156px 1384px #FFF, 1933px 666px #FFF, 1424px 1729px #FFF, 609px 1459px #FFF, 866px 1386px #FFF, 1269px 74px #FFF, 1331px 1746px #FFF, 1529px 165px #FFF, 1819px 1813px #FFF, 1603px 1098px #FFF, 1493px 895px #FFF;
-  }
-  #stars2 {
-    width: 2px;
-    height: 2px;
-    background: transparent;
-    box-shadow: 1531px 1052px #FFF, 1633px 1809px #FFF, 1930px 134px #FFF, 946px 1538px #FFF, 1524px 1416px #FFF, 1183px 683px #FFF, 1032px 14px #FFF, 1895px 168px #FFF, 198px 132px #FFF, 898px 1455px #FFF, 1735px 304px #FFF, 1515px 1750px #FFF, 1420px 1192px #FFF, 1502px 166px #FFF, 755px 1714px #FFF, 1428px 1431px #FFF, 853px 432px #FFF, 110px 1406px #FFF, 1490px 1842px #FFF, 1941px 1039px #FFF;
-    animation: animStar2 100s linear infinite;
-  }
-  #stars2:after {
-    content: " ";
-    position: absolute;
-    top: 2000px;
-    width: 2px;
-    height: 2px;
-    background: transparent;
-    box-shadow: 1531px 1052px #FFF, 1633px 1809px #FFF, 1930px 134px #FFF, 946px 1538px #FFF, 1524px 1416px #FFF, 1183px 683px #FFF, 1032px 14px #FFF, 1895px 168px #FFF, 198px 132px #FFF, 898px 1455px #FFF, 1735px 304px #FFF, 1515px 1750px #FFF, 1420px 1192px #FFF, 1502px 166px #FFF, 755px 1714px #FFF, 1428px 1431px #FFF, 853px 432px #FFF, 110px 1406px #FFF, 1490px 1842px #FFF, 1941px 1039px #FFF;
-  }
-  #stars3 {
-    width: 3px;
-    height: 3px;
-    background: transparent;
-    box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
-    animation: animStar3 150s linear infinite;
-  }
-  #stars3:after {
-    content: " ";
-    position: absolute;
-    top: 2000px;
-    width: 3px;
-    height: 3px;
-    background: transparent;
-    box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
-  }
 
+  /* Animations */
+  .book-nav-item.growing { animation: book-growing 1s ease-out forwards; }
+  .book-nav-item.holding { animation: book-holding 1s linear infinite; }
+  .book-nav-item.climax { animation: book-climax 1s ease-in-out forwards; }
+  .book-nav-item.decaying-on { animation: book-decaying-on 1s ease-out forwards; }
+  .book-nav-item.decaying-off { animation: book-decaying-off 1s ease-in forwards; }
 }
 
 @layer utilities {
@@ -258,28 +234,6 @@
     display: none; /* Chrome, Safari, Opera*/
   }
 
-  @keyframes galaxy-movement {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  @keyframes stars-twinkle {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-  }
-
-  @keyframes shooting-star {
-    0% { transform: translateX(300vw) translateY(0); opacity: 1; }
-    100% { transform: translateX(-50vw) translateY(100vh); opacity: 0; }
-  }
-
-  @keyframes shooting-star-horizontal {
-    0% { transform: translateY(100vh) translateX(0); opacity: 1; }
-    100% { transform: translateY(-50vh) translateX(100vw); opacity: 0; }
-  }
-  
   @keyframes active-icon-pulse {
     0%, 100% {
       color: hsl(var(--book-color-hue), 80%, 85%);
@@ -291,71 +245,59 @@
     }
   }
 
-@keyframes book-spin-and-ignite {
-    0% {
+  @keyframes book-growing {
+    from {
       transform: perspective(1000px) rotateY(0deg);
       box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
-    50% {
-      box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.4), 
-        0 0 30px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 18px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 10px hsl(var(--book-color-hue), 50%, 80%);
-    }
-    100% {
-      transform: perspective(1000px) rotateY(360deg);
-      box-shadow: 
-        inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-        0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-        0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+    to {
+      transform: perspective(1000px) rotateY(20deg);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
 
-@keyframes book-float {
-    0% { transform: translateY(0px) translateX(0px); }
-    25% { transform: translateY(-3px) translateX(2px); }
-    50% { transform: translateY(2px) translateX(-2px); }
-    75% { transform: translateY(1px) translateX(3px); }
-    100% { transform: translateY(0px) translateX(0px); }
-}
+  @keyframes book-holding {
+    0%, 100% {
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 12.5px hsla(var(--book-color-hue), 50%, 70%, 0.5);
+    }
+    50% {
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 37.5px hsla(var(--book-color-hue), 50%, 70%, 1.5);
+    }
+  }
 
-#title {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  
-  color: #FFF;
-  text-align: center;
-  font-family: 'lato',sans-serif;
-  font-weight: 300;
-  font-size: 50px;
-  letter-spacing: 10px;
-  
-  margin-top: -60px;
-  padding-left: 10px;
-}
+  @keyframes book-climax {
+    from {
+      transform: perspective(1000px) rotateY(20deg);
+    }
+    50% {
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 75px hsla(var(--book-color-hue), 50%, 70%, 3);
+    }
+    to {
+      transform: perspective(1000px) rotateY(20deg);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
+    }
+  }
 
-#title span {
-    background: -webkit-linear-gradient(white, #38495a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-    
-@keyframes animStar {
-  from { transform: translateY(0px); }
-  to { transform: translateY(-2000px); }
-}
+  @keyframes book-decaying-on {
+    from {
+      transform: perspective(1000px) rotateY(20deg);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
+    }
+    to {
+      transform: perspective(1000px) rotateY(20deg);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
+    }
+  }
 
-@keyframes animStar2 {
-  from { transform: translateY(0px); }
-  to { transform: translateY(-2000px); }
-}
+  @keyframes book-decaying-off {
+    from {
+      transform: perspective(1000px) rotateY(20deg);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
+    }
+    to {
+      transform: perspective(1000px) rotateY(0deg);
+      box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+    }
+  }
 
-@keyframes animStar3 {
-  from { transform: translateY(0px); }
-  to { transform: translateY(-2000px); }
-}
 }
