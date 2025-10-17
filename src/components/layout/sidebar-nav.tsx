@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const mainLinks = [
   { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
@@ -55,32 +55,38 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
+  const [previousBook, setPreviousBook] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    setActiveBook(activePath);
+  }, [activePath]);
 
-
+  // Effect to handle the delayed deactivation of the previous book
   useEffect(() => {
-    if (!animatingHref) {
-      setActiveBook(activePath);
+    let timeoutId: NodeJS.Timeout;
+    if (animatingHref) {
+      // After 1 second, the old book is deactivated
+      timeoutId = setTimeout(() => {
+        setPreviousBook(null);
+      }, 1000); 
     }
-  }, [activePath, animatingHref]);
-
+    return () => clearTimeout(timeoutId);
+  }, [animatingHref]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (href === activePath || animatingHref) return;
-
+    if (href === activeBook || animatingHref) return;
+    
+    // 1. Store the currently active book so we can deactivate it later.
+    setPreviousBook(activeBook);
+    
+    // 2. Immediately activate the new book and start the animation.
     setActiveBook(href);
     setAnimatingHref(href);
     
-    setTimeout(() => {
-        // After 1 second, the old book is deactivated
-        // We set activeBook to null, but the useEffect will bring it back to the new href after animation
-    }, 1000); 
-
+    // 3. Navigate after the animation completes.
     setTimeout(() => {
         router.push(href);
         setAnimatingHref(null);
@@ -90,6 +96,9 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const renderBook = (link: any, isTool: boolean) => {
     const isCurrentlyAnimating = animatingHref === link.href;
     const isActive = activeBook === link.href;
+    const isPrevious = previousBook === link.href;
+
+    const shouldBeActive = isActive || isPrevious;
   
     return (
       <TooltipProvider key={link.href}>
@@ -105,7 +114,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         className={cn(
                         'book-nav-item',
                         isTool ? 'tool-book' : 'main-book',
-                        isActive && 'active'
+                        // Only apply 'active' if it's the current or previous book during animation
+                        shouldBeActive && 'active'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
