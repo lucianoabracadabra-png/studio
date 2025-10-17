@@ -107,6 +107,10 @@ export function CombatTracker() {
     return [...combatants].sort((a, b) => a.ap - b.ap);
   }, [combatants]);
 
+  const rosterOrder = useMemo(() => {
+    return [...combatants].sort((a,b) => a.name.localeCompare(b.name));
+  }, [combatants]);
+
   useEffect(() => {
     if (combatStarted && sortedCombatants.length > 0) {
       setActiveCombatantId(sortedCombatants[0].id);
@@ -141,7 +145,6 @@ export function CombatTracker() {
     });
     setCombatants(updatedCombatants);
     
-    // Initialize trails
     const initialTrails = updatedCombatants.map(c => ({
       combatantId: c.id,
       fromAp: c.ap,
@@ -219,70 +222,82 @@ export function CombatTracker() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="relative h-48 w-full bg-background/30 rounded-lg p-2 overflow-x-auto">
-                    <div className="absolute top-0 left-0 right-0 flex justify-between px-2">
-                        {timelineMarkers.map(marker => (
-                            <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground">
-                                <span>{marker}</span>
-                                <div className="h-2 w-px bg-border"></div>
-                            </div>
-                        ))}
+                <div className="relative w-full bg-background/30 rounded-lg p-2 overflow-x-auto space-y-2">
+                    {/* TIMELINE MARKERS */}
+                    <div className="relative h-6">
+                        <div className="absolute top-0 left-0 right-0 flex justify-between px-2">
+                            {timelineMarkers.map(marker => (
+                                <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
+                                    <span>{marker}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <div className="relative h-full pt-4">
-                        {actionTrails.map(trail => {
-                             const from = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
-                             const to = (trail.toAp / MAX_AP_ON_TIMELINE) * 100;
-                             if(from === to) return null;
-                             return (
-                                <div
-                                    key={trail.combatantId}
-                                    className="absolute h-2 top-1/2 -translate-y-1/2 opacity-50"
-                                    style={{
-                                        left: `${from}%`,
-                                        width: `${to - from}%`,
-                                        backgroundColor: `hsl(${trail.colorHue}, 60%, 50%)`,
-                                    }}
-                                />
-                             )
-                        })}
-                        {sortedCombatants.map((c, index) => {
+                    
+                    {/* COMBATANT LANES */}
+                    <div className="relative space-y-2" style={{minHeight: `${rosterOrder.length * 3.5}rem`}}>
+                        {rosterOrder.map((c, index) => {
                             const leftPercentage = (c.ap / MAX_AP_ON_TIMELINE) * 100;
                             const isActive = c.id === activeCombatantId;
-                            const topPosition = `${20 + (index % 4) * 25}%`;
-                            const glowStyle = {
+                            const topPosition = `${index * 3.5}rem`;
+
+                            const glowStyle = isActive ? {
                                 boxShadow: `0 0 12px hsl(${c.colorHue}, 80%, 70%), 0 0 5px hsl(${c.colorHue}, 80%, 70%)`
-                            };
+                            } : {};
+                            
+                            const trail = actionTrails.find(t => t.combatantId === c.id);
+                            
                             return (
-                                <TooltipProvider key={c.id}>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <div
-                                                className="absolute -translate-y-1/2 transition-all duration-500 ease-out"
-                                                style={{ left: `calc(${leftPercentage}% - 20px)`, top: topPosition }}
-                                            >
-                                                <Avatar 
-                                                  className={cn(
-                                                    'h-10 w-10 border-4 transition-all relative', 
-                                                    isActive ? 'scale-125 z-10' : 'z-0',
-                                                    c.isPlayer ? 'border-white' : 'border-destructive'
-                                                  )}
+                                <div key={c.id} className="absolute w-full" style={{ top: topPosition, height: '3rem' }}>
+                                    {/* Action Trail */}
+                                    {trail && trail.fromAp !== trail.toAp && (
+                                        <div
+                                            className="absolute h-4 top-1/2 -translate-y-1/2 opacity-50"
+                                            style={{
+                                                left: `${(trail.fromAp / MAX_AP_ON_TIMELINE) * 100}%`,
+                                                width: `${((trail.toAp - trail.fromAp) / MAX_AP_ON_TIMELINE) * 100}%`,
+                                                backgroundColor: `hsl(${trail.colorHue}, 60%, 50%)`,
+                                            }}
+                                        />
+                                    )}
+
+                                    {/* Avatar */}
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div
+                                                    className="absolute -translate-y-1/2 transition-all duration-500 ease-out"
+                                                    style={{ left: `calc(${leftPercentage}% - 20px)`, top: '50%' }}
                                                 >
-                                                    <AvatarFallback 
-                                                      className={cn(c.isPlayer && 'font-bold')}
-                                                      style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
+                                                    <Avatar 
+                                                      className={cn(
+                                                        'h-10 w-10 transition-all relative', 
+                                                        isActive ? 'scale-125 z-10' : 'z-0'
+                                                      )}
                                                     >
-                                                      {c.name.substring(0, 2)}
-                                                    </AvatarFallback>
-                                                    {isActive && <div className="absolute -inset-1 rounded-full" style={glowStyle}></div>}
-                                                </Avatar>
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p className="font-bold">{c.name}</p>
-                                            <p>AP: {c.ap}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                                                        <AvatarFallback 
+                                                          className={cn(c.isPlayer && 'font-bold')}
+                                                          style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
+                                                        >
+                                                          {c.name.substring(0, 2)}
+                                                        </AvatarFallback>
+                                                        {isActive && 
+                                                          <div 
+                                                            className="absolute -inset-1 rounded-full border-2" 
+                                                            style={{ borderColor: `hsl(${c.colorHue}, 80%, 70%)`, ...glowStyle }}
+                                                          ></div>
+                                                        }
+                                                    </Avatar>
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p className="font-bold">{c.name}</p>
+                                                <p>AP: {c.ap}</p>
+                                                <p>React Mod: {c.reactionModifier}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
                             )
                         })}
                     </div>
@@ -373,10 +388,10 @@ export function CombatTracker() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-2 max-h-[30rem] overflow-y-auto">
-                    {combatants.length === 0 ? (
+                    {rosterOrder.length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
                     ) : (
-                        [...combatants].sort((a,b) => a.name.localeCompare(b.name)).map(c => (
+                        rosterOrder.map(c => (
                             <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/30 rounded-md">
                                 <Avatar className={cn('h-9 w-9 border-2', c.isPlayer ? 'border-white' : 'border-destructive')}>
                                     <AvatarFallback
@@ -417,3 +432,5 @@ export function CombatTracker() {
     </div>
   );
 }
+
+    
