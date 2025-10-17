@@ -130,8 +130,7 @@
     width: 4px;
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
-    animation: expand-out 0.5s ease-out forwards, active-border-pulse 2s ease-in-out infinite;
-    animation-delay: 0s, 0.5s; /* Delay the pulse until after the expansion */
+    animation: expand-out 0.5s ease-out forwards;
     box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
   }
   
@@ -377,8 +376,8 @@
 }
 
 @keyframes book-ignite-glow {
-  0% {
-     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
+  0%, 10% {
+    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
   }
   80% {
     box-shadow: 
@@ -387,7 +386,7 @@
       0 0 108px hsla(var(--book-color-hue), 50%, 70%, 0.7),
       0 0 45px hsl(var(--book-color-hue), 50%, 80%);
   }
-  90%, 100% {
+  100% {
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
