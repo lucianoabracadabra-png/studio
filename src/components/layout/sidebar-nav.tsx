@@ -59,8 +59,9 @@ const allLinks = [...mainLinks, ...gmToolsLinks, ...profileLink];
 const getInitialState = (activePath: string | null): BookStates => {
     const initialState: BookStates = {};
     allLinks.forEach(link => {
-        const isActive = activePath?.startsWith(link.href);
-        initialState[link.href] = isActive ? 'on' : 'off';
+        const isActive = activePath?.startsWith(link.href) && link.href !== '/';
+        const isDashboard = activePath === '/dashboard' && link.href === '/dashboard';
+        initialState[link.href] = (isActive || isDashboard) ? 'on' : 'off';
     });
     return initialState;
 }
@@ -96,9 +97,11 @@ const Book = ({
                             style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                             aria-current={animationState === 'on' ? 'page' : undefined}
                         >
-                            <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
+                           <div className='book-cover'>
+                             <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
                                 <Icon />
-                            </div>
+                             </div>
+                           </div>
                         </Link>
                     </div>
                 </TooltipTrigger>
@@ -116,17 +119,20 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     const pathname = usePathname();
     const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
     const [isPageLoading, setIsPageLoading] = useState(false);
+    const holdingBookRef = useRef<string | null>(null);
 
     useEffect(() => {
-        const initialState = getInitialState(pathname);
-        const holdingBookHref = Object.keys(bookStates).find(href => bookStates[href] === 'holding');
-
-        if(holdingBookHref && !isPageLoading) {
-             setBookStates(prev => ({ ...initialState, [holdingBookHref]: 'climax' }));
+        const newInitialState = getInitialState(pathname);
+        if (holdingBookRef.current && !isPageLoading) {
+            setBookStates(prev => ({
+                ...newInitialState,
+                [holdingBookRef.current!]: 'climax'
+            }));
+            holdingBookRef.current = null;
         } else {
-            setBookStates(initialState);
+            setBookStates(newInitialState);
         }
-    }, [pathname]);
+    }, [pathname, isPageLoading]);
 
 
     useEffect(() => {
@@ -164,17 +170,23 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
     const handleLinkClick = (href: string) => {
         if (pathname.startsWith(href) || isPageLoading) return;
-
+        
         setIsPageLoading(true);
+        holdingBookRef.current = href;
         router.push(href);
 
         setBookStates(prevStates => {
             const newStates = { ...prevStates };
             const currentOnBook = Object.keys(prevStates).find(key => prevStates[key] === 'on');
             
+            Object.keys(newStates).forEach(key => {
+                if (newStates[key] !== 'off') newStates[key] = 'decaying-off';
+            });
+            
             if (currentOnBook) {
                 newStates[currentOnBook] = 'decaying-off';
             }
+
             newStates[href] = 'growing';
             
             return newStates;
@@ -185,8 +197,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         if (isPageLoading) {
             setIsPageLoading(false);
         }
-    }, [pathname, isPageLoading]);
-
+    }, [pathname]);
 
     const renderBook = (link: any) => {
       return <Book 

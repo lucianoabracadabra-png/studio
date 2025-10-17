@@ -89,6 +89,11 @@
     @apply shadow-2xl shadow-primary/20 border-white/20;
     transform: translateY(-4px);
   }
+  
+  .book-wrapper {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
 
   .book-nav-item {
     @apply relative w-12 flex items-center justify-center cursor-pointer duration-300 ease-in-out;
@@ -120,6 +125,11 @@
     opacity: 0;
     transition: opacity 0.5s ease-out;
   }
+
+  .book-cover {
+      @apply absolute inset-0 flex items-center justify-center;
+      transform: translateZ(2px);
+  }
   
   .book-nav-item.on,
   .book-nav-item.growing,
@@ -129,7 +139,11 @@
     transform: perspective(1000px) rotateY(20deg);
   }
 
-  .book-nav-item.on::before {
+  .book-nav-item.on::before,
+  .book-nav-item.growing::before,
+  .book-nav-item.holding::before,
+  .book-nav-item.climax::before,
+  .book-nav-item.decaying-on::before {
     opacity: 1;
   }
   
@@ -154,7 +168,11 @@
     transition: width 0.5s ease-out;
   }
   
-  .book-nav-item.on::after {
+  .book-nav-item.on::after,
+  .book-nav-item.growing::after,
+  .book-nav-item.holding::after,
+  .book-nav-item.climax::after,
+  .book-nav-item.decaying-on::after {
     width: 4px;
   }
 
@@ -169,10 +187,10 @@
   .book-nav-item.climax .book-icon,
   .book-nav-item.decaying-on .book-icon {
      opacity: 1;
-     animation: active-icon-pulse 2s ease-in-out infinite;
   }
+
   .book-nav-item.on .book-icon {
-    animation: none; /* No pulse in final ON state */
+    animation: active-icon-pulse 2s ease-in-out infinite;
   }
 
   
@@ -237,40 +255,42 @@
       box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
     to {
-      transform: perspective(1000px) rotateY(20deg);
+      transform: perspective(1000px) rotateY(740deg); /* 2 spins + 20deg */
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
 
   @keyframes book-holding {
     0%, 100% {
+      transform: perspective(1000px) rotateY(740deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 12.5px hsla(var(--book-color-hue), 50%, 70%, 0.5);
     }
     50% {
+      transform: perspective(1000px) rotateY(740deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 37.5px hsla(var(--book-color-hue), 50%, 70%, 1.5);
     }
   }
 
   @keyframes book-climax {
     from {
-      transform: perspective(1000px) rotateY(20deg);
+      transform: perspective(1000px) rotateY(740deg);
     }
     50% {
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 75px hsla(var(--book-color-hue), 50%, 70%, 3);
     }
     to {
-      transform: perspective(1000px) rotateY(20deg);
+      transform: perspective(1000px) rotateY(2180deg); /* 740 + 1440 */
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
 
   @keyframes book-decaying-on {
     from {
-      transform: perspective(1000px) rotateY(20deg);
+      transform: perspective(1000px) rotateY(2180deg);
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
     to {
-      transform: perspective(1000px) rotateY(20deg);
+      transform: perspective(1000px) rotateY(2540deg); /* 2180 + 360 */
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
   }
@@ -281,7 +301,7 @@
       box-shadow: inset -3px 0 8px rgba(0,0,0,0.3), 0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1);
     }
     to {
-      transform: perspective(1000px) rotateY(0deg);
+      transform: perspective(1000px) rotateY(-340deg); /* 20 - 360 */
       box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     }
   }
