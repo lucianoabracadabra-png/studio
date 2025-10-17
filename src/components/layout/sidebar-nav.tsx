@@ -20,7 +20,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect, useRef } from 'react';
 
@@ -58,7 +57,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
-  const [activeBook, setActiveBook] = useState<string | null>(activePath);
+  
+  const activeBook = activePath;
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -83,7 +83,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setPreviousBook(activeBook);
     setSpinCompleteHref(null);
     setAnimatingHref(href);
-    setActiveBook(href);
     
     timeoutRef.current = setTimeout(() => {
       router.push(href);
@@ -136,19 +135,13 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     );
   }
 
-  const navContent = (
-    <nav className="flex flex-col items-center gap-4 py-4">
-        {mainLinks.map(link => renderBook(link, false))}
-        {gmToolsLinks.map(link => renderBook(link, true))}
-        {profileLink.map(link => renderBook(link, true))}
-    </nav>
-  )
-
   return (
-    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible">
-        <ScrollArea className="w-full h-full hide-scrollbar overflow-visible">
-          {navContent}
-        </ScrollArea>
+    <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center bg-transparent z-50 overflow-visible py-4">
+      <nav className="flex flex-col items-center gap-4">
+          {mainLinks.map(link => renderBook(link, false))}
+          {gmToolsLinks.map(link => renderBook(link, true))}
+          {profileLink.map(link => renderBook(link, true))}
+      </nav>
     </div>
   );
 }
