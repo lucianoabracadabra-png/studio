@@ -91,7 +91,7 @@
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     transform-origin: center;
     will-change: transform;
-    border-radius: calc(var(--radius) - 4px);
+    border-radius: 0;
     transform-style: preserve-3d;
     transition: box-shadow 0.5s ease-out;
   }
@@ -141,10 +141,10 @@
   .page-container {
     @apply rounded-lg relative;
     background: 
-      radial-gradient(ellipse at 100% 0%, hsl(var(--page-primary-color), 90%, 70%) / 0.15),
-      radial-gradient(ellipse at 0% 100%, hsl(var(--page-accent-color), 90%, 70%) / 0.15),
+      radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15)),
+      radial-gradient(ellipse at 0% 100%, hsla(var(--page-accent-color, 300), 90%, 70%, 0.15)),
       hsl(var(--background) / 0.5);
-    box-shadow: 0 0 40px hsl(var(--page-primary-color), 90%, 70%) / 0.1;
+    box-shadow: 0 0 40px hsla(var(--page-primary-color, 265), 90%, 70%, 0.1);
     backdrop-filter: blur(12px);
   }
   
@@ -161,8 +161,8 @@
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
-    border-color: hsl(var(--page-primary-color), 90%, 70%);
-    filter: drop-shadow(0 0 5px hsl(var(--page-primary-color), 90%, 70%));
+    border-color: hsla(var(--page-primary-color, 265), 90%, 70%, 1);
+    filter: drop-shadow(0 0 5px hsla(var(--page-primary-color, 265), 90%, 70%, 1));
     border-radius: var(--radius);
   }
 
@@ -192,8 +192,8 @@
   
   .magical-glow {
     @apply text-transparent bg-clip-text select-none;
-    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
-    text-shadow: 0 0 8px hsl(var(--primary)), 0 0 16px hsl(var(--accent));
+    background-image: linear-gradient(to right, hsl(var(--page-primary-color, var(--primary))), hsl(var(--page-accent-color, var(--accent))));
+    text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent)));
   }
 
   #stars {
@@ -364,7 +364,7 @@
 }
 
 @keyframes book-ignite-glow {
-  0% { 
+  0%, 40% { 
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); 
   }
   80% {

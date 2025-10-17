@@ -57,28 +57,33 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
   const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
 
-  useEffect(() => {
-    // This effect ensures the active book is set on initial load or browser navigation
+   useEffect(() => {
+    // This effect runs only on initial load or when the path changes via browser history.
+    // It immediately sets the visual state without animation.
     if (!animatingHref) {
       setActiveBook(activePath);
       setSpinCompleteHref(activePath);
     }
-  }, [activePath, animatingHref]);
-
+  }, [activePath]);
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (href === activePath || animatingHref) return; // Don't re-run on same link or while animating
 
+    setActiveBook(null); // Remove active state from current book
     setSpinCompleteHref(null); // Remove pulse from old active book immediately
     setAnimatingHref(href); // Start new animation
-    router.push(href);
     
     // Set a timer for the animation duration
     setTimeout(() => {
-        setActiveBook(href); // Set the book as visually active
-        setSpinCompleteHref(href); // Add the pulse effect
+        // This runs after the animation is complete.
+        router.push(href); // Navigate to the new page
         setAnimatingHref(null); // End the animation state
+        
+        // Forcefully set the final active states after navigation and animation.
+        // The useEffect above will handle this, but we can be explicit.
+        setActiveBook(href); 
+        setSpinCompleteHref(href); 
     }, 2000); // Animation duration: 2 seconds
   };
   

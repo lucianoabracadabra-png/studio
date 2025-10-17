@@ -28,10 +28,16 @@ export default function AuthenticatedAppLayout({
 
   return (
       <AppLayout 
-        activePath={activePath} 
-        style={pageStyle}
+        activePath={activePath}
       >
-          {children}
+          <div 
+              className="page-container h-full"
+              style={pageStyle}
+          >
+              <div className='p-4 lg:p-6 flex-1 flex flex-col'>
+                  {children}
+              </div>
+          </div>
       </AppLayout>
   );
 }
