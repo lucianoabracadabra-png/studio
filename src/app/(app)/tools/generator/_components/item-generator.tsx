@@ -17,9 +17,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
 const itemSchema = z.object({
-  itemType: z.string().min(1, 'Item type is required.'),
-  rarity: z.string().min(1, 'Rarity is required.'),
-  setting: z.string().min(1, 'Setting is required.'),
+  itemType: z.string().min(1, 'O tipo de item é obrigatório.'),
+  rarity: z.string().min(1, 'A raridade é obrigatória.'),
+  setting: z.string().min(1, 'O cenário é obrigatório.'),
   additionalDetails: z.string().optional(),
 });
 
@@ -31,8 +31,8 @@ export function ItemGenerator() {
   const form = useForm<z.infer<typeof itemSchema>>({
     resolver: zodResolver(itemSchema),
     defaultValues: {
-      itemType: 'Weapon',
-      rarity: 'Uncommon',
+      itemType: 'Arma',
+      rarity: 'Incomum',
       setting: 'Forgotten Realms',
       additionalDetails: '',
     },
@@ -48,8 +48,8 @@ export function ItemGenerator() {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Error Generating Item',
-        description: 'There was a problem with the AI generation. Please try again.',
+        title: 'Erro ao Gerar Item',
+        description: 'Houve um problema com a geração da IA. Por favor, tente novamente.',
       });
     } finally {
       setIsLoading(false);
@@ -59,8 +59,8 @@ export function ItemGenerator() {
   return (
     <Card className="glassmorphic-card">
       <CardHeader>
-        <CardTitle className="font-headline">Item & Loot Generator</CardTitle>
-        <CardDescription>Create unique items and loot for your campaigns.</CardDescription>
+        <CardTitle className="font-headline">Gerador de Itens & Tesouros</CardTitle>
+        <CardDescription>Crie itens e tesouros únicos para suas campanhas.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid md:grid-cols-2 gap-8">
@@ -71,17 +71,17 @@ export function ItemGenerator() {
                 name="itemType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Item Type</FormLabel>
+                    <FormLabel>Tipo de Item</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Select an item type" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Selecione um tipo de item" /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Weapon">Weapon</SelectItem>
-                        <SelectItem value="Armor">Armor</SelectItem>
-                        <SelectItem value="Potion">Potion</SelectItem>
-                        <SelectItem value="Scroll">Scroll</SelectItem>
-                        <SelectItem value="Wondrous Item">Wondrous Item</SelectItem>
+                        <SelectItem value="Weapon">Arma</SelectItem>
+                        <SelectItem value="Armor">Armadura</SelectItem>
+                        <SelectItem value="Potion">Poção</SelectItem>
+                        <SelectItem value="Scroll">Pergaminho</SelectItem>
+                        <SelectItem value="Wondrous Item">Item Maravilhoso</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -93,17 +93,17 @@ export function ItemGenerator() {
                 name="rarity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rarity</FormLabel>
+                    <FormLabel>Raridade</FormLabel>
                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Select rarity" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Selecione a raridade" /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Common">Common</SelectItem>
-                        <SelectItem value="Uncommon">Uncommon</SelectItem>
-                        <SelectItem value="Rare">Rare</SelectItem>
-                        <SelectItem value="Very Rare">Very Rare</SelectItem>
-                        <SelectItem value="Legendary">Legendary</SelectItem>
+                        <SelectItem value="Common">Comum</SelectItem>
+                        <SelectItem value="Uncommon">Incomum</SelectItem>
+                        <SelectItem value="Rare">Raro</SelectItem>
+                        <SelectItem value="Very Rare">Muito Raro</SelectItem>
+                        <SelectItem value="Legendary">Lendário</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -115,9 +115,9 @@ export function ItemGenerator() {
                 name="setting"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Game Setting</FormLabel>
+                    <FormLabel>Cenário de Jogo</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Forgotten Realms, Eberron" {...field} />
+                      <Input placeholder="Ex: Forgotten Realms, Eberron" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -128,9 +128,9 @@ export function ItemGenerator() {
                 name="additionalDetails"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Details</FormLabel>
+                    <FormLabel>Detalhes Adicionais</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., made of dragonscale, pulses with faint light" {...field} />
+                      <Textarea placeholder="Ex: feito de escama de dragão, pulsa com uma luz fraca" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -138,12 +138,12 @@ export function ItemGenerator() {
               />
               <Button type="submit" disabled={isLoading} className="w-full font-bold">
                 <WandSparkles className="mr-2 h-4 w-4" />
-                {isLoading ? 'Generating...' : 'Generate Item'}
+                {isLoading ? 'Gerando...' : 'Gerar Item'}
               </Button>
             </form>
           </Form>
           <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
-            <h3 className="font-headline text-xl text-center">Generated Item</h3>
+            <h3 className="font-headline text-xl text-center">Item Gerado</h3>
             {isLoading && (
               <div className="space-y-4">
                 <Skeleton className="h-6 w-1/2 mx-auto" />
@@ -165,7 +165,7 @@ export function ItemGenerator() {
             {!isLoading && !result && (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
                     <WandSparkles className="h-12 w-12 mb-4 text-accent" />
-                    <p>Your magical item will appear here.</p>
+                    <p>Seu item mágico aparecerá aqui.</p>
                 </div>
             )}
           </div>

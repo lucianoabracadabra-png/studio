@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Icons } from "@/components/icons";
+import { Icons } from "@/components/ui/icons";
 import Link from "next/link";
 import { ChromeIcon } from "lucide-react";
 
@@ -21,17 +21,17 @@ export default function LoginPage() {
           <div className="mb-4 flex justify-center">
             <Icons.logo className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="font-headline text-3xl">Welcome Back</CardTitle>
-          <CardDescription>Enter your credentials to access your realm.</CardDescription>
+          <CardTitle className="font-headline text-3xl">Bem-vindo de Volta</CardTitle>
+          <CardDescription>Insira suas credenciais para acessar seu reino.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" type="email" placeholder="m@exemplo.com" required />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input id="password" type="password" required />
             </div>
             <Button asChild className="w-full font-bold">
@@ -43,7 +43,7 @@ export default function LoginPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -57,9 +57,9 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="text-sm text-center block">
-          Don't have an account?{" "}
+          Não tem uma conta?{" "}
           <Link href="/signup" className="underline text-accent">
-            Sign up
+            Cadastre-se
           </Link>
         </CardFooter>
       </Card>

@@ -45,9 +45,8 @@ type ActionTrail = {
   fromAp: number;
   toAp: number;
   colorHue: number;
-  turn: number; // The turn number this trail was created on
+  turn: number;
 };
-
 
 type LogEntry = {
   id: number;
@@ -146,7 +145,7 @@ export function CombatTracker() {
   }, [combatStarted, sortedCombatants]);
 
   const addCombatant = () => {
-    const name = newCombatant.name.trim() || hueToNameMap[newCombatant.colorHue] || `Combatant ${nextId}`;
+    const name = newCombatant.name.trim() || hueToNameMap[newCombatant.colorHue] || `Combatente ${nextId}`;
     
     const combatant: Combatant = {
       id: nextId,
@@ -159,7 +158,7 @@ export function CombatTracker() {
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
     setNewCombatant({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
-    addLogEntry(`${combatant.name} has been added to the encounter.`);
+    addLogEntry(`${combatant.name} foi adicionado ao encontro.`);
   };
   
   const startCombat = () => {
@@ -174,7 +173,7 @@ export function CombatTracker() {
     
     setActionTrails([]); // Clear previous trails
     setCombatStarted(true);
-    addLogEntry("Combat has started! Reaction tests rolled.");
+    addLogEntry("O combate começou! Testes de reação rolados.");
   };
 
   const resetCombat = () => {
@@ -184,12 +183,12 @@ export function CombatTracker() {
     setActionTrails([]);
     setLog([]);
     setTurnCount(0);
-    addLogEntry("Combat has been reset.");
+    addLogEntry("O combate foi resetado.");
   }
 
   const removeCombatant = (id: number) => {
     const combatant = combatants.find(c => c.id === id);
-    if(combatant) addLogEntry(`${combatant.name} has been removed from the encounter.`);
+    if(combatant) addLogEntry(`${combatant.name} foi removido do encontro.`);
     setCombatants(combatants.filter(c => c.id !== id));
     setActionTrails(actionTrails.filter(t => t.combatantId !== id));
   };
@@ -200,7 +199,7 @@ export function CombatTracker() {
     const actor = combatants.find(c => c.id === activeCombatantId);
     if (!actor) return;
 
-    addLogEntry(`[AP ${actor.ap}] ${actor.name} performs an action with cost ${cost}.`, actor);
+    addLogEntry(`[AP ${actor.ap}] ${actor.name} realiza uma ação com custo ${cost}.`, actor);
     
     const newAp = actor.ap + cost;
     
@@ -239,13 +238,13 @@ export function CombatTracker() {
         
             const turnIndex = lastThreeUniqueTurns.indexOf(trail.turn);
             let opacity = 0;
-            if (turnIndex === 0) opacity = 1;      // Current turn action
-            else if (turnIndex === 1) opacity = 0.5; // Last turn
-            else if (turnIndex === 2) opacity = 0.1; // 2 turns ago
+            if (turnIndex === 0) opacity = 1;
+            else if (turnIndex === 1) opacity = 0.5;
+            else if (turnIndex === 2) opacity = 0.1;
             else return null;
 
             const DotComponent = isPlayer ? Circle : Square;
-            const dotSize = 4; // size in pixels
+            const dotSize = 4;
 
             return (
               <div key={`${trail.combatantId}-${trail.turn}-${index}`} className="absolute h-full top-0 left-0 right-0">
@@ -282,16 +281,16 @@ export function CombatTracker() {
         <Card className="glassmorphic-card w-full">
             <CardHeader>
                 <CardTitle className="font-headline flex items-center justify-between">
-                    <span className="magical-glow">Action Point Timeline</span>
+                    <span className="magical-glow">Linha do Tempo de Ação</span>
                      {combatStarted ? (
                         <Button onClick={resetCombat} variant="destructive">
                             <RefreshCw className="mr-2" />
-                            Reset Combat
+                            Resetar Combate
                         </Button>
                     ) : (
                         <Button onClick={startCombat} disabled={combatants.length === 0}>
                             <Play className="mr-2" />
-                            Start Combat
+                            Iniciar Combate
                         </Button>
                     )}
                 </CardTitle>
@@ -355,7 +354,7 @@ export function CombatTracker() {
                                             <TooltipContent>
                                                 <p className="font-bold">{c.name}</p>
                                                 <p>AP: {c.ap}</p>
-                                                <p>React Mod: {c.reactionModifier}</p>
+                                                <p>Mod. Reação: {c.reactionModifier}</p>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -370,12 +369,12 @@ export function CombatTracker() {
         {combatStarted && activeCombatant ? (
             <Card className="glassmorphic-card">
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><Crown /> Active Turn: {activeCombatant.name}</CardTitle>
-                    <CardDescription>Current AP: {activeCombatant.ap}</CardDescription>
+                    <CardTitle className="font-headline flex items-center gap-2"><Crown /> Turno Ativo: {activeCombatant.name}</CardTitle>
+                    <CardDescription>AP Atual: {activeCombatant.ap}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                      <div className="flex-grow space-y-2">
-                       <Label>Action Cost (AP)</Label>
+                       <Label>Custo da Ação (AP)</Label>
                         <div className='flex flex-wrap gap-2'>
                             {Array.from({length: 10}, (_, i) => i + 1).map(cost => (
                                 <Button key={cost} onClick={() => confirmAction(cost)} variant="outline" size="sm" className="font-mono">
@@ -392,16 +391,16 @@ export function CombatTracker() {
         <div className="lg:col-span-1 flex flex-col gap-6">
             <Card className="glassmorphic-card">
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Add Combatant</CardTitle>
+                    <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Adicionar Combatente</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" placeholder="e.g., Goblin, Player Hero" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
+                            <Label htmlFor="name">Nome</Label>
+                            <Input id="name" placeholder="Ex: Goblin, Herói do Jogador" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="reaction">Reaction Mod</Label>
+                            <Label htmlFor="reaction">Mod. Reação</Label>
                              <div className="flex items-center gap-2">
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
                                 <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-full hide-number-arrows" disabled={combatStarted}/>
@@ -410,11 +409,11 @@ export function CombatTracker() {
                         </div>
                     </div>
                     <div className="space-y-3">
-                        <Label>Color</Label>
+                        <Label>Cor</Label>
                         <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
                     </div>
                     <div className="flex items-center space-x-4 pt-2">
-                        <Label htmlFor="is-player" className='flex-grow'>Player Character</Label>
+                        <Label htmlFor="is-player" className='flex-grow'>Personagem de Jogador</Label>
                         <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
                     </div>
                     <Button 
@@ -427,14 +426,14 @@ export function CombatTracker() {
                             boxShadow: `0 0 15px hsla(${newCombatant.colorHue}, 90%, 70%, 0.6)`
                         }}
                     >
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
+                        <PlusCircle className="mr-2 h-4 w-4" /> Adicionar ao Encontro
                     </Button>
                 </CardContent>
             </Card>
 
             <Card className="glassmorphic-card flex-grow">
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><History /> Combat Log</CardTitle>
+                    <CardTitle className="font-headline flex items-center gap-2"><History /> Registro de Combate</CardTitle>
                 </CardHeader>
                 <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
                     {log.length > 0 ? log.map(entry => (
@@ -452,7 +451,7 @@ export function CombatTracker() {
                            </div>
                         </div>
                     )) : (
-                        <p className="text-center text-muted-foreground py-8">Log is empty.</p>
+                        <p className="text-center text-muted-foreground py-8">O registro está vazio.</p>
                     )}
                 </CardContent>
             </Card>
@@ -461,12 +460,12 @@ export function CombatTracker() {
 
         <Card className="lg:col-span-2 glassmorphic-card">
             <CardHeader>
-                <CardTitle className='font-headline'>Encounter Roster</CardTitle>
+                <CardTitle className='font-headline'>Lista do Encontro</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-2 max-h-[30rem] overflow-y-auto">
                     {rosterOrder.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">No combatants added.</p>
+                        <p className="text-sm text-muted-foreground text-center py-4">Nenhum combatente adicionado.</p>
                     ) : (
                         rosterOrder.map(c => (
                             <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/30 rounded-md">
@@ -481,7 +480,7 @@ export function CombatTracker() {
                                 <span className="flex-grow font-semibold">{c.name}</span>
                                 <div className='text-xs text-muted-foreground font-mono'>
                                     <p>AP: {c.ap}</p>
-                                    <p>React Mod: {c.reactionModifier}</p>
+                                    <p>Mod. Reação: {c.reactionModifier}</p>
                                 </div>
                                     <AlertDialog>
                                     <AlertDialogTrigger asChild>
@@ -489,14 +488,14 @@ export function CombatTracker() {
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                            This will permanently remove {c.name} from the encounter.
+                                            Isso removerá permanentemente {c.name} do encontro.
                                         </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => removeCombatant(c.id)} >Remove</AlertDialogAction>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => removeCombatant(c.id)} >Remover</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>

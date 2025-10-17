@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Icons } from '@/components/icons';
+import { Icons } from '@/components/ui/icons';
 import Link from 'next/link';
 import { ArrowRight, Zap } from 'lucide-react';
 
@@ -16,30 +16,30 @@ export default function LandingPage() {
         </div>
 
         <p className="max-w-2xl text-lg md:text-xl text-foreground/80 mb-10 animate-in fade-in-down" style={{ animationDelay: '200ms' }}>
-          Your all-in-one toolkit for immersive tabletop role-playing games. Forge legends, track battles, and bring your world to life.
+          Seu kit de ferramentas tudo-em-um para jogos de RPG de mesa imersivos. Forje lendas, rastreie batalhas e dê vida ao seu mundo.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in-down" style={{ animationDelay: '400ms' }}>
           <Button asChild size="lg" className="font-bold group">
             <Link href="/dashboard">
-              Launch App <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              Abrir App <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="font-bold border-2 group">
             <Link href="/login">
-              Login or Sign Up
+              Login ou Cadastro
             </Link>
           </Button>
         </div>
 
         <div className="mt-24 text-center w-full animate-in fade-in-up" style={{ animationDelay: '600ms' }}>
-            <h2 className="font-headline text-3xl font-bold text-foreground">Features</h2>
-            <p className="mt-2 text-muted-foreground">Everything you need for your next TTRPG session.</p>
+            <h2 className="font-headline text-3xl font-bold text-foreground">Recursos</h2>
+            <p className="mt-2 text-muted-foreground">Tudo que você precisa para sua próxima sessão de TTRPG.</p>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                <FeatureCard title="Campaign Management" description="Create and manage your campaigns with ease." icon={Zap} delay={700} />
-                <FeatureCard title="Interactive Character Sheets" description="Dynamic sheets with real-time updates and dice rolling." icon={Zap} delay={800} />
-                <FeatureCard title="Virtual Tabletop" description="Immersive maps with tokens, fog of war, and drawing tools." icon={Zap} delay={900} />
-                <FeatureCard title="AI-Powered Generation" description="Generate NPCs, items, and descriptions with a single click." icon={Zap} delay={1000} />
+                <FeatureCard title="Gerenciamento de Campanhas" description="Crie e gerencie suas campanhas com facilidade." icon={Zap} delay={700} />
+                <FeatureCard title="Fichas de Personagem Interativas" description="Fichas dinâmicas com atualizações em tempo real e rolagem de dados." icon={Zap} delay={800} />
+                <FeatureCard title="Mesa de Jogo Virtual" description="Mapas imersivos com tokens, névoa de guerra e ferramentas de desenho." icon={Zap} delay={900} />
+                <FeatureCard title="Geração com IA" description="Gere NPCs, itens e descrições com um único clique." icon={Zap} delay={1000} />
             </div>
         </div>
       </div>

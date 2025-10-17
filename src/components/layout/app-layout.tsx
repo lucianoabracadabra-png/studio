@@ -17,10 +17,12 @@ export default function AppLayout({ children, activePath, style }: AppLayoutProp
         </div>
         <main className="pl-24 h-screen relative z-10">
             <div 
-                className="page-container flex-1 flex flex-col h-full overflow-y-auto p-4 lg:p-6"
+                className="page-container h-full overflow-y-auto"
                 style={style}
             >
-                {children}
+                <div className='p-4 lg:p-6 flex-1 flex flex-col'>
+                    {children}
+                </div>
             </div>
         </main>
     </div>

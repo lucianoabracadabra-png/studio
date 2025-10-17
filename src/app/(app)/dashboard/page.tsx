@@ -14,18 +14,18 @@ import Link from 'next/link';
 
 const campaigns = [
   {
-    name: 'The Whispering Shadows',
-    description: 'An ancient evil stirs in the forgotten crypts.',
+    name: 'As Sombras Sussurrantes',
+    description: 'Um mal antigo desperta nas criptas esquecidas.',
     image: PlaceHolderImages.find(p => p.id === 'campaign-1')!,
   },
   {
-    name: 'Crimson Crown of the Mountain King',
-    description: 'A quest for a lost artifact of immense power.',
+    name: 'A Coroa Carmesim do Rei da Montanha',
+    description: 'Uma busca por um artefato perdido de poder imenso.',
     image: PlaceHolderImages.find(p => p.id === 'campaign-2')!,
   },
   {
-    name: 'City of a Thousand Stars',
-    description: 'Intrigue and danger in a bustling metropolis.',
+    name: 'Cidade das Mil Estrelas',
+    description: 'Intriga e perigo em uma metrópole vibrante.',
     image: PlaceHolderImages.find(p => p.id === 'campaign-4')!,
   },
 ];
@@ -34,10 +34,10 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center justify-between animate-in fade-in-down">
-        <h1 className="text-3xl font-headline magical-glow">Dashboard</h1>
+        <h1 className="text-3xl font-headline magical-glow">Painel de Controle</h1>
         <Button className="group">
           <PlusCircle className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
-          Create Campaign
+          Criar Campanha
         </Button>
       </div>
 
@@ -61,7 +61,7 @@ export default function DashboardPage() {
             </CardContent>
             <CardFooter className="p-4">
               <Button asChild className="w-full font-bold">
-                <Link href="#">Enter Campaign</Link>
+                <Link href="#">Entrar na Campanha</Link>
               </Button>
             </CardFooter>
           </Card>

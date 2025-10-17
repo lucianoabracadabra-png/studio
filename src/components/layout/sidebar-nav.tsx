@@ -25,22 +25,22 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 
 export const mainLinks = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
-  { label: 'Characters', href: '/characters', icon: Users, colorHue: 240 },
-  { label: 'Virtual Tabletop', href: '/vtt', icon: Map, colorHue: 280 },
+  { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200 },
+  { label: 'Personagens', href: '/characters', icon: Users, colorHue: 240 },
+  { label: 'Mesa Virtual', href: '/vtt', icon: Map, colorHue: 280 },
   { label: 'Wiki', href: '/wiki', icon: BookOpen, colorHue: 320 },
 ];
 
 export const gmToolsLinks = [
-  { label: 'Dice Roller', href: '/tools/dice-roller', icon: Dices, colorHue: 30 },
-  { label: 'Combat Tracker', href: '/gm/combat-tracker', icon: Swords, colorHue: 65 },
-  { label: 'Generators', href: '/tools/generator', icon: FlaskConical, colorHue: 100 },
-  { label: 'Describer', href: '/tools/description-generator', icon: FileText, colorHue: 135 },
-  { label: 'Soundboard', href: '/tools/soundboard', icon: Volume2, colorHue: 170 },
+  { label: 'Rolador de Dados', href: '/tools/dice-roller', icon: Dices, colorHue: 30 },
+  { label: 'Rastreador de Combate', href: '/gm/combat-tracker', icon: Swords, colorHue: 65 },
+  { label: 'Geradores', href: '/tools/generator', icon: FlaskConical, colorHue: 100 },
+  { label: 'Descritor de Cenas', href: '/tools/description-generator', icon: FileText, colorHue: 135 },
+  { label: 'Mesa de Som', href: '/tools/soundboard', icon: Volume2, colorHue: 170 },
 ];
 
 export const profileLink = [{
-  label: 'Profile',
+  label: 'Perfil',
   href: '/profile',
   icon: () => (
     <Avatar className="h-9 w-9 border-2 border-white/50 avatar-glow">
@@ -68,21 +68,20 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (animatingHref) return; // Don't allow new animations while one is running
+    if (href === activePath || animatingHref) return; // Don't re-run on same link or while animating
 
-    // Start animation and navigation
-    setAnimatingHref(href);
+    setSpinCompleteHref(null); // Remove pulse from old active book immediately
+    setAnimatingHref(href); // Start new animation
     router.push(href);
     
-    // Clear the animation class and set final active state after it finishes
+    // Set a timer for the animation duration
     setTimeout(() => {
-        setActiveBook(href);
-        setSpinCompleteHref(href);
-        setAnimatingHref(null);
-    }, 3000); // Must match the animation duration in CSS
+        setActiveBook(href); // Set the book as visually active
+        setSpinCompleteHref(href); // Add the pulse effect
+        setAnimatingHref(null); // End the animation state
+    }, 2000); // Animation duration: 2 seconds
   };
   
-
   const renderBook = (link: any, isTool: boolean) => {
     const isCurrentlyAnimating = animatingHref === link.href;
     const isActive = activeBook === link.href && !isCurrentlyAnimating;

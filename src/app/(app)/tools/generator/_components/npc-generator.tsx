@@ -16,9 +16,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
 const npcSchema = z.object({
-  race: z.string().min(1, 'Race is required.'),
-  occupation: z.string().min(1, 'Occupation is required.'),
-  setting: z.string().min(1, 'Setting is required.'),
+  race: z.string().min(1, 'A raça é obrigatória.'),
+  occupation: z.string().min(1, 'A ocupação é obrigatória.'),
+  setting: z.string().min(1, 'O cenário é obrigatório.'),
   additionalDetails: z.string().optional(),
 });
 
@@ -30,10 +30,10 @@ export function NpcGenerator() {
   const form = useForm<z.infer<typeof npcSchema>>({
     resolver: zodResolver(npcSchema),
     defaultValues: {
-      race: 'Human',
-      occupation: 'Blacksmith',
-      setting: 'A small village in a fantasy world',
-      additionalDetails: 'Has a mysterious past.',
+      race: 'Humano',
+      occupation: 'Ferreiro',
+      setting: 'Uma pequena vila em um mundo de fantasia',
+      additionalDetails: 'Tem um passado misterioso.',
     },
   });
 
@@ -47,8 +47,8 @@ export function NpcGenerator() {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Error Generating NPC',
-        description: 'There was a problem with the AI generation. Please try again.',
+        title: 'Erro ao Gerar NPC',
+        description: 'Houve um problema com a geração da IA. Por favor, tente novamente.',
       });
     } finally {
       setIsLoading(false);
@@ -58,8 +58,8 @@ export function NpcGenerator() {
   return (
     <Card className="glassmorphic-card">
       <CardHeader>
-        <CardTitle className="font-headline">NPC Generator</CardTitle>
-        <CardDescription>Create memorable Non-Player Characters for your world.</CardDescription>
+        <CardTitle className="font-headline">Gerador de NPC</CardTitle>
+        <CardDescription>Crie Personagens Não-Jogadores memoráveis para o seu mundo.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid md:grid-cols-2 gap-8">
@@ -70,9 +70,9 @@ export function NpcGenerator() {
                 name="race"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Race</FormLabel>
+                    <FormLabel>Raça</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Elf, Dwarf, Orc" {...field} />
+                      <Input placeholder="Ex: Elfo, Anão, Orc" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -83,9 +83,9 @@ export function NpcGenerator() {
                 name="occupation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Occupation</FormLabel>
+                    <FormLabel>Ocupação</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Merchant, Guard, Wizard" {...field} />
+                      <Input placeholder="Ex: Mercador, Guarda, Mago" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,9 +96,9 @@ export function NpcGenerator() {
                 name="setting"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Game Setting</FormLabel>
+                    <FormLabel>Cenário de Jogo</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., High-fantasy kingdom, Sci-fi metropolis" {...field} />
+                      <Input placeholder="Ex: Reino de alta fantasia, Metrópole sci-fi" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -109,9 +109,9 @@ export function NpcGenerator() {
                 name="additionalDetails"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Details</FormLabel>
+                    <FormLabel>Detalhes Adicionais</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., missing an eye, always humming a tune" {...field} />
+                      <Textarea placeholder="Ex: falta um olho, está sempre cantarolando uma melodia" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,12 +119,12 @@ export function NpcGenerator() {
               />
               <Button type="submit" disabled={isLoading} className="w-full font-bold">
                 <WandSparkles className="mr-2 h-4 w-4" />
-                {isLoading ? 'Generating...' : 'Generate NPC'}
+                {isLoading ? 'Gerando...' : 'Gerar NPC'}
               </Button>
             </form>
           </Form>
           <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
-            <h3 className="font-headline text-xl text-center">Generated NPC</h3>
+            <h3 className="font-headline text-xl text-center">NPC Gerado</h3>
             {isLoading && (
               <div className="space-y-4">
                 <Skeleton className="h-6 w-1/2 mx-auto" />
@@ -143,11 +143,11 @@ export function NpcGenerator() {
               <div className="space-y-4 animate-in fade-in-50">
                 <h4 className="text-2xl font-headline text-primary text-center">{result.name}</h4>
                 <div>
-                    <h5 className="font-bold text-accent mb-1">Description</h5>
+                    <h5 className="font-bold text-accent mb-1">Descrição</h5>
                     <p className="text-foreground/80 whitespace-pre-wrap">{result.description}</p>
                 </div>
                 <div>
-                    <h5 className="font-bold text-accent mb-1">Backstory</h5>
+                    <h5 className="font-bold text-accent mb-1">História</h5>
                     <p className="text-foreground/80 whitespace-pre-wrap">{result.backstory}</p>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export function NpcGenerator() {
             {!isLoading && !result && (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
                     <User className="h-12 w-12 mb-4 text-accent" />
-                    <p>Your generated character will appear here.</p>
+                    <p>Seu personagem gerado aparecerá aqui.</p>
                 </div>
             )}
           </div>

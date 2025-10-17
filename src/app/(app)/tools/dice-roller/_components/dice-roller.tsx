@@ -66,17 +66,17 @@ export function DiceRoller() {
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Dices className="h-6 w-6" />
-          Dice Roller
+          Rolador de Dados
         </CardTitle>
         <CardDescription>
-          Roll virtual dice for your game. Select the number of dice, a modifier, and the dice type.
+          Role dados virtuais para o seu jogo. Selecione o número de dados, um modificador e o tipo de dado.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-1 space-y-6">
             <div className="space-y-2">
-              <label className="font-medium">Number of Dice</label>
+              <label className="font-medium">Número de Dados</label>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => handleDiceCountChange(-1)}><Minus/></Button>
                 <Input type="number" value={diceCount} onChange={(e) => setDiceCount(parseInt(e.target.value) || 1)} className="text-center font-mono" />
@@ -85,7 +85,7 @@ export function DiceRoller() {
             </div>
 
             <div className="space-y-2">
-              <label className="font-medium">Modifier</label>
+              <label className="font-medium">Modificador</label>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => handleModifierChange(-1)}><Minus/></Button>
                 <Input type="number" value={modifier} onChange={(e) => setModifier(parseInt(e.target.value) || 0)} className="text-center font-mono" />
@@ -104,7 +104,7 @@ export function DiceRoller() {
 
           <div className="md:col-span-2 rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
             <div className="text-center space-y-2">
-                <p className="text-muted-foreground">Result</p>
+                <p className="text-muted-foreground">Resultado</p>
                 <p className="font-headline text-7xl font-bold magical-glow">
                     {lastRoll ? lastRoll.total : '...'}
                 </p>
@@ -119,7 +119,7 @@ export function DiceRoller() {
             <Separator />
             
             <div className="space-y-2">
-              <h3 className="font-headline text-lg flex items-center gap-2 text-muted-foreground"><History className="h-5 w-5" /> Roll History</h3>
+              <h3 className="font-headline text-lg flex items-center gap-2 text-muted-foreground"><History className="h-5 w-5" /> Histórico de Rolagens</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {results.length > 0 ? results.map((r, i) => (
                   <div key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
@@ -131,7 +131,7 @@ export function DiceRoller() {
                     </div>
                     <Badge variant="secondary" className="font-mono">{r.total}</Badge>
                   </div>
-                )) : <p className="text-sm text-muted-foreground text-center pt-4">Your roll history will appear here.</p>}
+                )) : <p className="text-sm text-muted-foreground text-center pt-4">Seu histórico de rolagens aparecerá aqui.</p>}
               </div>
             </div>
           </div>

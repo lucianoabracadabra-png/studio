@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
 const environmentSchema = z.object({
-  environmentType: z.string().min(1, 'Environment type is required.'),
+  environmentType: z.string().min(1, 'O tipo de ambiente é obrigatório.'),
   style: z.string().optional(),
   additionalDetails: z.string().optional(),
 });
@@ -29,9 +29,9 @@ export function EnvironmentGenerator() {
   const form = useForm<z.infer<typeof environmentSchema>>({
     resolver: zodResolver(environmentSchema),
     defaultValues: {
-      environmentType: 'Forest',
-      style: 'Mystical and ancient',
-      additionalDetails: 'During a full moon.',
+      environmentType: 'Floresta',
+      style: 'Mística e antiga',
+      additionalDetails: 'Durante a lua cheia.',
     },
   });
 
@@ -45,8 +45,8 @@ export function EnvironmentGenerator() {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Error Generating Description',
-        description: 'There was a problem with the AI generation. Please try again.',
+        title: 'Erro ao Gerar Descrição',
+        description: 'Houve um problema com a geração da IA. Por favor, tente novamente.',
       });
     } finally {
       setIsLoading(false);
@@ -56,8 +56,8 @@ export function EnvironmentGenerator() {
   return (
     <Card className="glassmorphic-card">
       <CardHeader>
-        <CardTitle className="font-headline">Environment Describer</CardTitle>
-        <CardDescription>Generate rich, atmospheric descriptions for your game world.</CardDescription>
+        <CardTitle className="font-headline">Descritor de Ambientes</CardTitle>
+        <CardDescription>Gere descrições ricas e atmosféricas para o seu mundo de jogo.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid md:grid-cols-2 gap-8">
@@ -68,9 +68,9 @@ export function EnvironmentGenerator() {
                 name="environmentType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Environment Type</FormLabel>
+                    <FormLabel>Tipo de Ambiente</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Dungeon, City, Forest" {...field} />
+                      <Input placeholder="Ex: Masmorra, Cidade, Floresta" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -81,9 +81,9 @@ export function EnvironmentGenerator() {
                 name="style"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Style</FormLabel>
+                    <FormLabel>Estilo</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Ruined, Cyberpunk, Mystical" {...field} />
+                      <Input placeholder="Ex: Arruinado, Cyberpunk, Místico" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -94,9 +94,9 @@ export function EnvironmentGenerator() {
                 name="additionalDetails"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Details</FormLabel>
+                    <FormLabel>Detalhes Adicionais</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g., Covered in snow, during a festival" {...field} />
+                      <Textarea placeholder="Ex: Coberto de neve, durante um festival" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -104,12 +104,12 @@ export function EnvironmentGenerator() {
               />
               <Button type="submit" disabled={isLoading} className="w-full font-bold">
                 <WandSparkles className="mr-2 h-4 w-4" />
-                {isLoading ? 'Describing...' : 'Describe Scene'}
+                {isLoading ? 'Descrevendo...' : 'Descrever Cena'}
               </Button>
             </form>
           </Form>
           <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
-            <h3 className="font-headline text-xl text-center">Generated Description</h3>
+            <h3 className="font-headline text-xl text-center">Descrição Gerada</h3>
             {isLoading && (
               <div className="space-y-2 pt-4">
                 <Skeleton className="h-4 w-full" />
@@ -128,7 +128,7 @@ export function EnvironmentGenerator() {
             {!isLoading && !result && (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-center">
                     <Mountain className="h-12 w-12 mb-4 text-accent" />
-                    <p>Your generated description will appear here.</p>
+                    <p>Sua descrição gerada aparecerá aqui.</p>
                 </div>
             )}
           </div>

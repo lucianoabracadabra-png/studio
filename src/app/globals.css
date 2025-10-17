@@ -23,6 +23,7 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
+    --radius: 0.5rem;
     --chart-1: 265 90% 70%;
     --chart-2: 300 90% 70%;
     --chart-3: 198 93% 60%;
@@ -50,6 +51,7 @@
     --border: 240 10% 20%;
     --input: 240 10% 20%;
     --ring: 265 90% 70%;
+    --radius: 0.5rem;
   }
 }
 
@@ -120,7 +122,7 @@
       0 0 5px hsl(var(--book-color-hue), 50%, 80%);
   }
   
-  .active.spin-complete::after {
+  .spin-complete::after {
     content: '';
     position: absolute;
     right: 0;
@@ -137,7 +139,7 @@
   }
   
   .page-container {
-    @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative flex flex-col;
+    @apply rounded-lg relative;
     background: 
       radial-gradient(ellipse at 100% 0%, hsl(var(--page-primary-color), 90%, 70%) / 0.15),
       radial-gradient(ellipse at 0% 100%, hsl(var(--page-accent-color), 90%, 70%) / 0.15),
@@ -146,10 +148,10 @@
     backdrop-filter: blur(12px);
   }
   
-  .page-container > * {
-    --primary: var(--page-primary-color) !important;
-    --accent: var(--page-accent-color) !important;
-    --ring: var(--page-primary-color) !important;
+  .page-container > div {
+    --primary: hsl(var(--page-primary-color));
+    --accent: hsl(var(--page-accent-color));
+    --ring: hsl(var(--page-primary-color));
   }
 
   .page-container::before,
@@ -161,6 +163,7 @@
     transition: all 0.5s ease-in-out;
     border-color: hsl(var(--page-primary-color), 90%, 70%);
     filter: drop-shadow(0 0 5px hsl(var(--page-primary-color), 90%, 70%));
+    border-radius: var(--radius);
   }
 
   .page-container::before {
@@ -189,8 +192,8 @@
   
   .magical-glow {
     @apply text-transparent bg-clip-text select-none;
-    background-image: linear-gradient(to right, hsl(var(--page-primary-color), 90%, 70%), hsl(var(--page-accent-color), 90%, 70%));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color), 90%, 70%), 0 0 16px hsl(var(--page-accent-color), 90%, 70%);
+    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+    text-shadow: 0 0 8px hsl(var(--primary)), 0 0 16px hsl(var(--accent));
   }
 
   #stars {
@@ -245,7 +248,7 @@
   }
 
   .book-spin-and-ignite .book-nav-item {
-    animation: book-spin 3s ease-in-out, book-ignite-glow 3s ease-in-out;
+    animation: book-spin 2s ease-in-out, book-ignite-glow 2s ease-in-out;
   }
 
 }
@@ -361,24 +364,23 @@
 }
 
 @keyframes book-ignite-glow {
-    0%, 20% { 
-        box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); 
-    }
-    80% {
-        box-shadow: 
-            inset -3px 0 24px rgba(0,0,0,0.4), 
-            0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1),
-            0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-            0 0 15px hsl(var(--book-color-hue), 50%, 80%);
-    }
-    100% {
-        box-shadow: 
-            inset -3px 0 8px rgba(0,0,0,0.3), 
-            0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-            0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-            0 0 5px hsl(var(--book-color-hue), 50%, 80%);
-    }
+  0% { 
+    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); 
+  }
+  80% {
+    box-shadow: 
+      inset -3px 0 24px rgba(0,0,0,0.4), 
+      0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1),
+      0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+      0 0 15px hsl(var(--book-color-hue), 50%, 80%);
+  }
+  100% {
+    box-shadow: 
+      inset -3px 0 8px rgba(0,0,0,0.3), 
+      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
+      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
+      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+  }
 }
 
 }
-    
