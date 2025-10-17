@@ -63,7 +63,9 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setIsClient(true);
+    if (typeof window !== 'undefined') {
+      setIsClient(true);
+    }
   }, []);
 
   useEffect(() => {
