@@ -111,18 +111,18 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
   
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
-  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
   
   const activeBook = activePath;
+  const spinCompleteHref = activePath; // The book is considered "spin complete" if it's the active one.
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // This effect ensures that if navigation happens externally (e.g. browser back/forward), the animation states are reset correctly.
-    if(activePath !== spinCompleteHref && !animatingHref) {
-      setSpinCompleteHref(activePath);
-      setPreviousBook(null);
+    // When the active path changes (due to navigation), and we were animating to it,
+    // clear the animation state.
+    if (animatingHref && activePath === animatingHref) {
+      setAnimatingHref(null);
     }
     
     return () => {
@@ -130,26 +130,23 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [activePath, spinCompleteHref, animatingHref]);
+  }, [activePath, animatingHref]);
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
     if (href === activeBook || animatingHref) {
+      e.preventDefault(); // Prevent navigation if already on the page or animating
       return;
     }
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    
+    e.preventDefault(); // Prevent default link behavior to control animation.
     
     setPreviousBook(activeBook);
-    setSpinCompleteHref(null);
     setAnimatingHref(href);
     
+    // The animation is 2s long. After it finishes, navigate.
     timeoutRef.current = setTimeout(() => {
       router.push(href);
       setAnimatingHref(null);
-      setSpinCompleteHref(href);
       setPreviousBook(null);
     }, 2000); 
   };
