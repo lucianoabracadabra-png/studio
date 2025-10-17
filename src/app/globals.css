@@ -157,15 +157,15 @@
   .page-container::before {
     top: -4px;
     left: -4px;
-    border-top: 2px solid var(--page-primary-color);
-    border-left: 2px solid var(--page-primary-color);
+    border-top: 2px solid;
+    border-left: 2px solid;
   }
 
   .page-container::after {
     bottom: -4px;
     right: -4px;
-    border-bottom: 2px solid var(--page-primary-color);
-    border-right: 2px solid var(--page-primary-color);
+    border-bottom: 2px solid;
+    border-right: 2px solid;
   }
 
   .spell-effect {
@@ -179,8 +179,8 @@
   }
   
   .magical-glow {
-    @apply text-transparent bg-clip-text;
-    background-image: linear-gradient(to right, var(--page-primary-color), var(--page-accent-color));
+    @apply text-transparent bg-clip-text select-none;
+    background-image: linear-gradient(to right, var(--page-primary-color, hsl(var(--primary))), var(--page-accent-color, hsl(var(--accent))));
     text-shadow: 0 0 8px var(--page-primary-color, hsl(var(--primary))), 0 0 16px var(--page-accent-color, hsl(var(--accent)));
   }
 

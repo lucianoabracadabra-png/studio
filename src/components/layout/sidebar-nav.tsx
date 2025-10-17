@@ -65,7 +65,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (spinningBookHref === href || focusedBookHref === href) return;
+    if (spinningBookHref) return;
 
     setSpinningBookHref(href);
     router.push(href);
@@ -76,6 +76,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
     setTimeout(() => {
         setSpinCompleteHref(href);
+        setSpinningBookHref(null);
     }, 2000);
   };
   
@@ -100,11 +101,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         isSpinComplete && 'spin-complete'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
-                        onAnimationEnd={() => {
-                            if (isSpinning) {
-                                setSpinningBookHref(null);
-                            }
-                        }}
                     >
                         <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && 'active-icon')} />
                     </Link>
@@ -134,5 +130,3 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     </div>
   );
 }
-
-    
