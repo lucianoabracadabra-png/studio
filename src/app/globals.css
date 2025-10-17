@@ -131,7 +131,6 @@
     background-color: hsl(var(--book-color-hue), 80%, 85%);
     border-radius: inherit;
     box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
-    animation: active-border-pulse 2s ease-in-out infinite;
   }
   
   .active-icon {
@@ -139,14 +138,14 @@
   }
   
   .page-container-visuals {
-     @apply relative h-full w-full overflow-hidden;
+     @apply relative h-full w-full;
     background: 
       radial-gradient(ellipse at 100% 0%, hsla(var(--page-primary-color, 265), 90%, 70%, 0.15));
     backdrop-filter: blur(12px);
   }
 
   .page-container-content {
-      @apply relative z-10 h-full flex-1 flex flex-col;
+      @apply relative z-10 h-full flex-1 flex flex-col p-4 lg:p-6;
   }
   
   .page-container-content > * {
@@ -249,12 +248,15 @@
 
   .book-spin-and-ignite .book-nav-item,
   .book-spin-and-ignite .book-nav-item::after {
-    animation-name: book-spin, book-ignite-glow;
     animation-duration: 2s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: forwards;
   }
   
+  .book-spin-and-ignite .book-nav-item {
+    animation-name: book-spin;
+  }
+
   .book-spin-and-ignite .book-nav-item::after {
     content: '';
     position: absolute;
@@ -263,8 +265,8 @@
     bottom: 0;
     width: 4px;
     border-radius: inherit;
+    animation-name: book-ignite-glow-border;
   }
-
 }
 
 @layer utilities {
@@ -313,18 +315,6 @@
     }
   }
 
-  @keyframes active-border-pulse {
-    0% {
-      box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
-    }
-    50% {
-      box-shadow: 0 0 16px hsl(var(--book-color-hue), 80%, 85%);
-    }
-    100% {
-      box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
-    }
-  }
-
 @keyframes book-spin {
   0% {
     transform: perspective(1000px) rotateY(0deg);
@@ -334,29 +324,20 @@
   }
 }
 
-@keyframes book-ignite-glow {
+@keyframes book-ignite-glow-border {
   0%, 10% {
-    box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     background-color: transparent;
+    box-shadow: none;
   }
   80% {
-    box-shadow: 
-      inset -3px 0 24px rgba(0,0,0,0.4), 
-      0 0 225px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 108px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 45px hsl(var(--book-color-hue), 50%, 80%);
     background-color: hsla(var(--book-color-hue), 80%, 85%, 1);
+    box-shadow: 0 0 16px hsl(var(--book-color-hue), 80%, 85%);
   }
-  90%, 100% {
+  85%, 100% {
     background-color: hsl(var(--book-color-hue), 80%, 85%);
-    box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
-      0 0 12px hsla(var(--book-color-hue), 50%, 70%, 0.7),
-      0 0 5px hsl(var(--book-color-hue), 50%, 80%);
+    box-shadow: 0 0 8px hsl(var(--book-color-hue), 80%, 85%);
   }
 }
-
 
 #title {
   position: absolute;
