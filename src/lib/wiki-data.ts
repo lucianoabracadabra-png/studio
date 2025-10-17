@@ -2,14 +2,6 @@
 
 import { BookCopy, User, DraftingCompass, ScrollText, type LucideIcon } from "lucide-react";
 
-// Este mapa é usado para buscar o componente de ícone real no lado do cliente
-export const iconMap: { [key: string]: LucideIcon } = {
-    BookCopy,
-    User,
-    DraftingCompass,
-    ScrollText,
-};
-
 export type WikiPage = {
     id: string;
     title: string;
@@ -22,9 +14,17 @@ export type Portal = {
     title: string;
     subtitle: string;
     description: string;
-    icon: keyof typeof iconMap; // O ícone agora é uma string
+    icon: keyof typeof iconMap;
     colorHue: number;
     pages: WikiPage[];
+};
+
+// Este mapa é usado para buscar o componente de ícone real no lado do cliente
+export const iconMap: { [key: string]: LucideIcon } = {
+    BookCopy,
+    User,
+    DraftingCompass,
+    ScrollText,
 };
 
 export const portals: Portal[] = [
