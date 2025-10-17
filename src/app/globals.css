@@ -120,7 +120,7 @@
       0 0 5px hsl(var(--book-color-hue), 50%, 80%);
   }
   
-  .spin-complete::after {
+  .active.spin-complete::after {
     content: '';
     position: absolute;
     right: 0;
@@ -245,7 +245,7 @@
   }
 
   .book-spin-and-ignite .book-nav-item {
-    animation: book-spin 2s ease-in-out, book-ignite-glow 2s ease-in-out;
+    animation: book-spin 3s ease-in-out, book-ignite-glow 3s ease-in-out;
   }
 
 }

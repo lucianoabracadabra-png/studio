@@ -53,31 +53,40 @@ export const profileLink = [{
 
 export function SidebarNav({ activePath }: { activePath: string | null }) {
   const router = useRouter();
-  const [isAnimating, setIsAnimating] = useState<string | null>(null);
+  const [animatingHref, setAnimatingHref] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
-  
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
+
   useEffect(() => {
-    setActiveBook(activePath);
-  }, [activePath]);
+    // This effect ensures the active book is set on initial load or browser navigation
+    if (!animatingHref) {
+      setActiveBook(activePath);
+      setSpinCompleteHref(activePath);
+    }
+  }, [activePath, animatingHref]);
 
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    if (isAnimating) return;
+    if (animatingHref) return; // Don't allow new animations while one is running
 
-    setIsAnimating(href);
+    // Start animation and navigation
+    setAnimatingHref(href);
     router.push(href);
     
+    // Clear the animation class and set final active state after it finishes
     setTimeout(() => {
-        setIsAnimating(null);
         setActiveBook(href);
-    }, 2000); // Duration of the animation
+        setSpinCompleteHref(href);
+        setAnimatingHref(null);
+    }, 3000); // Must match the animation duration in CSS
   };
   
 
   const renderBook = (link: any, isTool: boolean) => {
-    const isCurrentlyAnimating = isAnimating === link.href;
-    const isActive = activeBook === link.href && !isAnimating;
+    const isCurrentlyAnimating = animatingHref === link.href;
+    const isActive = activeBook === link.href && !isCurrentlyAnimating;
+    const isSpinComplete = spinCompleteHref === link.href;
   
     return (
       <TooltipProvider key={link.href}>
@@ -93,7 +102,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         className={cn(
                         'book-nav-item',
                         isTool ? 'tool-book' : 'main-book',
-                        isActive && 'active spin-complete'
+                        isActive && 'active',
+                        isSpinComplete && !isCurrentlyAnimating && 'spin-complete'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
