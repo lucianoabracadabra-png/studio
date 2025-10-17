@@ -3,7 +3,7 @@ import { Volume2 } from "lucide-react";
 
 export default function SoundboardPage() {
   return (
-    <div className="flex items-center justify-center flex-1 flex-col">
+    <>
       <h1 className="text-3xl font-headline magical-glow mb-8 animate-in fade-in-down">Soundboard</h1>
       <Card className="w-full max-w-md text-center animate-in fade-in-up">
         <CardHeader>
@@ -17,6 +17,6 @@ export default function SoundboardPage() {
           <p className="text-muted-foreground">Ambient sounds, thrilling sound effects, and musical scores to set the mood for your adventures are being composed. Get ready to enhance your game's atmosphere!</p>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }

@@ -3,7 +3,7 @@ import { Volume2 } from "lucide-react";
 
 export default function SoundboardPage() {
   return (
-    <div className="flex items-center justify-center flex-1 flex-col">
+    <>
       <h1 className="text-3xl font-headline magical-glow mb-8 animate-in fade-in-down">Mesa de Som</h1>
       <Card className="w-full max-w-md text-center animate-in fade-in-up">
         <CardHeader>
@@ -17,6 +17,6 @@ export default function SoundboardPage() {
           <p className="text-muted-foreground">Sons ambientes, efeitos sonoros emocionantes e partituras musicais para definir o clima de suas aventuras estão sendo compostos. Prepare-se para aprimorar a atmosfera do seu jogo!</p>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }
