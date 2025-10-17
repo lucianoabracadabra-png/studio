@@ -54,7 +54,7 @@ const Book = ({ link, activeBook, previousBook, animatingHref, spinCompleteHref,
     const [animationDelay, setAnimationDelay] = useState('0s');
 
     useEffect(() => {
-      // This will only run on the client, after hydration
+      // This will only run on the client, after hydration, preventing mismatch
       setAnimationDelay(`-${Math.random() * 20}s`);
     }, []);
 
@@ -120,7 +120,10 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
 
   useEffect(() => {
     if (animatingHref && activePath === animatingHref) {
-        setAnimatingHref(null);
+        if(timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+            setAnimatingHref(null);
+        }, 1000);
     }
     
     // Cleanup timeout on unmount or if dependencies change
@@ -146,6 +149,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     setPreviousBook(activeBook);
     setAnimatingHref(href);
     
+    if(timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       router.push(href);
     }, 1000);
