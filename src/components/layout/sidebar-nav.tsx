@@ -77,24 +77,30 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     
     timeoutRef.current = setTimeout(() => {
       router.push(href);
-      setAnimatingHref(null);
-      setSpinCompleteHref(href);
-      setPreviousBook(null);
     }, 2000); 
   };
   
   useEffect(() => {
-    setSpinCompleteHref(pathname);
-    setAnimatingHref(null);
-    setPreviousBook(null);
+    if(animatingHref) {
+        const animationTimer = setTimeout(() => {
+            setAnimatingHref(null);
+            setSpinCompleteHref(pathname);
+            setPreviousBook(null);
+        }, 2000);
+        return () => clearTimeout(animationTimer);
+    } else {
+        setSpinCompleteHref(pathname);
+        setAnimatingHref(null);
+        setPreviousBook(null);
+    }
   }, [pathname]);
 
 
   const renderBook = (link: any, isTool: boolean) => {
-    const isActive = pathname === link.href;
-    const isPrevious = previousBook === link.href;
+    const isActive = pathname.startsWith(link.href);
+    const isPrevious = previousBook && previousBook.startsWith(link.href);
     const isAnimating = animatingHref === link.href;
-    const isSpinComplete = spinCompleteHref === link.href;
+    const isSpinComplete = spinCompleteHref && spinCompleteHref.startsWith(link.href);
 
     const Icon = link.icon;
 
