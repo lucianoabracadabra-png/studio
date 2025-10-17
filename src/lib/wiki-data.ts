@@ -19,7 +19,7 @@ export type Portal = {
     pages: WikiPage[];
 };
 
-const wikiPortals: Portal[] = [
+export const portals: Portal[] = [
     {
         id: 'grimorio-do-mundo',
         title: 'O Grimório do Mundo',
@@ -182,11 +182,9 @@ const wikiPortals: Portal[] = [
     },
 ];
 
-const wikiIconMap: { [key: string]: LucideIcon } = {
+export const iconMap: { [key: string]: LucideIcon } = {
     BookCopy,
     User,
     DraftingCompass,
     ScrollText,
 };
-
-export { wikiPortals as portals, wikiIconMap as iconMap };
