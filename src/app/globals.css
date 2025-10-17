@@ -352,11 +352,14 @@
     0% {
         box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
     }
-    90% {
+    50% {
         box-shadow: 
           0 0 60px 30px hsl(var(--book-color-hue), 90%, 75%), 
           0 0 30px 15px #fff,
           0 0 15px 5px hsl(var(--book-color-hue), 90%, 75%);
+    }
+    90% {
+        box-shadow: 0 0 20px 10px hsl(var(--book-color-hue), 85%, 80%), 0 0 35px 15px hsl(var(--book-color-hue), 85%, 80% / 0.7);
     }
     100% {
         box-shadow: 0 0 10px 2px hsl(var(--book-color-hue), 80%, 85%), 0 0 20px 5px hsl(var(--book-color-hue), 80%, 85% / 0.7);
