@@ -114,13 +114,11 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [previousBook, setPreviousBook] = useState<string | null>(null);
   
   const activeBook = activePath;
-  const spinCompleteHref = activePath; // The book is considered "spin complete" if it's the active one.
+  const spinCompleteHref = activePath; 
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // When the active path changes (due to navigation), and we were animating to it,
-    // clear the animation state.
     if (animatingHref && activePath === animatingHref) {
       setAnimatingHref(null);
     }
@@ -134,21 +132,10 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     if (href === activeBook || animatingHref) {
-      e.preventDefault(); // Prevent navigation if already on the page or animating
       return;
     }
-    
-    e.preventDefault(); // Prevent default link behavior to control animation.
-    
     setPreviousBook(activeBook);
     setAnimatingHref(href);
-    
-    // The animation is 2s long. After it finishes, navigate.
-    timeoutRef.current = setTimeout(() => {
-      router.push(href);
-      setAnimatingHref(null);
-      setPreviousBook(null);
-    }, 2000); 
   };
   
   const renderBook = (link: any) => {
