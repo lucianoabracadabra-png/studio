@@ -57,7 +57,15 @@ type LogEntry = {
 
 const MAX_AP_ON_TIMELINE = 50;
 
-const bookColors = [...mainLinks, ...gmToolsLinks, profileLink].filter(l => l.colorHue > 0).map(link => link.colorHue);
+const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
+const bookColors = allLinks.filter(l => l.colorHue > 0).map(link => link.colorHue);
+const hueToNameMap = allLinks.reduce((acc, link) => {
+    if (link.colorHue > 0) {
+        acc[link.colorHue] = link.label;
+    }
+    return acc;
+}, {} as Record<number, string>);
+
 
 const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: number, onSelect: (hue: number) => void, disabled?: boolean }) => {
     return (
@@ -122,11 +130,12 @@ export function CombatTracker() {
   }, [combatStarted, sortedCombatants]);
 
   const addCombatant = () => {
-    if (!newCombatant.name) return;
+    const name = newCombatant.name.trim() || hueToNameMap[newCombatant.colorHue] || `Combatant ${nextId}`;
+    if (!name) return;
 
     const combatant: Combatant = {
       id: nextId,
-      name: newCombatant.name,
+      name,
       ap: 0,
       isPlayer: newCombatant.isPlayer,
       reactionModifier: newCombatant.reactionModifier,
@@ -204,9 +213,6 @@ export function CombatTracker() {
   const timelineMarkers = Array.from({ length: MAX_AP_ON_TIMELINE / 5 + 1 }, (_, i) => i * 5);
   const activeCombatant = useMemo(() => sortedCombatants.find(c => c.id === activeCombatantId), [sortedCombatants, activeCombatantId]);
   
-  const handleReactionModifierChange = (amount: number) => {
-    setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + amount }));
-  }
   
   const ActionTrailDots = ({ trail, isPlayer }: { trail: ActionTrail, isPlayer: boolean }) => {
     const distance = trail.toAp - trail.fromAp;
@@ -214,14 +220,10 @@ export function CombatTracker() {
 
     const trailWidthPercent = (distance / MAX_AP_ON_TIMELINE) * 100;
     const startPercent = (trail.fromAp / MAX_AP_ON_TIMELINE) * 100;
-    const dotSize = 4; // size in pixels
-    const containerWidth = 800; // Estimated width, needs to be dynamic for better results
-    const trailWidthPx = (trailWidthPercent / 100) * containerWidth;
-    const numDots = Math.floor(trailWidthPx / (dotSize * 2));
   
     return (
       <div
-        className="absolute h-2 top-1/2 -translate-y-1/2 flex items-center z-0"
+        className="absolute h-1 top-1/2 -translate-y-1/2 flex items-center z-0"
         style={{
           left: `${startPercent}%`,
           width: `${trailWidthPercent}%`,
@@ -263,15 +265,13 @@ export function CombatTracker() {
             <CardContent>
                 <div className="relative w-full bg-background/30 rounded-lg p-2 overflow-x-auto space-y-2">
                     {/* TIMELINE MARKERS */}
-                    <div className="relative h-6 border-b border-white/10">
-                        <div className="absolute top-0 left-0 right-0 flex justify-between px-2 h-full">
-                            {timelineMarkers.map(marker => (
-                                <div key={marker} className="flex flex-col items-center text-xs text-muted-foreground h-full" style={{ position: 'absolute', left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
-                                    <span className='-translate-y-full'>{marker}</span>
-                                    <div className="h-full w-px bg-white/10"></div>
-                                </div>
-                            ))}
-                        </div>
+                     <div className="absolute top-0 bottom-0 left-0 right-0">
+                        {timelineMarkers.map(marker => (
+                            <div key={marker} className="absolute h-full" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}>
+                                <div className="h-full w-px bg-white/10"></div>
+                                <span className='absolute -top-5 -translate-x-1/2 text-xs text-muted-foreground'>{marker}</span>
+                            </div>
+                        ))}
                     </div>
                     
                     {/* COMBATANT LANES */}
@@ -298,11 +298,11 @@ export function CombatTracker() {
                                             <TooltipTrigger asChild>
                                                 <div
                                                     className="absolute -translate-y-1/2 transition-all duration-500 ease-out z-10"
-                                                    style={{ left: `calc(${leftPercentage}% - 20px)`, top: '50%' }}
+                                                    style={{ left: `calc(${leftPercentage}% - 10px)`, top: '50%' }}
                                                 >
                                                     <Avatar 
                                                       className={cn(
-                                                        'h-10 w-10 transition-all relative', 
+                                                        'h-5 w-5 transition-all relative', 
                                                         c.isPlayer ? 'rounded-full' : 'rounded-md',
                                                       )}
                                                     >
@@ -314,7 +314,6 @@ export function CombatTracker() {
                                                             )}
                                                           style={{ backgroundColor: `hsl(${c.colorHue}, 40%, 30%)`, color: `hsl(${c.colorHue}, 80%, 90%)`}}
                                                         >
-                                                          {c.name.substring(0, 2)}
                                                         </AvatarFallback>
                                                         {isActive && 
                                                           <div 
@@ -387,9 +386,7 @@ export function CombatTracker() {
                         <div className="space-y-2">
                             <Label htmlFor="reaction">Reaction Mod</Label>
                              <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(-1)} disabled={combatStarted}><Minus className="h-4 w-4"/></Button>
-                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-16" disabled={combatStarted}/>
-                                <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(1)} disabled={combatStarted}><Plus className="h-4 w-4"/></Button>
+                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-full" disabled={combatStarted}/>
                             </div>
                         </div>
                     </div>
@@ -404,11 +401,10 @@ export function CombatTracker() {
                     <Button 
                         onClick={addCombatant} 
                         className="w-full font-bold transition-all" 
-                        disabled={combatStarted || !newCombatant.name}
+                        disabled={combatStarted}
                          style={{ 
                             backgroundColor: `hsl(${newCombatant.colorHue}, 90%, 70%)`,
                             color: `hsl(${newCombatant.colorHue}, 10%, 15%)`,
-                            boxShadow: !combatStarted && newCombatant.name ? `0 0 15px hsl(${newCombatant.colorHue}, 90%, 70%)` : 'none'
                         }}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
