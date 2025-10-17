@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle, CardFooter, CardContent } from "@/components/ui/card";
-import { portals } from "@/lib/wiki-data";
+import { portals, iconMap } from "@/lib/wiki-data";
 import { ArrowRight } from "lucide-react";
 
 export default function WikiPage() {
@@ -13,7 +13,7 @@ export default function WikiPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in-up" style={{ animationDelay: '200ms' }}>
         {portals.map((portal, i) => {
-          const Icon = portal.icon;
+          const Icon = iconMap[portal.icon];
           return (
             <Link href={`/wiki/${portal.id}`} key={portal.id} className="block group">
               <Card className="glassmorphic-card h-full flex flex-col" style={{ animationDelay: `${i * 100}ms`}}>

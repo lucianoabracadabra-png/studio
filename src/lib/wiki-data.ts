@@ -1,4 +1,14 @@
+'use client';
+
 import { BookCopy, User, DraftingCompass, ScrollText, type LucideIcon } from "lucide-react";
+
+// Este mapa é usado para buscar o componente de ícone real no lado do cliente
+export const iconMap: { [key: string]: LucideIcon } = {
+    BookCopy,
+    User,
+    DraftingCompass,
+    ScrollText,
+};
 
 export type WikiPage = {
     id: string;
@@ -12,7 +22,7 @@ export type Portal = {
     title: string;
     subtitle: string;
     description: string;
-    icon: LucideIcon;
+    icon: keyof typeof iconMap; // O ícone agora é uma string
     colorHue: number;
     pages: WikiPage[];
 };
@@ -23,7 +33,7 @@ export const portals: Portal[] = [
         title: 'O Grimório do Mundo',
         subtitle: 'A Lore e a Cosmologia',
         description: 'Mergulhe na filosofia, cosmologia e história que dão alma ao universo. Este portal é a porta de entrada para o contexto que fundamenta todas as regras e aventuras.',
-        icon: BookCopy,
+        icon: 'BookCopy',
         colorHue: 280,
         pages: [
             {
@@ -63,7 +73,7 @@ export const portals: Portal[] = [
         title: 'O Caminho do Herói',
         subtitle: 'O Manual do Jogador',
         description: 'Tudo o que um jogador precisa para criar, desenvolver e jogar com o seu personagem. As regras são organizadas para seguir a jornada de aprendizagem.',
-        icon: User,
+        icon: 'User',
         colorHue: 240,
         pages: [
             {
@@ -115,7 +125,7 @@ export const portals: Portal[] = [
         title: 'O Manto do Arquiteto',
         subtitle: 'O Guia do Mestre',
         description: 'Ferramentas, regras avançadas e conselhos para a pessoa que irá narrar o jogo. Este é o "lado B" do sistema, com os segredos da engenharia da magia.',
-        icon: DraftingCompass,
+        icon: 'DraftingCompass',
         colorHue: 65,
         pages: [
             {
@@ -149,7 +159,7 @@ export const portals: Portal[] = [
         title: 'O Catálogo da Criação',
         subtitle: 'Bases de Dados',
         description: 'A seção de referência prática do jogo, contendo listas e catálogos de todos os "objetos" do jogo, desde equipamentos e itens mágicos a monstros e feitiços.',
-        icon: ScrollText,
+        icon: 'ScrollText',
         colorHue: 30,
         pages: [
             {
