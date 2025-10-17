@@ -218,22 +218,22 @@
     box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
   }
 
-  .book-spin-and-ignite .book-nav-item,
-  .book-spin-and-ignite .book-nav-item::after {
+  .book-spin-and-ignite > .book-nav-item,
+  .book-spin-and-ignite > .book-nav-item::after {
     animation-duration: 2s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: forwards;
   }
   
-  .book-spin-and-ignite .book-nav-item {
+  .book-spin-and-ignite > .book-nav-item {
     animation-name: book-spin;
   }
 
-  .book-decaying .book-nav-item {
+  .book-decaying > .book-nav-item {
     animation: book-decay 1s ease-in-out forwards;
   }
 
-  .book-spin-and-ignite .book-nav-item::after {
+  .book-spin-and-ignite > .book-nav-item::after {
     content: '';
     position: absolute;
     right: 0;

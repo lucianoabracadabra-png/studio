@@ -56,43 +56,44 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [animatingHref, setAnimatingHref] = useState<string | null>(null);
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
-  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   const [isClient, setIsClient] = useState(false);
+  const previousBookRef = useRef<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
-    setActiveBook(activePath);
-    setSpinCompleteHref(activePath);
+    previousBookRef.current = activePath;
   }, [activePath]);
+
+  useEffect(() => {
+    if (activeBook !== previousBookRef.current) {
+      setPreviousBook(previousBookRef.current);
+      const timer = setTimeout(() => {
+        setPreviousBook(null);
+      }, 1000); // Duration of the decay animation
+      previousBookRef.current = activeBook;
+      return () => clearTimeout(timer);
+    }
+  }, [activeBook]);
+
 
   const handleLinkClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     if (href === activeBook || animatingHref) return;
 
-    setSpinCompleteHref(null);
     setActiveBook(href);
     setAnimatingHref(href);
     
-    // Delay setting the previous book to trigger its decay animation later
-    setTimeout(() => {
-      setPreviousBook(activePath);
-    }, 1000);
-
-    // Main navigation and animation reset
     setTimeout(() => {
         router.push(href);
         setAnimatingHref(null);
-        setSpinCompleteHref(href);
-        setPreviousBook(null); // Clean up previous book state
     }, 2000); 
   };
   
   const renderBook = (link: any, isTool: boolean) => {
     const isCurrentlyAnimating = animatingHref === link.href;
     const isPrevious = previousBook === link.href;
-    const isActive = activeBook === link.href && !isPrevious;
-    const isSpinComplete = spinCompleteHref === link.href;
-  
+    const isActive = activeBook === link.href;
+
     return (
       <TooltipProvider key={link.href}>
         <Tooltip>
@@ -108,12 +109,12 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
                         className={cn(
                         'book-nav-item',
                         isTool ? 'tool-book' : 'main-book',
-                        (isActive || isCurrentlyAnimating) && 'active',
-                        isSpinComplete && !isCurrentlyAnimating && 'spin-complete'
+                        isActive && 'active',
+                        isActive && !isCurrentlyAnimating && 'spin-complete',
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
-                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && !isCurrentlyAnimating && 'active-icon')} />
+                        <link.icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && !isCurrentlyAnimating && !isPrevious && 'active-icon')} />
                     </Link>
                 </div>
             </TooltipTrigger>
