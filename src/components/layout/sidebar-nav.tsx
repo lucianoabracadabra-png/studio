@@ -119,12 +119,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // If the page has loaded (activePath has updated) and it matches the one we're animating,
-    // start a timer to turn off the animation, allowing for an overlap.
     if (animatingHref && activePath === animatingHref) {
-      timeoutRef.current = setTimeout(() => {
         setAnimatingHref(null);
-      }, 1000); // Let animation continue for 1s after page load
     }
     
     // Cleanup timeout on unmount or if dependencies change
@@ -136,23 +132,23 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }, [activePath, animatingHref]);
   
   const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Prevent navigation if an animation is already in progress
     if (animatingHref) {
       e.preventDefault();
       return;
     }
 
-    // Don't do anything if clicking the active link
     if (href === activeBook) {
       e.preventDefault();
       return;
     }
     
-    // Set state for the new animation
+    e.preventDefault();
     setPreviousBook(activeBook);
     setAnimatingHref(href);
     
-    // The <Link> component will handle the navigation.
+    timeoutRef.current = setTimeout(() => {
+      router.push(href);
+    }, 1000);
   };
   
   const renderBook = (link: any) => {
