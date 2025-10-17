@@ -20,11 +20,16 @@ export default function AuthenticatedAppLayout({
   const pathname = usePathname();
   const activePath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
   const colorHue = pathColorMap[activePath || ''] || 0;
+  
+  const pageStyle = {
+    '--page-primary-color': `${colorHue}`,
+    '--page-accent-color': `${(colorHue + 40) % 360}`,
+  } as React.CSSProperties;
 
   return (
       <AppLayout 
         activePath={activePath} 
-        colorHue={colorHue}
+        style={pageStyle}
       >
           {children}
       </AppLayout>

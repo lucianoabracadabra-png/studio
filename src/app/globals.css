@@ -139,10 +139,10 @@
   .page-container {
     @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative flex flex-col;
     background: 
-      radial-gradient(ellipse at 100% 0%, hsl(var(--page-primary-color, var(--primary))) / 0.25),
-      radial-gradient(ellipse at 0% 100%, hsl(var(--page-accent-color, var(--accent))) / 0.25),
+      radial-gradient(ellipse at 100% 0%, hsl(var(--page-primary-color), 90%, 70%) / 0.15),
+      radial-gradient(ellipse at 0% 100%, hsl(var(--page-accent-color), 90%, 70%) / 0.15),
       hsl(var(--background) / 0.5);
-    box-shadow: 0 0 40px hsl(var(--page-primary-color, var(--primary))) / 0.1;
+    box-shadow: 0 0 40px hsl(var(--page-primary-color), 90%, 70%) / 0.1;
     backdrop-filter: blur(12px);
   }
   
@@ -159,8 +159,8 @@
     width: 2rem;
     height: 2rem;
     transition: all 0.5s ease-in-out;
-    border-color: hsl(var(--page-primary-color));
-    filter: drop-shadow(0 0 5px hsl(var(--page-primary-color)));
+    border-color: hsl(var(--page-primary-color), 90%, 70%);
+    filter: drop-shadow(0 0 5px hsl(var(--page-primary-color), 90%, 70%));
   }
 
   .page-container::before {
@@ -189,8 +189,8 @@
   
   .magical-glow {
     @apply text-transparent bg-clip-text select-none;
-    background-image: linear-gradient(to right, hsl(var(--page-primary-color, var(--primary))), hsl(var(--page-accent-color, var(--accent))));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent)));
+    background-image: linear-gradient(to right, hsl(var(--page-primary-color), 90%, 70%), hsl(var(--page-accent-color), 90%, 70%));
+    text-shadow: 0 0 8px hsl(var(--page-primary-color), 90%, 70%), 0 0 16px hsl(var(--page-accent-color), 90%, 70%);
   }
 
   #stars {
@@ -361,7 +361,7 @@
 }
 
 @keyframes book-ignite-glow {
-    0%, 79% { 
+    0%, 20% { 
         box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); 
     }
     80% {
@@ -371,7 +371,7 @@
             0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
             0 0 15px hsl(var(--book-color-hue), 50%, 80%);
     }
-    90%, 100% {
+    100% {
         box-shadow: 
             inset -3px 0 8px rgba(0,0,0,0.3), 
             0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),

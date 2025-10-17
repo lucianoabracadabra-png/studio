@@ -5,14 +5,10 @@ import { SidebarNav } from './sidebar-nav';
 type AppLayoutProps = {
   children: React.ReactNode;
   activePath: string | null;
-  colorHue: number;
+  style: React.CSSProperties;
 };
 
-export default function AppLayout({ children, activePath, colorHue }: AppLayoutProps) {
-  const pageStyle = {
-    '--page-primary-color': `hsl(${colorHue}, 90%, 70%)`,
-    '--page-accent-color': `hsl(${(colorHue + 40) % 360}, 90%, 70%)`,
-  } as React.CSSProperties;
+export default function AppLayout({ children, activePath, style }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen w-full bg-background relative">
@@ -20,13 +16,11 @@ export default function AppLayout({ children, activePath, colorHue }: AppLayoutP
             <SidebarNav activePath={activePath} />
         </div>
         <main className="pl-24 h-screen relative z-10">
-            <div className="flex-1 flex flex-col h-full overflow-y-auto p-4 lg:p-6">
-                <div 
-                    className="page-container flex-1 flex flex-col"
-                    style={pageStyle}
-                >
-                    {children}
-                </div>
+            <div 
+                className="page-container flex-1 flex flex-col h-full overflow-y-auto p-4 lg:p-6"
+                style={style}
+            >
+                {children}
             </div>
         </main>
     </div>
