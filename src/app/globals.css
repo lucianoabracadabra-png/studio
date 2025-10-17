@@ -137,7 +137,7 @@
   }
   
   .page-container {
-    @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative;
+    @apply rounded-lg p-4 lg:p-6 transition-colors duration-500 relative flex flex-col;
     background: 
       radial-gradient(ellipse at 100% 0%, hsl(var(--page-primary-color, var(--primary))) / 0.25),
       radial-gradient(ellipse at 0% 100%, hsl(var(--page-accent-color, var(--accent))) / 0.25),
@@ -244,11 +244,8 @@
     box-shadow: 140px 1325px #FFF, 1066px 1445px #FFF, 1545px 38px #FFF, 1552px 1335px #FFF, 1664px 343px #FFF, 1569px 1599px #FFF, 104px 1500px #FFF, 145px 1199px #FFF, 335px 1409px #FFF, 178px 1205px #FFF;
   }
 
-  .book-spin-anim {
-    animation: book-spin 2s ease-in-out;
-  }
-  .book-ignite-anim {
-    animation: book-ignite-glow 2s ease-in-out forwards;
+  .book-spin-and-ignite .book-nav-item {
+    animation: book-spin 2s ease-in-out, book-ignite-glow 2s ease-in-out;
   }
 
 }
@@ -364,15 +361,17 @@
 }
 
 @keyframes book-ignite-glow {
-    0% { box-shadow: none; }
+    0%, 79% { 
+        box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4); 
+    }
     80% {
         box-shadow: 
             inset -3px 0 24px rgba(0,0,0,0.4), 
-            0 0 75px hsla(var(--book-color-hue), 50%, 70%, 3),
-            0 0 36px hsla(var(--book-color-hue), 50%, 70%, 2.1),
+            0 0 75px hsla(var(--book-color-hue), 50%, 70%, 1),
+            0 0 36px hsla(var(--book-color-hue), 50%, 70%, 0.7),
             0 0 15px hsl(var(--book-color-hue), 50%, 80%);
     }
-    100% {
+    90%, 100% {
         box-shadow: 
             inset -3px 0 8px rgba(0,0,0,0.3), 
             0 0 25px hsla(var(--book-color-hue), 50%, 70%, 1),
