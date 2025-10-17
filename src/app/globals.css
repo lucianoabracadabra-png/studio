@@ -368,9 +368,9 @@
     50% {
         box-shadow: 
         inset -3px 0 8px rgba(0,0,0,0.3), 
-        0 0 75px hsla(var(--book-color-hue), 50%, 70%, 3),
-        0 0 36px hsla(var(--book-color-hue), 50%, 70%, 2.1),
-        0 0 15px hsl(var(--book-color-hue), 50%, 80%);
+        0 0 62.5px hsla(var(--book-color-hue), 50%, 70%, 2.5),
+        0 0 30px hsla(var(--book-color-hue), 50%, 70%, 1.75),
+        0 0 12.5px hsl(var(--book-color-hue), 50%, 80%);
     }
     100% {
         box-shadow: 

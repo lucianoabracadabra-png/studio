@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X } from 'lucide-react';
+import { PlusCircle, UserPlus, Crown, Play, History, Check, RefreshCw, X, Minus, Plus } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,7 +86,7 @@ export function CombatTracker() {
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [nextId, setNextId] = useState(1);
   const [activeCombatantId, setActiveCombatantId] = useState<number | null>(null);
-  const [newCombatant, setNewCombatant] = useState({ name: '', reactionModifier: '0', isPlayer: false, colorHue: bookColors[0] });
+  const [newCombatant, setNewCombatant] = useState<{name: string, reactionModifier: number, isPlayer: boolean, colorHue: number}>({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[0] });
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
@@ -127,12 +127,12 @@ export function CombatTracker() {
       name: newCombatant.name,
       ap: 0,
       isPlayer: newCombatant.isPlayer,
-      reactionModifier: parseInt(newCombatant.reactionModifier, 10) || 0,
+      reactionModifier: newCombatant.reactionModifier,
       colorHue: newCombatant.colorHue,
     };
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
-    setNewCombatant({ name: '', reactionModifier: '0', isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
+    setNewCombatant({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
     addLogEntry(`${combatant.name} has been added to the encounter.`);
   };
   
@@ -201,6 +201,10 @@ export function CombatTracker() {
 
   const timelineMarkers = Array.from({ length: MAX_AP_ON_TIMELINE / 5 + 1 }, (_, i) => i * 5);
   const activeCombatant = useMemo(() => sortedCombatants.find(c => c.id === activeCombatantId), [sortedCombatants, activeCombatantId]);
+  
+  const handleReactionModifierChange = (amount: number) => {
+    setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + amount }));
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -272,7 +276,6 @@ export function CombatTracker() {
                                                     <Avatar 
                                                       className={cn(
                                                         'h-10 w-10 transition-all relative', 
-                                                        isActive ? 'scale-125 z-10' : 'z-0'
                                                       )}
                                                     >
                                                         <AvatarFallback 
@@ -347,7 +350,11 @@ export function CombatTracker() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="reaction">Reaction Modifier</Label>
-                        <Input id="reaction" type="number" placeholder="0" value={newCombatant.reactionModifier} onChange={e => setNewCombatant({ ...newCombatant, reactionModifier: e.target.value })} disabled={combatStarted}/>
+                         <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(-1)} disabled={combatStarted}><Minus/></Button>
+                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg" disabled={combatStarted}/>
+                            <Button variant="outline" size="icon" onClick={() => handleReactionModifierChange(1)} disabled={combatStarted}><Plus/></Button>
+                        </div>
                     </div>
                     <div className="space-y-3">
                         <Label>Color</Label>
@@ -357,8 +364,15 @@ export function CombatTracker() {
                     <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
                     <Label htmlFor="is-player">Player Character</Label>
                     </div>
-                    <Button onClick={addCombatant} className="w-full font-bold" disabled={combatStarted}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
+                    <Button 
+                        onClick={addCombatant} 
+                        className="w-full font-bold transition-all" 
+                        disabled={combatStarted}
+                        style={{
+                            boxShadow: `0 0 15px hsl(${newCombatant.colorHue}, 80%, 70%)`
+                        } as React.CSSProperties}
+                    >
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add to Encounter
                     </Button>
                 </CardContent>
             </Card>
