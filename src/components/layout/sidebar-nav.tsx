@@ -77,6 +77,7 @@ const Book = ({
 }) => {
     const Icon = link.icon;
     const isTool = gmToolsLinks.some(l => l.href === link.href) || profileLink.some(l => l.href === link.href);
+    const isProfile = profileLink.some(l => l.href === link.href);
     
     return (
         <TooltipProvider key={link.href}>
@@ -99,7 +100,7 @@ const Book = ({
                         >
                            <div className='book-cover'>
                              <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
-                                <Icon />
+                                {isProfile ? <Icon /> : <Icon />}
                              </div>
                            </div>
                         </Link>
