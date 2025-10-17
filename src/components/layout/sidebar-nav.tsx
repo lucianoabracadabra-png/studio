@@ -56,7 +56,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   const [activeBook, setActiveBook] = useState<string | null>(activePath);
   const [previousBook, setPreviousBook] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [isAnimating, setIsAnimating] = useState<string | null>(null);
+  const [animatingHref, setAnimatingHref] = useState<string | null>(null);
+  const [spinCompleteHref, setSpinCompleteHref] = useState<string | null>(activePath);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -64,30 +65,60 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
   }, []);
 
   useEffect(() => {
-    // Only update states if the path has actually changed
     if (pathname !== activeBook) {
-      setPreviousBook(activeBook); // The old path becomes the previous one
-      setActiveBook(pathname);     // The new path becomes the active one
-      setIsAnimating(pathname);    // Start animating the new book
-      
+      setPreviousBook(activeBook);
+      setActiveBook(pathname);
+    }
+  }, [pathname, activeBook]);
+
+  const handleLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (href === activeBook) {
+      e.preventDefault();
+      return;
+    }
+    
+    e.preventDefault(); 
+    setAnimatingHref(href);
+    setSpinCompleteHref(null);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    window.history.pushState(null, '', href);
+    const navEvent = new PopStateEvent('popstate');
+    window.dispatchEvent(navEvent);
+
+    timeoutRef.current = setTimeout(() => {
+      setAnimatingHref(null);
+      setSpinCompleteHref(href);
+    }, 2000); 
+  };
+  
+  useEffect(() => {
+    const handlePopState = () => {
+       if (window.location.pathname !== activeBook) {
+         setPreviousBook(activeBook);
+         setActiveBook(window.location.pathname);
+       }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
-      // Clear animating state after animation is done
-      timeoutRef.current = setTimeout(() => {
-        setIsAnimating(null);
-        setPreviousBook(null); // Also clear previous book after decay animation
-      }, 2000);
-    }
-  }, [pathname]);
+    };
+  }, [activeBook]);
 
 
   const renderBook = (link: any, isTool: boolean) => {
     const isActive = activeBook === link.href;
     const isPrevious = previousBook === link.href;
-    const isSpinning = isAnimating === link.href;
-    
+    const isAnimating = animatingHref === link.href;
+    const isSpinComplete = spinCompleteHref === link.href;
+
     const Icon = link.icon;
 
     return (
@@ -96,19 +127,21 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
             <TooltipTrigger asChild>
                 <div className={cn(
                     "book-wrapper", 
-                    isSpinning && 'book-spin-and-ignite',
-                    isPrevious && 'book-decaying'
+                    isAnimating && 'book-spin-and-ignite',
+                    isPrevious && !isAnimating && 'book-decaying',
                 )}>
                     <Link
                         href={link.href}
+                        onClick={(e) => handleLinkClick(link.href, e)}
                         className={cn(
                           'book-nav-item',
                           isTool ? 'tool-book' : 'main-book',
-                          isActive && !isSpinning && 'active',
+                          isActive && !isAnimating && 'active',
+                          isSpinComplete && 'spin-complete'
                         )}
                         style={{ '--book-color-hue': `${link.colorHue}` } as React.CSSProperties}
                     >
-                        <Icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && !isSpinning && 'active-icon')} />
+                        <Icon className={cn("w-6 h-6 text-white/80 transition-all", isActive && !isAnimating && !isSpinComplete && 'active-icon')} />
                     </Link>
                 </div>
             </TooltipTrigger>
