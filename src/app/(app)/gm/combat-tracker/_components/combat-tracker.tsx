@@ -71,23 +71,36 @@ const hueToNameMap = allLinks.reduce((acc, link) => {
 const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: number, onSelect: (hue: number) => void, disabled?: boolean }) => {
     return (
         <div className={cn('flex flex-wrap gap-2', disabled && 'opacity-50')}>
-            {bookColors.map(hue => (
-                <button
-                    key={hue}
-                    type="button"
-                    onClick={() => !disabled && onSelect(hue)}
-                    disabled={disabled}
-                    className={cn(
-                        'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center',
-                        selectedHue === hue ? 'border-foreground scale-110' : 'border-transparent',
-                        disabled ? 'cursor-not-allowed' : 'hover:border-foreground/70'
-                    )}
-                    style={{ backgroundColor: `hsl(${hue}, 90%, 70%)` }}
-                    aria-label={`Select color hue ${hue}`}
-                >
-                    {selectedHue === hue && <Check className='h-5 w-5 text-white' />}
-                </button>
-            ))}
+            {bookColors.map(hue => {
+                const isSelected = selectedHue === hue;
+                const glowStyle = isSelected ? {
+                    boxShadow: `
+                        0 0 25px hsla(${hue}, 90%, 70%, 1),
+                        0 0 12px hsla(${hue}, 90%, 70%, 0.7),
+                        0 0 5px hsl(${hue}, 90%, 70%)`
+                } : {};
+
+                return (
+                    <button
+                        key={hue}
+                        type="button"
+                        onClick={() => !disabled && onSelect(hue)}
+                        disabled={disabled}
+                        className={cn(
+                            'w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center',
+                            isSelected ? 'border-transparent scale-110' : 'border-transparent',
+                            disabled ? 'cursor-not-allowed' : 'hover:border-foreground/70'
+                        )}
+                        style={{ 
+                            backgroundColor: `hsl(${hue}, 90%, 70%)`,
+                            ...glowStyle 
+                        }}
+                        aria-label={`Select color hue ${hue}`}
+                    >
+                        {isSelected && <Check className='h-5 w-5 text-white' />}
+                    </button>
+                )
+            })}
         </div>
     );
 };
@@ -288,7 +301,7 @@ export function CombatTracker() {
                          {/* Grid Lines */}
                         <div className="absolute top-0 bottom-0 left-0 right-0">
                             {timelineMarkers.map(marker => (
-                                <div key={marker} className="absolute h-full w-px bg-white/10" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%` }}></div>
+                                <div key={marker} className="absolute h-full w-px bg-white/10" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%`, top: 0, bottom: 0 }}></div>
                             ))}
                         </div>
 
@@ -297,9 +310,9 @@ export function CombatTracker() {
                             const isActive = c.id === activeCombatantId;
                             const topPosition = `${index * 3.5}rem`;
 
-                            const glowStyle = {
+                            const glowStyle = isActive ? {
                                 boxShadow: `0 0 12px hsl(${c.colorHue}, 90%, 70%), 0 0 5px hsl(${c.colorHue}, 90%, 70%)`
-                            };
+                            } : {};
                             
                             const trails = actionTrails.filter(t => t.combatantId === c.id);
                             
@@ -316,29 +329,24 @@ export function CombatTracker() {
                                                     className="absolute -translate-y-1/2 transition-all duration-500 ease-out z-10"
                                                     style={{ left: `calc(${leftPercentage}% - 5px)`, top: '50%' }}
                                                 >
-                                                    <Avatar 
-                                                      className={cn(
-                                                        'h-2.5 w-2.5 transition-all relative', 
-                                                        c.isPlayer ? 'rounded-full' : 'rounded-none',
-                                                      )}
-                                                    >
-                                                        <AvatarFallback 
-                                                          className={cn(
+                                                    <div 
+                                                        className={cn(
+                                                            "h-2.5 w-2.5 transition-all relative",
                                                             c.isPlayer ? 'rounded-full' : 'rounded-none'
-                                                            )}
-                                                          style={{ backgroundColor: `hsl(${c.colorHue}, 90%, 70%)`}}
-                                                        >
-                                                        </AvatarFallback>
-                                                        {isActive && 
-                                                          <div 
+                                                        )}
+                                                        style={isActive ? glowStyle : {}}
+                                                     >
+                                                        <Avatar className="h-full w-full">
+                                                          <AvatarFallback 
                                                             className={cn(
-                                                              "absolute -inset-1",
-                                                              c.isPlayer ? 'rounded-full' : 'rounded-none'
-                                                            )} 
-                                                            style={{ borderColor: `hsl(${c.colorHue}, 90%, 70%)`, ...glowStyle }}
-                                                          ></div>
-                                                        }
-                                                    </Avatar>
+                                                              c.isPlayer ? 'rounded-full' : 'rounded-none',
+                                                              isActive ? 'bg-transparent' : ''
+                                                              )}
+                                                            style={{ backgroundColor: !isActive ? `hsl(${c.colorHue}, 90%, 70%)` : undefined }}
+                                                          >
+                                                          </AvatarFallback>
+                                                        </Avatar>
+                                                    </div>
                                                 </div>
                                             </TooltipTrigger>
                                             <TooltipContent>
@@ -502,5 +510,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-    
