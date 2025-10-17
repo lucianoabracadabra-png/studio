@@ -28,7 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
+import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
 
 type Combatant = {
   id: number;
@@ -417,5 +417,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-    
