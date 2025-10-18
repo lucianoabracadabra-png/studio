@@ -34,12 +34,14 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
     }
   }
 
+  const isPanDisabled = activeTool === 'draw' || activeTool === 'fog';
+
   return (
     <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative" style={{ cursor: getCursor() }}>
       <motion.div
         drag
         dragMomentum={false}
-        dragListener={activeTool === 'select'}
+        dragListener={!isPanDisabled}
         onDragEnd={handleDragEnd}
         className="w-full h-full relative"
         style={{ 
@@ -48,7 +50,7 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
           scale: mapState.zoom,
           width: mapState.dimensions.width,
           height: mapState.dimensions.height,
-          cursor: activeTool === 'select' ? 'grab' : undefined,
+          cursor: !isPanDisabled ? 'grab' : undefined,
         }}
       >
         {mapState.url && <Image 
@@ -60,7 +62,7 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
           priority
         />}
 
-        <div className="absolute top-0 left-0 w-full h-full">
+        <div className="absolute top-0 left-0 w-full h-full" style={{transform: `scale(${1 / mapState.zoom})`}}>
           {tokens.map(token => (
             <Token
               key={token.id}

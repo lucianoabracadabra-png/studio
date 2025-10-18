@@ -255,7 +255,7 @@ export function VttSidebar({ vttState, setTokens, setMapState, setLayers, setCom
               <Card className="glassmorphic-card">
                   <CardHeader className='pb-2'>
                     <div className='flex justify-between items-center'>
-                      <CardTitle className='flex items-center gap-2 text-lg'><Shield/> Heróis</CardTitle>
+                      <CardTitle className='flex items-center gap-2 text-lg'>Heróis</CardTitle>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowHeroCreator(s => !s)}><PlusCircle /></Button>
                     </div>
                   </CardHeader>
@@ -270,7 +270,7 @@ export function VttSidebar({ vttState, setTokens, setMapState, setLayers, setCom
               <Card className="glassmorphic-card">
                   <CardHeader className='pb-2'>
                     <div className='flex justify-between items-center'>
-                      <CardTitle className='flex items-center gap-2 text-lg'><Swords/> Inimigos</CardTitle>
+                      <CardTitle className='flex items-center gap-2 text-lg'>Inimigos</CardTitle>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowEnemyCreator(s => !s)}><PlusCircle /></Button>
                     </div>
                   </CardHeader>

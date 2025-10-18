@@ -36,8 +36,8 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
         x: initialPosition.x,
         y: initialPosition.y,
         position: 'absolute',
-        width: 50 / mapZoom,
-        height: 50 / mapZoom,
+        width: 50,
+        height: 50,
         zIndex: isActive ? 10 : 1,
       }}
       className="cursor-pointer flex flex-col items-center group"

@@ -27,7 +27,7 @@ const mainTools: { id: VttTool, label: string, icon: React.ElementType }[] = [
 
 export function VttToolbar({ activeTool, onToolSelect, onZoomIn, onZoomOut, onCenter, zoomLevel }: VttToolbarProps) {
   return (
-    <div className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col items-center gap-2 p-2 rounded-lg bg-card/80 backdrop-blur-sm border border-white/10 shadow-lg">
+    <div className="absolute top-1/2 -translate-y-1/2 left-4 flex flex-col items-center gap-2 p-2 rounded-lg bg-card/80 backdrop-blur-sm border border-white/10 shadow-lg z-20">
       
       {mainTools.map(tool => (
          <TooltipProvider key={tool.id}>

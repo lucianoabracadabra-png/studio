@@ -137,13 +137,18 @@ export function VttLayout() {
   }
 
   const handleTokenDragEnd = (id: number, newPosition: { x: number; y: number }) => {
+    const map = vttState.map;
+    // Adjust position based on map pan and zoom to get absolute position on the canvas
+    const absoluteX = (newPosition.x - map.position.x) / map.zoom;
+    const absoluteY = (newPosition.y - map.position.y) / map.zoom;
+
     setTokens(prevTokens => {
       return {
         heroes: prevTokens.heroes.map(token =>
-          token.id === id ? { ...token, position: newPosition } : token
+          token.id === id ? { ...token, position: { x: absoluteX, y: absoluteY } } : token
         ),
         enemies: prevTokens.enemies.map(token =>
-          token.id === id ? { ...token, position: newPosition } : token
+          token.id === id ? { ...token, position: { x: absoluteX, y: absoluteY } } : token
         ),
       }
     });
