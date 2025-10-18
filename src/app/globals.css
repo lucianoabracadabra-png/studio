@@ -133,19 +133,11 @@
     transition: width 0.5s ease-out, box-shadow 0.5s ease-out;
   }
   
-  .book-nav-item.growing,
-  .book-nav-item.holding,
-  .book-nav-item.climax,
-  .book-nav-item.decaying-on,
-  .book-nav-item.on {
-    transform: rotateY(20deg);
-  }
-
   .book-nav-item.growing {
     animation: book-growing 1s ease-out forwards;
   }
   .book-nav-item.holding {
-    animation: book-holding 2s ease-in-out infinite;
+    animation: book-holding 2s ease-in-out forwards;
   }
   .book-nav-item.climax {
     animation: book-climax 1s ease-in-out forwards;
@@ -158,6 +150,7 @@
   }
   
   .book-nav-item.on, .book-nav-item.holding, .book-nav-item.climax, .book-nav-item.decaying-on {
+    transform: rotateY(20deg);
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 25px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
@@ -228,28 +221,60 @@
   }
 
   @keyframes book-holding {
-    0%, 100% { box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 20px hsla(var(--book-color-hue, 0), 50%, 70%, 0.8),
-      0 0 10px hsla(var(--book-color-hue, 0), 50%, 70%, 0.5),
-      0 0 4px hsl(var(--book-color-hue, 0), 50%, 80%); 
+    from { 
+      transform: rotateY(740deg);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 20px hsla(var(--book-color-hue, 0), 50%, 70%, 0.8),
+        0 0 10px hsla(var(--book-color-hue, 0), 50%, 70%, 0.5),
+        0 0 4px hsl(var(--book-color-hue, 0), 50%, 80%); 
     }
-    50% { box-shadow: 
-      inset -3px 0 8px rgba(0,0,0,0.3), 
-      0 0 40px hsla(var(--book-color-hue, 0), 50%, 70%, 1.5),
-      0 0 20px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
-      0 0 8px hsl(var(--book-color-hue, 0), 50%, 80%);
+    to { 
+      transform: rotateY(740deg);
+      box-shadow: 
+        inset -3px 0 8px rgba(0,0,0,0.3), 
+        0 0 40px hsla(var(--book-color-hue, 0), 50%, 70%, 1.5),
+        0 0 20px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
+        0 0 8px hsl(var(--book-color-hue, 0), 50%, 80%);
     }
   }
 
   @keyframes book-climax {
-    from { transform: rotateY(740deg); }
-    to { transform: rotateY(2180deg); } /* 4 more spins */
+    from { 
+        transform: rotateY(740deg);
+        box-shadow: 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
+          0 0 40px hsla(var(--book-color-hue, 0), 50%, 70%, 1.5),
+          0 0 20px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
+          0 0 8px hsl(var(--book-color-hue, 0), 50%, 80%);
+    }
+    to { 
+        transform: rotateY(2180deg); /* 4 more spins */
+        box-shadow: 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
+          0 0 100px hsla(var(--book-color-hue, 0), 60%, 75%, 2),
+          0 0 40px hsla(var(--book-color-hue, 0), 60%, 75%, 1.5),
+          0 0 15px hsl(var(--book-color-hue, 0), 60%, 85%);
+    }
   }
   
   @keyframes book-decaying-on {
-    from { transform: rotateY(2180deg); }
-    to { transform: rotateY(2540deg); } /* 1 final spin */
+    from { 
+        transform: rotateY(2180deg); 
+        box-shadow: 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
+          0 0 100px hsla(var(--book-color-hue, 0), 60%, 75%, 2),
+          0 0 40px hsla(var(--book-color-hue, 0), 60%, 75%, 1.5),
+          0 0 15px hsl(var(--book-color-hue, 0), 60%, 85%);
+    }
+    to { 
+        transform: rotateY(2540deg); /* 1 final spin */
+        box-shadow: 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
+          0 0 25px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
+          0 0 12px hsla(var(--book-color-hue, 0), 50%, 70%, 0.7),
+          0 0 5px hsl(var(--book-color-hue, 0), 50%, 80%);
+    }
   }
   
   @keyframes book-decaying-off {

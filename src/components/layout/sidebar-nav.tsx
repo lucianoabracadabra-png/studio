@@ -109,11 +109,10 @@ const Book = ({
     );
 };
 
-
 export function SidebarNav({ activePath: initialActivePath }: { activePath: string | null }) {
     const router = useRouter();
     const pathname = usePathname();
-
+    
     const [activeHref, setActiveHref] = useState<string | null>(null);
     const [visualStates, setVisualStates] = useState<Record<string, AnimationState>>(() => {
         const initialState: Record<string, AnimationState> = {};
@@ -123,33 +122,33 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
         return initialState;
     });
 
-    // EFFECT 1: Determine the true active link from the URL (source of truth)
-    useEffect(() => {
+    // Effect 1: Determine the true active link from the URL (source of truth)
+     useEffect(() => {
         const mostSpecificLink = [...allLinks]
             .sort((a, b) => b.href.length - a.href.length)
             .find(link => pathname.startsWith(link.href) && link.href !== '/');
         
         const currentActiveHref = mostSpecificLink ? mostSpecificLink.href : null;
-        setActiveHref(currentActiveHref);
 
-        // Turn off visual animations for non-active books
-        setVisualStates(prev => {
-            const newStates = {...prev};
-            Object.keys(newStates).forEach(href => {
-                if (href !== currentActiveHref && newStates[href] !== 'decaying-off') {
-                   if (prev[href] === 'on') {
-                     newStates[href] = 'decaying-off';
-                   } else {
-                     newStates[href] = 'off';
-                   }
+        if (currentActiveHref !== activeHref) {
+            setVisualStates(prev => {
+                const newStates = {...prev};
+                // Turn off the old book
+                if (activeHref && newStates[activeHref] !== 'off') {
+                    newStates[activeHref] = 'decaying-off';
                 }
+                // Turn on the new book
+                if (currentActiveHref) {
+                    newStates[currentActiveHref] = 'growing';
+                }
+                return newStates;
             });
-            return newStates;
-        });
+            setActiveHref(currentActiveHref);
+        }
 
     }, [pathname]);
 
-    // EFFECT 2: Manage the animation state machine based on visual state
+    // Effect 2: Manage the animation state machine based on visual state
     useEffect(() => {
         const timers: NodeJS.Timeout[] = [];
         
@@ -162,7 +161,6 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
                 timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'decaying-on' })), 1000));
             } else if (state === 'decaying-on') {
                  timers.push(setTimeout(() => {
-                    setActiveHref(href); // Sync the final active state
                     setVisualStates(prev => ({ ...prev, [href]: 'on' }));
                 }, 1000));
             } else if (state === 'decaying-off') {
@@ -174,26 +172,7 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
     }, [visualStates]);
 
     const handleLinkClick = (href: string) => {
-        // Prevent re-animation if already active or animating
-        if (activeHref === href || visualStates[href] === 'growing' || visualStates[href] === 'holding') {
-            return; 
-        }
-
-        // Start visual animation
-        setVisualStates(prevStates => {
-            const newStates: Record<string, AnimationState> = { ...prevStates };
-            // Turn off any other active book
-            Object.keys(newStates).forEach(key => {
-                if (newStates[key] === 'on' || newStates[key] === 'growing' || newStates[key] === 'holding' || newStates[key] === 'climax' || newStates[key] === 'decaying-on') {
-                    newStates[key] = 'decaying-off';
-                }
-            });
-            // Start the new animation
-            newStates[href] = 'growing';
-            return newStates;
-        });
-
-        // Navigate
+        if (pathname === href) return;
         router.push(href);
     };
 
@@ -209,18 +188,18 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
     );
 
     return (
-        <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center justify-between z-50 py-4 hide-scrollbar overflow-y-auto">
-            <nav className="flex flex-col items-center gap-4">
-                {mainLinks.map(link => renderBook(link, false))}
-            </nav>
-            <div className="my-4 w-8 border-t border-white/20"></div>
-            <nav className="flex flex-col items-center gap-4">
-                {gmToolsLinks.map(link => renderBook(link, true))}
-            </nav>
-            <div className='flex-grow'></div>
-            <nav className="flex flex-col items-center gap-4">
-                {profileLink.map(link => renderBook(link, false))}
-            </nav>
-        </div>
-    );
+      <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center justify-between z-50 py-4 hide-scrollbar overflow-y-auto">
+          <nav className="flex flex-col items-center gap-4">
+              {mainLinks.map(link => renderBook(link, false))}
+          </nav>
+          <div className="my-4 w-8 border-t border-white/20"></div>
+          <nav className="flex flex-col items-center gap-4">
+              {gmToolsLinks.map(link => renderBook(link, true))}
+          </nav>
+          <div className='flex-grow'></div>
+          <nav className="flex flex-col items-center gap-4">
+              {profileLink.map(link => renderBook(link, false))}
+          </nav>
+      </div>
+  );
 }
