@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useMovableWindow } from '@/context/movable-window-context';
 
 
 const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
@@ -280,35 +280,37 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
 );
 
 const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, type: 'armor' | 'weapon' | 'accessory' }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    
+    const { openWindow } = useMovableWindow();
+
     const iconMap = {
         armor: <Shield />,
         weapon: <Swords />,
         accessory: <Gem />
     };
 
+    const handleOpen = () => {
+        let content;
+        if (type === 'armor') {
+            content = <ArmorCardDetails armor={item as Armor} />;
+        } else if (type === 'weapon') {
+            content = <WeaponCardDetails weapon={item as Weapon} />;
+        } else {
+            content = <AccessoryCardDetails accessory={item as Accessory} />;
+        }
+        openWindow(item.name, content);
+    };
+
     return (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
-            <Card className="bg-muted/30">
-                <CollapsibleTrigger asChild>
-                    <CardHeader className="flex flex-row items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <span className="text-accent">{iconMap[type]}</span>
-                            <CardTitle className="text-base font-semibold">{item.name}</CardTitle>
-                        </div>
-                        <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
-                    </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <CardContent className="p-3 pt-0">
-                       {type === 'armor' && <ArmorCardDetails armor={item as Armor} />}
-                       {type === 'weapon' && <WeaponCardDetails weapon={item as Weapon} />}
-                       {type === 'accessory' && <AccessoryCardDetails accessory={item as Accessory} />}
-                    </CardContent>
-                </CollapsibleContent>
-            </Card>
-        </Collapsible>
+        <Button
+            variant="outline"
+            className="w-full justify-start h-auto p-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+            onClick={handleOpen}
+        >
+            <div className="flex items-center gap-3">
+                <span className="text-accent">{iconMap[type]}</span>
+                <p className="text-base font-semibold">{item.name}</p>
+            </div>
+        </Button>
     );
 };
 
