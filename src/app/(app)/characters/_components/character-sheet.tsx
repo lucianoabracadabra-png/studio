@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight, BookOpen } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -168,7 +168,7 @@ const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character[
             
             <Card className='sub-painel'>
                 <CardHeader>
-                    <h4 className='font-headline text-lg'>Atributos</h4>
+                    <CardTitle>Atributos</CardTitle>
                 </CardHeader>
                 <CardContent className='atributos-grid-interno'>
                     {focusData.attributes.map(attr => (
@@ -179,7 +179,7 @@ const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character[
 
             <Card className='sub-painel'>
                  <CardHeader>
-                    <h4 className='font-headline text-lg'>Perícias</h4>
+                    <CardTitle>Perícias</CardTitle>
                 </CardHeader>
                 <CardContent className='pericias-lista'>
                     {focusData.skills.map(skill => (
@@ -280,13 +280,15 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
 );
 
 const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, type: 'armor' | 'weapon' | 'accessory' }) => {
-    const { openWindow } = useMovableWindow();
+    const { openItem, isItemOpen } = useMovableWindow();
 
     const iconMap = {
         armor: <Shield />,
         weapon: <Swords />,
         accessory: <Gem />
     };
+    
+    const isOpen = isItemOpen(item.name);
 
     const handleOpen = () => {
         let content;
@@ -297,33 +299,52 @@ const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, ty
         } else {
             content = <AccessoryCardDetails accessory={item as Accessory} />;
         }
-        openWindow(item.name, content);
+        openItem({ id: item.name, title: item.name, content });
     };
 
     return (
         <Button
             variant="outline"
-            className="w-full justify-start h-auto p-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+            className={cn(
+                "w-full justify-start h-auto p-3 bg-muted/30 hover:bg-muted/50 transition-all",
+                isOpen && "bg-primary/20 border-primary/50 shadow-inner shadow-primary/20"
+            )}
             onClick={handleOpen}
         >
             <div className="flex items-center gap-3">
-                <span className="text-accent">{iconMap[type]}</span>
+                <span className={cn("text-accent transition-colors", isOpen && "text-primary")}>{iconMap[type]}</span>
                 <p className="text-base font-semibold">{item.name}</p>
             </div>
         </Button>
     );
 };
 
-
 const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) => {
+    const { openAllEquipped } = useMovableWindow();
+
     const equippedArmors = equipment.armors.filter(i => i.equipped);
     const equippedWeapons = equipment.weapons.filter(i => i.equipped);
     const equippedAccessories = equipment.accessories.filter(i => i.equipped);
 
+    const handleOpenAll = () => {
+        const allEquippedItems = [
+            ...equippedArmors.map(item => ({ id: item.name, title: item.name, content: <ArmorCardDetails armor={item} /> })),
+            ...equippedWeapons.map(item => ({ id: item.name, title: item.name, content: <WeaponCardDetails weapon={item} /> })),
+            ...equippedAccessories.map(item => ({ id: item.name, title: item.name, content: <AccessoryCardDetails accessory={item} /> })),
+        ];
+        openAllEquipped(allEquippedItems);
+    };
+
     return (
         <Card className="glassmorphic-card">
             <CardHeader>
-                <CardTitle className='font-headline text-2xl magical-glow text-center'>Equipamento</CardTitle>
+                <div className='flex justify-between items-center'>
+                    <CardTitle className='font-headline text-2xl magical-glow'>Equipamento</CardTitle>
+                    <Button variant="outline" size="sm" onClick={handleOpenAll}>
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        Abrir Todos
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
@@ -516,5 +537,3 @@ export function CharacterSheet() {
         </div>
     );
 }
-
-    

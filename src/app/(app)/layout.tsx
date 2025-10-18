@@ -4,7 +4,7 @@ import AppLayout from '@/components/layout/app-layout';
 import { usePathname } from 'next/navigation';
 import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
 import { MovableWindowProvider } from '@/context/movable-window-context';
-import { MovableWindow } from '@/components/layout/movable-window';
+import { MovableWindowManager } from '@/components/layout/movable-window';
 
 const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
 
@@ -49,7 +49,7 @@ export default function AuthenticatedAppLayout({
           {children}
         </div>
       </AppLayout>
-      <MovableWindow />
+      <MovableWindowManager />
     </MovableWindowProvider>
   );
 }
