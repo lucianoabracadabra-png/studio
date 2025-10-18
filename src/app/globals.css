@@ -101,10 +101,11 @@
     border-left: 3px solid hsl(var(--book-color-hue, 0), 30%, 50%);
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     will-change: transform, box-shadow;
+    transform-origin: center;
   }
   
   .book-nav-item--tool {
-    @apply w-14 h-14;
+    @apply w-12 h-12;
   }
 
   /* Pseudo-element for decorative spine line */
@@ -156,29 +157,13 @@
     animation: active-icon-pulse 2s ease-in-out infinite;
   }
 
-  /* State-specific styles */
-  .book-nav-item.on,
-  .book-nav-item.growing,
-  .book-nav-item.holding,
-  .book-nav-item.climax,
-  .book-nav-item.decaying-on {
-    transform: rotateY(20deg);
-  }
-  
-  .book-nav-item.on::before,
-  .book-nav-item.growing::before,
-  .book-nav-item.holding::before,
-  .book-nav-item.climax::before,
-  .book-nav-item.decaying-on::before {
-    opacity: 1;
-  }
-  
   .book-nav-item.on {
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 
       0 0 25px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
       0 0 12px hsla(var(--book-color-hue, 0), 50%, 70%, 0.7),
       0 0 5px hsl(var(--book-color-hue, 0), 50%, 80%);
+    transform: rotateY(20deg);
   }
   
   .book-nav-item.on::after,

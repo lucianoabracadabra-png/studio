@@ -58,10 +58,10 @@ const allLinks = [...mainLinks, ...gmToolsLinks, ...profileLink];
 
 const getInitialState = (activePath: string | null): BookStates => {
     const initialState: BookStates = {};
+    const activeLink = activePath ? [...allLinks].reverse().find(link => activePath.startsWith(link.href)) : null;
+    
     allLinks.forEach(link => {
-        const isActive = activePath?.startsWith(link.href) && link.href !== '/';
-        const isDashboard = activePath === '/dashboard' && link.href === '/dashboard';
-        initialState[link.href] = (isActive || isDashboard) ? 'on' : 'off';
+        initialState[link.href] = (activeLink && activeLink.href === link.href) ? 'on' : 'off';
     });
     return initialState;
 }
@@ -135,7 +135,7 @@ const Book = ({
                             aria-current={animationState === 'on' ? 'page' : undefined}
                         >
                            <div className='book-cover'>
-                                <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
+                               <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
                                    {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
                                </div>
                            </div>
@@ -155,72 +155,59 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     const router = useRouter();
     const pathname = usePathname();
     const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
-    const [isPageLoading, setIsPageLoading] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
     const destinationRef = useRef<string | null>(null);
 
-    // Effect to handle navigation and state changes after animations
+    // Effect to handle state transitions after animations complete
     useEffect(() => {
         const timeouts: NodeJS.Timeout[] = [];
+        let navigationTriggered = false;
 
         Object.entries(bookStates).forEach(([href, state]) => {
             if (state === 'growing') {
-                const t = setTimeout(() => {
-                    setBookStates(prev => ({...prev, [href]: 'holding'}));
-                }, 1000); // Duration of 'growing'
+                const t = setTimeout(() => setBookStates(prev => ({...prev, [href]: 'holding'})), 1000);
                 timeouts.push(t);
+            } else if (state === 'holding') {
+                if (href === destinationRef.current && !navigationTriggered) {
+                    navigationTriggered = true;
+                    router.push(href);
+                }
             } else if (state === 'climax') {
                 const t = setTimeout(() => {
                     setBookStates(prev => ({...prev, [href]: 'decaying-on'}));
-                }, 1000); // Duration of 'climax'
+                    setIsNavigating(false);
+                    destinationRef.current = null;
+                }, 1000);
                 timeouts.push(t);
             } else if (state === 'decaying-on') {
-                const t = setTimeout(() => {
-                    setBookStates(prev => ({...prev, [href]: 'on'}));
-                }, 1000); // Duration of 'decaying-on'
-                 timeouts.push(t);
+                const t = setTimeout(() => setBookStates(prev => ({...prev, [href]: 'on'})), 1000);
+                timeouts.push(t);
             } else if (state === 'decaying-off') {
-                 const t = setTimeout(() => {
-                    setBookStates(prev => ({...prev, [href]: 'off'}));
-                }, 1000); // Duration of 'decaying-off'
-                 timeouts.push(t);
+                const t = setTimeout(() => setBookStates(prev => ({...prev, [href]: 'off'})), 1000);
+                timeouts.push(t);
             }
         });
 
-        return () => {
-            timeouts.forEach(clearTimeout);
-        };
-    }, [bookStates]);
+        return () => timeouts.forEach(clearTimeout);
+    }, [bookStates, router]);
 
-    // Effect to trigger climax after page load
+    // Effect to trigger climax after page load completes
     useEffect(() => {
-        if (isPageLoading) {
-            // Page has finished loading
-            setIsPageLoading(false);
-            if (destinationRef.current) {
-                setBookStates(prev => {
-                    const newStates = { ...prev };
-                    const currentHolding = Object.keys(newStates).find(key => newStates[key] === 'holding');
-                    if (currentHolding) {
-                         newStates[currentHolding] = 'climax';
-                    }
-                    // Finalize old book's state
-                    Object.keys(newStates).forEach(key => {
-                        if (key !== currentHolding && newStates[key] === 'decaying-off') {
-                             newStates[key] = 'off';
-                        }
-                    });
-                    return newStates;
-                });
-                destinationRef.current = null;
-            }
+        if (destinationRef.current && pathname === destinationRef.current && !isNavigating) {
+             setBookStates(prev => {
+                const newStates = {...prev};
+                if (newStates[destinationRef.current!] === 'holding') {
+                    newStates[destinationRef.current!] = 'climax';
+                }
+                return newStates;
+            });
         }
-    }, [pathname, isPageLoading]);
-
+    }, [pathname, isNavigating]);
 
     const handleLinkClick = (href: string) => {
-        if (pathname === href || isPageLoading) return;
-        
-        setIsPageLoading(true);
+        if (pathname === href || isNavigating) return;
+
+        setIsNavigating(true);
         destinationRef.current = href;
 
         setBookStates(prevStates => {
@@ -234,8 +221,6 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
             newStates[href] = 'growing';
             return newStates;
         });
-
-        router.push(href);
     };
 
     const renderBook = (link: any, isTool: boolean = false) => {
@@ -249,8 +234,8 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     };
 
     return (
-      <div className="fixed top-0 left-0 z-50 flex h-full w-24 flex-col items-center overflow-y-auto hide-scrollbar">
-        <nav className="flex flex-col items-center gap-4 py-4">
+      <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 py-4 hide-scrollbar overflow-y-auto">
+        <nav className="flex flex-col items-center gap-4">
             {mainLinks.map(link => renderBook(link, false))}
         </nav>
         <div className="my-4 w-8 border-t border-white/20"></div>
@@ -258,7 +243,7 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
             {gmToolsLinks.map(link => renderBook(link, true))}
         </nav>
         <div className='flex-grow'></div>
-        <nav className="flex flex-col items-center gap-4 py-4">
+        <nav className="flex flex-col items-center gap-4">
             {profileLink.map(link => renderBook(link, false))}
         </nav>
       </div>
