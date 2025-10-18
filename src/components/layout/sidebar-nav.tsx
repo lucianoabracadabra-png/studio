@@ -51,65 +51,21 @@ export const profileLink = [{
   title: 'Perfil'
 }];
 
-type AnimationState = 'off' | 'growing' | 'holding' | 'climax' | 'decaying-on' | 'decaying-off' | 'on';
-type BookStates = Record<string, AnimationState>;
-
 const allLinks = [...mainLinks, ...gmToolsLinks, ...profileLink];
-
-const getInitialState = (activePath: string | null): BookStates => {
-    const initialState: BookStates = {};
-    const activeLink = activePath ? [...allLinks].reverse().find(link => activePath.startsWith(link.href)) : null;
-    
-    allLinks.forEach(link => {
-        initialState[link.href] = (activeLink && activeLink.href === link.href) ? 'on' : 'off';
-    });
-    return initialState;
-}
 
 const Book = ({ 
     link, 
-    animationState,
+    isActive,
     onClick,
     isTool
 }: { 
     link: (typeof mainLinks)[0], 
-    animationState: AnimationState,
+    isActive: boolean,
     onClick: (href: string) => void,
     isTool?: boolean;
 }) => {
     const Icon = link.icon;
     const isProfile = profileLink.some(l => l.href === link.href);
-
-    const animationStyle: CSSProperties = {};
-    let isSpinning = false;
-    
-    switch(animationState) {
-        case 'growing':
-            isSpinning = true;
-            animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = 2;
-            animationStyle['--book-animation-state'] = 'running';
-            break;
-        case 'climax':
-            isSpinning = true;
-            animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = 4;
-            animationStyle['--book-animation-state'] = 'running';
-            break;
-        case 'decaying-on':
-        case 'decaying-off':
-            isSpinning = true;
-            animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = 1;
-            animationStyle['--book-animation-state'] = 'running';
-            break;
-        case 'holding':
-        case 'on':
-        case 'off':
-            isSpinning = false;
-            animationStyle['--book-animation-state'] = 'paused';
-            break;
-    }
 
     return (
         <TooltipProvider key={link.href}>
@@ -125,17 +81,15 @@ const Book = ({
                             className={cn(
                               'book-nav-item',
                               isTool && 'book-nav-item--tool',
-                              animationState,
-                              isSpinning && 'spinning'
+                              isActive && 'on'
                             )}
                             style={{ 
                                 '--book-color-hue': `${link.colorHue}`,
-                                ...animationStyle 
                             } as React.CSSProperties}
-                            aria-current={animationState === 'on' ? 'page' : undefined}
+                            aria-current={isActive ? 'page' : undefined}
                         >
                            <div className='book-cover'>
-                               <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
+                               <div className={cn("book-icon")}>
                                    {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
                                </div>
                            </div>
@@ -151,83 +105,30 @@ const Book = ({
 };
 
 
-export function SidebarNav({ activePath }: { activePath: string | null }) {
+export function SidebarNav({ activePath: initialActivePath }: { activePath: string | null }) {
     const router = useRouter();
     const pathname = usePathname();
-    const [bookStates, setBookStates] = useState<BookStates>(() => getInitialState(activePath));
-    const [isNavigating, setIsNavigating] = useState(false);
-    const destinationRef = useRef<string | null>(null);
+    const [activeHref, setActiveHref] = useState<string | null>(initialActivePath);
 
-    // Effect to handle state transitions after animations complete
     useEffect(() => {
-        const timeouts: NodeJS.Timeout[] = [];
-        let navigationTriggered = false;
+        const mostSpecificLink = [...allLinks]
+            .sort((a, b) => b.href.length - a.href.length)
+            .find(link => pathname.startsWith(link.href));
 
-        Object.entries(bookStates).forEach(([href, state]) => {
-            if (state === 'growing') {
-                const t = setTimeout(() => setBookStates(prev => ({...prev, [href]: 'holding'})), 1000);
-                timeouts.push(t);
-            } else if (state === 'holding') {
-                if (href === destinationRef.current && !navigationTriggered) {
-                    navigationTriggered = true;
-                    router.push(href);
-                }
-            } else if (state === 'climax') {
-                const t = setTimeout(() => {
-                    setBookStates(prev => ({...prev, [href]: 'decaying-on'}));
-                    setIsNavigating(false);
-                    destinationRef.current = null;
-                }, 1000);
-                timeouts.push(t);
-            } else if (state === 'decaying-on') {
-                const t = setTimeout(() => setBookStates(prev => ({...prev, [href]: 'on'})), 1000);
-                timeouts.push(t);
-            } else if (state === 'decaying-off') {
-                const t = setTimeout(() => setBookStates(prev => ({...prev, [href]: 'off'})), 1000);
-                timeouts.push(t);
-            }
-        });
-
-        return () => timeouts.forEach(clearTimeout);
-    }, [bookStates, router]);
-
-    // Effect to trigger climax after page load completes
-    useEffect(() => {
-        if (destinationRef.current && pathname === destinationRef.current && !isNavigating) {
-             setBookStates(prev => {
-                const newStates = {...prev};
-                if (newStates[destinationRef.current!] === 'holding') {
-                    newStates[destinationRef.current!] = 'climax';
-                }
-                return newStates;
-            });
-        }
-    }, [pathname, isNavigating]);
+        setActiveHref(mostSpecificLink ? mostSpecificLink.href : null);
+    }, [pathname]);
 
     const handleLinkClick = (href: string) => {
-        if (pathname === href || isNavigating) return;
-
-        setIsNavigating(true);
-        destinationRef.current = href;
-
-        setBookStates(prevStates => {
-            const newStates = { ...prevStates };
-            const currentOnBook = Object.keys(prevStates).find(key => prevStates[key] === 'on');
-            
-            if (currentOnBook) {
-                newStates[currentOnBook] = 'decaying-off';
-            }
-            
-            newStates[href] = 'growing';
-            return newStates;
-        });
+        if (pathname !== href) {
+            router.push(href);
+        }
     };
 
     const renderBook = (link: any, isTool: boolean = false) => {
       return <Book 
           key={link.href}
           link={link}
-          animationState={bookStates[link.href] || 'off'}
+          isActive={activeHref === link.href}
           onClick={handleLinkClick}
           isTool={isTool}
       />
