@@ -5,14 +5,14 @@ import { characterData as initialCharacterData, Character, Armor, Weapon, Access
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
     <Card className='glassmorphic-card'>
@@ -29,67 +29,158 @@ const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon:
             </div>
             <Separator />
             <div className="flex items-center justify-between text-muted-foreground">
-                <p className='font-bold text-lg text-amber-400'>1</p>
+                <p className='font-bold text-lg text-accent'>1</p>
                 <p>Gasto</p>
             </div>
         </CardContent>
     </Card>
 );
 
-const AttributesCard = ({ attributes }: { attributes: { name: string, value: number }[]}) => (
-    <Card className='glassmorphic-card'>
-        <CardHeader>
-            <CardTitle className='font-headline text-center text-lg'>ATRIBUTOS</CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-3'>
-            {attributes.map(attr => (
-                <div key={attr.name} className='flex items-center justify-between font-mono text-lg'>
-                    <span className='font-bold text-amber-400'>{attr.value}</span>
-                    <span className='text-foreground'>{attr.name}</span>
-                    <div className='w-3 h-3 rounded-full border-2 border-amber-400'></div>
+const getEffectClasses = (level: number, type: 'attribute' | 'skill') => {
+    const classes: string[] = [];
+    let glowLevel = 0;
+
+    if (type === 'attribute') {
+        if (level >= 5) {
+            if (level >= 15) classes.push('shaking-4');
+            else if (level >= 11) classes.push('shaking-3');
+            else if (level >= 8) classes.push('shaking-2');
+            else classes.push('shaking-1');
+        }
+        if (level >= 10) {
+            classes.push('pulsing');
+        }
+        if (level >= 5) {
+            if (level >= 14) glowLevel = (level === 14) ? 6 : 7;
+            else glowLevel = Math.ceil((level - 4) / 2);
+        }
+    } else { // skill
+        if (level >= 7) {
+            classes.push('shaking');
+        }
+        if (level >= 5) {
+            classes.push('pulsing');
+            if (level === 5) classes.push('pulsing-1');
+            else if (level === 6) classes.push('pulsing-2');
+            else classes.push('pulsing-3');
+        }
+        if (level >= 3) {
+            glowLevel = level - 2;
+        }
+    }
+
+    return {
+        animationClasses: classes.join(' '),
+        glowLevel: glowLevel
+    };
+};
+
+const AttributeItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social' }) => {
+    const [level, setLevel] = useState(initialValue);
+    const { animationClasses, glowLevel } = getEffectClasses(level, 'attribute');
+
+    const handleLevelChange = (amount: number) => {
+        setLevel(prev => Math.max(0, Math.min(15, prev + amount)));
+    }
+
+    return (
+        <div className="item-lista">
+            <div className="item-header">
+                <span className="nome">{name}</span>
+                <div className="custos-wrapper">
+                    <div className="custo-display">Gasto<b>0</b></div>
+                    <div className="custo-display">Próximo<b>-</b></div>
                 </div>
-            ))}
-        </CardContent>
-    </Card>
-);
+            </div>
+            <div className="item-control">
+                <div className="stepper-container">
+                    <button className="stepper-btn" onClick={() => handleLevelChange(-1)}><Minus size={16}/></button>
+                    <span 
+                        className={cn('stepper-value', `pilar-${pilar}`, animationClasses)}
+                        data-glow-level={glowLevel}
+                        style={{ '--glow-color': `var(--cor-${pilar})`, '--glow-pulse-distance': `${15 + (level - 10) * 8}px` } as React.CSSProperties}
+                    >
+                        {level}
+                    </span>
+                    <button className="stepper-btn" onClick={() => handleLevelChange(1)}><Plus size={16}/></button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
-const SkillsTable = ({ title, skills }: { title: string, skills: { name: string, value: number }[]}) => (
-    <Card className='glassmorphic-card'>
-        <CardHeader>
-            <CardTitle className='flex items-center justify-between text-sm font-bold tracking-widest'>
-                <Button variant='ghost' size='icon' className='w-6 h-6'><PlusCircle className='w-5 h-5'/></Button>
-                {title}
-                <div className='w-6'></div>
-            </CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Table>
-                <TableBody>
-                    {skills.map(skill => (
-                        <TableRow key={skill.name}>
-                            <TableCell className='w-12 font-mono font-bold text-lg text-center'>{skill.value > 0 ? skill.value : '-'}</TableCell>
-                            <TableCell>{skill.name}</TableCell>
-                        </TableRow>
+const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social' }) => {
+    const [level, setLevel] = useState(initialValue);
+    const { animationClasses, glowLevel } = getEffectClasses(level, 'skill');
+
+    const handleDotClick = (newLevel: number) => {
+        setLevel(currentLevel => {
+            const finalLevel = newLevel === currentLevel ? newLevel - 1 : newLevel;
+            return Math.max(0, finalLevel);
+        });
+    };
+
+    return (
+         <div className="item-lista">
+            <div className="item-header">
+                <span className="nome">{name}</span>
+                <div className="custos-wrapper">
+                    <div className="custo-display">Gasto<b>0</b></div>
+                    <div className="custo-display">Próximo<b>-</b></div>
+                </div>
+            </div>
+            <div className="item-control">
+                <div 
+                    className={cn('dots-container', `pilar-${pilar}`, animationClasses)}
+                    data-glow-level={glowLevel}
+                    style={{ '--pulse-color': `var(--cor-${pilar})` } as React.CSSProperties}
+                >
+                    {[...Array(7)].map((_, i) => (
+                        <span
+                            key={i}
+                            className={cn('dot', { 'selected': i < level })}
+                            data-level={i + 1}
+                            onClick={() => handleDotClick(i + 1)}
+                            style={{ animationDelay: `-${Math.random() * 2.5}s` }}
+                        ></span>
                     ))}
-                </TableBody>
-            </Table>
-        </CardContent>
-    </Card>
-);
+                </div>
+            </div>
+        </div>
+    );
+};
 
-const FocusSection = ({ focusData, title, icon }: { focusData: Character['focus']['physical'], title: string, icon: React.ElementType }) => (
-    <div className='grid grid-cols-2 grid-rows-[auto_1fr] gap-4'>
-        <div className='col-span-1'>
-             <FocusHeaderCard title={title} icon={icon} resource={focusData.vigor || focusData.focus || focusData.grace} />
+
+const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character['focus']['physical'], title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
+    const pilarClass = `pilar-${pilar.toLowerCase()}`;
+    return (
+        <div className={`grid grid-cols-1 gap-6 ${pilarClass}`}>
+            <FocusHeaderCard title={title} icon={icon} resource={focusData.vigor || focusData.focus || focusData.grace} />
+            
+            <Card className='sub-painel'>
+                <CardHeader>
+                    <h4 className='font-headline text-lg'>Atributos</h4>
+                </CardHeader>
+                <CardContent className='atributos-grid-interno'>
+                    {focusData.attributes.map(attr => (
+                        <AttributeItem key={attr.name} name={attr.name} initialValue={attr.value} pilar={pilar} />
+                    ))}
+                </CardContent>
+            </Card>
+
+            <Card className='sub-painel'>
+                 <CardHeader>
+                    <h4 className='font-headline text-lg'>Perícias</h4>
+                </CardHeader>
+                <CardContent className='pericias-lista'>
+                    {focusData.skills.map(skill => (
+                        <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
+                    ))}
+                </CardContent>
+            </Card>
         </div>
-        <div className='col-span-1'>
-            <AttributesCard attributes={focusData.attributes} />
-        </div>
-        <div className='col-span-2'>
-            <SkillsTable title="PERÍCIAS" skills={focusData.skills} />
-        </div>
-    </div>
-)
+    );
+}
 
 
 const SoulCracks = ({ value }: { value: number }) => {
@@ -309,13 +400,13 @@ export function CharacterSheet() {
                                 <TabsTrigger value="social"><Users className='mr-2'/>Social</TabsTrigger>
                             </TabsList>
                             <TabsContent value="physical" className='mt-4'>
-                                <FocusSection focusData={character.focus.physical} title='FÍSICO' icon={PersonStanding} />
+                                <FocusSection focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
                             </TabsContent>
                              <TabsContent value="mental" className='mt-4'>
-                                <FocusSection focusData={character.focus.mental} title='MENTAL' icon={BrainCircuit} />
+                                <FocusSection focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
                             </TabsContent>
                              <TabsContent value="social" className='mt-4'>
-                                <FocusSection focusData={character.focus.social} title='SOCIAL' icon={Users} />
+                                <FocusSection focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
                             </TabsContent>
                         </Tabs>
                     </CardContent>

@@ -28,6 +28,10 @@
     --chart-3: 198 93% 60%;
     --chart-4: 283 100% 41%;
     --chart-5: 342.1 92.5% 61.4%;
+
+    --cor-fisico: #E04A2F;
+    --cor-mental: #3A7BE0;
+    --cor-social: #5E8C4F;
   }
 
   .dark {
@@ -68,15 +72,6 @@
   body {
     @apply bg-background text-foreground;
     background: radial-gradient(ellipse at bottom, hsl(var(--background)) 0%, hsl(var(--background) / 0.9) 70%, transparent 100%);
-  }
-
-  .hide-number-arrows {
-    -moz-appearance: textfield;
-  }
-  .hide-number-arrows::-webkit-outer-spin-button,
-  .hide-number-arrows::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
   }
 }
 
@@ -203,9 +198,48 @@
     @apply bg-clip-text select-none;
   }
 
+  /* ESTRUTURA DE ATRIBUTOS E PERÍCIAS */
+  .sub-painel { @apply bg-card/60 border border-white/10 rounded-lg; }
+  .atributos-grid-interno { @apply grid grid-cols-1 md:grid-cols-2 gap-x-5; }
+  .pericias-lista { @apply flex flex-col; }
+  .item-lista { @apply flex flex-col py-2; }
+  .item-header { @apply flex justify-between items-center w-full; }
+  .item-header .nome { @apply text-base font-semibold; }
+  .item-header .custos-wrapper { @apply flex gap-4; }
+  .custo-display { @apply text-xs text-center text-muted-foreground uppercase; }
+  .custo-display b { @apply block text-lg font-semibold; }
+  .item-control { @apply w-full pt-3 relative; }
+
+  .pilar-fisico .custo-display b, .pilar-fisico .stepper-value { color: var(--cor-fisico); }
+  .pilar-mental .custo-display b, .pilar-mental .stepper-value { color: var(--cor-mental); }
+  .pilar-social .custo-display b, .pilar-social .stepper-value { color: var(--cor-social); }
+  
+  .stepper-container { @apply flex items-center justify-start gap-2; }
+  .stepper-btn { @apply h-7 w-7 bg-muted/70 border-none rounded-md text-foreground font-bold cursor-pointer transition-all flex items-center justify-center; }
+  .stepper-btn:hover { @apply brightness-125; }
+  .stepper-btn:active { @apply scale-95; }
+  .stepper-value { @apply font-bold font-headline text-lg min-w-[30px] text-center transition-all; }
+  .pilar-fisico .stepper-btn:hover { background-color: var(--cor-fisico); }
+  .pilar-mental .stepper-btn:hover { background-color: var(--cor-mental); }
+  .pilar-social .stepper-btn:hover { background-color: var(--cor-social); }
+
+  .dots-container { @apply flex gap-2 items-center justify-around p-1; }
+  .dot { @apply w-3 h-3 bg-muted/70 cursor-pointer transition-all rounded-sm; transform: rotate(45deg); }
+  .dot:hover { transform: rotate(45deg) scale(1.1); }
+  .pilar-fisico .dot.selected { background-color: var(--cor-fisico); }
+  .pilar-mental .dot.selected { background-color: var(--cor-mental); }
+  .pilar-social .dot.selected { background-color: var(--cor-social); }
 }
 
 @layer utilities {
+  .hide-number-arrows::-webkit-outer-spin-button,
+  .hide-number-arrows::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+  }
+  .hide-number-arrows {
+      -moz-appearance: textfield;
+  }
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -291,4 +325,41 @@
       filter: drop-shadow(0 0 8px hsl(var(--book-color-hue, 0), 80%, 85%));
     }
   }
+
+  /* EFEITOS DE ATRIBUTOS E PERÍCIAS */
+  @keyframes shake-hard-diamond { 0%, 100% { transform: translate(0, 0) rotate(45deg); } 10% { transform: translate(-1px, -2px) rotate(44deg); } 20% { transform: translate(-3px, 0px) rotate(46deg); } 30% { transform: translate(3px, 2px) rotate(45deg); } 40% { transform: translate(1px, -1px) rotate(46deg); } 50% { transform: translate(-1px, 2px) rotate(44deg); } 60% { transform: translate(-3px, 1px) rotate(45deg); } 70% { transform: translate(3px, 1px) rotate(44deg); } 80% { transform: translate(-1px, -1px) rotate(46deg); } 90% { transform: translate(1px, 2px) rotate(45deg); } }
+  @keyframes sonar-pulse-1 { from { box-shadow: 0 0 0 0px var(--pulse-color); } to { box-shadow: 0 0 0 16px transparent; } }
+  @keyframes sonar-pulse-2 { from { box-shadow: 0 0 0 0px var(--pulse-color); } to { box-shadow: 0 0 0 24px transparent; } }
+  @keyframes sonar-pulse-3 { from { box-shadow: 0 0 0 0px var(--pulse-color); } to { box-shadow: 0 0 0 32px transparent; } }
+  @keyframes attribute-pulse { from { text-shadow: 0 0 15px var(--glow-color), 0 0 22px var(--glow-color); } to { text-shadow: 0 0 var(--glow-pulse-distance) var(--glow-color), 0 0 calc(var(--glow-pulse-distance) + 16px) var(--glow-color); } }
+  @keyframes tremilique-1 { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(0.5px, -0.5px); } 40% { transform: translate(-0.5px, 0.5px); } 60% { transform: translate(0.5px, 0.5px); } 80% { transform: translate(-0.5px, -0.5px); } }
+  @keyframes tremilique-2 { 0%, 100% { transform: translate(0, 0) rotate(0); } 10% { transform: translate(-1px, -1.5px) rotate(-0.5deg); } 30% { transform: translate(1.5px, 1px) rotate(0.5deg); } 50% { transform: translate(-0.5px, 1.5px) rotate(-0.5deg); } 70% { transform: translate(0.5px, -1px) rotate(0.5deg); } 90% { transform: translate(1.5px, 1px) rotate(0deg); } }
+  @keyframes tremilique-3 { 0%, 100% { transform: translate(0, 0) rotate(0); } 10% { transform: translate(-2px, -3px) rotate(-1.5deg); } 20% { transform: translate(3px, 0px) rotate(1.5deg); } 30% { transform: translate(-2px, 2px) rotate(0deg); } 40% { transform: translate(2px, -1px) rotate(1.5deg); } 50% { transform: translate(-1px, 3px) rotate(-1.5deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1.5deg); } 80% { transform: translate(-1px, -2px) rotate(1.5deg); } 90% { transform: translate(2px, 3px) rotate(0deg); } }
+  @keyframes tremilique-4 { 0%, 100% { transform: translate(0, 0) rotate(0); } 10% { transform: translate(-4px, -5px) rotate(-3deg); } 20% { transform: translate(5px, 0px) rotate(3deg); } 30% { transform: translate(-4px, 4px) rotate(0deg); } 40% { transform: translate(4px, -2px) rotate(3deg); } 50% { transform: translate(-2px, 5px) rotate(-3deg); } 60% { transform: translate(-5px, 2px) rotate(0deg); } 70% { transform: translate(5px, 2px) rotate(-3deg); } 80% { transform: translate(-2px, -2px) rotate(3deg); } 90% { transform: translate(4px, 5px) rotate(0deg); } }
+
+  .dots-container.shaking .dot.selected { animation: shake-hard-diamond 0.4s infinite ease-in-out; }
+  .dots-container.pulsing .dot.selected::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 2px; animation-duration: 1.8s; animation-iteration-count: infinite; animation-delay: inherit; }
+  .dots-container.pulsing-1 .dot.selected::after { animation-name: sonar-pulse-1; }
+  .dots-container.pulsing-2 .dot.selected::after { animation-name: sonar-pulse-2; }
+  .dots-container.pulsing-3 .dot.selected::after { animation-name: sonar-pulse-3; }
+  
+  .stepper-value.pulsing { animation: attribute-pulse 1.8s infinite alternate ease-in-out; }
+  .stepper-value.shaking-1 { animation: tremilique-1 0.15s infinite; }
+  .stepper-value.shaking-2 { animation: tremilique-2 0.3s infinite; }
+  .stepper-value.shaking-3 { animation: tremilique-3 0.3s infinite; }
+  .stepper-value.shaking-4 { animation: tremilique-4 0.4s infinite; }
+
+  .stepper-value[data-glow-level="1"] { text-shadow: 0 0 10px var(--glow-color); } 
+  .stepper-value[data-glow-level="2"] { text-shadow: 0 0 12px var(--glow-color), 0 0 16px var(--glow-color); } 
+  .stepper-value[data-glow-level="3"] { text-shadow: 0 0 14px var(--glow-color), 0 0 20px var(--glow-color); }
+  .stepper-value[data-glow-level="4"] { text-shadow: 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); }
+  .stepper-value[data-glow-level="5"] { text-shadow: 0 0 18px var(--glow-color), 0 0 28px var(--glow-color); }
+  .stepper-value[data-glow-level="6"] { text-shadow: 0 0 20px var(--glow-color), 0 0 32px var(--glow-color); }
+  .stepper-value[data-glow-level="7"] { text-shadow: 0 0 22px var(--glow-color), 0 0 36px var(--glow-color), 0 0 40px var(--glow-color); }
+  
+  .dots-container[data-glow-level="1"] .dot.selected { --glow-color: var(--pulse-color); box-shadow: 0 0 6px 1px var(--glow-color); }
+  .dots-container[data-glow-level="2"] .dot.selected { --glow-color: var(--pulse-color); box-shadow: 0 0 8px 2px var(--glow-color); }
+  .dots-container[data-glow-level="3"] .dot.selected { --glow-color: var(--pulse-color); box-shadow: 0 0 11px 3px var(--glow-color); }
+  .dots-container[data-glow-level="4"] .dot.selected { --glow-color: var(--pulse-color); box-shadow: 0 0 14px 4px var(--glow-color); }
+  .dots-container[data-glow-level="5"] .dot.selected { --glow-color: var(--pulse-color); box-shadow: 0 0 17px 5px var(--glow-color); }
 }
