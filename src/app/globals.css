@@ -176,8 +176,8 @@
   }
   
   .page-container-visuals > * {
-    --primary: hsl(var(--page-primary-color, 265));
-    --accent: hsl(var(--page-accent-color, 300));
+    --primary: hsl(var(--page-primary-color, 265), 90%, 70%);
+    --accent: hsl(var(--page-accent-color, 300), 90%, 70%);
     --ring: hsl(var(--page-primary-color, 265));
   }
 
@@ -193,9 +193,11 @@
   
   .magical-glow {
     color: transparent;
-    background-image: linear-gradient(to right, hsl(var(--page-primary-color, var(--primary))), hsl(var(--page-accent-color, var(--accent))));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color, var(--primary))), 0 0 16px hsl(var(--page-accent-color, var(--accent)));
-    @apply bg-clip-text select-none;
+    background-image: linear-gradient(to right, hsl(var(--page-primary-color, 265 90% 70%)), hsl(var(--page-accent-color, 300 90% 70%)));
+    text-shadow: 0 0 8px hsl(var(--page-primary-color, 265 90% 70%)), 0 0 16px hsl(var(--page-accent-color, 300 90% 70%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    user-select: none;
   }
 
   /* ESTRUTURA DE ATRIBUTOS E PERÍCIAS */
@@ -205,9 +207,6 @@
   .item-lista { @apply flex flex-col py-2; }
   .item-header { @apply flex justify-between items-center w-full; }
   .item-header .nome { @apply text-base font-semibold; }
-  .item-header .custos-wrapper { @apply flex gap-4; }
-  .custo-display { @apply text-xs text-center text-muted-foreground uppercase; }
-  .custo-display b { @apply block text-lg font-semibold; }
   .item-control { @apply w-full pt-3 relative; }
 
   .pilar-fisico .custo-display b, .pilar-fisico .stepper-value { color: var(--cor-fisico); }
@@ -331,6 +330,7 @@
   @keyframes sonar-pulse-1 { from { box-shadow: 0 0 0 0px var(--pulse-color); } to { box-shadow: 0 0 0 16px transparent; } }
   @keyframes sonar-pulse-2 { from { box-shadow: 0 0 0 0px var(--pulse-color); } to { box-shadow: 0 0 0 24px transparent; } }
   @keyframes sonar-pulse-3 { from { box-shadow: 0 0 0 0px var(--pulse-color); } to { box-shadow: 0 0 0 32px transparent; } }
+  
   @keyframes attribute-pulse { from { text-shadow: 0 0 15px var(--glow-color), 0 0 22px var(--glow-color); } to { text-shadow: 0 0 var(--glow-pulse-distance) var(--glow-color), 0 0 calc(var(--glow-pulse-distance) + 16px) var(--glow-color); } }
   @keyframes tremilique-1 { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(0.5px, -0.5px); } 40% { transform: translate(-0.5px, 0.5px); } 60% { transform: translate(0.5px, 0.5px); } 80% { transform: translate(-0.5px, -0.5px); } }
   @keyframes tremilique-2 { 0%, 100% { transform: translate(0, 0) rotate(0); } 10% { transform: translate(-1px, -1.5px) rotate(-0.5deg); } 30% { transform: translate(1.5px, 1px) rotate(0.5deg); } 50% { transform: translate(-0.5px, 1.5px) rotate(-0.5deg); } 70% { transform: translate(0.5px, -1px) rotate(0.5deg); } 90% { transform: translate(1.5px, 1px) rotate(0deg); } }

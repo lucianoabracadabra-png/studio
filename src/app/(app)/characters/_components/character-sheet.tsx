@@ -29,11 +29,6 @@ const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon:
                 <p className='font-bold text-lg'>{resource.name}</p>
                 <p className='font-mono text-lg'>{resource.value} / {resource.max}</p>
             </div>
-            <Separator />
-            <div className="flex items-center justify-between text-muted-foreground">
-                <p className='font-bold text-lg text-accent'>1</p>
-                <p>Gasto</p>
-            </div>
         </CardContent>
     </Card>
 );

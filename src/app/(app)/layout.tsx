@@ -26,14 +26,16 @@ export default function AuthenticatedAppLayout({
     const matchedLink = allLinks.find(link => pathname.startsWith(link.href) && link.href !== '/');
     if (matchedLink) return matchedLink.colorHue;
     if (pathname === '/dashboard') return pathColorMap['/dashboard'];
-    return 0;
+    return 265; // Fallback hue
   }
   
   const colorHue = getActiveColorHue();
+  const accentColorHue = (colorHue + 40) % 360;
   
   const pageStyle = {
-    '--page-primary-color': `${colorHue}`,
-    '--page-accent-color': `${(colorHue + 40) % 360}`,
+    '--page-primary-color': `${colorHue} 90% 70%`,
+    '--page-accent-color': `${accentColorHue} 90% 70%`,
+    '--ring': `hsl(${colorHue}, 90%, 70%)`
   } as React.CSSProperties;
 
   return (
@@ -44,7 +46,6 @@ export default function AuthenticatedAppLayout({
       >
         <div
           className="page-container-visuals"
-          style={pageStyle}
         >
           {children}
         </div>
