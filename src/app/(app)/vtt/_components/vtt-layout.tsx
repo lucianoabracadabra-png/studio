@@ -30,6 +30,7 @@ export interface VttState {
   layers: {
     isFogOfWarActive: boolean;
     isLightLayerActive: boolean;
+    isGridVisible: boolean;
   };
   combat: {
     turnOrder: number[]; // Array of token ids
@@ -42,10 +43,10 @@ export interface VttState {
 
 const initialVttState: VttState = {
   map: {
-    url: 'https://images.unsplash.com/photo-1593369687981-b01c3a611916?q=80&w=2560&h=1440&fit=crop',
+    url: 'https://images.unsplash.com/photo-1533575349833-3ab76a385a68?q=80&w=2560&h=1707&fit=crop',
     zoom: 0.5,
     position: { x: 0, y: 0 },
-    dimensions: { width: 2560, height: 1440 }
+    dimensions: { width: 2560, height: 1707 }
   },
   tokens: {
     heroes: [],
@@ -54,6 +55,7 @@ const initialVttState: VttState = {
   layers: {
     isFogOfWarActive: false,
     isLightLayerActive: false,
+    isGridVisible: true,
   },
   combat: {
     turnOrder: [],
@@ -172,6 +174,7 @@ export function VttLayout() {
           mapState={vttState.map}
           setMapState={setMapState}
           activeTool={vttState.ui.activeTool}
+          layers={vttState.layers}
         />
       </div>
       <VttSidebar

@@ -299,6 +299,10 @@ export function VttSidebar({ vttState, setTokens, setMapState, setLayers, setCom
                       </div>
                     </div>
                     <Separator/>
+                     <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                      <Label htmlFor="grid-switch" className="font-semibold">Grelha Visível</Label>
+                      <Switch id="grid-switch" checked={vttState.layers.isGridVisible} onCheckedChange={checked => setLayers(prev => ({...prev, isGridVisible: checked}))}/>
+                    </div>
                     <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
                       <Label htmlFor="fog-switch" className="font-semibold">Névoa de Guerra</Label>
                       <Switch id="fog-switch" checked={vttState.layers.isFogOfWarActive} onCheckedChange={checked => setLayers(prev => ({...prev, isFogOfWarActive: checked}))}/>

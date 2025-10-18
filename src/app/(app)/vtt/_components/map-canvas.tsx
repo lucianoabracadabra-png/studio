@@ -14,9 +14,24 @@ interface MapCanvasProps {
   mapState: VttState['map'];
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   activeTool: VttTool;
+  layers: VttState['layers'];
 }
 
-export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, setMapState, activeTool }: MapCanvasProps) {
+const GridLayer = ({ gridSize, mapDimensions }: { gridSize: number, mapDimensions: { width: number, height: number }}) => {
+    const gridId = React.useId();
+    return (
+        <svg width="100%" height="100%" className="absolute top-0 left-0 pointer-events-none">
+            <defs>
+                <pattern id={gridId} width={gridSize} height={gridSize} patternUnits="userSpaceOnUse">
+                    <path d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                </pattern>
+            </defs>
+            <rect width={mapDimensions.width} height={mapDimensions.height} fill={`url(#${gridId})`} />
+        </svg>
+    )
+}
+
+export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, setMapState, activeTool, layers }: MapCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   
   const handleDragEnd = (event: any, info: any) => {
@@ -61,6 +76,9 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
           className="absolute top-0 left-0 object-cover select-none pointer-events-none"
           priority
         />}
+
+        {layers.isGridVisible && <GridLayer gridSize={50} mapDimensions={mapState.dimensions} />}
+
 
         <div className="absolute top-0 left-0 w-full h-full" style={{transform: `scale(${1 / mapState.zoom})`}}>
           {tokens.map(token => (
