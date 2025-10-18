@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,8 +13,8 @@ import { Dices, History } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Die3D, type DiceType } from '@/components/features/dice/die-3d';
 import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
+import { DiceSvg, type DiceType } from '@/components/features/dice/dice-svg';
 
 type RollResult = {
   notation: string;
@@ -24,12 +24,12 @@ type RollResult = {
 };
 
 const attributeDice: { type: DiceType, hue: number }[] = [
-    { type: 4, hue: mainLinks[0].colorHue },
-    { type: 6, hue: mainLinks[1].colorHue },
-    { type: 8, hue: mainLinks[2].colorHue },
-    { type: 10, hue: mainLinks[3].colorHue },
-    { type: 12, hue: gmToolsLinks[0].colorHue },
-    { type: 20, hue: gmToolsLinks[1].colorHue },
+    { type: 'd4', hue: mainLinks[0].colorHue },
+    { type: 'd6', hue: mainLinks[1].colorHue },
+    { type: 'd8', hue: mainLinks[2].colorHue },
+    { type: 'd10', hue: mainLinks[3].colorHue },
+    { type: 'd12', hue: gmToolsLinks[0].colorHue },
+    { type: 'd20', hue: gmToolsLinks[1].colorHue },
 ];
 const skillDiceCounts = Array.from({ length: 10 }, (_, i) => i + 1);
 
@@ -38,7 +38,8 @@ export function DiceRoller() {
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
   const [rollingDie, setRollingDie] = useState<DiceType | null>(null);
 
-  const rollDice = (count: number, die: DiceType | 10) => {
+  const rollDice = (count: number, dieType: DiceType | 'd10') => {
+    const die = parseInt(dieType.substring(1));
     let rolls: number[] = [];
     let total = 0;
     for (let i = 0; i < count; i++) {
@@ -61,8 +62,12 @@ export function DiceRoller() {
   const handleAttributeRoll = (die: DiceType) => {
     rollDice(1, die);
     setRollingDie(die);
-    setTimeout(() => setRollingDie(null), 1000); // Duração da animação
+    setTimeout(() => setRollingDie(null), 300); // Duração da animação
   };
+
+  const handleSkillRoll = (count: number) => {
+    rollDice(count, 'd10');
+  }
 
   return (
     <Card className="glassmorphic-card">
@@ -88,9 +93,9 @@ export function DiceRoller() {
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
                   <CardDescription>Clique em um dado para rolar.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-3 gap-y-12 gap-x-4 justify-items-center pt-8 h-80">
+                <CardContent className="grid grid-cols-3 gap-y-8 gap-x-4 justify-items-center pt-8 h-auto">
                   {attributeDice.map(({ type, hue }) => (
-                     <Die3D 
+                     <DiceSvg
                         key={type}
                         type={type}
                         colorHue={hue}
@@ -109,7 +114,7 @@ export function DiceRoller() {
                 </CardHeader>
                 <CardContent className="grid grid-cols-5 gap-2">
                     {skillDiceCounts.map(count => (
-                        <Button key={count} onClick={() => rollDice(count, 10)} className="font-bold">
+                        <Button key={count} onClick={() => handleSkillRoll(count)} className="font-bold">
                         {count}d10
                         </Button>
                     ))}
