@@ -84,7 +84,7 @@ const Book = ({
                             className={cn(
                               'book-nav-item',
                               isTool && 'book-nav-item--tool',
-                              visualState !== 'off' && visualState
+                              visualState
                             )}
                             style={{ 
                                 '--book-color-hue': `${link.colorHue}`,
@@ -110,21 +110,29 @@ const Book = ({
 export function SidebarNav() {
     const router = useRouter();
     const pathname = usePathname();
-    const [visualStates, setVisualStates] = useState<Record<string, AnimationState>>(() => {
+
+    const getInitialState = () => {
         const initialState: Record<string, AnimationState> = {};
-        allLinks.forEach(link => {
-            initialState[link.href] = 'off';
-        });
         const mostSpecificLink = [...allLinks]
             .sort((a, b) => b.href.length - a.href.length)
             .find(link => pathname.startsWith(link.href) && link.href !== '/');
+
+        allLinks.forEach(link => {
+            initialState[link.href] = 'off';
+        });
+
         if (mostSpecificLink) {
             initialState[mostSpecificLink.href] = 'on';
         }
         return initialState;
-    });
+    }
 
-    const activeHrefRef = useRef<string | null>(null);
+    const [visualStates, setVisualStates] = useState<Record<string, AnimationState>>(getInitialState);
+    const activeHrefRef = useRef<string | null>(
+        [...allLinks]
+            .sort((a, b) => b.href.length - a.href.length)
+            .find(link => pathname.startsWith(link.href) && link.href !== '/')?.href || null
+    );
 
     useEffect(() => {
         const mostSpecificLink = [...allLinks]
@@ -132,21 +140,20 @@ export function SidebarNav() {
             .find(link => pathname.startsWith(link.href) && link.href !== '/');
         
         const currentActiveHref = mostSpecificLink ? mostSpecificLink.href : null;
-        
+
         if (currentActiveHref !== activeHrefRef.current) {
             const oldHref = activeHrefRef.current;
-            
+
             setVisualStates(prev => {
                 const newStates = {...prev};
-                if (oldHref && newStates[oldHref] === 'on') {
-                    newStates[oldHref] = 'decaying-off';
+                if (oldHref && (newStates[oldHref] === 'on' || newStates[oldHref] === 'decaying-on')) {
+                     newStates[oldHref] = 'decaying-off';
                 }
                 if (currentActiveHref) {
                     newStates[currentActiveHref] = 'growing';
                 }
                 return newStates;
             });
-
             activeHrefRef.current = currentActiveHref;
         }
     }, [pathname]);
@@ -174,12 +181,9 @@ export function SidebarNav() {
     }, [visualStates]);
 
     const handleLinkClick = (href: string) => {
-        if (pathname === href || (pathname.startsWith(href) && href !== '/')) {
-             if (visualStates[href] === 'off') {
-                 setVisualStates(prev => ({...prev, [href]: 'growing'}));
-             }
-             return;
-        }
+        const currentActiveHref = activeHrefRef.current;
+        if (href === currentActiveHref) return;
+
         router.push(href);
     };
 
@@ -188,7 +192,7 @@ export function SidebarNav() {
             key={link.href}
             link={link}
             isTool={isTool}
-            visualState={visualStates[link.href] || 'off'}
+            visualState={visualStates[link.href]}
             onClick={() => handleLinkClick(link.href)}
         />
     );
