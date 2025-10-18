@@ -55,26 +55,35 @@ export type Projectile = {
   extras: string;
 };
 
+type Stat = { name: string; value: number };
+
+type FocusData = {
+  attributes: Stat[];
+  skills: Stat[];
+};
+
+type PhysicalFocus = FocusData & {
+  vigor: { value: number; max: number };
+  treinamentos: Stat[];
+};
+
+type MentalFocus = FocusData & {
+  focus: { value: number; max: number };
+  ciencias: Stat[];
+};
+
+type SocialFocus = FocusData & {
+  grace: { value: number; max: number };
+  artes: Stat[];
+};
 
 export type Character = {
   name: string;
   concept: string;
   focus: {
-    physical: {
-      vigor: { value: number; max: number };
-      attributes: { name: string; value: number }[];
-      skills: { name: string; value: number }[];
-    };
-    mental: {
-      focus: { value: number; max: number };
-      attributes: { name: string; value: number }[];
-      skills: { name: string; value: number }[];
-    };
-    social: {
-      grace: { value: number; max: number };
-      attributes: { name: string; value: number }[];
-      skills: { name: string; value: number }[];
-    };
+    physical: PhysicalFocus;
+    mental: MentalFocus;
+    social: SocialFocus;
   };
   spirit: {
     personality: { name: string; value: number }[];
@@ -107,46 +116,76 @@ export const characterData: Character = {
       vigor: { value: 8, max: 10 },
       attributes: [
         { name: 'Força', value: 3 },
-        { name: 'Agilidade', value: 4 },
-        { name: 'Resistência', value: 3 },
-        { name: 'Vigor', value: 2 },
+        { name: 'Destreza', value: 4 },
+        { name: 'Agilidade', value: 3 },
+        { name: 'Constituição', value: 2 },
       ],
       skills: [
-        { name: 'Atletismo', value: 4 },
-        { name: 'Briga', value: 3 },
-        { name: 'Furtividade', value: 5 },
         { name: 'Armas Brancas', value: 2 },
+        { name: 'Armas de Fogo', value: 0 },
+        { name: 'Arquearia', value: 3 },
+        { name: 'Arremesso', value: 1 },
+        { name: 'Briga', value: 3 },
+        { name: 'Combate', value: 2 },
+        { name: 'Furtividade', value: 5 },
+        { name: 'Prontidão', value: 4 },
       ],
+      treinamentos: [
+          { name: 'Corrida', value: 2 },
+          { name: 'Natação', value: 1 },
+          { name: 'Escalada', value: 3 },
+          { name: 'Pilotagem', value: 0 },
+      ]
     },
     mental: {
       focus: { value: 12, max: 12 },
       attributes: [
         { name: 'Inteligência', value: 4 },
-        { name: 'Raciocínio', value: 3 },
         { name: 'Percepção', value: 5 },
-        { name: 'Intelecto', value: 3 },
+        { name: 'Raciocínio', value: 3 },
+        { name: 'Sabedoria', value: 3 },
       ],
       skills: [
+        { name: 'Acadêmicos', value: 2 },
+        { name: 'Armadilhas', value: 3 },
+        { name: 'Intuição', value: 4 },
         { name: 'Investigação', value: 4 },
-        { name: 'Conhecimento', value: 3 },
         { name: 'Medicina', value: 2 },
+        { name: 'Ocultismo', value: 1 },
+        { name: 'Segurança', value: 2 },
         { name: 'Sobrevivência', value: 5 },
       ],
+      ciencias: [
+        { name: 'Biologia', value: 3 },
+        { name: 'Física', value: 0 },
+        { name: 'Química', value: 1 },
+        { name: 'História', value: 2 },
+      ]
     },
     social: {
       grace: { value: 9, max: 10 },
       attributes: [
-        { name: 'Carisma', value: 3 },
-        { name: 'Manipulação', value: 2 },
-        { name: 'Autocontrole', value: 4 },
         { name: 'Empatia', value: 3 },
+        { name: 'Manipulação', value: 2 },
+        { name: 'Expressão', value: 3 },
+        { name: 'Resiliência', value: 4 },
       ],
       skills: [
-        { name: 'Empatia com Animais', value: 5 },
+        { name: 'Barganha', value: 2 },
+        { name: 'Doma', value: 5 },
+        { name: 'Etiqueta', value: 1 },
         { name: 'Intimidação', value: 2 },
-        { name: 'Persuasão', value: 3 },
         { name: 'Lábia', value: 1 },
+        { name: 'Liderança', value: 2 },
+        { name: 'Montaria', value: 3 },
+        { name: 'Sedução', value: 0 },
       ],
+      artes: [
+          { name: 'Canto', value: 1 },
+          { name: 'Dança', value: 0 },
+          { name: 'Pintura', value: 2 },
+          { name: 'Atuação', value: 1 },
+      ]
     },
   },
   spirit: {

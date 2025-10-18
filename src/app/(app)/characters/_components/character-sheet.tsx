@@ -89,10 +89,6 @@ const AttributeItem = ({ name, initialValue, pilar }: { name: string; initialVal
         <div className="item-lista">
             <div className="item-header">
                 <span className="nome">{name}</span>
-                <div className="custos-wrapper">
-                    <div className="custo-display">Gasto<b>0</b></div>
-                    <div className="custo-display">Próximo<b>-</b></div>
-                </div>
             </div>
             <div className="item-control">
                 <div className="stepper-container">
@@ -133,10 +129,6 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
          <div className="item-lista">
             <div className="item-header">
                 <span className="nome">{name}</span>
-                <div className="custos-wrapper">
-                    <div className="custo-display">Gasto<b>0</b></div>
-                    <div className="custo-display">Próximo<b>-</b></div>
-                </div>
             </div>
             <div className="item-control">
                 <div 
@@ -162,31 +154,55 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
 
 const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character['focus']['physical'], title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
     const pilarClass = `pilar-${pilar.toLowerCase()}`;
-    return (
-        <div className={`grid grid-cols-1 gap-6 ${pilarClass}`}>
-            <FocusHeaderCard title={title} icon={icon} resource={focusData.vigor || focusData.focus || focusData.grace} />
-            
-            <Card className='sub-painel'>
-                <CardHeader>
-                    <CardTitle>Atributos</CardTitle>
-                </CardHeader>
-                <CardContent className='atributos-grid-interno'>
-                    {focusData.attributes.map(attr => (
-                        <AttributeItem key={attr.name} name={attr.name} initialValue={attr.value} pilar={pilar} />
-                    ))}
-                </CardContent>
-            </Card>
+    const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
+    const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
 
-            <Card className='sub-painel'>
-                 <CardHeader>
-                    <CardTitle>Perícias</CardTitle>
-                </CardHeader>
-                <CardContent className='pericias-lista'>
-                    {focusData.skills.map(skill => (
-                        <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
-                    ))}
-                </CardContent>
-            </Card>
+    return (
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${pilarClass}`}>
+            <div className="md:col-span-1">
+                <FocusHeaderCard title={title} icon={icon} resource={focusData.vigor || focusData.focus || focusData.grace} />
+            </div>
+            
+            <div className="md:col-span-1">
+                <Card className='sub-painel h-full'>
+                    <CardHeader>
+                        <CardTitle>Atributos</CardTitle>
+                    </CardHeader>
+                    <CardContent className='atributos-grid-interno'>
+                        {focusData.attributes.map(attr => (
+                            <AttributeItem key={attr.name} name={attr.name} initialValue={attr.value} pilar={pilar} />
+                        ))}
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="md:col-span-2">
+                <Card className='sub-painel'>
+                    <CardHeader>
+                        <CardTitle>Perícias</CardTitle>
+                    </CardHeader>
+                    <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
+                        {focusData.skills.map(skill => (
+                            <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
+                        ))}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {modularSkills && (
+                <div className="md:col-span-2">
+                    <Card className='sub-painel'>
+                        <CardHeader>
+                            <CardTitle>{modularSkillsTitle}</CardTitle>
+                        </CardHeader>
+                        <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
+                            {modularSkills.map(skill => (
+                                <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }
