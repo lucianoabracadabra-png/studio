@@ -13,7 +13,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface VttSidebarProps {
   vttState: VttState;
@@ -200,7 +199,6 @@ export function VttSidebar({ vttState, setTokens, setMapState, setLayers, setCom
           position: { x: 100, y: 100 },
         };
         
-        // Also add to combat tracker
         setCombat(c => ({...c, turnOrder: [...c.turnOrder, tokenToAdd.id], activeTurnIndex: c.turnOrder.length === 0 ? 0 : c.activeTurnIndex }));
 
         return [...prev, tokenToAdd];

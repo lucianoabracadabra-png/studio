@@ -35,8 +35,6 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
   const canvasRef = useRef<HTMLDivElement>(null);
   
   const handleMapDrag = (event: any, info: any) => {
-    // This allows panning only when the appropriate tool is selected.
-    // Modify this logic if you want panning enabled with other tools.
     if(activeTool === 'select' || activeTool === 'measure') {
         const currentPosition = mapState.position;
         setMapState(prev => ({ ...prev, position: { x: currentPosition.x + info.delta.x, y: currentPosition.y + info.delta.y }}));
@@ -82,7 +80,6 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
         />}
 
         {layers.isGridVisible && <GridLayer gridSize={50} mapDimensions={mapState.dimensions} />}
-
 
         <div className="absolute top-0 left-0 w-full h-full">
           {tokens.map(token => (

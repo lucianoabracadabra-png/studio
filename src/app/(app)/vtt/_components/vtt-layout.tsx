@@ -43,7 +43,7 @@ export interface VttState {
 
 const initialVttState: VttState = {
   map: {
-    url: 'https://images.unsplash.com/photo-1517524206127-48bbd363f5de?q=80&w=2560&h=1440&fit=crop',
+    url: 'https://images.unsplash.com/photo-1542892650-7619c6332766?q=80&w=2560&h=1440&fit=crop',
     zoom: 0.5,
     position: { x: 0, y: 0 },
     dimensions: { width: 2560, height: 1440 }
@@ -126,7 +126,7 @@ export function VttLayout() {
             newCombat.activeTurnIndex = -1;
         } else if (newCombat.activeTurnIndex >= newCombat.turnOrder.length) {
             newCombat.activeTurnIndex = 0;
-        } else if (newCombat.activeTurnIndex < 0) {
+        } else if (newCombat.activeTurnIndex < -1) { // allow -1
             newCombat.activeTurnIndex = 0;
         }
         return { ...prev, combat: newCombat };
