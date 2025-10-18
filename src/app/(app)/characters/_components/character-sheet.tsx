@@ -44,7 +44,7 @@ const FocusCard = ({ title, resource, attributes, skills }: { title: string, res
                     {attributes.map(attr => (
                         <div key={attr.name} className="space-y-1 text-center">
                             <Label>{attr.name}</Label>
-                            <Input type="number" value={attr.value} className="text-center font-bold text-lg" readOnly />
+                            <Input type="number" value={attr.value} className="text-center font-bold text-lg hide-number-arrows" readOnly />
                         </div>
                     ))}
                 </div>
@@ -57,7 +57,7 @@ const FocusCard = ({ title, resource, attributes, skills }: { title: string, res
                         {skills.map(skill => (
                              <div key={skill.name} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
                                 <span>{skill.name}</span>
-                                <Input type="number" value={skill.value} className="w-16 h-8 text-center" readOnly />
+                                <Input type="number" value={skill.value} className="w-16 h-8 text-center hide-number-arrows" readOnly />
                              </div>
                         ))}
                     </div>

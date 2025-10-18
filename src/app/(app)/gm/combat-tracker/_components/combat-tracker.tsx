@@ -403,7 +403,7 @@ export function CombatTracker() {
                             <Label htmlFor="reaction">Mod. Reação</Label>
                              <div className="flex items-center gap-2">
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
-                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg w-full hide-number-arrows" disabled={combatStarted}/>
+                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg hide-number-arrows" disabled={combatStarted}/>
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
                             </div>
                         </div>
