@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,8 +13,9 @@ import { Dices, History } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Die3D, type DiceType } from '@/components/features/dice/die-3d';
+import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
 
-type DiceType = 4 | 6 | 8 | 10 | 12 | 20;
 type RollResult = {
   notation: string;
   rolls: number[];
@@ -22,12 +23,20 @@ type RollResult = {
   timestamp: string;
 };
 
-const attributeDice: DiceType[] = [4, 6, 8, 10, 12, 20];
+const attributeDice: { type: DiceType, hue: number }[] = [
+    { type: 4, hue: mainLinks[0].colorHue },
+    { type: 6, hue: mainLinks[1].colorHue },
+    { type: 8, hue: mainLinks[2].colorHue },
+    { type: 10, hue: mainLinks[3].colorHue },
+    { type: 12, hue: gmToolsLinks[0].colorHue },
+    { type: 20, hue: gmToolsLinks[1].colorHue },
+];
 const skillDiceCounts = Array.from({ length: 10 }, (_, i) => i + 1);
 
 export function DiceRoller() {
   const [results, setResults] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
+  const [rollingDie, setRollingDie] = useState<DiceType | null>(null);
 
   const rollDice = (count: number, die: DiceType | 10) => {
     let rolls: number[] = [];
@@ -47,6 +56,12 @@ export function DiceRoller() {
 
     setLastRoll(newRoll);
     setResults([newRoll, ...results].slice(0, 10)); // Manter os últimos 10 resultados
+  };
+  
+  const handleAttributeRoll = (die: DiceType) => {
+    rollDice(1, die);
+    setRollingDie(die);
+    setTimeout(() => setRollingDie(null), 1000); // Duração da animação
   };
 
   return (
@@ -71,13 +86,17 @@ export function DiceRoller() {
                <Card className='bg-background/30 border-white/10'>
                 <CardHeader>
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
-                  <CardDescription>Role um único dado.</CardDescription>
+                  <CardDescription>Clique em um dado para rolar.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-3 gap-2">
-                  {attributeDice.map(die => (
-                    <Button key={die} onClick={() => rollDice(1, die)} className="font-bold">
-                      d{die}
-                    </Button>
+                <CardContent className="grid grid-cols-3 gap-y-12 gap-x-4 justify-items-center pt-8 h-80">
+                  {attributeDice.map(({ type, hue }) => (
+                     <Die3D 
+                        key={type}
+                        type={type}
+                        colorHue={hue}
+                        isRolling={rollingDie === type}
+                        onClick={() => handleAttributeRoll(type)}
+                     />
                   ))}
                 </CardContent>
               </Card>
