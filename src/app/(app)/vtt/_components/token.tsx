@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { TokenShape } from './vtt-layout';
@@ -12,7 +12,7 @@ interface TokenProps {
   imageUrl: string;
   color: string;
   initialPosition: { x: number; y: number };
-  onDragEnd: (id: number, position: { x: number; y: number }) => void;
+  onDragEnd: (id: number, info: PanInfo, initialPosition: { x: number; y: number }) => void;
   mapZoom: number;
   shape: TokenShape;
   isActive: boolean;
@@ -21,8 +21,8 @@ interface TokenProps {
 export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape, isActive }: TokenProps) {
   const tokenRef = useRef(null);
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent, info: any) => {
-    onDragEnd(id, { x: info.point.x, y: info.point.y });
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    onDragEnd(id, info, initialPosition);
   };
   
   const glowStyle = isActive ? { boxShadow: `0 0 20px 5px ${color}, 0 0 8px 2px ${color}` } : {};
@@ -32,9 +32,11 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
       ref={tokenRef}
       drag
       onDragEnd={handleDragEnd}
+      dragMomentum={false}
+      initial={false} // Prevents animation on initial render
+      animate={{ x: initialPosition.x, y: initialPosition.y }}
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
       style={{
-        x: initialPosition.x,
-        y: initialPosition.y,
         position: 'absolute',
         width: 50,
         height: 50,

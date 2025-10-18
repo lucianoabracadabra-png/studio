@@ -10,7 +10,7 @@ import Image from 'next/image';
 interface MapCanvasProps {
   tokens: TokenType[];
   activeTokenId?: number;
-  onTokenDragEnd: (id: number, newPosition: { x: number; y: number }) => void;
+  onTokenDragEnd: (id: number, info: any, initialPosition: { x: number, y: number }) => void;
   mapState: VttState['map'];
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   activeTool: VttTool;
@@ -34,38 +34,41 @@ const GridLayer = ({ gridSize, mapDimensions }: { gridSize: number, mapDimension
 export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, setMapState, activeTool, layers }: MapCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   
-  const handleDragEnd = (event: any, info: any) => {
-    setMapState(prev => ({ ...prev, position: { x: info.point.x, y: info.point.y }}));
+  const handleMapDrag = (event: any, info: any) => {
+    // This allows panning only when the appropriate tool is selected.
+    // Modify this logic if you want panning enabled with other tools.
+    if(activeTool === 'select' || activeTool === 'measure') {
+        const currentPosition = mapState.position;
+        setMapState(prev => ({ ...prev, position: { x: currentPosition.x + info.delta.x, y: currentPosition.y + info.delta.y }}));
+    }
   };
   
   const getCursor = () => {
     switch (activeTool) {
-      case 'select': return 'default';
+      case 'select': return 'grab';
       case 'measure': return 'crosshair';
       case 'fog': return 'cell';
       case 'draw': return 'crosshair';
       case 'ping': return 'pointer';
-      default: return 'grab';
+      default: return 'default';
     }
   }
 
-  const isPanDisabled = activeTool === 'draw' || activeTool === 'fog';
+  const isPanDisabled = activeTool !== 'select' && activeTool !== 'measure';
 
   return (
     <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative" style={{ cursor: getCursor() }}>
       <motion.div
-        drag
+        drag={!isPanDisabled}
         dragMomentum={false}
-        dragListener={!isPanDisabled}
-        onDragEnd={handleDragEnd}
-        className="w-full h-full relative"
+        onDrag={handleMapDrag}
+        className="absolute top-0 left-0"
         style={{ 
           x: mapState.position.x, 
           y: mapState.position.y,
           scale: mapState.zoom,
           width: mapState.dimensions.width,
           height: mapState.dimensions.height,
-          cursor: !isPanDisabled ? 'grab' : undefined,
         }}
       >
         {mapState.url && <Image 
@@ -73,14 +76,15 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
           alt="VTT Map" 
           width={mapState.dimensions.width}
           height={mapState.dimensions.height}
-          className="absolute top-0 left-0 object-cover select-none pointer-events-none"
+          className="absolute top-0 left-0 object-cover select-none"
           priority
+          draggable={false}
         />}
 
         {layers.isGridVisible && <GridLayer gridSize={50} mapDimensions={mapState.dimensions} />}
 
 
-        <div className="absolute top-0 left-0 w-full h-full" style={{transform: `scale(${1 / mapState.zoom})`}}>
+        <div className="absolute top-0 left-0 w-full h-full">
           {tokens.map(token => (
             <Token
               key={token.id}
