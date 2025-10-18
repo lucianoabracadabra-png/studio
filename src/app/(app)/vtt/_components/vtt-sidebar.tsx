@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Shield, Swords, Layers, Save, Undo, Upload, Music, BookText, Repeat, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Wrench, X } from 'lucide-react';
+import { PlusCircle, Trash2, Shield, Layers, Save, Undo, Upload, Music, BookText, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Wrench, X } from 'lucide-react';
 import Image from 'next/image';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -100,7 +100,7 @@ const TokenListItem = ({ token, onRemove }: { token: Token, onRemove: (id: numbe
     )
 }
 
-const TokensPanel = ({ vttState, setTokens, setCombat }: Pick<VttSidebarProps, 'vttState' | 'setTokens' | 'setCombat'>) => {
+const TokensPanel = ({ vttState, setTokens }: Pick<VttSidebarProps, 'vttState' | 'setTokens'>) => {
     const [showHeroCreator, setShowHeroCreator] = useState(false);
     const [showEnemyCreator, setShowEnemyCreator] = useState(false);
     
@@ -282,15 +282,10 @@ export function VttSidebar(props: VttSidebarProps) {
   const ActivePanelComponent = activePanel ? sidebarPanels[activePanel] : null;
 
   return (
-    <div className="h-full flex justify-end relative z-20">
-        <div 
-            className={cn(
-                "h-full bg-card/80 backdrop-blur-sm border-l border-white/10 flex flex-col transition-transform duration-300 ease-in-out w-80 absolute right-16 top-0",
-                activePanel ? "translate-x-0" : "translate-x-full"
-            )}
-        >
+    <div className="h-full flex justify-end">
+        <div className={cn("h-full bg-card/90 backdrop-blur-sm border-l border-white/10 flex flex-col transition-all duration-300 ease-in-out overflow-hidden", activePanel ? 'w-80' : 'w-0')}>
              {ActivePanelComponent && (
-                <div className='flex flex-col flex-grow overflow-hidden'>
+                <div className='flex flex-col flex-grow w-80'>
                     <div className='flex items-center justify-between p-2 border-b'>
                         <h3 className='font-headline text-lg ml-2'>{sidebarButtons.find(b => b.id === activePanel)?.label}</h3>
                         <Button variant="ghost" size="icon" onClick={() => setActivePanel(null)}>
