@@ -101,7 +101,10 @@
     border-left: 3px solid hsl(var(--book-color-hue, 0), 30%, 50%);
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
     will-change: transform, box-shadow;
-    transform: rotateY(0deg);
+  }
+  
+  .book-nav-item--tool {
+    @apply w-14 h-14;
   }
 
   /* Pseudo-element for decorative spine line */

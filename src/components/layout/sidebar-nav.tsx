@@ -69,11 +69,13 @@ const getInitialState = (activePath: string | null): BookStates => {
 const Book = ({ 
     link, 
     animationState,
-    onClick 
+    onClick,
+    isTool
 }: { 
     link: (typeof mainLinks)[0], 
     animationState: AnimationState,
     onClick: (href: string) => void,
+    isTool?: boolean;
 }) => {
     const Icon = link.icon;
     const isProfile = profileLink.some(l => l.href === link.href);
@@ -85,25 +87,20 @@ const Book = ({
         case 'growing':
             isSpinning = true;
             animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = '2';
+            animationStyle['--book-rotation-count'] = 2;
             animationStyle['--book-animation-state'] = 'running';
             break;
         case 'climax':
             isSpinning = true;
             animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = '4';
+            animationStyle['--book-rotation-count'] = 4;
             animationStyle['--book-animation-state'] = 'running';
             break;
         case 'decaying-on':
-            isSpinning = true;
-            animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = '1';
-            animationStyle['--book-animation-state'] = 'running';
-            break;
         case 'decaying-off':
             isSpinning = true;
             animationStyle['--book-rotation-duration'] = '1s';
-            animationStyle['--book-rotation-count'] = '1';
+            animationStyle['--book-rotation-count'] = 1;
             animationStyle['--book-animation-state'] = 'running';
             break;
         case 'holding':
@@ -127,6 +124,7 @@ const Book = ({
                             }}
                             className={cn(
                               'book-nav-item',
+                              isTool && 'book-nav-item--tool',
                               animationState,
                               isSpinning && 'spinning'
                             )}
@@ -240,28 +238,33 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
         router.push(href);
     };
 
-    const renderBook = (link: any) => {
+    const renderBook = (link: any, isTool: boolean = false) => {
       return <Book 
           key={link.href}
           link={link}
           animationState={bookStates[link.href] || 'off'}
           onClick={handleLinkClick}
+          isTool={isTool}
       />
     };
 
     return (
-        <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50 overflow-visible">
-            <nav className="flex flex-col items-center gap-4 py-4">
-                {mainLinks.map(renderBook)}
-            </nav>
-            <div className="my-4 w-8 border-t border-white/20"></div>
-            <nav className="flex flex-col items-center gap-4">
-                 {gmToolsLinks.map(renderBook)}
-            </nav>
-            <div className='flex-grow'></div>
-            <nav className="flex flex-col items-center gap-4 py-4">
-                {profileLink.map(renderBook)}
-            </nav>
+        <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50">
+            <div className="w-full h-full overflow-y-auto hide-scrollbar">
+                <div className='flex flex-col items-center w-full'>
+                    <nav className="flex flex-col items-center gap-4 py-4">
+                        {mainLinks.map(link => renderBook(link, false))}
+                    </nav>
+                    <div className="my-4 w-8 border-t border-white/20"></div>
+                    <nav className="flex flex-col items-center gap-4">
+                        {gmToolsLinks.map(link => renderBook(link, true))}
+                    </nav>
+                    <div className='flex-grow'></div>
+                    <nav className="flex flex-col items-center gap-4 py-4">
+                        {profileLink.map(link => renderBook(link, false))}
+                    </nav>
+                </div>
+            </div>
         </div>
     );
 }
