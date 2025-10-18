@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, Projectile, BagItem } from '@/lib/character-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -62,7 +62,7 @@ const getEffectClasses = (level: number, type: 'attribute' | 'skill') => {
             classes.push('pulsing');
             if (level === 5) classes.push('pulsing-1');
             else if (level === 6) classes.push('pulsing-2');
-            else classes.push('pulsing-3');
+            else if (level === 7) classes.push('pulsing-3');
         }
         if (level >= 3) {
             glowLevel = level - 2;
@@ -111,7 +111,14 @@ const AttributeItem = ({ name, initialValue, pilar }: { name: string; initialVal
 
 const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social' }) => {
     const [level, setLevel] = useState(initialValue);
+    const [animationDelays, setAnimationDelays] = useState<string[]>([]);
     const { animationClasses, glowLevel } = getEffectClasses(level, 'skill');
+
+    useEffect(() => {
+        setAnimationDelays(
+            Array.from({ length: 7 }, () => `-${Math.random() * 2.5}s`)
+        );
+    }, []);
 
     const handleDotClick = (newLevel: number) => {
         setLevel(currentLevel => {
@@ -141,7 +148,7 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
                             className={cn('dot', { 'selected': i < level })}
                             data-level={i + 1}
                             onClick={() => handleDotClick(i + 1)}
-                            style={{ animationDelay: `-${Math.random() * 2.5}s` }}
+                            style={{ animationDelay: animationDelays[i] || '0s' }}
                         ></span>
                     ))}
                 </div>
