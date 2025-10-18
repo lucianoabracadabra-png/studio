@@ -3,6 +3,8 @@
 import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import type { TokenShape } from './vtt-layout';
 
 interface TokenProps {
   id: number;
@@ -12,9 +14,10 @@ interface TokenProps {
   initialPosition: { x: number; y: number };
   onDragEnd: (id: number, position: { x: number; y: number }) => void;
   mapZoom: number;
+  shape: TokenShape;
 }
 
-export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom }: TokenProps) {
+export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape }: TokenProps) {
   const tokenRef = useRef(null);
 
   const handleDragEnd = (event: MouseEvent | TouchEvent, info: any) => {
@@ -33,10 +36,13 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
         width: 50 / mapZoom,
         height: 50 / mapZoom,
       }}
-      className="rounded-full cursor-pointer flex flex-col items-center group"
+      className="cursor-pointer flex flex-col items-center group"
     >
       <div 
-        className="w-full h-full rounded-full border-2 overflow-hidden transition-all duration-200 group-hover:shadow-lg"
+        className={cn(
+            "w-full h-full border-2 overflow-hidden transition-all duration-200 group-hover:shadow-lg",
+            shape === 'circle' ? 'rounded-full' : 'rounded-md'
+        )}
         style={{ borderColor: color, boxShadow: `0 0 15px ${color}, 0 0 5px ${color}` }}
       >
         <Image
@@ -44,7 +50,10 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
           alt={name}
           width={50}
           height={50}
-          className="object-cover w-full h-full pointer-events-none select-none"
+          className={cn(
+              "object-cover w-full h-full pointer-events-none select-none",
+              shape === 'circle' ? 'rounded-full' : ''
+            )}
         />
       </div>
       <div
