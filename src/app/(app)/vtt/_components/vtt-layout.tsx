@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MapCanvas } from './map-canvas';
 import { VttSidebar } from './vtt-sidebar';
-import { VttToolbar } from './vtt-toolbar';
+import { VttToolbar, type VttTool } from './vtt-toolbar';
 
 export type TokenShape = 'circle' | 'square';
 
@@ -30,6 +30,13 @@ export interface VttState {
   layers: {
     isFogOfWarActive: boolean;
     isLightLayerActive: boolean;
+  };
+  combat: {
+    turnOrder: number[]; // Array of token ids
+    activeTurnIndex: number;
+  },
+  ui: {
+    activeTool: VttTool;
   }
 }
 
@@ -47,11 +54,31 @@ const initialVttState: VttState = {
   layers: {
     isFogOfWarActive: false,
     isLightLayerActive: false,
+  },
+  combat: {
+    turnOrder: [],
+    activeTurnIndex: 0,
+  },
+  ui: {
+    activeTool: 'select',
   }
 };
 
 export function VttLayout() {
   const [vttState, setVttState] = useState<VttState>(initialVttState);
+
+  const allTokens = useMemo(() => 
+    [...vttState.tokens.heroes, ...vttState.tokens.enemies], 
+    [vttState.tokens.heroes, vttState.tokens.enemies]
+  );
+  
+  const combatants = useMemo(() => 
+    vttState.combat.turnOrder.map(id => allTokens.find(t => t.id === id)).filter(Boolean) as Token[],
+    [vttState.combat.turnOrder, allTokens]
+  );
+  
+  const activeCombatantId = combatants[vttState.combat.activeTurnIndex]?.id;
+
 
   const handleZoom = (newZoom: number) => {
     setVttState(prev => ({ ...prev, map: {...prev.map, zoom: Math.max(0.1, Math.min(3, newZoom))} }));
@@ -69,10 +96,19 @@ export function VttLayout() {
   };
 
   const setTokens = (updater: React.SetStateAction<VttState['tokens']>) => {
-    setVttState(prev => ({
-      ...prev,
-      tokens: typeof updater === 'function' ? updater(prev.tokens) : updater,
-    }));
+    setVttState(prev => {
+        const newTokens = typeof updater === 'function' ? updater(prev.tokens) : updater;
+        const allNewTokenIds = [...newTokens.heroes, ...newTokens.enemies].map(t => t.id);
+        
+        return {
+            ...prev,
+            tokens: newTokens,
+            combat: {
+                ...prev.combat,
+                turnOrder: prev.combat.turnOrder.filter(id => allNewTokenIds.includes(id)),
+            }
+        };
+    });
   }
 
   const setMapState = (updater: React.SetStateAction<VttState['map']>) => {
@@ -88,8 +124,17 @@ export function VttLayout() {
       layers: typeof updater === 'function' ? updater(prev.layers) : updater,
     }));
   }
-
-  const allTokens = [...vttState.tokens.heroes, ...vttState.tokens.enemies];
+  
+  const setCombat = (updater: React.SetStateAction<VttState['combat']>) => {
+    setVttState(prev => ({
+      ...prev,
+      combat: typeof updater === 'function' ? updater(prev.combat) : updater,
+    }));
+  }
+  
+  const setActiveTool = (tool: VttTool) => {
+      setVttState(prev => ({ ...prev, ui: { ...prev.ui, activeTool: tool }}));
+  }
 
   const handleTokenDragEnd = (id: number, newPosition: { x: number; y: number }) => {
     setTokens(prevTokens => {
@@ -106,18 +151,22 @@ export function VttLayout() {
 
   return (
     <div className="w-full h-full flex bg-black">
+      <VttToolbar
+        activeTool={vttState.ui.activeTool}
+        onToolSelect={setActiveTool}
+        onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
+        onZoomOut={() => handleZoom(vttState.map.zoom / 1.2)}
+        onCenter={centerMap}
+        zoomLevel={vttState.map.zoom}
+      />
       <div className="flex-grow h-full relative">
         <MapCanvas 
           tokens={allTokens}
+          activeTokenId={activeCombatantId}
           onTokenDragEnd={handleTokenDragEnd}
           mapState={vttState.map}
           setMapState={setMapState}
-        />
-        <VttToolbar 
-          onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
-          onZoomOut={() => handleZoom(vttState.map.zoom / 1.2)}
-          onCenter={centerMap}
-          zoomLevel={vttState.map.zoom}
+          activeTool={vttState.ui.activeTool}
         />
       </div>
       <VttSidebar
@@ -125,6 +174,9 @@ export function VttLayout() {
         setTokens={setTokens}
         setMapState={setMapState}
         setLayers={setLayers}
+        setCombat={setCombat}
+        allTokens={allTokens}
+        combatants={combatants}
       />
     </div>
   );

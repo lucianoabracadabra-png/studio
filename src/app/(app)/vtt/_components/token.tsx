@@ -15,15 +15,18 @@ interface TokenProps {
   onDragEnd: (id: number, position: { x: number; y: number }) => void;
   mapZoom: number;
   shape: TokenShape;
+  isActive: boolean;
 }
 
-export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape }: TokenProps) {
+export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape, isActive }: TokenProps) {
   const tokenRef = useRef(null);
 
   const handleDragEnd = (event: MouseEvent | TouchEvent, info: any) => {
     onDragEnd(id, { x: info.point.x, y: info.point.y });
   };
   
+  const glowStyle = isActive ? { boxShadow: `0 0 20px 5px ${color}, 0 0 8px 2px ${color}` } : {};
+
   return (
     <motion.div
       ref={tokenRef}
@@ -35,6 +38,7 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
         position: 'absolute',
         width: 50 / mapZoom,
         height: 50 / mapZoom,
+        zIndex: isActive ? 10 : 1,
       }}
       className="cursor-pointer flex flex-col items-center group"
     >
@@ -43,7 +47,7 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
             "w-full h-full border-2 overflow-hidden transition-all duration-200 group-hover:shadow-lg",
             shape === 'circle' ? 'rounded-full' : 'rounded-md'
         )}
-        style={{ borderColor: color, boxShadow: `0 0 15px ${color}, 0 0 5px ${color}` }}
+        style={{ borderColor: color, ...glowStyle }}
       >
         <Image
           src={imageUrl}

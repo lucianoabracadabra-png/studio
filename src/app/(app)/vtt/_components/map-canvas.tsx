@@ -4,27 +4,42 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Token } from './token';
 import type { Token as TokenType, VttState } from './vtt-layout';
+import type { VttTool } from './vtt-toolbar';
 import Image from 'next/image';
 
 interface MapCanvasProps {
   tokens: TokenType[];
+  activeTokenId?: number;
   onTokenDragEnd: (id: number, newPosition: { x: number; y: number }) => void;
   mapState: VttState['map'];
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
+  activeTool: VttTool;
 }
 
-export function MapCanvas({ tokens, onTokenDragEnd, mapState, setMapState }: MapCanvasProps) {
+export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, setMapState, activeTool }: MapCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   
   const handleDragEnd = (event: any, info: any) => {
     setMapState(prev => ({ ...prev, position: { x: info.point.x, y: info.point.y }}));
   };
   
+  const getCursor = () => {
+    switch (activeTool) {
+      case 'select': return 'default';
+      case 'measure': return 'crosshair';
+      case 'fog': return 'cell';
+      case 'draw': return 'crosshair';
+      case 'ping': return 'pointer';
+      default: return 'grab';
+    }
+  }
+
   return (
-    <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative cursor-grab active:cursor-grabbing">
+    <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative" style={{ cursor: getCursor() }}>
       <motion.div
         drag
         dragMomentum={false}
+        dragListener={activeTool === 'select'}
         onDragEnd={handleDragEnd}
         className="w-full h-full relative"
         style={{ 
@@ -32,7 +47,8 @@ export function MapCanvas({ tokens, onTokenDragEnd, mapState, setMapState }: Map
           y: mapState.position.y,
           scale: mapState.zoom,
           width: mapState.dimensions.width,
-          height: mapState.dimensions.height
+          height: mapState.dimensions.height,
+          cursor: activeTool === 'select' ? 'grab' : undefined,
         }}
       >
         {mapState.url && <Image 
@@ -56,6 +72,7 @@ export function MapCanvas({ tokens, onTokenDragEnd, mapState, setMapState }: Map
               onDragEnd={onTokenDragEnd}
               mapZoom={mapState.zoom}
               shape={token.shape}
+              isActive={token.id === activeTokenId}
             />
           ))}
         </div>
