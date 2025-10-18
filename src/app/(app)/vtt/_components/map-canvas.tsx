@@ -4,7 +4,7 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Token } from './token';
 import type { Token as TokenType, VttState } from './vtt-layout';
-import type { VttTool } from './vtt-toolbar';
+import type { VttTool } from './vtt-layout';
 import Image from 'next/image';
 
 interface MapCanvasProps {

@@ -1,18 +1,20 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import type { Token, TokenType, VttState } from './vtt-layout';
+import type { Token, TokenType, VttState, VttTool } from './vtt-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Shield, Swords, Map, Layers, Save, Undo, Upload, Music, BookText, ChevronUp, ChevronDown, Repeat } from 'lucide-react';
+import { PlusCircle, Trash2, Shield, Swords, Map, Layers, Save, Undo, Upload, Music, BookText, ChevronUp, ChevronDown, Repeat, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Tool } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+
 
 interface VttSidebarProps {
   vttState: VttState;
@@ -21,6 +23,13 @@ interface VttSidebarProps {
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   setLayers: React.Dispatch<React.SetStateAction<VttState['layers']>>;
   setCombat: React.Dispatch<React.SetStateAction<VttState['combat']>>;
+  isCollapsed: boolean;
+  activeTool: VttTool;
+  onToolSelect: (tool: VttTool) => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onCenter: () => void;
+  zoomLevel: number;
 }
 
 const TokenCreator = ({
@@ -163,6 +172,56 @@ const TurnTracker = ({ combatants, activeTurnIndex, setCombat, allTokens }: { co
     )
 }
 
+const mainTools: { id: VttTool, label: string, icon: React.ElementType }[] = [
+    { id: 'select', label: 'Selecionar & Mover', icon: MousePointer },
+    { id: 'measure', label: 'Medir Distância', icon: Ruler },
+    { id: 'fog', label: 'Névoa de Guerra', icon: Cloud },
+    { id: 'draw', label: 'Desenhar', icon: Pen },
+    { id: 'ping', label: 'Pingar no Mapa', icon: Zap },
+]
+
+const ToolPanel = ({ activeTool, onToolSelect, onZoomIn, onZoomOut, onCenter, zoomLevel }: Omit<VttSidebarProps, 'vttState' | 'setTokens' | 'setMapState' | 'setLayers' | 'setCombat' | 'isCollapsed' | 'combatants'>) => {
+    return (
+        <div className='space-y-4'>
+            <Card className="glassmorphic-card">
+                <CardHeader><CardTitle className='text-lg'>Ferramentas</CardTitle></CardHeader>
+                <CardContent className="grid grid-cols-3 gap-2">
+                    {mainTools.map(tool => (
+                        <TooltipProvider key={tool.id}>
+                            <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button 
+                                    variant="outline" 
+                                    size="icon" 
+                                    onClick={() => onToolSelect(tool.id)}
+                                    className={cn("h-12 w-full", activeTool === tool.id && "bg-primary/20 text-primary border-primary")}
+                                >
+                                    <tool.icon />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                                <p>{tool.label}</p>
+                            </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    ))}
+                </CardContent>
+            </Card>
+            <Card className="glassmorphic-card">
+                <CardHeader><CardTitle className='text-lg'>Navegação</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                    <div className='flex items-center gap-2'>
+                        <Button variant="outline" size="icon" onClick={onZoomOut} className="flex-1"><ZoomOut /></Button>
+                         <div className="font-mono text-xs px-2 w-16 text-center border border-input rounded-md flex items-center justify-center h-10">{Math.round(zoomLevel * 100)}%</div>
+                        <Button variant="outline" size="icon" onClick={onZoomIn} className="flex-1"><ZoomIn /></Button>
+                    </div>
+                     <Button variant="outline" onClick={onCenter} className='w-full'><Maximize className='mr-2'/> Centralizar</Button>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
 const Jukebox = () => (
     <Card className="glassmorphic-card">
         <CardHeader><CardTitle className='text-lg'>Mesa de Som</CardTitle></CardHeader>
@@ -183,7 +242,10 @@ const Journal = () => (
     </Card>
 );
 
-export function VttSidebar({ vttState, setTokens, setMapState, setLayers, setCombat, combatants }: VttSidebarProps) {
+export function VttSidebar({ 
+    vttState, setTokens, setMapState, setLayers, setCombat, combatants, isCollapsed,
+    activeTool, onToolSelect, onZoomIn, onZoomOut, onCenter, zoomLevel
+}: VttSidebarProps) {
   const [showHeroCreator, setShowHeroCreator] = useState(false);
   const [showEnemyCreator, setShowEnemyCreator] = useState(false);
   
@@ -214,103 +276,119 @@ export function VttSidebar({ vttState, setTokens, setMapState, setLayers, setCom
   };
   
   return (
-    <div className="w-80 h-full bg-card/70 border-l border-white/10 flex flex-col">
-       <Tabs defaultValue="tokens" className="flex flex-col flex-grow">
-        <TabsList className="grid w-full grid-cols-5 rounded-none">
-          <TabsTrigger value="tokens"><Shield className="h-4 w-4" /></TabsTrigger>
-          <TabsTrigger value="combat"><Swords className="h-4 w-4" /></TabsTrigger>
-          <TabsTrigger value="layers"><Layers className="h-4 w-4" /></TabsTrigger>
-          <TabsTrigger value="audio"><Music className="h-4 w-4" /></TabsTrigger>
-          <TabsTrigger value="journal"><BookText className="h-4 w-4" /></TabsTrigger>
-        </TabsList>
+    <div className={cn(
+        "h-full bg-card/70 border-l border-white/10 flex flex-col transition-all duration-300",
+        isCollapsed ? "w-0" : "w-80"
+    )}>
+      <div className={cn("flex flex-col flex-grow overflow-hidden", isCollapsed && "invisible")}>
+        <Tabs defaultValue="tokens" className="flex flex-col flex-grow">
+            <TabsList className="grid w-full grid-cols-6 rounded-none">
+                <TabsTrigger value="tools"><Tool className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="tokens"><Shield className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="combat"><Swords className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="layers"><Layers className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="audio"><Music className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="journal"><BookText className="h-4 w-4" /></TabsTrigger>
+            </TabsList>
 
-        <ScrollArea className='flex-grow'>
-          <div className="p-4">
-            <TabsContent value="tokens">
-              <div className="space-y-4">
-                  <Card className="glassmorphic-card">
-                      <CardHeader className='pb-2'>
-                        <div className='flex justify-between items-center'>
-                          <CardTitle className='flex items-center gap-2 text-lg'>Heróis</CardTitle>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowHeroCreator(s => !s)}><PlusCircle /></Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        {showHeroCreator && <TokenCreator tokenType='hero' onAddToken={addToken} />}
-                        {heroTokens.length === 0 && !showHeroCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum herói adicionado.</p> : heroTokens.map(token => (
-                          <TokenListItem key={token.id} token={token} onRemove={removeToken} />
-                        ))}
-                      </CardContent>
-                  </Card>
-                  <Card className="glassmorphic-card">
-                      <CardHeader className='pb-2'>
-                        <div className='flex justify-between items-center'>
-                          <CardTitle className='flex items-center gap-2 text-lg'>Inimigos</CardTitle>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowEnemyCreator(s => !s)}><PlusCircle /></Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        {showEnemyCreator && <TokenCreator tokenType='enemy' onAddToken={addToken} />}
-                        {enemyTokens.length === 0 && !showEnemyCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum inimigo adicionado.</p> : enemyTokens.map(token => (
-                          <TokenListItem key={token.id} token={token} onRemove={removeToken} />
-                        ))}
-                      </CardContent>
-                  </Card>
-              </div>
-            </TabsContent>
+            <ScrollArea className='flex-grow'>
+            <div className="p-4">
+                <TabsContent value="tools">
+                    <ToolPanel 
+                        activeTool={activeTool}
+                        onToolSelect={onToolSelect}
+                        onZoomIn={onZoomIn}
+                        onZoomOut={onZoomOut}
+                        onCenter={onCenter}
+                        zoomLevel={zoomLevel}
+                    />
+                </TabsContent>
+                <TabsContent value="tokens">
+                <div className="space-y-4">
+                    <Card className="glassmorphic-card">
+                        <CardHeader className='pb-2'>
+                            <div className='flex justify-between items-center'>
+                            <CardTitle className='flex items-center gap-2 text-lg'>Heróis</CardTitle>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowHeroCreator(s => !s)}><PlusCircle /></Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {showHeroCreator && <TokenCreator tokenType='hero' onAddToken={addToken} />}
+                            {heroTokens.length === 0 && !showHeroCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum herói adicionado.</p> : heroTokens.map(token => (
+                            <TokenListItem key={token.id} token={token} onRemove={removeToken} />
+                            ))}
+                        </CardContent>
+                    </Card>
+                    <Card className="glassmorphic-card">
+                        <CardHeader className='pb-2'>
+                            <div className='flex justify-between items-center'>
+                            <CardTitle className='flex items-center gap-2 text-lg'>Inimigos</CardTitle>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowEnemyCreator(s => !s)}><PlusCircle /></Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {showEnemyCreator && <TokenCreator tokenType='enemy' onAddToken={addToken} />}
+                            {enemyTokens.length === 0 && !showEnemyCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum inimigo adicionado.</p> : enemyTokens.map(token => (
+                            <TokenListItem key={token.id} token={token} onRemove={removeToken} />
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
+                </TabsContent>
 
-            <TabsContent value="combat">
-                <TurnTracker combatants={combatants} activeTurnIndex={vttState.combat.activeTurnIndex} setCombat={setCombat} allTokens={vttState.tokens} />
-            </TabsContent>
+                <TabsContent value="combat">
+                    <TurnTracker combatants={combatants} activeTurnIndex={vttState.combat.activeTurnIndex} setCombat={setCombat} allTokens={vttState.tokens} />
+                </TabsContent>
 
-            <TabsContent value="layers">
-              <div className='space-y-4'>
-                <Card className="glassmorphic-card">
-                    <CardHeader><CardTitle className='text-lg'>Camadas do Mapa</CardTitle></CardHeader>
-                    <CardContent className='space-y-4'>
-                        <div className="space-y-2">
-                          <Label htmlFor="map-url">URL do Mapa Base</Label>
-                          <div className='flex gap-2'>
-                            <Input id="map-url" value={vttState.map.url} onChange={e => setMapState(prev => ({...prev, url: e.target.value}))} placeholder="https://..." />
-                            <Button size="icon" variant="outline"><Upload/></Button>
-                          </div>
-                        </div>
-                        <Separator/>
-                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                          <Label htmlFor="grid-switch" className="font-semibold">Grelha Visível</Label>
-                          <Switch id="grid-switch" checked={vttState.layers.isGridVisible} onCheckedChange={checked => setLayers(prev => ({...prev, isGridVisible: checked}))}/>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                          <Label htmlFor="fog-switch" className="font-semibold">Névoa de Guerra</Label>
-                          <Switch id="fog-switch" checked={vttState.layers.isFogOfWarActive} onCheckedChange={checked => setLayers(prev => ({...prev, isFogOfWarActive: checked}))}/>
-                        </div>
-                        <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                          <Label htmlFor="light-switch" className="font-semibold">Camada de Luz</Label>
-                          <Switch id="light-switch" checked={vttState.layers.isLightLayerActive} onCheckedChange={checked => setLayers(prev => ({...prev, isLightLayerActive: checked}))}/>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="glassmorphic-card">
-                    <CardHeader><CardTitle className='text-lg'>Gerenciar Cena</CardTitle></CardHeader>
-                    <CardContent className='grid grid-cols-1 gap-2'>
-                      <Button><Save className='mr-2'/> Salvar Cena</Button>
-                      <Button variant="outline"><Upload className='mr-2' /> Carregar Cena</Button>
-                      <Button variant="secondary"><Undo className='mr-2' /> Desfazer Ação</Button>
-                    </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+                <TabsContent value="layers">
+                <div className='space-y-4'>
+                    <Card className="glassmorphic-card">
+                        <CardHeader><CardTitle className='text-lg'>Camadas do Mapa</CardTitle></CardHeader>
+                        <CardContent className='space-y-4'>
+                            <div className="space-y-2">
+                            <Label htmlFor="map-url">URL do Mapa Base</Label>
+                            <div className='flex gap-2'>
+                                <Input id="map-url" value={vttState.map.url} onChange={e => setMapState(prev => ({...prev, url: e.target.value}))} placeholder="https://..." />
+                                <Button size="icon" variant="outline"><Upload/></Button>
+                            </div>
+                            </div>
+                            <Separator/>
+                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                            <Label htmlFor="grid-switch" className="font-semibold">Grelha Visível</Label>
+                            <Switch id="grid-switch" checked={vttState.layers.isGridVisible} onCheckedChange={checked => setLayers(prev => ({...prev, isGridVisible: checked}))}/>
+                            </div>
+                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                            <Label htmlFor="fog-switch" className="font-semibold">Névoa de Guerra</Label>
+                            <Switch id="fog-switch" checked={vttState.layers.isFogOfWarActive} onCheckedChange={checked => setLayers(prev => ({...prev, isFogOfWarActive: checked}))}/>
+                            </div>
+                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                            <Label htmlFor="light-switch" className="font-semibold">Camada de Luz</Label>
+                            <Switch id="light-switch" checked={vttState.layers.isLightLayerActive} onCheckedChange={checked => setLayers(prev => ({...prev, isLightLayerActive: checked}))}/>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="glassmorphic-card">
+                        <CardHeader><CardTitle className='text-lg'>Gerenciar Cena</CardTitle></CardHeader>
+                        <CardContent className='grid grid-cols-1 gap-2'>
+                        <Button><Save className='mr-2'/> Salvar Cena</Button>
+                        <Button variant="outline"><Upload className='mr-2' /> Carregar Cena</Button>
+                        <Button variant="secondary"><Undo className='mr-2' /> Desfazer Ação</Button>
+                        </CardContent>
+                    </Card>
+                </div>
+                </TabsContent>
 
-             <TabsContent value="audio">
-                <Jukebox />
-             </TabsContent>
-            
-             <TabsContent value="journal">
-                <Journal />
-             </TabsContent>
-          </div>
-        </ScrollArea>
-      </Tabs>
+                <TabsContent value="audio">
+                    <Jukebox />
+                </TabsContent>
+                
+                <TabsContent value="journal">
+                    <Journal />
+                </TabsContent>
+            </div>
+            </ScrollArea>
+        </Tabs>
+      </div>
     </div>
   );
 }
