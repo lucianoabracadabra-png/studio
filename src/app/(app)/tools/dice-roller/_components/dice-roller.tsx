@@ -14,7 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
-import { DiceSvg, type DiceType } from '@/components/features/dice/dice-svg';
+import { Die3D, type DiceType } from '@/components/features/dice/die-3d';
+
 
 type RollResult = {
   notation: string;
@@ -38,7 +39,7 @@ export function DiceRoller() {
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
   const [rollingDie, setRollingDie] = useState<DiceType | null>(null);
 
-  const rollDice = (count: number, dieType: DiceType | 'd10') => {
+  const rollDice = (count: number, dieType: DiceType) => {
     const die = parseInt(dieType.substring(1));
     let rolls: number[] = [];
     let total = 0;
@@ -62,7 +63,7 @@ export function DiceRoller() {
   const handleAttributeRoll = (die: DiceType) => {
     rollDice(1, die);
     setRollingDie(die);
-    setTimeout(() => setRollingDie(null), 300); // Duração da animação
+    setTimeout(() => setRollingDie(null), 1000); // Duração da animação
   };
 
   const handleSkillRoll = (count: number) => {
@@ -93,9 +94,9 @@ export function DiceRoller() {
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
                   <CardDescription>Clique em um dado para rolar.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-3 gap-y-8 gap-x-4 justify-items-center pt-8 h-auto">
+                <CardContent className="grid grid-cols-3 gap-y-8 gap-x-4 justify-items-center items-center pt-8 min-h-[300px]">
                   {attributeDice.map(({ type, hue }) => (
-                     <DiceSvg
+                     <Die3D
                         key={type}
                         type={type}
                         colorHue={hue}
