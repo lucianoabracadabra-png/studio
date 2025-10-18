@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -12,28 +12,26 @@ interface TokenProps {
   imageUrl: string;
   color: string;
   initialPosition: { x: number; y: number };
-  onDragEnd: (id: number, info: PanInfo, initialPosition: { x: number; y: number }) => void;
+  onDragEnd: (id: number, info: PanInfo) => void;
   mapZoom: number;
   shape: TokenShape;
   isActive: boolean;
 }
 
 export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape, isActive }: TokenProps) {
-  const tokenRef = useRef(null);
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    onDragEnd(id, info, initialPosition);
+    onDragEnd(id, info);
   };
   
   const glowStyle = isActive ? { boxShadow: `0 0 20px 5px ${color}, 0 0 8px 2px ${color}` } : {};
 
   return (
     <motion.div
-      ref={tokenRef}
       drag
       onDragEnd={handleDragEnd}
       dragMomentum={false}
-      initial={false} // Prevents animation on initial render
+      initial={false}
       animate={{ x: initialPosition.x, y: initialPosition.y }}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
       style={{

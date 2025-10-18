@@ -20,13 +20,10 @@ interface VttSidebarProps {
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   setLayers: React.Dispatch<React.SetStateAction<VttState['layers']>>;
   setCombat: React.Dispatch<React.SetStateAction<VttState['combat']>>;
-  isCollapsed: boolean;
-  activeTool: VttTool;
   onToolSelect: (tool: VttTool) => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onCenter: () => void;
-  zoomLevel: number;
 }
 
 const TokenCreator = ({
@@ -118,10 +115,6 @@ const TokensPanel = ({ vttState, setTokens, setCombat }: Pick<VttSidebarProps, '
               ...newTokenData,
               position: { x: 100, y: 100 },
             };
-            
-            // This logic to add to combat should be elsewhere or optional
-            // setCombat(c => ({...c, turnOrder: [...c.turnOrder, tokenToAdd.id], activeTurnIndex: c.turnOrder.length === 0 ? 0 : c.activeTurnIndex }));
-
             return [...prev, tokenToAdd];
         });
 
@@ -206,6 +199,48 @@ const LayersPanel = ({ vttState, setMapState, setLayers }: Pick<VttSidebarProps,
     )
 }
 
+const mainTools: { id: VttTool, label: string, icon: React.ElementType }[] = [
+    { id: 'select', label: 'Selecionar & Mover', icon: MousePointer },
+    { id: 'measure', label: 'Medir Distância', icon: Ruler },
+    { id: 'fog', label: 'Névoa de Guerra', icon: Cloud },
+    { id: 'draw', label: 'Desenhar', icon: Pen },
+    { id: 'ping', label: 'Pingar no Mapa', icon: Zap },
+];
+
+const ToolsPanel = ({ vttState, onToolSelect, onZoomIn, onZoomOut, onCenter }: Pick<VttSidebarProps, 'vttState' | 'onToolSelect' | 'onZoomIn' | 'onZoomOut' | 'onCenter'>) => (
+    <div className='space-y-4'>
+        <div className='grid grid-cols-2 gap-2'>
+        {mainTools.map(tool => (
+            <TooltipProvider key={tool.id}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button 
+                            variant={vttState.ui.activeTool === tool.id ? 'secondary' : 'outline'} 
+                            size="lg" 
+                            onClick={() => onToolSelect(tool.id)}
+                            className="h-16 flex flex-col gap-1"
+                        >
+                            <tool.icon className='h-6 w-6' />
+                            <span className='text-xs'>{tool.label.split(' ')[0]}</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left"><p>{tool.label}</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        ))}
+        </div>
+        <Separator />
+        <div className='space-y-2'>
+            <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={onZoomOut} className="flex-1"><ZoomOut /></Button>
+                <div className="font-mono text-xs p-2 rounded-md bg-muted text-center flex-1">{Math.round(vttState.map.zoom * 100)}%</div>
+                <Button variant="outline" size="icon" onClick={onZoomIn} className="flex-1"><ZoomIn /></Button>
+            </div>
+            <Button variant="outline" onClick={onCenter} className='w-full'><Maximize className='mr-2' /> Centralizar</Button>
+        </div>
+    </div>
+);
+
 const JukeboxPanel = () => (
     <div className='space-y-4 text-center text-muted-foreground text-sm p-4'>
         <Music className="mx-auto h-10 w-10 text-primary/50" />
@@ -220,10 +255,10 @@ const JournalPanel = () => (
     </div>
 );
 
-
 const sidebarPanels = {
     tokens: TokensPanel,
     layers: LayersPanel,
+    tools: ToolsPanel,
     audio: JukeboxPanel,
     journal: JournalPanel,
 }
@@ -232,13 +267,12 @@ type PanelId = keyof typeof sidebarPanels;
 const sidebarButtons: { id: PanelId, label: string, icon: React.ElementType }[] = [
     { id: 'tokens', label: 'Tokens', icon: Shield },
     { id: 'layers', label: 'Camadas', icon: Layers },
+    { id: 'tools', label: 'Ferramentas', icon: Wrench },
     { id: 'audio', label: 'Mesa de Som', icon: Music },
     { id: 'journal', label: 'Diário & Notas', icon: BookText },
 ];
 
-export function VttSidebar({ 
-    vttState, setTokens, setMapState, setLayers, setCombat
-}: VttSidebarProps) {
+export function VttSidebar(props: VttSidebarProps) {
   const [activePanel, setActivePanel] = useState<PanelId | null>(null);
 
   const togglePanel = (panelId: PanelId) => {
@@ -248,15 +282,15 @@ export function VttSidebar({
   const ActivePanelComponent = activePanel ? sidebarPanels[activePanel] : null;
 
   return (
-    <div className={cn("h-full flex justify-end")}>
+    <div className="h-full flex justify-end relative z-20">
         <div 
             className={cn(
-                "h-full bg-card/70 backdrop-blur-sm border-l border-white/10 flex flex-col transition-all duration-300 ease-in-out",
-                activePanel ? "w-80" : "w-0"
+                "h-full bg-card/80 backdrop-blur-sm border-l border-white/10 flex flex-col transition-transform duration-300 ease-in-out w-80 absolute right-16 top-0",
+                activePanel ? "translate-x-0" : "translate-x-full"
             )}
         >
              {ActivePanelComponent && (
-                <div className={cn('flex flex-col flex-grow overflow-hidden', !activePanel && "invisible")}>
+                <div className='flex flex-col flex-grow overflow-hidden'>
                     <div className='flex items-center justify-between p-2 border-b'>
                         <h3 className='font-headline text-lg ml-2'>{sidebarButtons.find(b => b.id === activePanel)?.label}</h3>
                         <Button variant="ghost" size="icon" onClick={() => setActivePanel(null)}>
@@ -265,7 +299,7 @@ export function VttSidebar({
                     </div>
                     <ScrollArea className='flex-grow'>
                         <div className="p-4">
-                            <ActivePanelComponent {...{ vttState, setTokens, setMapState, setLayers, setCombat }} />
+                            <ActivePanelComponent {...props} />
                         </div>
                     </ScrollArea>
                 </div>

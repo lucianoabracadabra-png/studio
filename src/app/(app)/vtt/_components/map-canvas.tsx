@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import { Token } from './token';
 import type { Token as TokenType, VttState } from './vtt-layout';
 import type { VttTool } from './vtt-layout';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 interface MapCanvasProps {
   tokens: TokenType[];
   activeTokenId?: number;
-  onTokenDragEnd: (id: number, info: any, initialPosition: { x: number, y: number }) => void;
+  onTokenDragEnd: (id: number, info: PanInfo) => void;
   mapState: VttState['map'];
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   activeTool: VttTool;

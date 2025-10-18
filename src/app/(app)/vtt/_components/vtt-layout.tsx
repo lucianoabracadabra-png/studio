@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { MapCanvas } from './map-canvas';
 import { VttSidebar } from './vtt-sidebar';
-import { VttToolbar } from './vtt-toolbar';
-import { PanInfo } from 'framer-motion';
+import type { PanInfo } from 'framer-motion';
 
 export type TokenShape = 'circle' | 'square';
 export type TokenType = 'hero' | 'enemy';
@@ -34,7 +33,7 @@ export interface VttState {
     isGridVisible: boolean;
   };
   combat: {
-    turnOrder: number[]; // Array of token ids
+    turnOrder: number[];
     activeTurnIndex: number;
   },
   ui: {
@@ -44,7 +43,7 @@ export interface VttState {
 
 const initialVttState: VttState = {
   map: {
-    url: '', // Empty to use the CSS texture by default
+    url: '',
     zoom: 0.5,
     position: { x: 0, y: 0 },
     dimensions: { width: 2560, height: 1440 }
@@ -108,28 +107,27 @@ export function VttLayout() {
       setVttState(prev => ({ ...prev, ui: { ...prev.ui, activeTool: tool }}));
   }
 
-  const handleTokenDragEnd = (id: number, info: PanInfo, initialPosition: { x: number; y: number }) => {
-    const mapZoom = vttState.map.zoom;
-    const newX = initialPosition.x + info.offset.x / mapZoom;
-    const newY = initialPosition.y + info.offset.y / mapZoom;
+  const handleTokenDragEnd = (id: number, info: PanInfo) => {
+    setTokens(currentTokens => {
+      const tokenIndex = currentTokens.findIndex(t => t.id === id);
+      if (tokenIndex === -1) return currentTokens;
 
-    setTokens(prevTokens => {
-      return prevTokens.map(token =>
-          token.id === id ? { ...token, position: { x: newX, y: newY } } : token
-        )
+      const updatedToken = {
+        ...currentTokens[tokenIndex],
+        position: {
+          x: currentTokens[tokenIndex].position.x + info.offset.x / vttState.map.zoom,
+          y: currentTokens[tokenIndex].position.y + info.offset.y / vttState.map.zoom,
+        },
+      };
+      
+      const newTokens = [...currentTokens];
+      newTokens[tokenIndex] = updatedToken;
+      return newTokens;
     });
   };
 
   return (
-    <div className="w-full h-full grid grid-cols-[auto_1fr_auto] bg-black">
-      <VttToolbar 
-        activeTool={vttState.ui.activeTool}
-        onToolSelect={setActiveTool}
-        onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
-        onZoomOut={() => handleZoom(vttState.map.zoom / 1.2)}
-        onCenter={centerMap}
-        zoomLevel={vttState.map.zoom}
-      />
+    <div className="w-full h-full grid grid-cols-[1fr_auto] bg-black">
       <div className="flex-grow h-full relative">
         <MapCanvas 
           tokens={vttState.tokens}
@@ -147,13 +145,10 @@ export function VttLayout() {
         setMapState={setMapState}
         setLayers={setLayers}
         setCombat={setCombat}
-        isCollapsed={false} // This can be managed by a state if needed
-        activeTool={vttState.ui.activeTool}
         onToolSelect={setActiveTool}
         onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
         onZoomOut={() => handleZoom(vttState.map.zoom / 1.2)}
         onCenter={centerMap}
-        zoomLevel={vttState.map.zoom}
       />
     </div>
   );
