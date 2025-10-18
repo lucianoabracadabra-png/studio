@@ -107,41 +107,32 @@ const Book = ({
 };
 
 
-export function SidebarNav() {
+export function SidebarNav({ activePath: initialActivePath }: { activePath: string | null }) {
     const router = useRouter();
     const pathname = usePathname();
     
-    const [bookStates, setBookStates] = useState<Record<string, AnimationState>>({});
-    const [activeHref, setActiveHref] = useState<string | null>(null);
-
-    useEffect(() => {
+    const [bookStates, setBookStates] = useState<Record<string, AnimationState>>(() => {
+        const initialState: Record<string, AnimationState> = {};
         const mostSpecificLink = [...allLinks]
             .sort((a, b) => b.href.length - a.href.length)
             .find(link => pathname.startsWith(link.href) && link.href !== '/');
         
-        const currentActiveHref = mostSpecificLink ? mostSpecificLink.href : null;
-        
-        if (currentActiveHref !== activeHref) {
-            setBookStates(prevStates => {
-                const newStates: Record<string, AnimationState> = {};
-                
-                for (const link of allLinks) {
-                    const isNewActive = link.href === currentActiveHref;
-                    const wasOldActive = link.href === activeHref;
+        allLinks.forEach(link => {
+            initialState[link.href] = 'off';
+        });
 
-                    if (isNewActive) {
-                        newStates[link.href] = 'growing';
-                    } else if (wasOldActive) {
-                        newStates[link.href] = 'decaying-off';
-                    } else {
-                        newStates[link.href] = 'off';
-                    }
-                }
-                return newStates;
-            });
-            setActiveHref(currentActiveHref);
+        if (mostSpecificLink) {
+            initialState[mostSpecificLink.href] = 'on';
         }
-    }, [pathname, activeHref]);
+        return initialState;
+    });
+
+    const [activeHref, setActiveHref] = useState<string | null>(() => {
+        const mostSpecificLink = [...allLinks]
+            .sort((a, b) => b.href.length - a.href.length)
+            .find(link => pathname.startsWith(link.href) && link.href !== '/');
+        return mostSpecificLink ? mostSpecificLink.href : null;
+    });
 
     useEffect(() => {
         const timers: NodeJS.Timeout[] = [];
@@ -163,13 +154,24 @@ export function SidebarNav() {
         return () => timers.forEach(clearTimeout);
     }, [bookStates]);
 
-
     const handleLinkClick = (href: string) => {
-        if (href !== activeHref) {
-            router.push(href);
+        if (href === activeHref) {
+            return; // Do nothing if the link is already active
         }
+
+        setBookStates(prevStates => {
+            const newStates = { ...prevStates };
+            if (activeHref && prevStates[activeHref] === 'on') {
+                newStates[activeHref] = 'decaying-off';
+            }
+            newStates[href] = 'growing';
+            return newStates;
+        });
+
+        setActiveHref(href);
+        router.push(href);
     };
-    
+
     const renderBook = (link: any, isTool: boolean = false) => (
         <Book 
             key={link.href}
