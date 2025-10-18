@@ -135,7 +135,7 @@ const Book = ({
                             aria-current={animationState === 'on' ? 'page' : undefined}
                         >
                            <div className='book-cover'>
-                               <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
+                                <div className={cn("book-icon w-6 h-6 flex items-center justify-center")}>
                                    {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
                                </div>
                            </div>
@@ -249,22 +249,18 @@ export function SidebarNav({ activePath }: { activePath: string | null }) {
     };
 
     return (
-        <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center z-50">
-            <div className="w-full h-full overflow-y-auto hide-scrollbar">
-                <div className='flex flex-col items-center w-full'>
-                    <nav className="flex flex-col items-center gap-4 py-4">
-                        {mainLinks.map(link => renderBook(link, false))}
-                    </nav>
-                    <div className="my-4 w-8 border-t border-white/20"></div>
-                    <nav className="flex flex-col items-center gap-4">
-                        {gmToolsLinks.map(link => renderBook(link, true))}
-                    </nav>
-                    <div className='flex-grow'></div>
-                    <nav className="flex flex-col items-center gap-4 py-4">
-                        {profileLink.map(link => renderBook(link, false))}
-                    </nav>
-                </div>
-            </div>
-        </div>
+      <div className="fixed top-0 left-0 z-50 flex h-full w-24 flex-col items-center overflow-y-auto hide-scrollbar">
+        <nav className="flex flex-col items-center gap-4 py-4">
+            {mainLinks.map(link => renderBook(link, false))}
+        </nav>
+        <div className="my-4 w-8 border-t border-white/20"></div>
+        <nav className="flex flex-col items-center gap-4">
+            {gmToolsLinks.map(link => renderBook(link, true))}
+        </nav>
+        <div className='flex-grow'></div>
+        <nav className="flex flex-col items-center gap-4 py-4">
+            {profileLink.map(link => renderBook(link, false))}
+        </nav>
+      </div>
     );
 }
