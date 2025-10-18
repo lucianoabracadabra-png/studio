@@ -8,64 +8,89 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 
-const FocusCard = ({ title, resource, attributes, skills }: { title: string, resource: { name: string, value: number, max: number }, attributes: { name: string, value: number }[], skills: { name: string, value: number }[] }) => {
-    return (
-        <Card className="glassmorphic-card flex-1">
-            <CardHeader>
-                <CardTitle className="font-headline text-2xl magical-glow text-center">{title}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-                <div>
-                    <div className="flex justify-between items-center mb-1">
-                        <Label>{resource.name}</Label>
-                        <span className="text-sm font-mono">{resource.value}/{resource.max}</span>
-                    </div>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Progress value={(resource.value / resource.max) * 100} className="w-full h-3 [&>div]:bg-primary" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{Math.round((resource.value / resource.max) * 100)}%</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
+    <Card className='glassmorphic-card'>
+        <CardHeader>
+            <CardTitle className='flex items-center justify-between font-headline text-2xl magical-glow'>
+                {title}
+                <Icon className='w-8 h-8' />
+            </CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+            <div className="flex items-baseline justify-between">
+                <p className='font-bold text-lg'>{resource.name}</p>
+                <p className='font-mono text-lg'>{resource.value} / {resource.max}</p>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between text-muted-foreground">
+                <p className='font-bold text-lg text-amber-400'>1</p>
+                <p>Gasto</p>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const AttributesCard = ({ attributes }: { attributes: { name: string, value: number }[]}) => (
+    <Card className='glassmorphic-card'>
+        <CardHeader>
+            <CardTitle className='font-headline text-center text-lg'>ATRIBUTOS</CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-3'>
+            {attributes.map(attr => (
+                <div key={attr.name} className='flex items-center justify-between font-mono text-lg'>
+                    <span className='font-bold text-amber-400'>{attr.value}</span>
+                    <span className='text-foreground'>{attr.name}</span>
+                    <div className='w-3 h-3 rounded-full border-2 border-amber-400'></div>
                 </div>
+            ))}
+        </CardContent>
+    </Card>
+);
 
-                <Separator />
-
-                <div className="grid grid-cols-2 gap-4">
-                    {attributes.map(attr => (
-                        <div key={attr.name} className="space-y-1 text-center">
-                            <Label>{attr.name}</Label>
-                            <Input type="number" value={attr.value} className="text-center font-bold text-lg hide-number-arrows" readOnly />
-                        </div>
+const SkillsTable = ({ title, skills }: { title: string, skills: { name: string, value: number }[]}) => (
+    <Card className='glassmorphic-card'>
+        <CardHeader>
+            <CardTitle className='flex items-center justify-between text-sm font-bold tracking-widest'>
+                <Button variant='ghost' size='icon' className='w-6 h-6'><PlusCircle className='w-5 h-5'/></Button>
+                {title}
+                <div className='w-6'></div>
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            <Table>
+                <TableBody>
+                    {skills.map(skill => (
+                        <TableRow key={skill.name}>
+                            <TableCell className='w-12 font-mono font-bold text-lg text-center'>{skill.value > 0 ? skill.value : '-'}</TableCell>
+                            <TableCell>{skill.name}</TableCell>
+                        </TableRow>
                     ))}
-                </div>
+                </TableBody>
+            </Table>
+        </CardContent>
+    </Card>
+);
 
-                <Separator />
-                
-                <div className='space-y-2'>
-                    <h4 className="font-semibold text-center text-muted-foreground">Skills</h4>
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                        {skills.map(skill => (
-                             <div key={skill.name} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
-                                <span>{skill.name}</span>
-                                <Input type="number" value={skill.value} className="w-16 h-8 text-center hide-number-arrows" readOnly />
-                             </div>
-                        ))}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
+const FocusSection = ({ focusData, title, icon }: { focusData: Character['focus']['physical'], title: string, icon: React.ElementType }) => (
+    <div className='grid grid-cols-2 grid-rows-[auto_1fr] gap-4'>
+        <div className='col-span-1'>
+             <FocusHeaderCard title={title} icon={icon} resource={focusData.vigor || focusData.focus || focusData.grace} />
+        </div>
+        <div className='col-span-1'>
+            <AttributesCard attributes={focusData.attributes} />
+        </div>
+        <div className='col-span-2'>
+            <SkillsTable title="PERÍCIAS" skills={focusData.skills} />
+        </div>
+    </div>
+)
+
 
 const SoulCracks = ({ value }: { value: number }) => {
     return (
@@ -271,25 +296,30 @@ export function CharacterSheet() {
             </header>
 
             {/* FOCUS PANEL */}
-            <section className="flex flex-col md:flex-row gap-6">
-                <FocusCard 
-                    title="FÍSICO"
-                    resource={character.focus.physical.vigor}
-                    attributes={character.focus.physical.attributes}
-                    skills={character.focus.physical.skills}
-                />
-                <FocusCard 
-                    title="MENTAL"
-                    resource={character.focus.mental.focus}
-                    attributes={character.focus.mental.attributes}
-                    skills={character.focus.mental.skills}
-                />
-                <FocusCard 
-                    title="SOCIAL"
-                    resource={character.focus.social.grace}
-                    attributes={character.focus.social.attributes}
-                    skills={character.focus.social.skills}
-                />
+            <section>
+                <Card className='glassmorphic-card'>
+                    <CardHeader>
+                        <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <Tabs defaultValue="physical">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="physical"><PersonStanding className='mr-2'/>Físico</TabsTrigger>
+                                <TabsTrigger value="mental"><BrainCircuit className='mr-2'/>Mental</TabsTrigger>
+                                <TabsTrigger value="social"><Users className='mr-2'/>Social</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="physical" className='mt-4'>
+                                <FocusSection focusData={character.focus.physical} title='FÍSICO' icon={PersonStanding} />
+                            </TabsContent>
+                             <TabsContent value="mental" className='mt-4'>
+                                <FocusSection focusData={character.focus.mental} title='MENTAL' icon={BrainCircuit} />
+                            </TabsContent>
+                             <TabsContent value="social" className='mt-4'>
+                                <FocusSection focusData={character.focus.social} title='SOCIAL' icon={Users} />
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
             </section>
 
              {/* SOUL & SPIRIT PANEL */}
