@@ -7,12 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 
 const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
     <Card className='glassmorphic-card'>
@@ -113,12 +115,12 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
     const [level, setLevel] = useState(initialValue);
     const [animationDelays, setAnimationDelays] = useState<string[]>([]);
     const { animationClasses, glowLevel } = getEffectClasses(level, 'skill');
-
+    
     useEffect(() => {
-        setAnimationDelays(
-            Array.from({ length: 7 }, () => `-${Math.random() * 2.5}s`)
-        );
+        const delays = Array.from({ length: 7 }, () => `-${Math.random() * 2.5}s`);
+        setAnimationDelays(delays);
     }, []);
+
 
     const handleDotClick = (newLevel: number) => {
         setLevel(currentLevel => {
@@ -148,7 +150,7 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
                             className={cn('dot', { 'selected': i < level })}
                             data-level={i + 1}
                             onClick={() => handleDotClick(i + 1)}
-                            style={{ animationDelay: animationDelays[i] || '0s' }}
+                            style={{ animationDelay: animationDelays[i] }}
                         ></span>
                     ))}
                 </div>
@@ -216,171 +218,174 @@ const SoulCracks = ({ value }: { value: number }) => {
     );
 };
 
-const ArmorCard = ({ armor }: { armor: Armor }) => (
-    <Card className='bg-muted/30'>
-        <CardHeader>
-            <CardTitle className='flex justify-between items-center'>{armor.name} <Button size="sm" variant={armor.equipped ? 'secondary' : 'outline'}>{armor.equipped ? 'Equipado' : 'Equipar'}</Button></CardTitle>
-            <CardDescription>{armor.extras}</CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-            <div className='grid grid-cols-3 gap-2 text-center'>
-                <div className='space-y-1'><Label>Cortante</Label><p className='font-mono'>{armor.slashing}</p></div>
-                <div className='space-y-1'><Label>Esmagamento</Label><p className='font-mono'>{armor.bludgeoning}</p></div>
-                <div className='space-y-1'><Label>Perfurante</Label><p className='font-mono'>{armor.piercing}</p></div>
-            </div>
-             <div className='grid grid-cols-3 gap-2 text-center'>
-                <div className='space-y-1'><Label>Resistência</Label><p className='font-mono'>{armor.resistance}</p></div>
-                <div className='space-y-1'><Label>Durabilidade</Label><p className='font-mono'>{armor.durability}</p></div>
-                <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{armor.weight}kg</p></div>
-            </div>
-            <div className='grid grid-cols-2 gap-2 text-center'>
-                <div className='space-y-1'><Label>Cobertura</Label><p className='font-mono'>{armor.coverage}</p></div>
-                <div className='space-y-1'><Label>Tamanho</Label><p className='font-mono uppercase'>{armor.size}</p></div>
-            </div>
-        </CardContent>
-    </Card>
-)
-
-const WeaponCard = ({ weapon }: { weapon: Weapon }) => (
-    <Card className='bg-muted/30'>
-        <CardHeader>
-            <CardTitle className='flex justify-between items-center'>{weapon.name} <Button size="sm" variant={weapon.equipped ? 'secondary' : 'outline'}>{weapon.equipped ? 'Equipado' : 'Equipar'}</Button></CardTitle>
-            <CardDescription>{weapon.extras}</CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-            {weapon.thrust && (
-                <div>
-                    <h4 className='font-semibold text-accent mb-2'>Thrust</h4>
-                    <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                        <div><Label>Dano</Label><p>{weapon.thrust.damage}</p></div>
-                        <div><Label>Tipo</Label><p>{weapon.thrust.type}</p></div>
-                        <div><Label>AP</Label><p>{weapon.thrust.ap}</p></div>
-                        <div><Label>Precisão</Label><p>{weapon.thrust.accuracy}</p></div>
-                    </div>
-                </div>
-            )}
-            {weapon.swing && (
-                <div>
-                    <h4 className='font-semibold text-accent mb-2'>Swing</h4>
-                    <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                        <div><Label>Dano</Label><p>{weapon.swing.damage}</p></div>
-                        <div><Label>Tipo</Label><p>{weapon.swing.type}</p></div>
-                        <div><Label>AP</Label><p>{weapon.swing.ap}</p></div>
-                        <div><Label>Precisão</Label><p>{weapon.swing.accuracy}</p></div>
-                    </div>
-                </div>
-            )}
-             <div className='grid grid-cols-2 gap-2 text-center pt-2 border-t border-border'>
-                <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{weapon.weight}kg</p></div>
-                <div className='space-y-1'><Label>Tamanho</Label><p className='font-mono uppercase'>{weapon.size}</p></div>
-            </div>
-        </CardContent>
-    </Card>
+const ArmorCardDetails = ({ armor }: { armor: Armor }) => (
+    <div className='space-y-4 pt-4'>
+        <p className="text-sm text-muted-foreground">{armor.extras}</p>
+        <Separator/>
+        <div className='grid grid-cols-3 gap-2 text-center'>
+            <div className='space-y-1'><Label>Cortante</Label><p className='font-mono'>{armor.slashing}</p></div>
+            <div className='space-y-1'><Label>Esmagamento</Label><p className='font-mono'>{armor.bludgeoning}</p></div>
+            <div className='space-y-1'><Label>Perfurante</Label><p className='font-mono'>{armor.piercing}</p></div>
+        </div>
+        <div className='grid grid-cols-3 gap-2 text-center'>
+            <div className='space-y-1'><Label>Resistência</Label><p className='font-mono'>{armor.resistance}</p></div>
+            <div className='space-y-1'><Label>Durabilidade</Label><p className='font-mono'>{armor.durability}</p></div>
+            <div className='spacey-1'><Label>Peso</Label><p className='font-mono'>{armor.weight}kg</p></div>
+        </div>
+    </div>
 );
 
-const AccessoryCard = ({ accessory }: { accessory: Accessory }) => (
-    <Card className='bg-muted/30'>
-        <CardHeader>
-            <CardTitle className='flex justify-between items-center'>{accessory.name} <Button size="sm" variant={accessory.equipped ? 'secondary' : 'outline'}>{accessory.equipped ? 'Equipado' : 'Equipar'}</Button></CardTitle>
-            <CardDescription>{accessory.typeAndDescription}</CardDescription>
-        </CardHeader>
-        <CardContent className='grid grid-cols-2 gap-2 text-center'>
+const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
+     <div className='space-y-4 pt-4'>
+        <p className="text-sm text-muted-foreground">{weapon.extras}</p>
+        <Separator/>
+        {weapon.thrust && (
+            <div>
+                <h4 className='font-semibold text-accent mb-2'>Thrust</h4>
+                <div className='grid grid-cols-4 gap-2 text-center text-sm'>
+                    <div><Label>Dano</Label><p>{weapon.thrust.damage}</p></div>
+                    <div><Label>Tipo</Label><p>{weapon.thrust.type}</p></div>
+                    <div><Label>AP</Label><p>{weapon.thrust.ap}</p></div>
+                    <div><Label>Precisão</Label><p>{weapon.thrust.accuracy}</p></div>
+                </div>
+            </div>
+        )}
+        {weapon.swing && (
+            <div>
+                <h4 className='font-semibold text-accent mb-2'>Swing</h4>
+                <div className='grid grid-cols-4 gap-2 text-center text-sm'>
+                    <div><Label>Dano</Label><p>{weapon.swing.damage}</p></div>
+                    <div><Label>Tipo</Label><p>{weapon.swing.type}</p></div>
+                    <div><Label>AP</Label><p>{weapon.swing.ap}</p></div>
+                    <div><Label>Precisão</Label><p>{weapon.swing.accuracy}</p></div>
+                </div>
+            </div>
+        )}
+        <div className='grid grid-cols-2 gap-2 text-center pt-2 border-t border-border'>
+            <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{weapon.weight}kg</p></div>
+            <div className='space-y-1'><Label>Tamanho</Label><p className='font-mono uppercase'>{weapon.size}</p></div>
+        </div>
+    </div>
+);
+
+const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
+    <div className='space-y-4 pt-4'>
+        <p className="text-sm text-muted-foreground">{accessory.typeAndDescription}</p>
+        <Separator/>
+        <div className='grid grid-cols-2 gap-2 text-center'>
             <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{accessory.weight}kg</p></div>
             <div className='space-y-1'><Label>Efeito</Label><p className='font-mono'>{accessory.effect}</p></div>
-        </CardContent>
-    </Card>
-)
-
-const ProjectileCard = ({ projectile }: { projectile: Projectile }) => (
-    <Card className='bg-muted/30'>
-        <CardHeader>
-            <CardTitle>{projectile.name} ({projectile.quantity})</CardTitle>
-            <CardDescription>{projectile.extras}</CardDescription>
-        </CardHeader>
-        <CardContent className='grid grid-cols-3 gap-4 text-center'>
-            <div className='space-y-1'><Label>Tipo</Label><p>{projectile.type}</p></div>
-            <div className='space-y-1'><Label>AP</Label><p>{projectile.ap}</p></div>
-            <div className='space-y-1'><Label>Precisão</Label><p>{projectile.accuracy}</p></div>
-            <div className='space-y-1'><Label>Peso Total</Label><p>{(projectile.weight * projectile.quantity).toFixed(2)}kg</p></div>
-             <div className='space-y-1'><Label>Tamanho</Label><p className='uppercase'>{projectile.size}</p></div>
-        </CardContent>
-    </Card>
-)
-
-const BagCard = ({ items }: { items: BagItem[] }) => (
-    <Card className='bg-muted/30'>
-        <CardHeader>
-            <CardTitle>Mochila</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead className='text-center'>Qtd</TableHead>
-                        <TableHead className='text-right'>Peso</TableHead>
-                        <TableHead>Extras</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {items.map(item => (
-                        <TableRow key={item.name}>
-                            <TableCell>{item.name}</TableCell>
-                            <TableCell className='text-center'>{item.quantity}</TableCell>
-                            <TableCell className='text-right'>{(item.weight * item.quantity).toFixed(2)}kg</TableCell>
-                            <TableCell>{item.extras}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </CardContent>
-    </Card>
+        </div>
+    </div>
 );
 
+const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, type: 'armor' | 'weapon' | 'accessory' }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const iconMap = {
+        armor: <Shield />,
+        weapon: <Swords />,
+        accessory: <Gem />
+    };
 
-const EquipmentAndInventory = ({ equipment, inventory }: { equipment: Character['equipment'], inventory: Character['inventory'] }) => {
     return (
-        <Card className="glassmorphic-card">
-            <CardHeader>
-                <CardTitle className='font-headline text-2xl magical-glow text-center'>Inventário & Equipamentos</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Tabs defaultValue="equipment">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="equipment"><Shirt className='mr-2'/>Equipamento</TabsTrigger>
-                        <TabsTrigger value="inventory"><Backpack className='mr-2'/>Inventário</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="equipment">
-                        <Tabs defaultValue='armor' className='mt-4'>
-                            <TabsList className='grid w-full grid-cols-4'>
-                                <TabsTrigger value='armor'><Shield className='mr-2' />Armaduras</TabsTrigger>
-                                <TabsTrigger value='weapons'><Swords className='mr-2' />Armamentos</TabsTrigger>
-                                <TabsTrigger value='accessories'><Gem className='mr-2' />Acessórios</TabsTrigger>
-                                <TabsTrigger value='projectiles'><ArrowRight className='mr-2' />Projéteis</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value='armor' className='space-y-4 mt-4'>
-                                {equipment.armors.map(armor => <ArmorCard key={armor.name} armor={armor} />)}
-                            </TabsContent>
-                            <TabsContent value='weapons' className='space-y-4 mt-4'>
-                                {equipment.weapons.map(weapon => <WeaponCard key={weapon.name} weapon={weapon} />)}
-                            </TabsContent>
-                            <TabsContent value='accessories' className='space-y-4 mt-4'>
-                                {equipment.accessories.map(accessory => <AccessoryCard key={accessory.name} accessory={accessory} />)}
-                            </TabsContent>
-                             <TabsContent value='projectiles' className='space-y-4 mt-4'>
-                                {equipment.projectiles.map(projectile => <ProjectileCard key={projectile.name} projectile={projectile} />)}
-                            </TabsContent>
-                        </Tabs>
-                    </TabsContent>
-                    <TabsContent value="inventory" className='mt-4'>
-                        <BagCard items={inventory.bag} />
-                    </TabsContent>
-                </Tabs>
-            </CardContent>
-        </Card>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+            <Card className="bg-muted/30">
+                <CollapsibleTrigger asChild>
+                    <CardHeader className="flex flex-row items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                            <span className="text-accent">{iconMap[type]}</span>
+                            <CardTitle className="text-base font-semibold">{item.name}</CardTitle>
+                        </div>
+                        <ChevronDown className={cn("h-5 w-5 transition-transform", isOpen && "rotate-180")} />
+                    </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <CardContent className="p-3 pt-0">
+                       {type === 'armor' && <ArmorCardDetails armor={item as Armor} />}
+                       {type === 'weapon' && <WeaponCardDetails weapon={item as Weapon} />}
+                       {type === 'accessory' && <AccessoryCardDetails accessory={item as Accessory} />}
+                    </CardContent>
+                </CollapsibleContent>
+            </Card>
+        </Collapsible>
     );
 };
 
+
+const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) => {
+    const equippedArmors = equipment.armors.filter(i => i.equipped);
+    const equippedWeapons = equipment.weapons.filter(i => i.equipped);
+    const equippedAccessories = equipment.accessories.filter(i => i.equipped);
+
+    return (
+        <Card className="glassmorphic-card">
+            <CardHeader>
+                <CardTitle className='font-headline text-2xl magical-glow text-center'>Equipamento</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                    <h3 className="font-headline text-lg text-center">Armaduras</h3>
+                    {equippedArmors.length > 0 ? equippedArmors.map(item => <EquippedItemCard key={item.name} item={item} type="armor" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma armadura equipada.</p>}
+                </div>
+                 <div className="space-y-3">
+                    <h3 className="font-headline text-lg text-center">Armas</h3>
+                    {equippedWeapons.length > 0 ? equippedWeapons.map(item => <EquippedItemCard key={item.name} item={item} type="weapon" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma arma equipada.</p>}
+                </div>
+                 <div className="space-y-3">
+                    <h3 className="font-headline text-lg text-center">Acessórios</h3>
+                    {equippedAccessories.length > 0 ? equippedAccessories.map(item => <EquippedItemCard key={item.name} item={item} type="accessory" />) : <p className="text-xs text-center text-muted-foreground">Nenhum acessório equipado.</p>}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+const InventorySection = ({ equipment, inventory }: { equipment: Character['equipment'], inventory: Character['inventory'] }) => {
+    
+    const unequippedItems = [
+        ...equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Armadura'})),
+        ...equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Arma'})),
+        ...equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Acessório'})),
+        ...equipment.projectiles.map(i => ({...i, type: 'Projétil'})),
+        ...inventory.bag.map(i => ({...i, type: 'Item'})),
+    ];
+    
+    const totalWeight = unequippedItems.reduce((acc, item) => acc + (item.weight * item.quantity), 0);
+
+    return (
+        <Card className="glassmorphic-card">
+            <CardHeader>
+                <div className="flex justify-between items-baseline">
+                    <CardTitle className='font-headline text-2xl magical-glow'>Inventário</CardTitle>
+                    <p className="font-mono text-muted-foreground flex items-center gap-2"><Weight className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead className='text-center'>Qtd</TableHead>
+                            <TableHead className='text-right'>Peso</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {unequippedItems.map(item => (
+                            <TableRow key={item.name}>
+                                <TableCell className="font-medium">{item.name}</TableCell>
+                                <TableCell className="text-muted-foreground">{item.type}</TableCell>
+                                <TableCell className='text-center'>{item.quantity}</TableCell>
+                                <TableCell className='text-right font-mono'>{(item.weight * item.quantity).toFixed(2)}kg</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+}
 
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(initialCharacterData);
@@ -501,8 +506,13 @@ export function CharacterSheet() {
                 </Card>
             </section>
              <section>
-                <EquipmentAndInventory equipment={character.equipment} inventory={character.inventory} />
+                <EquippedSection equipment={character.equipment} />
+            </section>
+             <section>
+                <InventorySection equipment={character.equipment} inventory={character.inventory} />
             </section>
         </div>
     );
 }
+
+    
