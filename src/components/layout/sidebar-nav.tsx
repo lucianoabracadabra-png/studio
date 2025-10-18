@@ -57,17 +57,20 @@ type AnimationState = 'off' | 'growing' | 'holding' | 'climax' | 'decaying-on' |
 
 const Book = ({ 
     link, 
-    animationState,
+    isTool,
+    visualState,
+    isActive,
     onClick,
-    isTool
 }: { 
     link: (typeof mainLinks)[0], 
-    animationState: AnimationState,
-    onClick: () => void,
     isTool?: boolean;
+    visualState: AnimationState;
+    isActive: boolean;
+    onClick: () => void,
 }) => {
     const Icon = link.icon;
     const isProfile = profileLink.some(l => l.href === link.href);
+    const animationClass = isActive ? 'on' : visualState;
 
     return (
         <TooltipProvider key={link.href}>
@@ -83,15 +86,15 @@ const Book = ({
                             className={cn(
                               'book-nav-item',
                               isTool && 'book-nav-item--tool',
-                              animationState
+                              animationClass
                             )}
                             style={{ 
                                 '--book-color-hue': `${link.colorHue}`,
                             } as CSSProperties}
-                            aria-current={animationState === 'on' ? 'page' : undefined}
+                            aria-current={isActive ? 'page' : undefined}
                         >
                            <div className='book-cover'>
-                               <div className={cn("book-icon", animationState === 'on' && 'on')}>
+                               <div className={cn("book-icon", isActive && 'on')}>
                                    {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
                                </div>
                            </div>
@@ -110,65 +113,87 @@ const Book = ({
 export function SidebarNav({ activePath: initialActivePath }: { activePath: string | null }) {
     const router = useRouter();
     const pathname = usePathname();
-    
-    const [bookStates, setBookStates] = useState<Record<string, AnimationState>>(() => {
+
+    const [activeHref, setActiveHref] = useState<string | null>(null);
+    const [visualStates, setVisualStates] = useState<Record<string, AnimationState>>(() => {
         const initialState: Record<string, AnimationState> = {};
-        const mostSpecificLink = [...allLinks]
-            .sort((a, b) => b.href.length - a.href.length)
-            .find(link => pathname.startsWith(link.href) && link.href !== '/');
-        
         allLinks.forEach(link => {
             initialState[link.href] = 'off';
         });
-
-        if (mostSpecificLink) {
-            initialState[mostSpecificLink.href] = 'on';
-        }
         return initialState;
     });
 
-    const [activeHref, setActiveHref] = useState<string | null>(() => {
+    // EFFECT 1: Determine the true active link from the URL (source of truth)
+    useEffect(() => {
         const mostSpecificLink = [...allLinks]
             .sort((a, b) => b.href.length - a.href.length)
             .find(link => pathname.startsWith(link.href) && link.href !== '/');
-        return mostSpecificLink ? mostSpecificLink.href : null;
-    });
+        
+        const currentActiveHref = mostSpecificLink ? mostSpecificLink.href : null;
+        setActiveHref(currentActiveHref);
 
+        // Turn off visual animations for non-active books
+        setVisualStates(prev => {
+            const newStates = {...prev};
+            Object.keys(newStates).forEach(href => {
+                if (href !== currentActiveHref && newStates[href] !== 'decaying-off') {
+                   if (prev[href] === 'on') {
+                     newStates[href] = 'decaying-off';
+                   } else {
+                     newStates[href] = 'off';
+                   }
+                }
+            });
+            return newStates;
+        });
+
+    }, [pathname]);
+
+    // EFFECT 2: Manage the animation state machine based on visual state
     useEffect(() => {
         const timers: NodeJS.Timeout[] = [];
         
-        Object.entries(bookStates).forEach(([href, state]) => {
+        Object.entries(visualStates).forEach(([href, state]) => {
             if (state === 'growing') {
-                timers.push(setTimeout(() => setBookStates(prev => ({ ...prev, [href]: 'holding' })), 1000));
+                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'holding' })), 1000));
             } else if (state === 'holding') {
-                timers.push(setTimeout(() => setBookStates(prev => ({ ...prev, [href]: 'climax' })), 2000));
+                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'climax' })), 2000));
             } else if (state === 'climax') {
-                timers.push(setTimeout(() => setBookStates(prev => ({ ...prev, [href]: 'decaying-on' })), 1000));
+                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'decaying-on' })), 1000));
             } else if (state === 'decaying-on') {
-                timers.push(setTimeout(() => setBookStates(prev => ({ ...prev, [href]: 'on' })), 1000));
+                 timers.push(setTimeout(() => {
+                    setActiveHref(href); // Sync the final active state
+                    setVisualStates(prev => ({ ...prev, [href]: 'on' }));
+                }, 1000));
             } else if (state === 'decaying-off') {
-                timers.push(setTimeout(() => setBookStates(prev => ({ ...prev, [href]: 'off' })), 1000));
+                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'off' })), 1000));
             }
         });
 
         return () => timers.forEach(clearTimeout);
-    }, [bookStates]);
+    }, [visualStates]);
 
     const handleLinkClick = (href: string) => {
-        if (href === activeHref) {
-            return; // Do nothing if the link is already active
+        // Prevent re-animation if already active or animating
+        if (activeHref === href || visualStates[href] === 'growing' || visualStates[href] === 'holding') {
+            return; 
         }
 
-        setBookStates(prevStates => {
-            const newStates = { ...prevStates };
-            if (activeHref && prevStates[activeHref] === 'on') {
-                newStates[activeHref] = 'decaying-off';
-            }
+        // Start visual animation
+        setVisualStates(prevStates => {
+            const newStates: Record<string, AnimationState> = { ...prevStates };
+            // Turn off any other active book
+            Object.keys(newStates).forEach(key => {
+                if (newStates[key] === 'on' || newStates[key] === 'growing' || newStates[key] === 'holding' || newStates[key] === 'climax' || newStates[key] === 'decaying-on') {
+                    newStates[key] = 'decaying-off';
+                }
+            });
+            // Start the new animation
             newStates[href] = 'growing';
             return newStates;
         });
 
-        setActiveHref(href);
+        // Navigate
         router.push(href);
     };
 
@@ -176,9 +201,10 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
         <Book 
             key={link.href}
             link={link}
-            animationState={bookStates[link.href] || 'off'}
-            onClick={() => handleLinkClick(link.href)}
             isTool={isTool}
+            visualState={visualStates[link.href] || 'off'}
+            isActive={activeHref === link.href && visualStates[link.href] === 'on'}
+            onClick={() => handleLinkClick(link.href)}
         />
     );
 
