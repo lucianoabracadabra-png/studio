@@ -100,7 +100,6 @@
     background: linear-gradient(to right, hsl(var(--book-color-hue, 0), 20%, 30%), hsl(var(--book-color-hue, 0), 25%, 40%));
     border-left: 3px solid hsl(var(--book-color-hue, 0), 30%, 50%);
     box-shadow: inset -3px 0 5px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.4);
-    will-change: transform, box-shadow;
     transform-origin: center;
   }
   
@@ -149,7 +148,7 @@
     animation: book-decaying-off 1s ease-in forwards;
   }
   
-  .book-nav-item.on, .book-nav-item.holding, .book-nav-item.climax, .book-nav-item.decaying-on {
+  .book-nav-item.on, .book-nav-item.growing, .book-nav-item.holding, .book-nav-item.climax, .book-nav-item.decaying-on {
     transform: rotateY(20deg);
     box-shadow: 
       inset -3px 0 8px rgba(0,0,0,0.3), 

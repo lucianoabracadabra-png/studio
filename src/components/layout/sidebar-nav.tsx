@@ -20,7 +20,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useEffect, useState, CSSProperties } from 'react';
+import { useEffect, useState, CSSProperties, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export const mainLinks = [
@@ -59,18 +59,16 @@ const Book = ({
     link, 
     isTool,
     visualState,
-    isActive,
     onClick,
 }: { 
     link: (typeof mainLinks)[0], 
     isTool?: boolean;
     visualState: AnimationState;
-    isActive: boolean;
     onClick: () => void,
 }) => {
     const Icon = link.icon;
     const isProfile = profileLink.some(l => l.href === link.href);
-    const animationClass = isActive ? 'on' : visualState;
+    const isVisuallyActive = ['growing', 'holding', 'climax', 'decaying-on', 'on'].includes(visualState);
 
     return (
         <TooltipProvider key={link.href}>
@@ -86,15 +84,15 @@ const Book = ({
                             className={cn(
                               'book-nav-item',
                               isTool && 'book-nav-item--tool',
-                              animationClass
+                              visualState !== 'off' && visualState
                             )}
                             style={{ 
                                 '--book-color-hue': `${link.colorHue}`,
                             } as CSSProperties}
-                            aria-current={isActive ? 'page' : undefined}
+                            aria-current={visualState === 'on' ? 'page' : undefined}
                         >
                            <div className='book-cover'>
-                               <div className={cn("book-icon", isActive && 'on')}>
+                               <div className={cn("book-icon", isVisuallyActive && 'on')}>
                                    {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
                                </div>
                            </div>
@@ -109,46 +107,50 @@ const Book = ({
     );
 };
 
-export function SidebarNav({ activePath: initialActivePath }: { activePath: string | null }) {
+export function SidebarNav() {
     const router = useRouter();
     const pathname = usePathname();
-    
-    const [activeHref, setActiveHref] = useState<string | null>(null);
     const [visualStates, setVisualStates] = useState<Record<string, AnimationState>>(() => {
         const initialState: Record<string, AnimationState> = {};
         allLinks.forEach(link => {
             initialState[link.href] = 'off';
         });
+        const mostSpecificLink = [...allLinks]
+            .sort((a, b) => b.href.length - a.href.length)
+            .find(link => pathname.startsWith(link.href) && link.href !== '/');
+        if (mostSpecificLink) {
+            initialState[mostSpecificLink.href] = 'on';
+        }
         return initialState;
     });
 
-    // Effect 1: Determine the true active link from the URL (source of truth)
-     useEffect(() => {
+    const activeHrefRef = useRef<string | null>(null);
+
+    useEffect(() => {
         const mostSpecificLink = [...allLinks]
             .sort((a, b) => b.href.length - a.href.length)
             .find(link => pathname.startsWith(link.href) && link.href !== '/');
         
         const currentActiveHref = mostSpecificLink ? mostSpecificLink.href : null;
-
-        if (currentActiveHref !== activeHref) {
+        
+        if (currentActiveHref !== activeHrefRef.current) {
+            const oldHref = activeHrefRef.current;
+            
             setVisualStates(prev => {
                 const newStates = {...prev};
-                // Turn off the old book
-                if (activeHref && newStates[activeHref] !== 'off') {
-                    newStates[activeHref] = 'decaying-off';
+                if (oldHref && newStates[oldHref] === 'on') {
+                    newStates[oldHref] = 'decaying-off';
                 }
-                // Turn on the new book
                 if (currentActiveHref) {
                     newStates[currentActiveHref] = 'growing';
                 }
                 return newStates;
             });
-            setActiveHref(currentActiveHref);
-        }
 
+            activeHrefRef.current = currentActiveHref;
+        }
     }, [pathname]);
 
-    // Effect 2: Manage the animation state machine based on visual state
     useEffect(() => {
         const timers: NodeJS.Timeout[] = [];
         
@@ -172,7 +174,12 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
     }, [visualStates]);
 
     const handleLinkClick = (href: string) => {
-        if (pathname === href) return;
+        if (pathname === href || (pathname.startsWith(href) && href !== '/')) {
+             if (visualStates[href] === 'off') {
+                 setVisualStates(prev => ({...prev, [href]: 'growing'}));
+             }
+             return;
+        }
         router.push(href);
     };
 
@@ -182,7 +189,6 @@ export function SidebarNav({ activePath: initialActivePath }: { activePath: stri
             link={link}
             isTool={isTool}
             visualState={visualStates[link.href] || 'off'}
-            isActive={activeHref === link.href && visualStates[link.href] === 'on'}
             onClick={() => handleLinkClick(link.href)}
         />
     );
