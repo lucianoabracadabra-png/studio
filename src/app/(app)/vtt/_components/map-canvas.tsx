@@ -6,6 +6,7 @@ import { Token } from './token';
 import type { Token as TokenType, VttState } from './vtt-layout';
 import type { VttTool } from './vtt-layout';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface MapCanvasProps {
   tokens: TokenType[];
@@ -60,7 +61,7 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
         drag={!isPanDisabled}
         dragMomentum={false}
         onDrag={handleMapDrag}
-        className="absolute top-0 left-0"
+        className={cn("absolute top-0 left-0", !mapState.url && "grass-texture")}
         style={{ 
           x: mapState.position.x, 
           y: mapState.position.y,

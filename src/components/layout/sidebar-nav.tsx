@@ -11,6 +11,7 @@ import {
   Volume2,
   Dices,
   FlaskConical,
+  Icon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -22,6 +23,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePathname } from 'next/navigation';
 import { Separator } from '../ui/separator';
+import React, { useState, useEffect, useRef } from 'react';
+
 
 export const mainLinks = [
   { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200, title: 'Painel' },
@@ -51,17 +54,78 @@ export const profileLink = {
   title: 'Perfil'
 };
 
-const SidebarLink = ({ link, isActive }: { link: (typeof mainLinks)[0], isActive: boolean }) => {
+type AnimationState = 'off' | 'growing' | 'holding' | 'climax' | 'decaying-on' | 'on' | 'decaying-off';
+
+const useAnimationState = (isActive: boolean) => {
+    const [animationState, setAnimationState] = useState<AnimationState>(isActive ? 'on' : 'off');
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const clearTimers = () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+
+        if (isActive) {
+            if (animationState === 'off' || animationState === 'decaying-off') {
+                clearTimers();
+                setAnimationState('growing');
+                timerRef.current = setTimeout(() => {
+                    setAnimationState('holding');
+                    timerRef.current = setTimeout(() => {
+                        setAnimationState('climax');
+                        timerRef.current = setTimeout(() => {
+                            setAnimationState('decaying-on');
+                            timerRef.current = setTimeout(() => {
+                                setAnimationState('on');
+                            }, 1000);
+                        }, 1000);
+                    }, 2000);
+                }, 1000);
+            }
+        } else {
+            if (animationState !== 'off' && animationState !== 'decaying-off') {
+                clearTimers();
+                setAnimationState('decaying-off');
+                timerRef.current = setTimeout(() => {
+                    setAnimationState('off');
+                }, 1000);
+            }
+        }
+        
+        return clearTimers;
+
+    }, [isActive, animationState]);
+
+    return animationState;
+};
+
+const Book = ({ link, isActive }: { link: (typeof mainLinks)[0], isActive: boolean }) => {
     const Icon = link.icon;
+    const animationState = useAnimationState(isActive);
+
+    const isTool = gmToolsLinks.some(tool => tool.href === link.href);
+
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Link href={link.href} className={cn(
-                        "flex items-center justify-center w-12 h-12 rounded-lg transition-colors",
-                        isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    )}>
-                        <Icon className="w-6 h-6" />
+                    <Link href={link.href} className="book-wrapper">
+                        <div
+                            className={cn(
+                                'book-nav-item',
+                                isTool && 'book-nav-item--tool',
+                                animationState !== 'off' && animationState,
+                                isActive && 'on'
+                            )}
+                            style={{ '--book-color-hue': link.colorHue } as React.CSSProperties}
+                        >
+                            <div className="book-cover">
+                                <Icon className={cn('book-icon', (isActive || animationState !== 'off') && 'on')} />
+                            </div>
+                        </div>
                     </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">
@@ -69,8 +133,9 @@ const SidebarLink = ({ link, isActive }: { link: (typeof mainLinks)[0], isActive
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
-    )
-}
+    );
+};
+
 
 const ProfileLink = ({ link, isActive }: { link: typeof profileLink, isActive: boolean }) => {
     const Icon = link.icon;
@@ -101,7 +166,7 @@ export function SidebarNav() {
       <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 bg-background border-r">
           <nav className="flex flex-col items-center gap-2">
               {mainLinks.map(link => (
-                  <SidebarLink 
+                  <Book 
                     key={link.href} 
                     link={link} 
                     isActive={pathname.startsWith(link.href)} />
@@ -110,7 +175,7 @@ export function SidebarNav() {
           <Separator className='my-2 w-8' />
           <nav className="flex flex-col items-center gap-2">
               {gmToolsLinks.map(link => (
-                  <SidebarLink 
+                  <Book 
                     key={link.href} 
                     link={link} 
                     isActive={pathname.startsWith(link.href)} />

@@ -193,8 +193,8 @@
   
   .magical-glow {
     color: transparent;
-    background-image: linear-gradient(to right, hsl(var(--page-primary-color, 265 90% 70%)), hsl(var(--page-accent-color, 300 90% 70%)));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color, 265 90% 70%)), 0 0 16px hsl(var(--page-accent-color, 300 90% 70%));
+    background-image: linear-gradient(to right, hsl(var(--page-primary-color)), hsl(var(--page-accent-color)));
+    text-shadow: 0 0 8px hsl(var(--page-primary-color)), 0 0 16px hsl(var(--page-accent-color));
     background-clip: text;
     -webkit-background-clip: text;
     user-select: none;
@@ -228,6 +228,21 @@
   .pilar-fisico .dot.selected { background-color: var(--cor-fisico); }
   .pilar-mental .dot.selected { background-color: var(--cor-mental); }
   .pilar-social .dot.selected { background-color: var(--cor-social); }
+
+  .grass-texture {
+    background-color: #3a592a;
+    background-image: 
+        radial-gradient(circle at 100% 0, rgba(82, 128, 59, 0.4) 0%, rgba(82, 128, 59, 0) 10%),
+        radial-gradient(circle at 0 50%, rgba(58, 89, 42, 0.2) 0%, rgba(58, 89, 42, 0) 6%),
+        radial-gradient(circle at 20% 70%, #52803b 0%, #52803b 1%, transparent 1.2%),
+        radial-gradient(circle at 80% 30%, #4a7334 0%, #4a7334 1%, transparent 1.2%),
+        radial-gradient(circle at 50% 50%, #41662e 0%, #41662e 0.5%, transparent 0.7%),
+        radial-gradient(circle at 30% 20%, #4a7334 0%, #4a7334 1%, transparent 1.4%),
+        radial-gradient(circle at 70% 90%, #52803b 0%, #52803b 1.5%, transparent 1.7%),
+        radial-gradient(circle at 90% 60%, #41662e 0%, #41662e 0.8%, transparent 1%),
+        radial-gradient(circle at 10% 10%, #4a7334 0%, #4a7334 1.2%, transparent 1.4%);
+    background-size: 100px 100px, 80px 80px, 40px 40px, 50px 50px, 30px 30px, 45px 45px, 55px 55px, 35px 35px, 60px 60px;
+  }
 }
 
 @layer utilities {

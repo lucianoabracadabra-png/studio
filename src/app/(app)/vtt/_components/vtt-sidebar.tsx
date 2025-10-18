@@ -6,19 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Shield, Swords, Layers, Save, Undo, Upload, Music, BookText, ChevronUp, ChevronDown, Repeat, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Wrench } from 'lucide-react';
+import { PlusCircle, Trash2, Shield, Swords, Layers, Save, Undo, Upload, Music, BookText, Repeat, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Wrench, X } from 'lucide-react';
 import Image from 'next/image';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
-
 interface VttSidebarProps {
   vttState: VttState;
-  combatants: Token[];
   setTokens: React.Dispatch<React.SetStateAction<VttState['tokens']>>;
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   setLayers: React.Dispatch<React.SetStateAction<VttState['layers']>>;
@@ -106,289 +103,195 @@ const TokenListItem = ({ token, onRemove }: { token: Token, onRemove: (id: numbe
     )
 }
 
-const TurnTracker = ({ combatants, activeTurnIndex, setCombat, allTokens }: { combatants: Token[], activeTurnIndex: number, setCombat: VttSidebarProps['setCombat'], allTokens: Token[] }) => {
-
-    const nextTurn = () => {
-        if (combatants.length === 0) return;
-        setCombat(prev => ({ ...prev, activeTurnIndex: (prev.activeTurnIndex + 1) % combatants.length }))
-    };
-    const prevTurn = () => {
-        if (combatants.length === 0) return;
-        setCombat(prev => ({ ...prev, activeTurnIndex: (prev.activeTurnIndex - 1 + combatants.length) % combatants.length }))
-    };
-
-    const rerollInitiative = () => {
-        const shuffled = [...allTokens].sort(() => Math.random() - 0.5);
-        setCombat(prev => ({
-            ...prev,
-            turnOrder: shuffled.map(t => t.id),
-            activeTurnIndex: shuffled.length > 0 ? 0 : -1,
-        }))
-    }
+const TokensPanel = ({ vttState, setTokens, setCombat }: Pick<VttSidebarProps, 'vttState' | 'setTokens' | 'setCombat'>) => {
+    const [showHeroCreator, setShowHeroCreator] = useState(false);
+    const [showEnemyCreator, setShowEnemyCreator] = useState(false);
     
-    return (
-        <Card className="glassmorphic-card">
-            <CardHeader>
-                <CardTitle className='text-lg flex justify-between items-center'>
-                    Rastreador de Turnos
-                    <Button variant="outline" size="sm" onClick={rerollInitiative} disabled={allTokens.length === 0}>
-                        <Repeat className='mr-2 h-3 w-3'/>
-                        Iniciativa
-                    </Button>
-                </CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-3'>
-                <div className='flex justify-between items-center gap-2'>
-                    <Button size="icon" onClick={prevTurn} disabled={combatants.length === 0}><ChevronUp/></Button>
-                    <div className='flex-grow text-center'>
-                        <p className='text-sm text-muted-foreground'>Turno</p>
-                        <p className='text-xl font-bold'>{combatants.length > 0 ? activeTurnIndex + 1 : 0} / {combatants.length}</p>
-                    </div>
-                    <Button size="icon" onClick={nextTurn} disabled={combatants.length === 0}><ChevronDown/></Button>
-                </div>
-                <Separator/>
-                <ScrollArea className='h-80'>
-                    <div className='space-y-2 pr-4'>
-                        {combatants.length > 0 ? combatants.map((c, index) => (
-                             <div key={c.id} className={cn("flex items-center gap-3 p-2 rounded-md transition-all", activeTurnIndex === index ? 'bg-primary/20 border border-primary' : 'bg-muted/30')}>
-                                <div
-                                className={cn(
-                                    "w-8 h-8 border-2 flex-shrink-0",
-                                    c.shape === 'circle' ? 'rounded-full' : 'rounded-sm'
-                                )}
-                                style={{ borderColor: c.color }}
-                                >
-                                <Image src={c.imageUrl} alt={c.name} width={32} height={32} className={cn(c.shape === 'circle' ? 'rounded-full' : '')} />
-                                </div>
-                                <span className="flex-grow font-semibold text-sm truncate" title={c.name}>{c.name}</span>
-                            </div>
-                        )) : (
-                            <p className="text-center text-muted-foreground py-10 text-xs">Nenhum combatente na ordem de iniciativa.</p>
-                        )}
-                    </div>
-                </ScrollArea>
-            </CardContent>
-        </Card>
-    )
-}
+    const heroTokens = useMemo(() => vttState.tokens.filter(t => t.type === 'hero'), [vttState.tokens]);
+    const enemyTokens = useMemo(() => vttState.tokens.filter(t => t.type === 'enemy'), [vttState.tokens]);
 
-const mainTools: { id: VttTool, label: string, icon: React.ElementType }[] = [
-    { id: 'select', label: 'Selecionar & Mover', icon: MousePointer },
-    { id: 'measure', label: 'Medir Distância', icon: Ruler },
-    { id: 'fog', label: 'Névoa de Guerra', icon: Cloud },
-    { id: 'draw', label: 'Desenhar', icon: Pen },
-    { id: 'ping', label: 'Pingar no Mapa', icon: Zap },
-]
+    const addToken = (newTokenData: Omit<Token, 'id' | 'position'>) => {
+        setTokens(prev => {
+            const newId = (prev.length > 0 ? Math.max(...prev.map(t => t.id)) : 0) + 1;
+            const tokenToAdd: Token = {
+              id: newId,
+              ...newTokenData,
+              position: { x: 100, y: 100 },
+            };
+            
+            // This logic to add to combat should be elsewhere or optional
+            // setCombat(c => ({...c, turnOrder: [...c.turnOrder, tokenToAdd.id], activeTurnIndex: c.turnOrder.length === 0 ? 0 : c.activeTurnIndex }));
 
-const ToolPanel = ({ activeTool, onToolSelect, onZoomIn, onZoomOut, onCenter, zoomLevel }: Omit<VttSidebarProps, 'vttState' | 'setTokens' | 'setMapState' | 'setLayers' | 'setCombat' | 'isCollapsed' | 'combatants'>) => {
+            return [...prev, tokenToAdd];
+        });
+
+        if (newTokenData.type === 'hero') setShowHeroCreator(false);
+        else setShowEnemyCreator(false);
+    };
+
+    const removeToken = (id: number) => {
+        setTokens(prev => prev.filter(t => t.id !== id));
+    };
+
     return (
-        <div className='space-y-4'>
-            <Card className="glassmorphic-card">
-                <CardHeader><CardTitle className='text-lg'>Ferramentas</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-3 gap-2">
-                    {mainTools.map(tool => (
-                        <TooltipProvider key={tool.id}>
-                            <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button 
-                                    variant="outline" 
-                                    size="icon" 
-                                    onClick={() => onToolSelect(tool.id)}
-                                    className={cn("h-12 w-full", activeTool === tool.id && "bg-primary/20 text-primary border-primary")}
-                                >
-                                    <tool.icon />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                                <p>{tool.label}</p>
-                            </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+        <div className="space-y-4">
+            <Card className="bg-transparent border-none shadow-none">
+                <CardHeader className='pb-2'>
+                    <div className='flex justify-between items-center'>
+                    <CardTitle className='flex items-center gap-2 text-lg'>Heróis</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowHeroCreator(s => !s)}><PlusCircle /></Button>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {showHeroCreator && <TokenCreator tokenType='hero' onAddToken={addToken} />}
+                    {heroTokens.length === 0 && !showHeroCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum herói.</p> : heroTokens.map(token => (
+                    <TokenListItem key={token.id} token={token} onRemove={removeToken} />
                     ))}
                 </CardContent>
             </Card>
-            <Card className="glassmorphic-card">
-                <CardHeader><CardTitle className='text-lg'>Navegação</CardTitle></CardHeader>
-                <CardContent className="space-y-2">
-                    <div className='flex items-center gap-2'>
-                        <Button variant="outline" size="icon" onClick={onZoomOut} className="flex-1"><ZoomOut /></Button>
-                         <div className="font-mono text-xs px-2 w-16 text-center border border-input rounded-md flex items-center justify-center h-10">{Math.round(zoomLevel * 100)}%</div>
-                        <Button variant="outline" size="icon" onClick={onZoomIn} className="flex-1"><ZoomIn /></Button>
+            <Card className="bg-transparent border-none shadow-none">
+                <CardHeader className='pb-2'>
+                    <div className='flex justify-between items-center'>
+                    <CardTitle className='flex items-center gap-2 text-lg'>Inimigos</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowEnemyCreator(s => !s)}><PlusCircle /></Button>
                     </div>
-                     <Button variant="outline" onClick={onCenter} className='w-full'><Maximize className='mr-2'/> Centralizar</Button>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    {showEnemyCreator && <TokenCreator tokenType='enemy' onAddToken={addToken} />}
+                    {enemyTokens.length === 0 && !showEnemyCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum inimigo.</p> : enemyTokens.map(token => (
+                    <TokenListItem key={token.id} token={token} onRemove={removeToken} />
+                    ))}
                 </CardContent>
             </Card>
         </div>
     )
 }
 
-const Jukebox = () => (
-    <Card className="glassmorphic-card">
-        <CardHeader><CardTitle className='text-lg'>Mesa de Som</CardTitle></CardHeader>
-        <CardContent className='space-y-4 text-center text-muted-foreground text-sm'>
-            <Music className="mx-auto h-10 w-10 text-primary/50" />
-           Funcionalidade em desenvolvimento.
-        </CardContent>
-    </Card>
+const LayersPanel = ({ vttState, setMapState, setLayers }: Pick<VttSidebarProps, 'vttState' | 'setMapState' | 'setLayers'>) => {
+    return (
+        <div className='space-y-4'>
+            <Card className="bg-transparent border-none shadow-none">
+                <CardHeader><CardTitle className='text-lg'>Camadas do Mapa</CardTitle></CardHeader>
+                <CardContent className='space-y-4'>
+                    <div className="space-y-2">
+                    <Label htmlFor="map-url">URL do Mapa Base</Label>
+                    <div className='flex gap-2'>
+                        <Input id="map-url" value={vttState.map.url} onChange={e => setMapState(prev => ({...prev, url: e.target.value}))} placeholder="Deixe em branco para relva" />
+                    </div>
+                    </div>
+                    <Separator/>
+                    <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                    <Label htmlFor="grid-switch" className="font-semibold">Grelha Visível</Label>
+                    <Switch id="grid-switch" checked={vttState.layers.isGridVisible} onCheckedChange={checked => setLayers(prev => ({...prev, isGridVisible: checked}))}/>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                    <Label htmlFor="fog-switch" className="font-semibold">Névoa de Guerra</Label>
+                    <Switch id="fog-switch" checked={vttState.layers.isFogOfWarActive} onCheckedChange={checked => setLayers(prev => ({...prev, isFogOfWarActive: checked}))}/>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                    <Label htmlFor="light-switch" className="font-semibold">Camada de Luz</Label>
+                    <Switch id="light-switch" checked={vttState.layers.isLightLayerActive} onCheckedChange={checked => setLayers(prev => ({...prev, isLightLayerActive: checked}))}/>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="bg-transparent border-none shadow-none">
+                <CardHeader><CardTitle className='text-lg'>Gerenciar Cena</CardTitle></CardHeader>
+                <CardContent className='grid grid-cols-1 gap-2'>
+                    <Button><Save className='mr-2'/> Salvar Cena</Button>
+                    <Button variant="outline"><Upload className='mr-2' /> Carregar Cena</Button>
+                    <Button variant="secondary"><Undo className='mr-2' /> Desfazer Ação</Button>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
+const JukeboxPanel = () => (
+    <div className='space-y-4 text-center text-muted-foreground text-sm p-4'>
+        <Music className="mx-auto h-10 w-10 text-primary/50" />
+        Mesa de Som em desenvolvimento.
+    </div>
 );
 
-const Journal = () => (
-    <Card className="glassmorphic-card">
-        <CardHeader><CardTitle className='text-lg'>Diário & Notas</CardTitle></CardHeader>
-        <CardContent className='space-y-4 text-center text-muted-foreground text-sm'>
-            <BookText className="mx-auto h-10 w-10 text-primary/50" />
-            Funcionalidade em desenvolvimento.
-        </CardContent>
-    </Card>
+const JournalPanel = () => (
+     <div className='space-y-4 text-center text-muted-foreground text-sm p-4'>
+        <BookText className="mx-auto h-10 w-10 text-primary/50" />
+        Diário & Notas em desenvolvimento.
+    </div>
 );
+
+
+const sidebarPanels = {
+    tokens: TokensPanel,
+    layers: LayersPanel,
+    audio: JukeboxPanel,
+    journal: JournalPanel,
+}
+type PanelId = keyof typeof sidebarPanels;
+
+const sidebarButtons: { id: PanelId, label: string, icon: React.ElementType }[] = [
+    { id: 'tokens', label: 'Tokens', icon: Shield },
+    { id: 'layers', label: 'Camadas', icon: Layers },
+    { id: 'audio', label: 'Mesa de Som', icon: Music },
+    { id: 'journal', label: 'Diário & Notas', icon: BookText },
+];
 
 export function VttSidebar({ 
-    vttState, setTokens, setMapState, setLayers, setCombat, combatants, isCollapsed,
-    activeTool, onToolSelect, onZoomIn, onZoomOut, onCenter, zoomLevel
+    vttState, setTokens, setMapState, setLayers, setCombat
 }: VttSidebarProps) {
-  const [showHeroCreator, setShowHeroCreator] = useState(false);
-  const [showEnemyCreator, setShowEnemyCreator] = useState(false);
-  
-  const heroTokens = useMemo(() => vttState.tokens.filter(t => t.type === 'hero'), [vttState.tokens]);
-  const enemyTokens = useMemo(() => vttState.tokens.filter(t => t.type === 'enemy'), [vttState.tokens]);
+  const [activePanel, setActivePanel] = useState<PanelId | null>(null);
 
-  const addToken = (newTokenData: Omit<Token, 'id' | 'position'>) => {
-    setTokens(prev => {
-        const newId = (prev.length > 0 ? Math.max(...prev.map(t => t.id)) : 0) + 1;
-        const tokenToAdd: Token = {
-          id: newId,
-          ...newTokenData,
-          position: { x: 100, y: 100 },
-        };
-        
-        setCombat(c => ({...c, turnOrder: [...c.turnOrder, tokenToAdd.id], activeTurnIndex: c.turnOrder.length === 0 ? 0 : c.activeTurnIndex }));
+  const togglePanel = (panelId: PanelId) => {
+    setActivePanel(prev => prev === panelId ? null : panelId);
+  }
 
-        return [...prev, tokenToAdd];
-    });
+  const ActivePanelComponent = activePanel ? sidebarPanels[activePanel] : null;
 
-
-    if (newTokenData.type === 'hero') setShowHeroCreator(false);
-    else setShowEnemyCreator(false);
-  };
-
-  const removeToken = (id: number) => {
-    setTokens(prev => prev.filter(t => t.id !== id));
-  };
-  
   return (
-    <div className={cn(
-        "h-full bg-card/70 border-l border-white/10 flex flex-col transition-all duration-300",
-        isCollapsed ? "w-0" : "w-80"
-    )}>
-      <div className={cn("flex flex-col flex-grow overflow-hidden", isCollapsed && "invisible")}>
-        <Tabs defaultValue="tokens" className="flex flex-col flex-grow">
-            <TabsList className="grid w-full grid-cols-6 rounded-none">
-                <TabsTrigger value="tools"><Wrench className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="tokens"><Shield className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="combat"><Swords className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="layers"><Layers className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="audio"><Music className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="journal"><BookText className="h-4 w-4" /></TabsTrigger>
-            </TabsList>
-
-            <ScrollArea className='flex-grow'>
-            <div className="p-4">
-                <TabsContent value="tools">
-                    <ToolPanel 
-                        activeTool={activeTool}
-                        onToolSelect={onToolSelect}
-                        onZoomIn={onZoomIn}
-                        onZoomOut={onZoomOut}
-                        onCenter={onCenter}
-                        zoomLevel={zoomLevel}
-                    />
-                </TabsContent>
-                <TabsContent value="tokens">
-                <div className="space-y-4">
-                    <Card className="glassmorphic-card">
-                        <CardHeader className='pb-2'>
-                            <div className='flex justify-between items-center'>
-                            <CardTitle className='flex items-center gap-2 text-lg'>Heróis</CardTitle>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowHeroCreator(s => !s)}><PlusCircle /></Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {showHeroCreator && <TokenCreator tokenType='hero' onAddToken={addToken} />}
-                            {heroTokens.length === 0 && !showHeroCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum herói adicionado.</p> : heroTokens.map(token => (
-                            <TokenListItem key={token.id} token={token} onRemove={removeToken} />
-                            ))}
-                        </CardContent>
-                    </Card>
-                    <Card className="glassmorphic-card">
-                        <CardHeader className='pb-2'>
-                            <div className='flex justify-between items-center'>
-                            <CardTitle className='flex items-center gap-2 text-lg'>Inimigos</CardTitle>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowEnemyCreator(s => !s)}><PlusCircle /></Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {showEnemyCreator && <TokenCreator tokenType='enemy' onAddToken={addToken} />}
-                            {enemyTokens.length === 0 && !showEnemyCreator ? <p className='text-xs text-muted-foreground text-center py-2'>Nenhum inimigo adicionado.</p> : enemyTokens.map(token => (
-                            <TokenListItem key={token.id} token={token} onRemove={removeToken} />
-                            ))}
-                        </CardContent>
-                    </Card>
+    <div className={cn("h-full flex justify-end")}>
+        <div 
+            className={cn(
+                "h-full bg-card/70 backdrop-blur-sm border-l border-white/10 flex flex-col transition-all duration-300 ease-in-out",
+                activePanel ? "w-80" : "w-0"
+            )}
+        >
+             {ActivePanelComponent && (
+                <div className={cn('flex flex-col flex-grow overflow-hidden', !activePanel && "invisible")}>
+                    <div className='flex items-center justify-between p-2 border-b'>
+                        <h3 className='font-headline text-lg ml-2'>{sidebarButtons.find(b => b.id === activePanel)?.label}</h3>
+                        <Button variant="ghost" size="icon" onClick={() => setActivePanel(null)}>
+                            <X className='h-5 w-5'/>
+                        </Button>
+                    </div>
+                    <ScrollArea className='flex-grow'>
+                        <div className="p-4">
+                            <ActivePanelComponent {...{ vttState, setTokens, setMapState, setLayers, setCombat }} />
+                        </div>
+                    </ScrollArea>
                 </div>
-                </TabsContent>
-
-                <TabsContent value="combat">
-                    <TurnTracker combatants={combatants} activeTurnIndex={vttState.combat.activeTurnIndex} setCombat={setCombat} allTokens={vttState.tokens} />
-                </TabsContent>
-
-                <TabsContent value="layers">
-                <div className='space-y-4'>
-                    <Card className="glassmorphic-card">
-                        <CardHeader><CardTitle className='text-lg'>Camadas do Mapa</CardTitle></CardHeader>
-                        <CardContent className='space-y-4'>
-                            <div className="space-y-2">
-                            <Label htmlFor="map-url">URL do Mapa Base</Label>
-                            <div className='flex gap-2'>
-                                <Input id="map-url" value={vttState.map.url} onChange={e => setMapState(prev => ({...prev, url: e.target.value}))} placeholder="https://..." />
-                                <Button size="icon" variant="outline"><Upload/></Button>
-                            </div>
-                            </div>
-                            <Separator/>
-                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                            <Label htmlFor="grid-switch" className="font-semibold">Grelha Visível</Label>
-                            <Switch id="grid-switch" checked={vttState.layers.isGridVisible} onCheckedChange={checked => setLayers(prev => ({...prev, isGridVisible: checked}))}/>
-                            </div>
-                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                            <Label htmlFor="fog-switch" className="font-semibold">Névoa de Guerra</Label>
-                            <Switch id="fog-switch" checked={vttState.layers.isFogOfWarActive} onCheckedChange={checked => setLayers(prev => ({...prev, isFogOfWarActive: checked}))}/>
-                            </div>
-                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                            <Label htmlFor="light-switch" className="font-semibold">Camada de Luz</Label>
-                            <Switch id="light-switch" checked={vttState.layers.isLightLayerActive} onCheckedChange={checked => setLayers(prev => ({...prev, isLightLayerActive: checked}))}/>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="glassmorphic-card">
-                        <CardHeader><CardTitle className='text-lg'>Gerenciar Cena</CardTitle></CardHeader>
-                        <CardContent className='grid grid-cols-1 gap-2'>
-                        <Button><Save className='mr-2'/> Salvar Cena</Button>
-                        <Button variant="outline"><Upload className='mr-2' /> Carregar Cena</Button>
-                        <Button variant="secondary"><Undo className='mr-2' /> Desfazer Ação</Button>
-                        </CardContent>
-                    </Card>
-                </div>
-                </TabsContent>
-
-                <TabsContent value="audio">
-                    <Jukebox />
-                </TabsContent>
-                
-                <TabsContent value="journal">
-                    <Journal />
-                </TabsContent>
-            </div>
-            </ScrollArea>
-        </Tabs>
-      </div>
+             )}
+        </div>
+        <div className='h-full w-16 bg-card/90 border-l border-white/10 flex flex-col items-center py-4 gap-2'>
+            {sidebarButtons.map(button => (
+                <TooltipProvider key={button.id}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button 
+                                variant={activePanel === button.id ? 'secondary' : 'ghost'} 
+                                size="icon" 
+                                className='h-12 w-12'
+                                onClick={() => togglePanel(button.id)}
+                            >
+                                <button.icon/>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                            <p>{button.label}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            ))}
+        </div>
     </div>
   );
 }

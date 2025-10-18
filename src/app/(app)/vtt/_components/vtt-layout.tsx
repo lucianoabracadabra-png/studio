@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { MapCanvas } from './map-canvas';
 import { VttSidebar } from './vtt-sidebar';
+import { VttToolbar } from './vtt-toolbar';
 import { PanInfo } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 export type TokenShape = 'circle' | 'square';
 export type TokenType = 'hero' | 'enemy';
@@ -46,7 +44,7 @@ export interface VttState {
 
 const initialVttState: VttState = {
   map: {
-    url: 'https://images.unsplash.com/photo-1533202633912-db3399a38753?q=80&w=2560&h=1440&fit=crop',
+    url: '', // Empty to use the CSS texture by default
     zoom: 0.5,
     position: { x: 0, y: 0 },
     dimensions: { width: 2560, height: 1440 }
@@ -68,14 +66,6 @@ const initialVttState: VttState = {
 
 export function VttLayout() {
   const [vttState, setVttState] = useState<VttState>(initialVttState);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  const combatants = useMemo(() => 
-    vttState.combat.turnOrder.map(id => vttState.tokens.find(t => t.id === id)).filter(Boolean) as Token[],
-    [vttState.combat.turnOrder, vttState.tokens]
-  );
-  
-  const activeCombatantId = combatants[vttState.combat.activeTurnIndex]?.id;
 
   const handleZoom = (newZoom: number) => {
     setVttState(prev => ({ ...prev, map: {...prev.map, zoom: Math.max(0.1, Math.min(3, newZoom))} }));
@@ -93,19 +83,7 @@ export function VttLayout() {
   };
 
   const setTokens = (updater: React.SetStateAction<VttState['tokens']>) => {
-    setVttState(prev => {
-        const newTokens = typeof updater === 'function' ? updater(prev.tokens) : updater;
-        const allNewTokenIds = newTokens.map(t => t.id);
-        
-        return {
-            ...prev,
-            tokens: newTokens,
-            combat: {
-                ...prev.combat,
-                turnOrder: prev.combat.turnOrder.filter(id => allNewTokenIds.includes(id)),
-            }
-        };
-    });
+    setVttState(prev => ({ ...prev, tokens: typeof updater === 'function' ? updater(prev.tokens) : updater }));
   }
 
   const setMapState = (updater: React.SetStateAction<VttState['map']>) => {
@@ -123,18 +101,7 @@ export function VttLayout() {
   }
   
   const setCombat = (updater: React.SetStateAction<VttState['combat']>) => {
-    setVttState(prev => {
-        const newCombat = typeof updater === 'function' ? updater(prev.combat) : updater;
-        // Ensure activeTurnIndex is valid
-        if (newCombat.turnOrder.length === 0) {
-            newCombat.activeTurnIndex = -1;
-        } else if (newCombat.activeTurnIndex >= newCombat.turnOrder.length) {
-            newCombat.activeTurnIndex = 0;
-        } else if (newCombat.activeTurnIndex < -1) { // allow -1
-            newCombat.activeTurnIndex = 0;
-        }
-        return { ...prev, combat: newCombat };
-    });
+    setVttState(prev => ({ ...prev, combat: typeof updater === 'function' ? updater(prev.combat) : updater }));
   }
   
   const setActiveTool = (tool: VttTool) => {
@@ -154,27 +121,25 @@ export function VttLayout() {
   };
 
   return (
-    <div className="w-full h-full grid grid-cols-[1fr_auto] bg-black">
+    <div className="w-full h-full grid grid-cols-[auto_1fr_auto] bg-black">
+      <VttToolbar 
+        activeTool={vttState.ui.activeTool}
+        onToolSelect={setActiveTool}
+        onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
+        onZoomOut={() => handleZoom(vttState.map.zoom / 1.2)}
+        onCenter={centerMap}
+        zoomLevel={vttState.map.zoom}
+      />
       <div className="flex-grow h-full relative">
         <MapCanvas 
           tokens={vttState.tokens}
-          activeTokenId={activeCombatantId}
+          activeTokenId={vttState.combat.turnOrder[vttState.combat.activeTurnIndex]}
           onTokenDragEnd={handleTokenDragEnd}
           mapState={vttState.map}
           setMapState={setMapState}
           activeTool={vttState.ui.activeTool}
           layers={vttState.layers}
         />
-        <Button
-            size="icon"
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className={cn(
-                "absolute top-1/2 -translate-y-1/2 z-20 transition-all duration-300",
-                isSidebarCollapsed ? "right-2" : "right-[20.5rem]"
-            )}
-        >
-            {isSidebarCollapsed ? <ChevronLeft /> : <ChevronRight />}
-        </Button>
       </div>
       <VttSidebar
         vttState={vttState}
@@ -182,8 +147,7 @@ export function VttLayout() {
         setMapState={setMapState}
         setLayers={setLayers}
         setCombat={setCombat}
-        combatants={combatants}
-        isCollapsed={isSidebarCollapsed}
+        isCollapsed={false} // This can be managed by a state if needed
         activeTool={vttState.ui.activeTool}
         onToolSelect={setActiveTool}
         onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
