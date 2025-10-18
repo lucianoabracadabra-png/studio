@@ -63,7 +63,30 @@
   backdrop-filter: blur(5px);
 }
 
-/* D6 */
+/* D4 - Tetrahedron */
+.d4 {
+  transform: translateY(calc(var(--die-size) * 0.1));
+}
+.d4 .die-face {
+  width: var(--die-size);
+  height: calc(var(--die-size) * 0.866); /* Equilateral triangle height */
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  padding-bottom: calc(var(--die-size) * 0.2);
+}
+.d4 .faces {
+  transform: rotateY(30deg) rotateX(19.47deg);
+}
+.d4 .face-front { transform: rotateY(0deg) translateZ(calc(var(--die-size) * 0.2887)); }
+.d4 .face-right { transform: rotateY(120deg) translateZ(calc(var(--die-size) * 0.2887)); }
+.d4 .face-back { transform: rotateY(240deg) translateZ(calc(var(--die-size) * 0.2887)); }
+.d4 .face-bottom {
+  transform: rotateY(180deg) rotateX(-70.53deg) translateZ(calc(var(--die-size) * 0.2887));
+  padding: 0;
+  padding-top: calc(var(--die-size) * 0.2);
+}
+
+
+/* D6 - Cube */
 .d6 .die-face {
   width: var(--die-size);
   height: var(--die-size);
@@ -75,121 +98,102 @@
 .d6 .face-top    { transform: rotateX( 90deg) translateZ(calc(var(--die-size) / 2)); }
 .d6 .face-bottom { transform: rotateX(-90deg) translateZ(calc(var(--die-size) / 2)); }
 
-/* D4 */
-.d4 { transform: translateY(calc(var(--die-size) * 0.1)) rotateX(-20deg) rotateY(-30deg); }
-.d4 .die-face {
-    width: var(--die-size);
-    height: calc(var(--die-size) * 0.866);
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    padding-bottom: calc(var(--die-size) * 0.2);
-}
-.d4 .face-front {
-    transform: rotateY(0deg) translateZ(calc(var(--die-size) * 0.163));
-}
-.d4 .face-right {
-    transform: rotateY(120deg) translateZ(calc(var(--die-size) * 0.163));
-}
-.d4 .face-back {
-    transform: rotateY(240deg) translateZ(calc(var(--die-size) * 0.163));
-}
-.d4 .face-bottom {
-    transform: rotateX(90deg) translateZ(calc(var(--die-size) * -0.23)) translateY(calc(var(--die-size) * 0.42)) rotateZ(180deg);
-    padding-bottom: 0;
-    padding-top: calc(var(--die-size) * 0.2);
-}
 
-/* D8 */
-.d8 { transform: rotateX(15deg) rotateY(15deg); }
+/* D8 - Octahedron */
+.d8 {
+    transform: rotateX(15deg) rotateY(15deg);
+}
 .d8 .die-face {
-    width: calc(var(--die-size) * 0.9428); 
-    height: calc(var(--die-size) * 0.8165);
+    width: var(--die-size);
+    height: calc(var(--die-size) * 0.866); /* Equilateral triangle height */
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    padding-bottom: calc(var(--die-size) * 0.2);
     font-size: calc(var(--die-size) / 3);
+    padding-bottom: calc(var(--die-size) * 0.15);
 }
-.d8 .face-1 { transform: rotateY(  0deg) rotateX(54.73deg) translateZ(calc(var(--die-size) * 0.35)); }
-.d8 .face-2 { transform: rotateY( 90deg) rotateX(54.73deg) translateZ(calc(var(--die-size) * 0.35)); }
-.d8 .face-3 { transform: rotateY(180deg) rotateX(54.73deg) translateZ(calc(var(--die-size) * 0.35)); }
-.d8 .face-4 { transform: rotateY(270deg) rotateX(54.73deg) translateZ(calc(var(--die-size) * 0.35)); }
-.d8 .face-5 { transform: rotateY(  0deg) rotateX(-54.73deg) translateZ(calc(var(--die-size) * 0.35)) rotateZ(180deg); }
-.d8 .face-6 { transform: rotateY( 90deg) rotateX(-54.73deg) translateZ(calc(var(--die-size) * 0.35)) rotateZ(180deg); }
-.d8 .face-7 { transform: rotateY(180deg) rotateX(-54.73deg) translateZ(calc(var(--die-size) * 0.35)) rotateZ(180deg); }
-.d8 .face-8 { transform: rotateY(270deg) rotateX(-54.73deg) translateZ(calc(var(--die-size) * 0.35)) rotateZ(180deg); }
+.d8 .faces {
+    transform-style: preserve-3d;
+}
+.d8 .face-1 { transform: rotateY(0deg) rotateX(54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)); }
+.d8 .face-2 { transform: rotateY(90deg) rotateX(-54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)) rotateZ(180deg); }
+.d8 .face-3 { transform: rotateY(180deg) rotateX(54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)); }
+.d8 .face-4 { transform: rotateY(270deg) rotateX(-54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)) rotateZ(180deg); }
+.d8 .face-5 { transform: rotateY(0deg) rotateX(-54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)) rotateZ(180deg); }
+.d8 .face-6 { transform: rotateY(90deg) rotateX(54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)); }
+.d8 .face-7 { transform: rotateY(180deg) rotateX(-54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)) rotateZ(180deg); }
+.d8 .face-8 { transform: rotateY(270deg) rotateX(54.75deg) translate3d(0, 0, calc(var(--die-size) * 0.3535)); }
 
-/* D10 */
+
+/* D10 - Pentagonal Trapezohedron */
 .d10 { transform: rotateX(10deg) rotateY(10deg); }
 .d10 .die-face {
-    width: calc(var(--die-size) * 0.618);
-    height: calc(var(--die-size) * 1.16);
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    width: calc(var(--die-size) * 0.79);
+    height: calc(var(--die-size) * 0.75);
+    clip-path: polygon(50% 0, 100% 38%, 50% 100%, 0 38%);
     font-size: calc(var(--die-size) / 3);
 }
-.d10 .face-0 { transform: rotateY(0deg)   rotateX(37.38deg) translateZ(calc(var(--die-size) * 0.45)); }
-.d10 .face-1 { transform: rotateY(36deg)  rotateX(37.38deg) translateZ(calc(var(--die-size) * 0.45)); }
-.d10 .face-2 { transform: rotateY(72deg)  rotateX(37.38deg) translateZ(calc(var(--die-size) * 0.45)); }
-.d10 .face-3 { transform: rotateY(108deg) rotateX(37.38deg) translateZ(calc(var(--die-size) * 0.45)); }
-.d10 .face-4 { transform: rotateY(144deg) rotateX(37.38deg) translateZ(calc(var(--die-size) * 0.45)); }
-.d10 .face-5 { transform: rotateY(180deg) rotateX(-37.38deg) translateZ(calc(var(--die-size) * 0.45)) rotateZ(180deg); }
-.d10 .face-6 { transform: rotateY(216deg) rotateX(-37.38deg) translateZ(calc(var(--die-size) * 0.45)) rotateZ(180deg); }
-.d10 .face-7 { transform: rotateY(252deg) rotateX(-37.38deg) translateZ(calc(var(--die-size) * 0.45)) rotateZ(180deg); }
-.d10 .face-8 { transform: rotateY(288deg) rotateX(-37.38deg) translateZ(calc(var(--die-size) * 0.45)) rotateZ(180deg); }
-.d10 .face-9 { transform: rotateY(324deg) rotateX(-37.38deg) translateZ(calc(var(--die-size) * 0.45)) rotateZ(180deg); }
+.d10 .face-0 { transform: rotateY(0deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.42)); }
+.d10 .face-1 { transform: rotateY(36deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.42)) rotateZ(180deg); }
+.d10 .face-2 { transform: rotateY(72deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.42)); }
+.d10 .face-3 { transform: rotateY(108deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.42)) rotateZ(180deg); }
+.d10 .face-4 { transform: rotateY(144deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.42)); }
+.d10 .face-5 { transform: rotateY(180deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.42)) rotateZ(180deg); }
+.d10 .face-6 { transform: rotateY(216deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.42)); }
+.d10 .face-7 { transform: rotateY(252deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.42)) rotateZ(180deg); }
+.d10 .face-8 { transform: rotateY(288deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.42)); }
+.d10 .face-9 { transform: rotateY(324deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.42)) rotateZ(180deg); }
 
 
-/* D12 */
+/* D12 - Dodecahedron */
 .d12 { transform: rotateX(10deg) rotateY(10deg); }
 .d12 .die-face {
-    width: calc(var(--die-size) * 0.618);
-    height: calc(var(--die-size) * 0.587);
+    width: var(--die-size);
+    height: var(--die-size);
     clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
     font-size: calc(var(--die-size) / 3.5);
 }
-.d12 .face-1 { transform: rotateY(  0deg) translateZ(calc(var(--die-size) * 0.59)); }
-.d12 .face-2 { transform: rotateY( 72deg) translateZ(calc(var(--die-size) * 0.59)); }
-.d12 .face-3 { transform: rotateY(144deg) translateZ(calc(var(--die-size) * 0.59)); }
-.d12 .face-4 { transform: rotateY(216deg) translateZ(calc(var(--die-size) * 0.59)); }
-.d12 .face-5 { transform: rotateY(288deg) translateZ(calc(var(--die-size) * 0.59)); }
-.d12 .face-6 { transform: rotateY( 36deg) rotateX(63.43deg) translateZ(calc(var(--die-size) * 0.52)); }
-.d12 .face-7 { transform: rotateY(108deg) rotateX(63.43deg) translateZ(calc(var(--die-size) * 0.52)); }
-.d12 .face-8 { transform: rotateY(180deg) rotateX(63.43deg) translateZ(calc(var(--die-size) * 0.52)); }
-.d12 .face-9 { transform: rotateY(252deg) rotateX(63.43deg) translateZ(calc(var(--die-size) * 0.52)); }
-.d12 .face-10{ transform: rotateY(324deg) rotateX(63.43deg) translateZ(calc(var(--die-size) * 0.52)); }
-.d12 .face-11{ transform: rotateY(180deg) translateZ(calc(var(--die-size) * -0.59)) rotateX(180deg); }
-.d12 .face-12{ transform: rotateX(116.57deg) rotateY(180deg) translateZ(calc(var(--die-size) * 0.52)) translateY(calc(var(--die-size) * -0.5)); }
+.d12 .face-1 { transform: rotateY(0deg) rotateX(116.565deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-2 { transform: rotateY(72deg) rotateX(63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-3 { transform: rotateY(144deg) rotateX(63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-4 { transform: rotateY(216deg) rotateX(63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-5 { transform: rotateY(288deg) rotateX(63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-6 { transform: rotateY(36deg) rotateX(-63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-7 { transform: rotateY(108deg) rotateX(-63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-8 { transform: rotateY(180deg) rotateX(-116.565deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-9 { transform: rotateY(252deg) rotateX(-63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-10 { transform: rotateY(324deg) rotateX(-63.435deg) translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-11 { transform: translateZ(calc(var(--die-size) * 0.55)); }
+.d12 .face-12 { transform: rotateY(180deg) translateZ(calc(var(--die-size) * 0.55)) rotateX(180deg); }
 
 
-/* D20 */
+/* D20 - Icosahedron */
 .d20 { transform: rotateX(10deg) rotateY(10deg); }
 .d20 .die-face {
-    width: calc(var(--die-size) * 0.5257);
-    height: calc(var(--die-size) * 0.455); 
+    width: var(--die-size);
+    height: calc(var(--die-size) * 0.866); /* Equilateral triangle height */
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     padding-bottom: calc(var(--die-size) * 0.1);
     font-size: calc(var(--die-size) / 4);
 }
-.d20 .face-1  { transform: rotateY(0deg) rotateX(20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)); }
-.d20 .face-2  { transform: rotateY(72deg) rotateX(20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)); }
-.d20 .face-3  { transform: rotateY(144deg) rotateX(20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)); }
-.d20 .face-4  { transform: rotateY(216deg) rotateX(20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)); }
-.d20 .face-5  { transform: rotateY(288deg) rotateX(20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)); }
-
-.d20 .face-6  { transform: rotateY(36deg) rotateX(79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)); }
-.d20 .face-7  { transform: rotateY(108deg) rotateX(79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)); }
-.d20 .face-8  { transform: rotateY(180deg) rotateX(79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)); }
-.d20 .face-9  { transform: rotateY(252deg) rotateX(79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)); }
-.d20 .face-10 { transform: rotateY(324deg) rotateX(79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)); }
-
-.d20 .face-11 { transform: rotateY(36deg) rotateX(-79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)) rotateZ(180deg); }
-.d20 .face-12 { transform: rotateY(108deg) rotateX(-79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)) rotateZ(180deg); }
-.d20 .face-13 { transform: rotateY(180deg) rotateX(-79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)) rotateZ(180deg); }
-.d20 .face-14 { transform: rotateY(252deg) rotateX(-79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)) rotateZ(180deg); }
-.d20 .face-15 { transform: rotateY(324deg) rotateX(-79.2deg) translate3d(0, 0, calc(var(--die-size) * 0.42)) rotateZ(180deg); }
-
-.d20 .face-16 { transform: rotateY(0deg) rotateX(-20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)) rotateZ(180deg); }
-.d20 .face-17 { transform: rotateY(72deg) rotateX(-20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)) rotateZ(180deg); }
-.d20 .face-18 { transform: rotateY(144deg) rotateX(-20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)) rotateZ(180deg); }
-.d20 .face-19 { transform: rotateY(216deg) rotateX(-20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)) rotateZ(180deg); }
-.d20 .face-20 { transform: rotateY(288deg) rotateX(-20.9deg) translate3d(0, 0, calc(var(--die-size) * 0.48)) rotateZ(180deg); }
+.d20 .face-1 { transform: rotateY(0deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.48)); }
+.d20 .face-2 { transform: rotateY(36deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.48)) rotateZ(180deg); }
+.d20 .face-3 { transform: rotateY(72deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.48)); }
+.d20 .face-4 { transform: rotateY(108deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.48)) rotateZ(180deg); }
+.d20 .face-5 { transform: rotateY(144deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.48)); }
+.d20 .face-6 { transform: rotateY(180deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.48)) rotateZ(180deg); }
+.d20 .face-7 { transform: rotateY(216deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.48)); }
+.d20 .face-8 { transform: rotateY(252deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.48)) rotateZ(180deg); }
+.d20 .face-9 { transform: rotateY(288deg) rotateX(31.7deg) translateZ(calc(var(--die-size) * 0.48)); }
+.d20 .face-10 { transform: rotateY(324deg) rotateX(-31.7deg) translateZ(calc(var(--die-size) * 0.48)) rotateZ(180deg); }
+.d20 .face-11 { transform: rotateY(18deg) rotateX(79.2deg) translateZ(calc(var(--die-size) * 0.4)); }
+.d20 .face-12 { transform: rotateY(54deg) rotateX(-79.2deg) translateZ(calc(var(--die-size) * 0.4)) rotateZ(180deg); }
+.d20 .face-13 { transform: rotateY(90deg) rotateX(79.2deg) translateZ(calc(var(--die-size) * 0.4)); }
+.d20 .face-14 { transform: rotateY(126deg) rotateX(-79.2deg) translateZ(calc(var(--die-size) * 0.4)) rotateZ(180deg); }
+.d20 .face-15 { transform: rotateY(162deg) rotateX(79.2deg) translateZ(calc(var(--die-size) * 0.4)); }
+.d20 .face-16 { transform: rotateY(198deg) rotateX(-79.2deg) translateZ(calc(var(--die-size) * 0.4)) rotateZ(180deg); }
+.d20 .face-17 { transform: rotateY(234deg) rotateX(79.2deg) translateZ(calc(var(--die-size) * 0.4)); }
+.d20 .face-18 { transform: rotateY(270deg) rotateX(-79.2deg) translateZ(calc(var(--die-size) * 0.4)) rotateZ(180deg); }
+.d20 .face-19 { transform: rotateY(306deg) rotateX(79.2deg) translateZ(calc(var(--die-size) * 0.4)); }
+.d20 .face-20 { transform: rotateY(342deg) rotateX(-79.2deg) translateZ(calc(var(--die-size) * 0.4)) rotateZ(180deg); }
 
 
 /* Animação */
