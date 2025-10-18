@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -394,16 +394,16 @@ export function CombatTracker() {
                     <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Adicionar Combatente</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-[1fr_auto] gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Nome</Label>
-                            <Input id="name" placeholder="Ex: Goblin, Herói do Jogador" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
+                            <Input id="name" placeholder="Ex: Goblin, Herói" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="reaction">Mod. Reação</Label>
                              <div className="flex items-center gap-2">
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
-                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="text-center font-bold text-lg hide-number-arrows" disabled={combatStarted}/>
+                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows" disabled={combatStarted}/>
                                 <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
                             </div>
                         </div>
@@ -412,9 +412,9 @@ export function CombatTracker() {
                         <Label>Cor</Label>
                         <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
                     </div>
-                    <div className="flex items-center space-x-4 pt-2">
-                        <Label htmlFor="is-player" className='flex-grow'>Personagem de Jogador</Label>
-                        <Switch id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: checked })} disabled={combatStarted}/>
+                    <div className="flex items-center space-x-2 pt-2">
+                        <Checkbox id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: !!checked })} disabled={combatStarted}/>
+                        <Label htmlFor="is-player" className='cursor-pointer'>Personagem de Jogador</Label>
                     </div>
                     <Button 
                         onClick={addCombatant} 
