@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Shield, Swords, Map, Layers, Save, Undo, Upload, Music, BookText, ChevronUp, ChevronDown, Repeat, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Tool } from 'lucide-react';
+import { PlusCircle, Trash2, Shield, Swords, Layers, Save, Undo, Upload, Music, BookText, ChevronUp, ChevronDown, Repeat, ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap, Wrench } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -283,7 +283,7 @@ export function VttSidebar({
       <div className={cn("flex flex-col flex-grow overflow-hidden", isCollapsed && "invisible")}>
         <Tabs defaultValue="tokens" className="flex flex-col flex-grow">
             <TabsList className="grid w-full grid-cols-6 rounded-none">
-                <TabsTrigger value="tools"><Tool className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="tools"><Wrench className="h-4 w-4" /></TabsTrigger>
                 <TabsTrigger value="tokens"><Shield className="h-4 w-4" /></TabsTrigger>
                 <TabsTrigger value="combat"><Swords className="h-4 w-4" /></TabsTrigger>
                 <TabsTrigger value="layers"><Layers className="h-4 w-4" /></TabsTrigger>
