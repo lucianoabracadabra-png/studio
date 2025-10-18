@@ -20,7 +20,6 @@ export default function AuthenticatedAppLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const activePath = pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname === '/_error' ? null : pathname;
   
   const getActiveColorHue = () => {
     const matchedLink = allLinks.find(link => pathname.startsWith(link.href) && link.href !== '/');
@@ -41,7 +40,6 @@ export default function AuthenticatedAppLayout({
   return (
     <MovableWindowProvider>
       <AppLayout 
-        activePath={activePath}
         style={pageStyle}
       >
         <div

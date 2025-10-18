@@ -20,8 +20,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useEffect, useState, CSSProperties, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { Separator } from '../ui/separator';
 
 export const mainLinks = [
   { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200, title: 'Painel' },
@@ -38,177 +38,87 @@ export const gmToolsLinks = [
   { label: 'Mesa de Som', href: '/tools/soundboard', icon: Volume2, colorHue: 170, title: 'Som' },
 ];
 
-export const profileLink = [{
+export const profileLink = {
   label: 'Perfil',
   href: '/profile',
   icon: () => (
-    <Avatar className="h-9 w-9 border-2 border-white/50 avatar-glow">
+    <Avatar className="h-10 w-10 border-2 border-white/50">
       <AvatarImage src="https://picsum.photos/seed/avatar/40/40" alt="@shadcn" data-ai-hint="fantasy wizard" />
       <AvatarFallback>GM</AvatarFallback>
     </Avatar>
   ),
   colorHue: 0,
   title: 'Perfil'
-}];
+};
 
-const allLinks = [...mainLinks, ...gmToolsLinks, ...profileLink];
-
-type AnimationState = 'off' | 'growing' | 'holding' | 'climax' | 'decaying-on' | 'on' | 'decaying-off';
-
-const Book = ({ 
-    link, 
-    isTool,
-    visualState,
-    onClick,
-}: { 
-    link: (typeof mainLinks)[0], 
-    isTool?: boolean;
-    visualState: AnimationState;
-    onClick: () => void,
-}) => {
+const SidebarLink = ({ link, isActive }: { link: (typeof mainLinks)[0], isActive: boolean }) => {
     const Icon = link.icon;
-    const isProfile = profileLink.some(l => l.href === link.href);
-    const isVisuallyActive = ['growing', 'holding', 'climax', 'decaying-on', 'on'].includes(visualState);
-
     return (
-        <TooltipProvider key={link.href}>
+        <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div className="book-wrapper">
-                        <Link
-                            href={link.href}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                onClick();
-                            }}
-                            className={cn(
-                              'book-nav-item',
-                              isTool && 'book-nav-item--tool',
-                              visualState
-                            )}
-                            style={{ 
-                                '--book-color-hue': `${link.colorHue}`,
-                            } as CSSProperties}
-                            aria-current={visualState === 'on' ? 'page' : undefined}
-                        >
-                           <div className='book-cover'>
-                               <div className={cn("book-icon", isVisuallyActive && 'on')}>
-                                   {isProfile ? <Icon /> : <Icon className="w-full h-full" />}
-                               </div>
-                           </div>
-                        </Link>
-                    </div>
+                    <Link href={link.href} className={cn(
+                        "flex items-center justify-center w-12 h-12 rounded-lg transition-colors",
+                        isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    )}>
+                        <Icon className="w-6 h-6" />
+                    </Link>
                 </TooltipTrigger>
                 <TooltipContent side="right">
-                  <p>{link.label}</p>
+                    <p>{link.label}</p>
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
-    );
-};
+    )
+}
+
+const ProfileLink = ({ link, isActive }: { link: typeof profileLink, isActive: boolean }) => {
+    const Icon = link.icon;
+    return (
+         <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Link href={link.href} className={cn(
+                        "flex items-center justify-center w-12 h-12 rounded-full transition-colors",
+                        isActive ? "ring-2 ring-primary" : ""
+                    )}>
+                        <Icon />
+                    </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                    <p>{link.label}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    )
+}
+
 
 export function SidebarNav() {
-    const router = useRouter();
     const pathname = usePathname();
 
-    const getInitialState = () => {
-        const initialState: Record<string, AnimationState> = {};
-        const mostSpecificLink = [...allLinks]
-            .sort((a, b) => b.href.length - a.href.length)
-            .find(link => pathname.startsWith(link.href) && link.href !== '/');
-
-        allLinks.forEach(link => {
-            initialState[link.href] = 'off';
-        });
-
-        if (mostSpecificLink) {
-            initialState[mostSpecificLink.href] = 'on';
-        }
-        return initialState;
-    }
-
-    const [visualStates, setVisualStates] = useState<Record<string, AnimationState>>(getInitialState);
-    const activeHrefRef = useRef<string | null>(
-        [...allLinks]
-            .sort((a, b) => b.href.length - a.href.length)
-            .find(link => pathname.startsWith(link.href) && link.href !== '/')?.href || null
-    );
-
-    useEffect(() => {
-        const mostSpecificLink = [...allLinks]
-            .sort((a, b) => b.href.length - a.href.length)
-            .find(link => pathname.startsWith(link.href) && link.href !== '/');
-        
-        const currentActiveHref = mostSpecificLink ? mostSpecificLink.href : null;
-
-        if (currentActiveHref !== activeHrefRef.current) {
-            const oldHref = activeHrefRef.current;
-
-            setVisualStates(prev => {
-                const newStates = {...prev};
-                if (oldHref && (newStates[oldHref] === 'on' || newStates[oldHref] === 'decaying-on')) {
-                     newStates[oldHref] = 'decaying-off';
-                }
-                if (currentActiveHref) {
-                    newStates[currentActiveHref] = 'growing';
-                }
-                return newStates;
-            });
-            activeHrefRef.current = currentActiveHref;
-        }
-    }, [pathname]);
-
-    useEffect(() => {
-        const timers: NodeJS.Timeout[] = [];
-        
-        Object.entries(visualStates).forEach(([href, state]) => {
-            if (state === 'growing') {
-                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'holding' })), 1000));
-            } else if (state === 'holding') {
-                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'climax' })), 2000));
-            } else if (state === 'climax') {
-                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'decaying-on' })), 1000));
-            } else if (state === 'decaying-on') {
-                 timers.push(setTimeout(() => {
-                    setVisualStates(prev => ({ ...prev, [href]: 'on' }));
-                }, 1000));
-            } else if (state === 'decaying-off') {
-                timers.push(setTimeout(() => setVisualStates(prev => ({ ...prev, [href]: 'off' })), 1000));
-            }
-        });
-
-        return () => timers.forEach(clearTimeout);
-    }, [visualStates]);
-
-    const handleLinkClick = (href: string) => {
-        const currentActiveHref = activeHrefRef.current;
-        if (href === currentActiveHref) return;
-
-        router.push(href);
-    };
-
-    const renderBook = (link: any, isTool: boolean = false) => (
-        <Book 
-            key={link.href}
-            link={link}
-            isTool={isTool}
-            visualState={visualStates[link.href]}
-            onClick={() => handleLinkClick(link.href)}
-        />
-    );
-
     return (
-      <div className="fixed top-0 left-0 h-full w-24 flex flex-col items-center justify-between z-50 py-4 hide-scrollbar overflow-y-auto">
-          <nav className="flex flex-col items-center gap-4">
-              {mainLinks.map(link => renderBook(link, false))}
+      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 bg-background border-r">
+          <nav className="flex flex-col items-center gap-2">
+              {mainLinks.map(link => (
+                  <SidebarLink 
+                    key={link.href} 
+                    link={link} 
+                    isActive={pathname.startsWith(link.href)} />
+              ))}
           </nav>
-          <div className="my-4 w-8 border-t border-white/20"></div>
-          <nav className="flex flex-col items-center gap-4">
-              {gmToolsLinks.map(link => renderBook(link, true))}
+          <Separator className='my-2 w-8' />
+          <nav className="flex flex-col items-center gap-2">
+              {gmToolsLinks.map(link => (
+                  <SidebarLink 
+                    key={link.href} 
+                    link={link} 
+                    isActive={pathname.startsWith(link.href)} />
+              ))}
           </nav>
           <div className='flex-grow'></div>
-          <nav className="flex flex-col items-center gap-4">
-              {profileLink.map(link => renderBook(link, false))}
+          <nav>
+              <ProfileLink link={profileLink} isActive={pathname.startsWith(profileLink.href)} />
           </nav>
       </div>
   );
