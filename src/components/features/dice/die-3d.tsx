@@ -13,21 +13,42 @@ interface Die3DProps {
 }
 
 export const Die3D = ({ type, colorHue, isRolling, onClick }: Die3DProps) => {
-  const dieFace = (face: number | string, index: number) => (
-    <div key={index} className={`face face-${index + 1}`}>
-      {face}
-    </div>
-  );
+  const getFaces = () => {
+    switch (type) {
+      case 'd4':
+        return [
+          [1, 2, 3],
+          [1, 4, 2],
+          [1, 3, 4],
+          [2, 4, 3],
+        ];
+      case 'd10':
+        return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      default:
+        const faceCount = parseInt(type.substring(1));
+        return Array.from({ length: faceCount }, (_, i) => i + 1);
+    }
+  };
 
-  let faces: (string | number)[] = [];
-  const faceCount = parseInt(type.substring(1));
+  const faces = getFaces();
 
-  if (type === 'd10') {
-    faces = Array.from({ length: 10 }, (_, i) => `${i}0`);
-    faces[0] = '0';
-  } else {
-    faces = Array.from({ length: faceCount }, (_, i) => i + 1);
+  const renderFace = (faceValue: any, index: number) => {
+    if (type === 'd4') {
+        return (
+            <div key={index} className={`face face-${index + 1}`}>
+                {faceValue.map((num: number, i: number) => (
+                    <span key={i} className={`face-value-${i+1}`}>{num}</span>
+                ))}
+            </div>
+        )
+    }
+    return (
+        <div key={index} className={`face face-${index + 1}`}>
+            {faceValue}
+        </div>
+    );
   }
+
 
   return (
     <div className="die-container" onClick={onClick}>
@@ -35,7 +56,7 @@ export const Die3D = ({ type, colorHue, isRolling, onClick }: Die3DProps) => {
         className={cn('die', type, isRolling && 'rolling')}
         style={{ '--die-hue': colorHue } as React.CSSProperties}
       >
-        {faces.map((face, index) => dieFace(face, index))}
+        {faces.map(renderFace)}
       </div>
     </div>
   );
