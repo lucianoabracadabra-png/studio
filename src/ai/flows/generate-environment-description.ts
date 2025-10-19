@@ -29,6 +29,7 @@ export async function generateEnvironmentDescription(input: GenerateEnvironmentD
 
 const prompt = ai.definePrompt({
   name: 'generateEnvironmentDescriptionPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: GenerateEnvironmentDescriptionInputSchema},
   output: {schema: GenerateEnvironmentDescriptionOutputSchema},
   prompt: `You are a fantasy world builder, skilled at writing rich and detailed descriptions of environments for tabletop role-playing games.

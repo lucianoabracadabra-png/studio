@@ -32,6 +32,7 @@ export async function generateItemLoot(input: GenerateItemLootInput): Promise<Ge
 
 const prompt = ai.definePrompt({
   name: 'generateItemLootPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: GenerateItemLootInputSchema},
   output: {schema: GenerateItemLootOutputSchema},
   prompt: `You are an expert fantasy item generator for role-playing games. Given the item type, rarity, setting, and any additional details, you will generate a unique and interesting item for the players.

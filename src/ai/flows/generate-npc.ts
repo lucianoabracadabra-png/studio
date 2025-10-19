@@ -31,6 +31,7 @@ export async function generateNpc(input: GenerateNpcInput): Promise<GenerateNpcO
 
 const prompt = ai.definePrompt({
   name: 'generateNpcPrompt',
+  model: 'googleai/gemini-pro',
   input: {schema: GenerateNpcInputSchema},
   output: {schema: GenerateNpcOutputSchema},
   prompt: `You are a creative game master assistant, skilled at creating compelling and unique non-player characters (NPCs) for role-playing games.
