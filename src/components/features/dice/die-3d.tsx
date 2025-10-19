@@ -13,23 +13,21 @@ interface Die3DProps {
 }
 
 export const Die3D = ({ type, colorHue, isRolling, onClick }: Die3DProps) => {
-  const dieFace = (face: number | string, index: number) => <div key={index} className={`face face-${face}`}>{face}</div>;
-  
-  let faces: (string|number)[] = Array.from({length: parseInt(type.substring(1))}, (_, i) => i + 1);
+  const dieFace = (face: number | string, index: number) => (
+    <div key={index} className={`face face-${index + 1}`}>
+      {face}
+    </div>
+  );
+
+  let faces: (string | number)[] = [];
+  const faceCount = parseInt(type.substring(1));
 
   if (type === 'd10') {
-    faces = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90];
+    faces = Array.from({ length: 10 }, (_, i) => `${i}0`);
+    faces[0] = '0';
+  } else {
+    faces = Array.from({ length: faceCount }, (_, i) => i + 1);
   }
-  if (type === 'd4') {
-    faces = [1, 2, 3, 4]
-  }
-   if (type === 'd8') {
-    faces = [1,2,3,4,5,6,7,8]
-  }
-  if (type === 'd12') {
-    faces = [1,2,3,4,5,6,7,8,9,10,11,12]
-  }
-
 
   return (
     <div className="die-container" onClick={onClick}>

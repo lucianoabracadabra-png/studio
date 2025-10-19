@@ -30,8 +30,6 @@
 
 .face {
     position: absolute;
-    width: 100%;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -42,22 +40,22 @@
     text-shadow: 0 0 5px black;
 }
 
-/* --- D4 (Tetrahedron) --- */
-.d4 { transform: translateY(10px) scale(0.8); }
+/* --- D4 --- */
+.d4 { transform: scale(0.8) translateY(15px); }
 .d4 .face {
-    width: 100px;
-    height: 86.6px;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    width: 80px;
+    height: 69.28px; /* height = width * sqrt(3)/2 */
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
     font-size: 20px;
 }
-.d4 .face-1 { transform: rotateY(0deg) translateZ(16.6px); }
-.d4 .face-2 { transform: rotateY(120deg) rotateX(-19.47deg) translateZ(24px) translateY(-14px); }
-.d4 .face-3 { transform: rotateY(240deg) rotateX(-19.47deg) translateZ(24px) translateY(-14px); }
-.d4 .face-4 { transform: rotateX(70.5deg) translateZ(24px) translateY(14px) rotate(180deg); }
+.d4 .face-1 { transform: rotateY(0deg) translateZ(13.33px) rotateX(19.47deg); }
+.d4 .face-2 { transform: rotateY(120deg) translateZ(13.33px) rotateX(19.47deg); }
+.d4 .face-3 { transform: rotateY(240deg) translateZ(13.33px) rotateX(19.47deg); }
+.d4 .face-4 { transform: rotateX(-90deg) translateY(23.1px) translateZ(32.6px) rotate(180deg); }
 
 
 /* --- D6 (Cube) --- */
-.d6 { font-size: 40px; }
+.d6 .face { width: 80px; height: 80px; font-size: 40px; }
 .d6 .face-1 { transform: rotateY(0deg) translateZ(40px); }
 .d6 .face-2 { transform: rotateX(180deg) translateZ(40px); }
 .d6 .face-3 { transform: rotateY(90deg) translateZ(40px); }
@@ -65,69 +63,72 @@
 .d6 .face-5 { transform: rotateX(90deg) translateZ(40px); }
 .d6 .face-6 { transform: rotateX(-90deg) translateZ(40px); }
 
-
-/* --- D8 (Octahedron) --- */
-.d8 { transform: scale(0.9); }
+/* --- D8 --- */
+.d8 { transform: scale(0.8); }
 .d8 .face {
-    width: 56.6px;
-    height: 98px;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  width: 56.56px;
+  height: 56.56px;
+  transform-origin: 50% 50%;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform: rotateZ(45deg);
 }
-.d8 .face-1 { transform: rotateY(0)   rotateX(35.26deg) translateZ(40px); }
-.d8 .face-2 { transform: rotateY(90deg)  rotateX(35.26deg) translateZ(40px); }
-.d8 .face-3 { transform: rotateY(180deg) rotateX(35.26deg) translateZ(40px); }
-.d8 .face-4 { transform: rotateY(270deg) rotateX(35.26deg) translateZ(40px); }
-.d8 .face-5 { transform: rotateY(0)   rotateX(-35.26deg) translateZ(40px) rotate(180deg); }
-.d8 .face-6 { transform: rotateY(90deg)  rotateX(-35.26deg) translateZ(40px) rotate(180deg); }
-.d8 .face-7 { transform: rotateY(180deg) rotateX(-35.26deg) translateZ(40px) rotate(180deg); }
-.d8 .face-8 { transform: rotateY(270deg) rotateX(-35.26deg) translateZ(40px) rotate(180deg); }
+.d8 .face-1 { transform: rotateY(0deg) rotateX(45deg) translateZ(40px); }
+.d8 .face-2 { transform: rotateY(90deg) rotateX(45deg) translateZ(40px); }
+.d8 .face-3 { transform: rotateY(180deg) rotateX(45deg) translateZ(40px); }
+.d8 .face-4 { transform: rotateY(270deg) rotateX(45deg) translateZ(40px); }
+.d8 .face-5 { transform: rotateY(0deg) rotateX(-45deg) translateZ(40px); }
+.d8 .face-6 { transform: rotateY(90deg) rotateX(-45deg) translateZ(40px); }
+.d8 .face-7 { transform: rotateY(180deg) rotateX(-45deg) translateZ(40px); }
+.d8 .face-8 { transform: rotateY(270deg) rotateX(-45deg) translateZ(40px); }
 
 
 /* --- D10 --- */
-.d10 { transform: scale(0.8); }
+.d10 { transform: scale(0.7); }
 .d10 .face {
-    width: 80px;
-    height: 76px;
-    clip-path: polygon(0 50%, 50% 0, 100% 50%, 50% 100%);
+    width: 76px;
+    height: 80px;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
-.d10 .face-0 { transform: rotateY(0deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-10 { transform: rotateY(36deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-20 { transform: rotateY(72deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-30 { transform: rotateY(108deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-40 { transform: rotateY(144deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-50 { transform: rotateY(180deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-60 { transform: rotateY(216deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-70 { transform: rotateY(252deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-80 { transform: rotateY(288deg) rotateX(26.565deg) translateZ(40px); }
-.d10 .face-90 { transform: rotateY(324deg) rotateX(26.565deg) translateZ(40px); }
+.d10 .face-1  { transform: rotateY(18deg) rotateX(37.38deg) translateZ(50px); }
+.d10 .face-2  { transform: rotateY(54deg) rotateX(-37.38deg) translateZ(50px) rotate(180deg); }
+.d10 .face-3  { transform: rotateY(90deg) rotateX(37.38deg) translateZ(50px); }
+.d10 .face-4  { transform: rotateY(126deg) rotateX(-37.38deg) translateZ(50px) rotate(180deg); }
+.d10 .face-5  { transform: rotateY(162deg) rotateX(37.38deg) translateZ(50px); }
+.d10 .face-6  { transform: rotateY(198deg) rotateX(-37.38deg) translateZ(50px) rotate(180deg); }
+.d10 .face-7  { transform: rotateY(234deg) rotateX(37.38deg) translateZ(50px); }
+.d10 .face-8  { transform: rotateY(270deg) rotateX(-37.38deg) translateZ(50px) rotate(180deg); }
+.d10 .face-9  { transform: rotateY(306deg) rotateX(37.38deg) translateZ(50px); }
+.d10 .face-10 { transform: rotateY(342deg) rotateX(-37.38deg) translateZ(50px) rotate(180deg); }
 
-/* --- D12 (Dodecahedron) --- */
-.d12 { font-size: 20px; transform: scale(0.9); }
+/* --- D12 --- */
+.d12 { transform: scale(0.8); }
 .d12 .face {
     width: 50px;
     height: 47.5px;
     clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%);
+    font-size: 20px;
 }
-.d12 .face-1  { transform: rotateY(0deg) translateZ(66px); }
-.d12 .face-2  { transform: rotateY(180deg) translateZ(66px) rotate(180deg); }
-.d12 .face-3  { transform: rotateY(72deg) rotateX(63.43deg) translateZ(53.4px) translateY(-20px); }
-.d12 .face-4  { transform: rotateY(144deg) rotateX(63.43deg) translateZ(53.4px) translateY(-20px); }
-.d12 .face-5  { transform: rotateY(216deg) rotateX(63.43deg) translateZ(53.4px) translateY(-20px); }
-.d12 .face-6  { transform: rotateY(288deg) rotateX(63.43deg) translateZ(53.4px) translateY(-20px); }
-.d12 .face-7  { transform: rotateY(360deg) rotateX(63.43deg) translateZ(53.4px) translateY(-20px); }
-.d12 .face-8  { transform: rotateY(36deg) rotateX(-63.43deg) translateZ(53.4px) translateY(20px) rotate(180deg); }
-.d12 .face-9  { transform: rotateY(108deg) rotateX(-63.43deg) translateZ(53.4px) translateY(20px) rotate(180deg); }
-.d12 .face-10 { transform: rotateY(252deg) rotateX(-63.43deg) translateZ(53.4px) translateY(20px) rotate(180deg); }
-.d12 .face-11 { transform: rotateY(324deg) rotateX(-63.43deg) translateZ(53.4px) translateY(20px) rotate(180deg); }
-.d12 .face-12 { transform: rotateY(180deg) rotateX(-63.43deg) translateZ(53.4px) translateY(20px) rotate(180deg); }
+.d12 .face-1 { transform: rotateY(0deg) translateZ(66.5px); }
+.d12 .face-2 { transform: rotateY(72deg) rotateX(63.43deg) translateZ(41px) translateY(-14px); }
+.d12 .face-3 { transform: rotateY(144deg) rotateX(63.43deg) translateZ(41px) translateY(-14px); }
+.d12 .face-4 { transform: rotateY(216deg) rotateX(63.43deg) translateZ(41px) translateY(-14px); }
+.d12 .face-5 { transform: rotateY(288deg) rotateX(63.43deg) translateZ(41px) translateY(-14px); }
+.d12 .face-6 { transform: rotateY(360deg) rotateX(63.43deg) translateZ(41px) translateY(-14px); }
+.d12 .face-7 { transform: rotateY(36deg) rotateX(-63.43deg) translateZ(41px) translateY(14px) rotate(180deg); }
+.d12 .face-8 { transform: rotateY(108deg) rotateX(-63.43deg) translateZ(41px) translateY(14px) rotate(180deg); }
+.d12 .face-9 { transform: rotateY(180deg) rotateX(-63.43deg) translateZ(41px) translateY(14px) rotate(180deg); }
+.d12 .face-10 { transform: rotateY(252deg) rotateX(-63.43deg) translateZ(41px) translateY(14px) rotate(180deg); }
+.d12 .face-11 { transform: rotateY(324deg) rotateX(-63.43deg) translateZ(41px) translateY(14px) rotate(180deg); }
+.d12 .face-12 { transform: rotateY(0deg) translateZ(-66.5px) rotateX(180deg); }
 
 
-/* --- D20 (Icosahedron) --- */
-.d20 { transform: scale(0.9); font-size: 18px; }
+/* --- D20 --- */
+.d20 { transform: scale(0.9); }
 .d20 .face {
     width: 69.2px;
     height: 60px;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    font-size: 18px;
 }
 .d20 .face-1 { transform: rotateY(0deg) rotateX(31.7deg) translateZ(62px); }
 .d20 .face-2 { transform: rotateY(72deg) rotateX(31.7deg) translateZ(62px); }
