@@ -17,9 +17,9 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 type AtlasTool = 'pan' | 'draw';
 
-const PIXELS_PER_UNIT = 50; // 50 pixels on the base map zoom level...
+const PIXELS_PER_UNIT = 50; 
 const UNIT_NAME = 'km';
-const UNIT_CONVERSION = 10; // ...equals 10km
+const UNIT_CONVERSION = 10; 
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -60,17 +60,21 @@ export function InteractiveMap() {
             canvas.isDrawingMode = true;
             canvas.selection = false;
              canvas.forEachObject(obj => {
-                if (obj.type !== 'path') {
-                    obj.selectable = false;
-                    obj.evented = false;
-                }
+                obj.selectable = false;
+                obj.evented = false;
             });
         } else {
             canvas.isDrawingMode = false;
             canvas.selection = true;
              canvas.forEachObject(obj => {
-                obj.selectable = true;
-                obj.evented = true;
+                // In pan mode, only POIs should be clickable.
+                if (obj.type === 'circle' && 'poiData' in obj) {
+                     obj.selectable = true;
+                     obj.evented = true;
+                } else {
+                     obj.selectable = false;
+                     obj.evented = false;
+                }
             });
         }
         canvas.renderAll();
@@ -116,47 +120,43 @@ export function InteractiveMap() {
                 const prevCommand = pathCommands[i - 1];
                 let x1: number, y1: number, x2: number, y2: number;
     
-                // Get end point of previous command
-                if (prevCommand[0].toUpperCase() === 'C') { // Cubic Bezier
+                if (prevCommand[0].toUpperCase() === 'C') { 
                     x1 = prevCommand[5];
                     y1 = prevCommand[6];
-                } else if (prevCommand[0].toUpperCase() === 'Q') { // Quadratic Bezier
+                } else if (prevCommand[0].toUpperCase() === 'Q') { 
                     x1 = prevCommand[3];
                     y1 = prevCommand[4];
-                } else { // 'M' or 'L'
+                } else { 
                     x1 = prevCommand[prevCommand.length - 2];
                     y1 = prevCommand[prevCommand.length - 1];
                 }
     
-                // Get end point of current command
                 if (commandType === 'C') {
                     x2 = command[5];
                     y2 = command[6];
                 } else if (commandType === 'Q') {
                     x2 = command[3];
                     y2 = command[4];
-                } else { // 'L'
+                } else { 
                     x2 = command[1];
                     y2 = command[2];
                 }
     
-                // Simple straight line distance for approximation.
-                // A more accurate calculation would involve integrating the curve length.
                 if (x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined) {
                     totalLength += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 }
             }
         }
         
-        const zoom = fabricRef.current?.getZoom() || 1;
-        return (totalLength / PIXELS_PER_UNIT / zoom) * UNIT_CONVERSION;
+        const baseMapZoom = 0.5; // The zoom level at which the map is initially rendered
+        return (totalLength / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
     }
 
     useEffect(() => {
         const canvas = new fabric.Canvas(canvasRef.current, {
             width: canvasRef.current?.parentElement?.clientWidth,
             height: canvasRef.current?.parentElement?.clientHeight,
-            selection: true,
+            selection: false, // selection managed by tool
             backgroundColor: '#000',
         });
         fabricRef.current = canvas;
@@ -165,6 +165,8 @@ export function InteractiveMap() {
             canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
                 originX: 'left',
                 originY: 'top',
+                selectable: false,
+                evented: false,
             });
             canvas.setZoom(0.5);
 
@@ -180,8 +182,8 @@ export function InteractiveMap() {
                     originY: 'center',
                     hasControls: false,
                     hasBorders: false,
-                    lockMovementX: true,
-                    lockMovementY: true,
+                    selectable: true,
+                    evented: true,
                     // @ts-ignore - custom property
                     poiData: poi, 
                 });
@@ -192,15 +194,22 @@ export function InteractiveMap() {
             canvas.renderAll();
         }, { crossOrigin: 'anonymous' });
 
-        canvas.on('mouse:down', (opt) => {
-            if (opt.target && 'poiData' in opt.target) {
-                // @ts-ignore
-                setActivePoi(opt.target.poiData);
-            } else if (!opt.target) {
-                 setActivePoi(null);
-            }
+        let isDragging = false;
+        let lastPosX: number, lastPosY: number;
 
-            if (canvas.isDrawingMode) {
+        canvas.on('mouse:down', (opt) => {
+             if (activeTool === 'pan') {
+                if (opt.target && 'poiData' in opt.target) {
+                    // @ts-ignore
+                    setActivePoi(opt.target.poiData);
+                    isDragging = false;
+                } else {
+                     setActivePoi(null);
+                     isDragging = true;
+                     lastPosX = opt.e.clientX;
+                     lastPosY = opt.e.clientY;
+                }
+            } else if (canvas.isDrawingMode) {
                 setIsDrawing(true);
                 currentPathRef.current = null;
             }
@@ -214,12 +223,34 @@ export function InteractiveMap() {
             currentPathRef.current = path;
             const finalDistance = calculatePathDistance(path);
             setDrawingDistance(finalDistance);
+            setIsDrawing(false);
+        });
+
+        canvas.on('mouse:move', function(opt) {
+            if (activeTool === 'pan' && isDragging) {
+                const e = opt.e;
+                const vpt = canvas.viewportTransform;
+                if (vpt) {
+                    vpt[4] += e.clientX - lastPosX;
+                    vpt[5] += e.clientY - lastPosY;
+                    canvas.requestRenderAll();
+                }
+                lastPosX = e.clientX;
+                lastPosY = e.clientY;
+            } else if (canvas.isDrawingMode && isDrawing) {
+                 // The 'path:created' event handles the final path, but we can try to get the current one for real-time
+                 // @ts-ignore This is an internal property, but useful here.
+                 const currentDrawingPath = canvas._currentPath;
+                 if (currentDrawingPath) {
+                    const currentDistance = calculatePathDistance(currentDrawingPath);
+                    setDrawingDistance(currentDistance);
+                 }
+            }
         });
 
         canvas.on('mouse:up', () => {
-             if (canvas.isDrawingMode) {
-                // isDrawing is set to false here, but the toolbar remains
-                // until clearDrawing is called.
+             if (activeTool === 'pan') {
+                isDragging = false;
              }
         })
         
@@ -241,44 +272,6 @@ export function InteractiveMap() {
 
         window.addEventListener('resize', handleResize);
 
-        // Pan logic
-        let isDragging = false;
-        let lastPosX: number, lastPosY: number;
-        canvas.on('mouse:down', function(opt) {
-            if (activeTool !== 'pan') return;
-            const evt = opt.e;
-            isDragging = true;
-            canvas.selection = false;
-            lastPosX = evt.clientX;
-            lastPosY = evt.clientY;
-        });
-        canvas.on('mouse:move', function(opt) {
-            if (isDragging) {
-                const e = opt.e;
-                const vpt = canvas.viewportTransform;
-                if (vpt) {
-                    vpt[4] += e.clientX - lastPosX;
-                    vpt[5] += e.clientY - lastPosY;
-                    canvas.requestRenderAll();
-                }
-                lastPosX = e.clientX;
-                lastPosY = e.clientY;
-            }
-            if (canvas.isDrawingMode && isDrawing && currentPathRef.current) {
-                 const currentDistance = calculatePathDistance(currentPathRef.current);
-                 setDrawingDistance(currentDistance);
-            }
-        });
-        canvas.on('mouse:up', function(opt) {
-            if(canvas.viewportTransform) {
-                canvas.setViewportTransform(canvas.viewportTransform);
-            }
-            isDragging = false;
-            canvas.selection = true;
-        });
-
-
-        // Initial setup
         toggleTool('pan');
         
         return () => {
