@@ -7,7 +7,7 @@ import { ZoomIn, ZoomOut, Maximize, MousePointer, Pen, Eraser } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
@@ -45,25 +45,29 @@ export function InteractiveMap() {
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [drawingDistance, setDrawingDistance] = useState(0);
-    const isDrawingPath = useRef(false);
+    const [isDrawing, setIsDrawing] = useState(false);
     const currentPathRef = useRef<fabric.Path | null>(null);
 
 
     const calculatePathDistance = useCallback((path: fabric.Path) => {
         if (!path || !path.path) return 0;
-        const baseMapZoom = 0.5;
-        return (path.path.reduce((acc, command, i, commands) => {
-            if (i === 0) return acc;
-            const prev = new (fabric as any).Point(commands[i-1][1], commands[i-1][2]);
-            const curr = new (fabric as any).Point(command[1], command[2]);
-            return acc + prev.distanceFrom(curr);
-        }, 0) / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
+        const baseMapZoom = 0.5; // The zoom level at which the map is initially rendered
+        let distance = 0;
+        for (let i = 1; i < path.path.length; i++) {
+            const p1 = path.path[i-1];
+            const p2 = path.path[i];
+            const dx = p2[1] - p1[1];
+            const dy = p2[2] - p1[2];
+            distance += Math.sqrt(dx*dx + dy*dy);
+        }
+        return (distance / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
     }, []);
 
 
     useEffect(() => {
         const initFabric = async () => {
-            const { fabric } = await import('fabric');
+            const { fabric: fabric_ } = await import('fabric');
+            const fabric = fabric_ as any; // Use 'any' to bypass potential type issues with a dynamic import
             
             const canvas = new fabric.Canvas(canvasRef.current, {
                 width: canvasRef.current?.parentElement?.clientWidth,
@@ -73,7 +77,7 @@ export function InteractiveMap() {
             });
             fabricRef.current = canvas;
 
-            fabric.Image.fromURL(mapImage.imageUrl, (img) => {
+            fabric.Image.fromURL(mapImage.imageUrl, (img: fabric.Image) => {
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
                     originX: 'left',
                     originY: 'top',
@@ -82,7 +86,7 @@ export function InteractiveMap() {
                 });
                 canvas.setZoom(0.5);
 
-                pointsOfInterest.forEach(poi => {
+                 pointsOfInterest.forEach(poi => {
                     const pin = new fabric.Circle({
                         radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
@@ -101,6 +105,7 @@ export function InteractiveMap() {
                     });
                     canvas.add(pin);
                 });
+
                 canvas.renderAll();
             }, { crossOrigin: 'anonymous' });
 
@@ -114,9 +119,9 @@ export function InteractiveMap() {
                     setActivePoi(opt.target.poiData);
                     isDragging = false;
                 } else if (canvas.isDrawingMode) {
-                    isDrawingPath.current = true;
+                    setIsDrawing(true);
                     setActivePoi(null);
-                } else {
+                } else if(activeTool === 'pan'){
                     isDragging = true;
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
@@ -124,14 +129,12 @@ export function InteractiveMap() {
                 }
             });
 
-            canvas.on('before:path:created', (opt) => {
-                // @ts-ignore
+            canvas.on('before:path:created', (opt: { path: fabric.Path }) => {
                 currentPathRef.current = opt.path;
             });
             
-            canvas.on('path:created', (opt) => {
-                // @ts-ignore
-                const path = opt.path as fabric.Path;
+            canvas.on('path:created', (opt: { path: fabric.Path }) => {
+                const path = opt.path;
                 path.selectable = false;
                 path.evented = false;
                 currentPathRef.current = null;
@@ -156,14 +159,13 @@ export function InteractiveMap() {
 
             canvas.on('mouse:up', () => {
                  isDragging = false;
-                 if (isDrawingPath.current) {
-                     isDrawingPath.current = false;
+                 if (isDrawing) {
+                     setIsDrawing(false);
                  }
             });
             
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5;
-            // @ts-ignore
             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
                 blur: 10,
                 color: '#ef4444',
@@ -196,25 +198,8 @@ export function InteractiveMap() {
 
         if (tool === 'draw') {
             canvas.isDrawingMode = true;
-            canvas.selection = false;
-            canvas.getObjects().forEach(o => {
-                o.selectable = false;
-                o.evented = false;
-            });
-
         } else { // pan
             canvas.isDrawingMode = false;
-            canvas.selection = true;
-            canvas.getObjects().forEach(o => {
-                // @ts-ignore
-                if (o.poiData) {
-                    o.selectable = true;
-                    o.evented = true;
-                } else {
-                    o.selectable = false;
-                    o.evented = false;
-                }
-            });
         }
         canvas.renderAll();
     };
@@ -240,11 +225,11 @@ export function InteractiveMap() {
         const objects = canvas.getObjects('path');
         objects.forEach(obj => canvas.remove(obj));
         setDrawingDistance(0);
-        isDrawingPath.current = false;
+        setIsDrawing(false);
         canvas.renderAll();
     };
 
-    const showDrawingToolbar = activeTool === 'draw' && (isDrawingPath.current || drawingDistance > 0);
+    const showDrawingToolbar = isDrawing || drawingDistance > 0;
 
     return (
         <div className="w-full h-full relative overflow-hidden bg-gray-900">
@@ -263,12 +248,14 @@ export function InteractiveMap() {
                 <Button size="icon" onClick={centerAndReset} variant="outline"><Maximize /></Button>
             </div>
 
+            <AnimatePresence>
             {activePoi && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
+                    transition={{ duration: 0.2 }}
                 >
                     <Card className="w-80 glassmorphic-card">
                         <CardHeader><CardTitle className="text-xl font-headline">{activePoi.name}</CardTitle></CardHeader>
@@ -280,10 +267,13 @@ export function InteractiveMap() {
                     </Card>
                 </motion.div>
             )}
+            </AnimatePresence>
 
-            {showDrawingToolbar && (
-                <DrawingToolbar onClear={clearDrawing} distance={drawingDistance} />
-            )}
+            <AnimatePresence>
+                {showDrawingToolbar && (
+                    <DrawingToolbar onClear={clearDrawing} distance={drawingDistance} />
+                )}
+            </AnimatePresence>
         </div>
     );
 }
