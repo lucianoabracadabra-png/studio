@@ -14,9 +14,9 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 type AtlasTool = 'pan' | 'draw';
 
-const PIXELS_PER_UNIT = 50; 
+const PIXELS_PER_UNIT = 50;
 const UNIT_NAME = 'km';
-const UNIT_CONVERSION = 10; 
+const UNIT_CONVERSION = 10;
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -46,21 +46,18 @@ export function InteractiveMap() {
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [drawingDistance, setDrawingDistance] = useState(0);
     const isDrawingPath = useRef(false);
+    const currentPathRef = useRef<fabric.Path | null>(null);
+
 
     const calculatePathDistance = useCallback((path: fabric.Path) => {
         if (!path || !path.path) return 0;
-    
-        let totalLength = 0;
-        const pathCommands = path.path;
-    
-        for (let i = 1; i < pathCommands.length; i++) {
-            const prevPoint = new (fabric as any).Point(pathCommands[i-1][1], pathCommands[i-1][2]);
-            const currentPoint = new (fabric as any).Point(pathCommands[i][1], pathCommands[i][2]);
-            totalLength += prevPoint.distanceFrom(currentPoint);
-        }
-        
         const baseMapZoom = 0.5;
-        return (totalLength / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
+        return (path.path.reduce((acc, command, i, commands) => {
+            if (i === 0) return acc;
+            const prev = new (fabric as any).Point(commands[i-1][1], commands[i-1][2]);
+            const curr = new (fabric as any).Point(command[1], command[2]);
+            return acc + prev.distanceFrom(curr);
+        }, 0) / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
     }, []);
 
 
@@ -126,18 +123,22 @@ export function InteractiveMap() {
                     setActivePoi(null);
                 }
             });
+
+            canvas.on('before:path:created', (opt) => {
+                // @ts-ignore
+                currentPathRef.current = opt.path;
+            });
             
             canvas.on('path:created', (opt) => {
                 // @ts-ignore
                 const path = opt.path as fabric.Path;
                 path.selectable = false;
                 path.evented = false;
-                const finalDistance = calculatePathDistance(path);
-                setDrawingDistance(finalDistance);
+                currentPathRef.current = null;
             });
 
             canvas.on('mouse:move', function(opt) {
-                if (isDragging) {
+                if (activeTool === 'pan' && isDragging) {
                     const e = opt.e;
                     const vpt = canvas.viewportTransform;
                     if (vpt) {
@@ -147,17 +148,9 @@ export function InteractiveMap() {
                     }
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
-                } else if (isDrawingPath.current) {
-                    const pointer = canvas.getPointer(opt.e);
-                    // This is a bit of a hack as fabric doesn't expose the current path easily.
-                    // We get the last object, assuming it's the one being drawn.
-                    const objects = canvas.getObjects();
-                    const currentPath = objects[objects.length - 1];
-                    if (currentPath && currentPath.type === 'path') {
-                        // @ts-ignore
-                         const distance = calculatePathDistance(currentPath as fabric.Path);
-                         setDrawingDistance(distance);
-                    }
+                } else if (canvas.isDrawingMode && currentPathRef.current) {
+                    const distance = calculatePathDistance(currentPathRef.current);
+                    setDrawingDistance(distance);
                 }
             });
 
@@ -203,8 +196,25 @@ export function InteractiveMap() {
 
         if (tool === 'draw') {
             canvas.isDrawingMode = true;
+            canvas.selection = false;
+            canvas.getObjects().forEach(o => {
+                o.selectable = false;
+                o.evented = false;
+            });
+
         } else { // pan
             canvas.isDrawingMode = false;
+            canvas.selection = true;
+            canvas.getObjects().forEach(o => {
+                // @ts-ignore
+                if (o.poiData) {
+                    o.selectable = true;
+                    o.evented = true;
+                } else {
+                    o.selectable = false;
+                    o.evented = false;
+                }
+            });
         }
         canvas.renderAll();
     };
