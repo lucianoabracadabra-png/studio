@@ -33,6 +33,13 @@ export function InteractiveMap() {
         x.set(0);
         y.set(0);
     }
+    
+    const handleMapClick = (e: React.MouseEvent) => {
+        // If the click is on the map itself (not a child like a POI marker button), close the active POI.
+        if (e.target === e.currentTarget) {
+            setActivePoi(null);
+        }
+    }
 
     return (
         <div ref={mapContainerRef} className="w-full h-full rounded-lg border overflow-hidden relative bg-black">
@@ -41,6 +48,7 @@ export function InteractiveMap() {
                 style={{ x, y, scale: zoom, width: '2000px', height: '1500px' }}
                 drag
                 dragMomentum={false}
+                onClick={handleMapClick}
             >
                 <Image
                     src={mapImage.imageUrl}
@@ -48,7 +56,7 @@ export function InteractiveMap() {
                     layout="fill"
                     objectFit="cover"
                     priority
-                    className='select-none'
+                    className='select-none pointer-events-none'
                     data-ai-hint={mapImage.imageHint}
                     draggable={false}
                 />
