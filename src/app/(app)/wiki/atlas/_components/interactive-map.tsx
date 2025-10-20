@@ -115,28 +115,30 @@ export function InteractiveMap() {
                 originY: 'top',
             });
             canvas.setZoom(0.5);
-        }, { crossOrigin: 'anonymous' });
 
-        pointsOfInterest.forEach(poi => {
-            const pin = new fabric.Circle({
-                radius: 10,
-                fill: 'hsl(var(--accent))',
-                stroke: 'white',
-                strokeWidth: 2,
-                left: (img.width || 2000) * (poi.position.x / 100),
-                top: (img.height || 1500) * (poi.position.y / 100),
-                originX: 'center',
-                originY: 'center',
-                hasControls: false,
-                hasBorders: false,
-                lockMovementX: true,
-                lockMovementY: true,
-                // @ts-ignore - custom property
-                poiData: poi, 
+            pointsOfInterest.forEach(poi => {
+                const pin = new fabric.Circle({
+                    radius: 10,
+                    fill: 'hsl(var(--accent))',
+                    stroke: 'white',
+                    strokeWidth: 2,
+                    left: (img.width || 2000) * (poi.position.x / 100),
+                    top: (img.height || 1500) * (poi.position.y / 100),
+                    originX: 'center',
+                    originY: 'center',
+                    hasControls: false,
+                    hasBorders: false,
+                    lockMovementX: true,
+                    lockMovementY: true,
+                    // @ts-ignore - custom property
+                    poiData: poi, 
+                });
+    
+                canvas.add(pin);
             });
 
-            canvas.add(pin);
-        });
+            canvas.renderAll();
+        }, { crossOrigin: 'anonymous' });
 
         canvas.on('mouse:down', (opt) => {
             if (opt.target && 'poiData' in opt.target) {
