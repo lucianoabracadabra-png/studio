@@ -2,7 +2,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, useMotionValue } from 'framer-motion';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { pointsOfInterest } from '@/lib/wiki-data';
 import { MapPin, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
@@ -16,78 +16,71 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 export function InteractiveMap() {
     const [zoom, setZoom] = useState(1);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
-
-    const handlePan = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        setPosition(prev => ({
-            x: prev.x + info.delta.x,
-            y: prev.y + info.delta.y
-        }));
-    };
-
+    
     const handleZoom = (direction: 'in' | 'out') => {
-        setZoom(prevZoom => {
-            const newZoom = direction === 'in' ? prevZoom * 1.2 : prevZoom / 1.2;
-            return Math.max(0.5, Math.min(5, newZoom));
-        });
+        const newZoom = direction === 'in' ? zoom * 1.2 : zoom / 1.2;
+        const clampedZoom = Math.max(0.5, Math.min(5, newZoom));
+        setZoom(clampedZoom);
     };
     
     const centerAndReset = () => {
         setZoom(1);
-        setPosition({x: 0, y: 0});
+        x.set(0);
+        y.set(0);
     }
 
     return (
         <div ref={mapContainerRef} className="w-full h-full rounded-lg border overflow-hidden relative bg-black">
             <motion.div
                 className="absolute top-0 left-0 cursor-grab active:cursor-grabbing"
-                style={{ x: position.x, y: position.y, scale: zoom }}
+                style={{ x, y, scale: zoom, width: '2000px', height: '1500px' }}
                 drag
                 dragMomentum={false}
-                onDrag={handlePan}
             >
-                <div className="relative" style={{ width: '2000px', height: '1500px' }}>
-                    <Image
-                        src={mapImage.imageUrl}
-                        alt={mapImage.description}
-                        layout="fill"
-                        objectFit="cover"
-                        priority
-                        className='select-none'
-                        data-ai-hint={mapImage.imageHint}
-                    />
+                <Image
+                    src={mapImage.imageUrl}
+                    alt={mapImage.description}
+                    layout="fill"
+                    objectFit="cover"
+                    priority
+                    className='select-none'
+                    data-ai-hint={mapImage.imageHint}
+                    draggable={false}
+                />
 
-                    {pointsOfInterest.map(poi => (
-                        <div
-                            key={poi.id}
-                            className="absolute"
-                            style={{ 
-                                left: `${poi.position.x}%`, 
-                                top: `${poi.position.y}%`,
-                                transform: 'translate(-50%, -50%)'
-                            }}
-                        >
-                             <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button onClick={() => setActivePoi(poi)} className='focus:outline-none'>
-                                            <MapPin className={cn(
-                                                'h-8 w-8 text-destructive drop-shadow-lg transition-all duration-300 hover:scale-125 hover:text-accent',
-                                                activePoi?.id === poi.id && 'text-accent scale-125'
-                                            )} style={{ filter: 'drop-shadow(0 0 5px hsl(var(--accent)))' }} />
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p className="font-bold">{poi.name}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
-                    ))}
-                </div>
+                {pointsOfInterest.map(poi => (
+                    <motion.div
+                        key={poi.id}
+                        className="absolute"
+                        style={{ 
+                            left: `${poi.position.x}%`, 
+                            top: `${poi.position.y}%`,
+                        }}
+                        initial={{ scale: 1 }}
+                        whileHover={{ scale: 1.1 / zoom }}
+                    >
+                         <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button onClick={() => setActivePoi(poi)} className='focus:outline-none' style={{ transform: `scale(${1 / zoom}) translate(-50%, -100%)` }}>
+                                        <MapPin className={cn(
+                                            'h-8 w-8 text-destructive drop-shadow-lg transition-all duration-300 hover:text-accent',
+                                            activePoi?.id === poi.id && 'text-accent'
+                                        )} style={{ filter: 'drop-shadow(0 0 5px hsl(var(--accent)))' }} />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="font-bold">{poi.name}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </motion.div>
+                ))}
             </motion.div>
 
             <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -100,6 +93,7 @@ export function InteractiveMap() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
                     className="absolute bottom-4 left-1/2 -translate-x-1/2"
                 >
                     <Card className="w-80 glassmorphic-card">
