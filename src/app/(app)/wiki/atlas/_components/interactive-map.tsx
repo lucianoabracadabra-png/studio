@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, MouseEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, PanInfo, useMotionValue } from 'framer-motion';
@@ -19,50 +19,14 @@ type AtlasTool = 'pan' | 'draw';
 
 const DrawingLayer = ({ 
     points, 
-    setPoints, 
     mapZoom, 
-    activeTool,
-    setDistance
 }: { 
     points: Point[], 
-    setPoints: React.Dispatch<React.SetStateAction<Point[]>>, 
-    mapZoom: number,
-    activeTool: AtlasTool,
-    setDistance: React.Dispatch<React.SetStateAction<number>>
+    mapZoom: number, 
 }) => {
-    const [isDrawing, setIsDrawing] = useState(false);
-    const PIXELS_PER_UNIT = 50;
-    const UNIT_NAME = 'km';
-    const UNIT_CONVERSION = 10; // 50px = 10km
-
-    const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
-        if (activeTool !== 'draw') return;
-        setIsDrawing(true);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const newPoint = {
-            x: (e.clientX - rect.left) / mapZoom,
-            y: (e.clientY - rect.top) / mapZoom,
-        };
-        setPoints([newPoint]);
-        setDistance(0);
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-        if (!isDrawing || activeTool !== 'draw') return;
-        const rect = e.currentTarget.getBoundingClientRect();
-        const newPoint = {
-            x: (e.clientX - rect.left) / mapZoom,
-            y: (e.clientY - rect.top) / mapZoom,
-        };
-        setPoints(prev => [...prev, newPoint]);
-    };
-    
-    const handleMouseUp = () => {
-        setIsDrawing(false);
-    };
-
     const pathData = points.map((p, i) => (i === 0 ? 'M' : 'L') + `${p.x} ${p.y}`).join(' ');
-
+    
+    const PIXELS_PER_UNIT = 50;
     const ticks = [];
     let accumulatedLength = 0;
     for (let i = 1; i < points.length; i++) {
@@ -80,34 +44,14 @@ const DrawingLayer = ({
         }
         accumulatedLength += segmentLength;
     }
-    
-    useEffect(() => {
-        let totalLength = 0;
-        for (let i = 1; i < points.length; i++) {
-            const p1 = points[i-1];
-            const p2 = points[i];
-            totalLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-        }
-        const calculatedDistance = (totalLength / PIXELS_PER_UNIT) * UNIT_CONVERSION;
-        setDistance(calculatedDistance);
-    }, [points, setDistance]);
 
     return (
-        <svg 
-            className="absolute top-0 left-0 w-full h-full"
-            style={{ cursor: activeTool === 'draw' ? 'crosshair' : 'default' }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-        >
-            <g>
-                <path d={pathData} strokeWidth={3 / mapZoom} stroke="hsl(var(--accent))" fill="none" strokeLinejoin="round" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 3px hsl(var(--accent)))`}} />
-                {ticks.map((tick, i) => (
-                    <line key={i} x1={tick.x - 5/mapZoom} y1={tick.y} x2={tick.x + 5/mapZoom} y2={tick.y} stroke="hsl(var(--accent))" strokeWidth={4/mapZoom} transform={`rotate(90 ${tick.x} ${tick.y})`} />
-                ))}
-            </g>
-        </svg>
+        <>
+            <path d={pathData} strokeWidth={3 / mapZoom} stroke="hsl(var(--accent))" fill="none" strokeLinejoin="round" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 3px hsl(var(--accent)))`}} />
+            {ticks.map((tick, i) => (
+                <line key={i} x1={tick.x - 5/mapZoom} y1={tick.y} x2={tick.x + 5/mapZoom} y2={tick.y} stroke="hsl(var(--accent))" strokeWidth={4/mapZoom} transform={`rotate(90 ${tick.x} ${tick.y})`} />
+            ))}
+        </>
     );
 };
 
@@ -139,11 +83,17 @@ export function InteractiveMap() {
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     
+    const [isDrawing, setIsDrawing] = useState(false);
     const [drawingPoints, setDrawingPoints] = useState<Point[]>([]);
     const [drawingDistance, setDrawingDistance] = useState(0);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
+    const mapMotionRef = useRef<HTMLDivElement>(null);
     
+    const PIXELS_PER_UNIT = 50;
+    const UNIT_NAME = 'km';
+    const UNIT_CONVERSION = 10;
+
     const handleZoom = (direction: 'in' | 'out') => {
         const newZoom = direction === 'in' ? zoom * 1.2 : zoom / 1.2;
         const clampedZoom = Math.max(0.5, Math.min(5, newZoom));
@@ -157,7 +107,7 @@ export function InteractiveMap() {
     }
     
     const handleMapClick = (e: React.MouseEvent) => {
-        if (activeTool === 'pan' && e.target === e.currentTarget) {
+        if (activeTool === 'pan' && e.target === mapMotionRef.current) {
             setActivePoi(null);
         }
     }
@@ -165,12 +115,68 @@ export function InteractiveMap() {
     useEffect(() => {
         if(activeTool !== 'draw') {
             setDrawingPoints([]);
+            setDrawingDistance(0);
         }
-    }, [activeTool])
+    }, [activeTool]);
+
+    useEffect(() => {
+        let totalLength = 0;
+        for (let i = 1; i < drawingPoints.length; i++) {
+            const p1 = drawingPoints[i-1];
+            const p2 = drawingPoints[i];
+            totalLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
+        const calculatedDistance = (totalLength / PIXELS_PER_UNIT) * UNIT_CONVERSION;
+        setDrawingDistance(calculatedDistance);
+    }, [drawingPoints]);
+
+    const getPointFromEvent = (e: MouseEvent<SVGElement>): Point => {
+        const mapRect = mapMotionRef.current!.getBoundingClientRect();
+        const containerRect = mapContainerRef.current!.getBoundingClientRect();
+        // Calculate cursor position relative to the viewport
+        const clientX = e.clientX;
+        const clientY = e.clientY;
+        
+        // Calculate position inside the scaled and dragged map div
+        const mapX = (clientX - mapRect.left) / zoom;
+        const mapY = (clientY - mapRect.top) / zoom;
+        
+        return { x: mapX, y: mapY };
+    }
+
+    const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+        if (activeTool !== 'draw') return;
+        e.preventDefault();
+        setIsDrawing(true);
+        const newPoint = getPointFromEvent(e as any);
+        setDrawingPoints([newPoint]);
+    };
+
+    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+        if (!isDrawing || activeTool !== 'draw') return;
+        e.preventDefault();
+        const newPoint = getPointFromEvent(e as any);
+        setDrawingPoints(prev => [...prev, newPoint]);
+    };
+    
+    const handleMouseUp = (e: MouseEvent<HTMLDivElement>) => {
+        if (activeTool !== 'draw') return;
+        e.preventDefault();
+        setIsDrawing(false);
+    };
 
     return (
-        <div ref={mapContainerRef} className="w-full h-full rounded-lg border overflow-hidden relative bg-black">
+        <div 
+            ref={mapContainerRef} 
+            className="w-full h-full rounded-lg border overflow-hidden relative bg-black"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{ cursor: activeTool === 'draw' ? 'crosshair' : 'default' }}
+        >
             <motion.div
+                ref={mapMotionRef}
                 className={cn("absolute top-0 left-0", activeTool === 'pan' && "cursor-grab active:cursor-grabbing")}
                 style={{ x, y, scale: zoom, width: '2000px', height: '1500px' }}
                 drag={activeTool === 'pan'}
@@ -187,10 +193,11 @@ export function InteractiveMap() {
                     data-ai-hint={mapImage.imageHint}
                     draggable={false}
                 />
-
-                <motion.g style={{ transform: `scale(${1 / zoom})` }}>
-                  <DrawingLayer points={drawingPoints} setPoints={setDrawingPoints} mapZoom={1} activeTool={activeTool} setDistance={setDrawingDistance} />
-                </motion.g>
+                
+                {/* SVG for drawing, now lives inside the scaled div to match coordinates */}
+                <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                    <DrawingLayer points={drawingPoints} mapZoom={zoom} />
+                </svg>
 
                 {pointsOfInterest.map(poi => (
                     <motion.div
@@ -199,9 +206,11 @@ export function InteractiveMap() {
                         style={{ 
                             left: `${poi.position.x}%`, 
                             top: `${poi.position.y}%`,
+                            transform: `scale(${1 / zoom}) translate(-50%, -100%)`
                         }}
-                        initial={{ scale: 1 }}
-                        whileHover={{ scale: 1.1 / zoom }}
+                        initial={{ scale: 1/zoom }}
+                        animate={{ scale: 1/zoom }}
+                        whileHover={{ scale: 1.2 / zoom }}
                     >
                          <TooltipProvider>
                             <Tooltip>
@@ -209,7 +218,7 @@ export function InteractiveMap() {
                                     <button 
                                         onClick={() => activeTool === 'pan' && setActivePoi(poi)} 
                                         className='focus:outline-none' 
-                                        style={{ transform: `scale(${1 / zoom}) translate(-50%, -100%)`, cursor: activeTool === 'pan' ? 'pointer' : 'default' }}
+                                        style={{ cursor: activeTool === 'pan' ? 'pointer' : 'default' }}
                                     >
                                         <MapPin className={cn(
                                             'h-8 w-8 text-destructive drop-shadow-lg transition-all duration-300 hover:text-accent',
@@ -264,7 +273,7 @@ export function InteractiveMap() {
             )}
             
             {drawingPoints.length > 0 && activeTool === 'draw' && (
-                <DrawingToolbar onClear={() => setDrawingPoints([])} distance={drawingDistance} />
+                <DrawingToolbar onClear={() => { setDrawingPoints([]); setDrawingDistance(0); }} distance={drawingDistance} />
             )}
         </div>
     );
