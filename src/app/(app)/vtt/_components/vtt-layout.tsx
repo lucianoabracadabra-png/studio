@@ -7,7 +7,7 @@ import type { PanInfo } from 'framer-motion';
 
 export type TokenShape = 'circle' | 'square';
 export type TokenType = 'hero' | 'enemy';
-export type VttTool = 'select' | 'measure' | 'fog' | 'draw' | 'ping';
+export type VttTool = 'select' | 'measure' | 'fog' | 'ping';
 export type Point = { x: number, y: number };
 
 export interface Token {
@@ -40,10 +40,6 @@ export interface VttState {
   ui: {
     activeTool: VttTool;
   };
-  drawing: {
-    points: Point[];
-    distance: number;
-  }
 }
 
 const initialVttState: VttState = {
@@ -66,10 +62,6 @@ const initialVttState: VttState = {
   ui: {
     activeTool: 'select',
   },
-  drawing: {
-    points: [],
-    distance: 0,
-  }
 };
 
 export function VttLayout() {
@@ -111,14 +103,6 @@ export function VttLayout() {
   const setCombat = (updater: React.SetStateAction<VttState['combat']>) => {
     setVttState(prev => ({ ...prev, combat: typeof updater === 'function' ? updater(prev.combat) : updater }));
   }
-
-  const setDrawingPoints = (updater: React.SetStateAction<Point[]>) => {
-    setVttState(prev => ({...prev, drawing: { ...prev.drawing, points: typeof updater === 'function' ? updater(prev.drawing.points) : updater }}));
-  };
-
-  const setDrawingDistance = (updater: React.SetStateAction<number>) => {
-    setVttState(prev => ({...prev, drawing: { ...prev.drawing, distance: typeof updater === 'function' ? updater(prev.drawing.distance) : updater }}));
-  };
   
   const setActiveTool = (tool: VttTool) => {
       setVttState(prev => ({ ...prev, ui: { ...prev.ui, activeTool: tool }}));
@@ -154,10 +138,6 @@ export function VttLayout() {
           setMapState={setMapState}
           activeTool={vttState.ui.activeTool}
           layers={vttState.layers}
-          drawingPoints={vttState.drawing.points}
-          setDrawingPoints={setDrawingPoints}
-          drawingDistance={vttState.drawing.distance}
-          setDrawingDistance={setDrawingDistance}
         />
       </div>
       <VttSidebar

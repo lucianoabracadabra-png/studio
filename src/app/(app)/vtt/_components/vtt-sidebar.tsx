@@ -203,7 +203,6 @@ const mainTools: { id: VttTool, label: string, icon: React.ElementType }[] = [
     { id: 'select', label: 'Selecionar & Mover', icon: MousePointer },
     { id: 'measure', label: 'Medir Distância', icon: Ruler },
     { id: 'fog', label: 'Névoa de Guerra', icon: Cloud },
-    { id: 'draw', label: 'Desenhar', icon: Pen },
     { id: 'ping', label: 'Pingar no Mapa', icon: Zap },
 ];
 
