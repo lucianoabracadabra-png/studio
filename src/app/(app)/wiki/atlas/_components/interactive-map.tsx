@@ -60,7 +60,7 @@ export function InteractiveMap() {
             canvas.isDrawingMode = true;
             canvas.selection = false;
              canvas.forEachObject(obj => {
-                if (obj.type !== 'path') { // Don't disable drawing paths
+                if (obj.type !== 'path') {
                     obj.selectable = false;
                     obj.evented = false;
                 }
@@ -103,20 +103,51 @@ export function InteractiveMap() {
     }
     
     const calculatePathDistance = (path: fabric.Path) => {
+        if (!path || !path.path) return 0;
+    
         let totalLength = 0;
-        if (path.path) {
-             for (let i = 0; i < path.path.length - 1; i++) {
-                const p1Arr = path.path[i];
-                const p2Arr = path.path[i+1];
-                 if(p1Arr.length >= 3 && p2Arr.length >=3) {
-                    const p1 = { x: p1Arr[1], y: p1Arr[2] };
-                    const p2 = { x: p2Arr[1], y: p2Arr[2] };
-                    if(p1 && p2){
-                        totalLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-                    }
+        const pathCommands = path.path;
+    
+        for (let i = 0; i < pathCommands.length; i++) {
+            const command = pathCommands[i];
+            const commandType = command[0].toUpperCase();
+    
+            if (i > 0) {
+                const prevCommand = pathCommands[i - 1];
+                let x1: number, y1: number, x2: number, y2: number;
+    
+                // Get end point of previous command
+                if (prevCommand[0].toUpperCase() === 'C') { // Cubic Bezier
+                    x1 = prevCommand[5];
+                    y1 = prevCommand[6];
+                } else if (prevCommand[0].toUpperCase() === 'Q') { // Quadratic Bezier
+                    x1 = prevCommand[3];
+                    y1 = prevCommand[4];
+                } else { // 'M' or 'L'
+                    x1 = prevCommand[prevCommand.length - 2];
+                    y1 = prevCommand[prevCommand.length - 1];
+                }
+    
+                // Get end point of current command
+                if (commandType === 'C') {
+                    x2 = command[5];
+                    y2 = command[6];
+                } else if (commandType === 'Q') {
+                    x2 = command[3];
+                    y2 = command[4];
+                } else { // 'L'
+                    x2 = command[1];
+                    y2 = command[2];
+                }
+    
+                // Simple straight line distance for approximation.
+                // A more accurate calculation would involve integrating the curve length.
+                if (x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined) {
+                    totalLength += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 }
             }
         }
+        
         const zoom = fabricRef.current?.getZoom() || 1;
         return (totalLength / PIXELS_PER_UNIT / zoom) * UNIT_CONVERSION;
     }
@@ -214,9 +245,10 @@ export function InteractiveMap() {
         let isDragging = false;
         let lastPosX: number, lastPosY: number;
         canvas.on('mouse:down', function(opt) {
-            if (canvas.isDrawingMode) return;
+            if (activeTool !== 'pan') return;
             const evt = opt.e;
             isDragging = true;
+            canvas.selection = false;
             lastPosX = evt.clientX;
             lastPosY = evt.clientY;
         });
@@ -232,8 +264,8 @@ export function InteractiveMap() {
                 lastPosX = e.clientX;
                 lastPosY = e.clientY;
             }
-            if (canvas.isDrawingMode && canvas._currentPath) {
-                 const currentDistance = calculatePathDistance(canvas._currentPath);
+            if (canvas.isDrawingMode && isDrawing && currentPathRef.current) {
+                 const currentDistance = calculatePathDistance(currentPathRef.current);
                  setDrawingDistance(currentDistance);
             }
         });
@@ -242,6 +274,7 @@ export function InteractiveMap() {
                 canvas.setViewportTransform(canvas.viewportTransform);
             }
             isDragging = false;
+            canvas.selection = true;
         });
 
 
