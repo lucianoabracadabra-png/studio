@@ -63,7 +63,7 @@ export function InteractiveMap() {
                 obj.selectable = false;
                 obj.evented = false;
             });
-        } else {
+        } else { // pan
             canvas.isDrawingMode = false;
             canvas.selection = true;
              canvas.forEachObject(obj => {
@@ -214,7 +214,7 @@ export function InteractiveMap() {
                     }
                 } else if (activeTool === 'draw') {
                     setIsDrawing(true);
-                    currentPathRef.current = null;
+                    // fabric.js will create the path, we listen for path:created
                 }
             });
             
@@ -226,7 +226,6 @@ export function InteractiveMap() {
                 currentPathRef.current = path;
                 const finalDistance = calculatePathDistance(path);
                 setDrawingDistance(finalDistance);
-                setIsDrawing(false);
             });
 
             canvas.on('mouse:move', function(opt) {
@@ -240,9 +239,11 @@ export function InteractiveMap() {
                     }
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
-                } else if (activeTool === 'draw' && isDrawing && currentPathRef.current) {
-                     const currentDistance = calculatePathDistance(currentPathRef.current);
-                     setDrawingDistance(currentDistance);
+                } else if (activeTool === 'draw' && isDrawing) {
+                    // This logic is tricky with fabric's free drawing mode.
+                    // The 'path:created' event is more reliable for the final path.
+                    // For real-time updates, we would need to inspect the private '_currentPath'
+                    // which is not ideal. Let's stick to updating on path:created and mouse:up for now.
                 }
             });
 
@@ -252,6 +253,7 @@ export function InteractiveMap() {
                  }
                  if(activeTool === 'draw') {
                      setIsDrawing(false);
+                     currentPathRef.current = null;
                  }
             })
             
