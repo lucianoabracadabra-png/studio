@@ -33,7 +33,7 @@ const prompt = ai.definePrompt({
   name: 'generateNpcPrompt',
   input: {schema: GenerateNpcInputSchema},
   output: {schema: GenerateNpcOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-pro',
   prompt: `You are a creative game master assistant, skilled at creating compelling and unique non-player characters (NPCs) for role-playing games.
 
   Generate a character name, detailed description, and backstory, and set the name, description, and backstory output fields appropriately.

@@ -31,7 +31,7 @@ const prompt = ai.definePrompt({
   name: 'generateEnvironmentDescriptionPrompt',
   input: {schema: GenerateEnvironmentDescriptionInputSchema},
   output: {schema: GenerateEnvironmentDescriptionOutputSchema},
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-pro',
   prompt: `You are a fantasy world builder, skilled at writing rich and detailed descriptions of environments for tabletop role-playing games.
 
   Generate a description of the following environment, based on the user input.
