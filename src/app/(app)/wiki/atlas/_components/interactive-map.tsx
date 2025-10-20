@@ -27,21 +27,21 @@ const DrawingLayer = ({ points, mapZoom }: { points: Point[], mapZoom: number })
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 
     return (
-        <path 
-            d={pathData} 
-            strokeWidth={4 / mapZoom} 
-            stroke="hsl(var(--accent))" 
-            fill="none" 
-            strokeLinejoin="round" 
-            strokeLinecap="round" 
-            style={{ filter: `drop-shadow(0 0 5px hsl(var(--accent)))`}} 
+        <path
+            d={pathData}
+            strokeWidth={4 / mapZoom}
+            stroke="hsl(var(--accent))"
+            fill="none"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            style={{ filter: `drop-shadow(0 0 5px hsl(var(--accent)))`}}
         />
     );
 };
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
-        <motion.div 
+        <motion.div
             className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -137,7 +137,7 @@ export function InteractiveMap() {
         >
             <motion.div
                 className={cn(
-                    "relative w-full h-full overflow-hidden",
+                    "w-full h-full",
                     activeTool === 'pan' && "cursor-grab active:cursor-grabbing"
                 )}
                 style={{ x, y, scale: zoom }}
@@ -147,13 +147,10 @@ export function InteractiveMap() {
                 onMouseMove={handleInteractionMove}
                 onMouseUp={handleInteractionEnd}
                 onMouseLeave={handleInteractionEnd}
-                onTapStart={e => handleInteractionStart(e as any)}
-                onTap={e => handleInteractionMove(e as any)}
-                onTapCancel={handleInteractionEnd}
                 onClick={handleMapClick}
             >
                 <div
-                    className="absolute top-0 left-0"
+                    className="relative"
                     style={{ width: '2000px', height: '1500px' }}
                 >
                     <Image
@@ -162,7 +159,7 @@ export function InteractiveMap() {
                         layout="fill"
                         objectFit="cover"
                         priority
-                        className='select-none pointer-events-none'
+                        className='select-none pointer-events-none absolute top-0 left-0 z-10'
                         data-ai-hint={mapImage.imageHint}
                         draggable={false}
                     />
@@ -171,7 +168,7 @@ export function InteractiveMap() {
                     {pointsOfInterest.map(poi => (
                         <motion.div
                             key={poi.id}
-                            className="absolute z-10"
+                            className="absolute z-30"
                             style={{ left: `${poi.position.x}%`, top: `${poi.position.y}%` }}
                             initial={{ scale: 1 / zoom }}
                             animate={{ scale: 1 / zoom }}
@@ -186,7 +183,7 @@ export function InteractiveMap() {
                                         >
                                             <MapPin className={cn(
                                                 'h-8 w-8 text-destructive drop-shadow-lg transition-colors duration-300',
-                                                activePoi?.id === poi.id ? 'text-accent' : 'hover:text-accent/80'
+                                                activePoi?.id === poi.id ? 'text-accent' : ''
                                             )} style={{ filter: 'drop-shadow(0 0 5px hsl(var(--accent)))' }} />
                                         </button>
                                     </TooltipTrigger>
