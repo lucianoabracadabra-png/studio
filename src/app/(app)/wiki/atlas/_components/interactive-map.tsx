@@ -112,43 +112,33 @@ export function InteractiveMap() {
         let totalLength = 0;
         const pathCommands = path.path;
     
-        for (let i = 0; i < pathCommands.length; i++) {
+        for (let i = 1; i < pathCommands.length; i++) {
+            const prevCommand = pathCommands[i - 1];
             const command = pathCommands[i];
-            const commandType = command[0].toUpperCase();
-    
-            if (i > 0) {
-                const prevCommand = pathCommands[i - 1];
-                let x1: number, y1: number, x2: number, y2: number;
-    
-                if (prevCommand[0].toUpperCase() === 'C') { 
-                    x1 = prevCommand[5];
-                    y1 = prevCommand[6];
-                } else if (prevCommand[0].toUpperCase() === 'Q') { 
-                    x1 = prevCommand[3];
-                    y1 = prevCommand[4];
-                } else { 
-                    x1 = prevCommand[prevCommand.length - 2];
-                    y1 = prevCommand[prevCommand.length - 1];
-                }
-    
-                if (commandType === 'C') {
-                    x2 = command[5];
-                    y2 = command[6];
-                } else if (commandType === 'Q') {
-                    x2 = command[3];
-                    y2 = command[4];
-                } else { 
-                    x2 = command[1];
-                    y2 = command[2];
-                }
-    
-                if (x1 !== undefined && y1 !== undefined && x2 !== undefined && y2 !== undefined) {
-                    totalLength += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-                }
+
+            let x1: number, y1: number, x2: number, y2: number;
+
+            // Extract end point of the previous command
+            if (prevCommand.length > 2) {
+                x1 = prevCommand[prevCommand.length - 2];
+                y1 = prevCommand[prevCommand.length - 1];
+            } else {
+                // This case is unlikely for a continuous path, but as a fallback
+                continue;
             }
+
+            // Extract end point of the current command
+            if (command.length > 2) {
+                x2 = command[command.length - 2];
+                y2 = command[command.length - 1];
+            } else {
+                 continue;
+            }
+
+            totalLength += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         }
         
-        const baseMapZoom = 0.5; // The zoom level at which the map is initially rendered
+        const baseMapZoom = 0.5;
         return (totalLength / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
     }
 
@@ -214,7 +204,6 @@ export function InteractiveMap() {
                     }
                 } else if (activeTool === 'draw') {
                     setIsDrawing(true);
-                    // fabric.js will create the path, we listen for path:created
                 }
             });
             
@@ -240,10 +229,10 @@ export function InteractiveMap() {
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
                 } else if (activeTool === 'draw' && isDrawing) {
-                    // This logic is tricky with fabric's free drawing mode.
-                    // The 'path:created' event is more reliable for the final path.
-                    // For real-time updates, we would need to inspect the private '_currentPath'
-                    // which is not ideal. Let's stick to updating on path:created and mouse:up for now.
+                   if (currentPathRef.current) {
+                        const distance = calculatePathDistance(currentPathRef.current);
+                        setDrawingDistance(distance);
+                    }
                 }
             });
 
@@ -283,7 +272,7 @@ export function InteractiveMap() {
         
         initFabric();
 
-    }, []);
+    }, [activeTool]);
 
 
     return (
