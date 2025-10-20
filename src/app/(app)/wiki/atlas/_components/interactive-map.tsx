@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { fabric } from 'fabric';
+import type { fabric } from 'fabric';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { pointsOfInterest } from '@/lib/wiki-data';
 import { MapPin, ZoomIn, ZoomOut, Maximize, MousePointer, Pen, Eraser } from 'lucide-react';
@@ -153,132 +153,137 @@ export function InteractiveMap() {
     }
 
     useEffect(() => {
-        const canvas = new fabric.Canvas(canvasRef.current, {
-            width: canvasRef.current?.parentElement?.clientWidth,
-            height: canvasRef.current?.parentElement?.clientHeight,
-            selection: false, // selection managed by tool
-            backgroundColor: '#000',
-        });
-        fabricRef.current = canvas;
-
-        fabric.Image.fromURL(mapImage.imageUrl, (img) => {
-            canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-                originX: 'left',
-                originY: 'top',
-                selectable: false,
-                evented: false,
+        const initFabric = async () => {
+            const { fabric } = await import('fabric');
+            
+            const canvas = new fabric.Canvas(canvasRef.current, {
+                width: canvasRef.current?.parentElement?.clientWidth,
+                height: canvasRef.current?.parentElement?.clientHeight,
+                selection: false, // selection managed by tool
+                backgroundColor: '#000',
             });
-            canvas.setZoom(0.5);
+            fabricRef.current = canvas;
 
-            pointsOfInterest.forEach(poi => {
-                const pin = new fabric.Circle({
-                    radius: 10,
-                    fill: 'hsl(0, 70%, 60%)',
-                    stroke: 'white',
-                    strokeWidth: 2,
-                    left: (img.width || 2000) * (poi.position.x / 100),
-                    top: (img.height || 1500) * (poi.position.y / 100),
-                    originX: 'center',
-                    originY: 'center',
-                    hasControls: false,
-                    hasBorders: false,
-                    selectable: true,
-                    evented: true,
-                    // @ts-ignore - custom property
-                    poiData: poi, 
+            fabric.Image.fromURL(mapImage.imageUrl, (img) => {
+                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                    originX: 'left',
+                    originY: 'top',
+                    selectable: false,
+                    evented: false,
                 });
-    
-                canvas.add(pin);
+                canvas.setZoom(0.5);
+
+                pointsOfInterest.forEach(poi => {
+                    const pin = new fabric.Circle({
+                        radius: 10,
+                        fill: 'hsl(0, 70%, 60%)',
+                        stroke: 'white',
+                        strokeWidth: 2,
+                        left: (img.width || 2000) * (poi.position.x / 100),
+                        top: (img.height || 1500) * (poi.position.y / 100),
+                        originX: 'center',
+                        originY: 'center',
+                        hasControls: false,
+                        hasBorders: false,
+                        selectable: true,
+                        evented: true,
+                        // @ts-ignore - custom property
+                        poiData: poi, 
+                    });
+        
+                    canvas.add(pin);
+                });
+
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+
+            let isDragging = false;
+            let lastPosX: number, lastPosY: number;
+
+            canvas.on('mouse:down', (opt) => {
+                 if (activeTool === 'pan') {
+                    if (opt.target && 'poiData' in opt.target) {
+                        // @ts-ignore
+                        setActivePoi(opt.target.poiData);
+                        isDragging = false;
+                    } else {
+                         setActivePoi(null);
+                         isDragging = true;
+                         lastPosX = opt.e.clientX;
+                         lastPosY = opt.e.clientY;
+                    }
+                } else if (canvas.isDrawingMode) {
+                    setIsDrawing(true);
+                    currentPathRef.current = null;
+                }
+            });
+            
+            canvas.on('path:created', (opt) => {
+                // @ts-ignore
+                const path = opt.path as fabric.Path;
+                path.selectable = false;
+                path.evented = false;
+                currentPathRef.current = path;
+                const finalDistance = calculatePathDistance(path);
+                setDrawingDistance(finalDistance);
+                setIsDrawing(false);
             });
 
-            canvas.renderAll();
-        }, { crossOrigin: 'anonymous' });
+            canvas.on('mouse:move', function(opt) {
+                if (activeTool === 'pan' && isDragging) {
+                    const e = opt.e;
+                    const vpt = canvas.viewportTransform;
+                    if (vpt) {
+                        vpt[4] += e.clientX - lastPosX;
+                        vpt[5] += e.clientY - lastPosY;
+                        canvas.requestRenderAll();
+                    }
+                    lastPosX = e.clientX;
+                    lastPosY = e.clientY;
+                } else if (canvas.isDrawingMode && isDrawing) {
+                     // The 'path:created' event handles the final path, but we can try to get the current one for real-time
+                     if (currentPathRef.current) {
+                        const currentDistance = calculatePathDistance(currentPathRef.current);
+                        setDrawingDistance(currentDistance);
+                     }
+                }
+            });
 
-        let isDragging = false;
-        let lastPosX: number, lastPosY: number;
-
-        canvas.on('mouse:down', (opt) => {
-             if (activeTool === 'pan') {
-                if (opt.target && 'poiData' in opt.target) {
-                    // @ts-ignore
-                    setActivePoi(opt.target.poiData);
+            canvas.on('mouse:up', () => {
+                 if (activeTool === 'pan') {
                     isDragging = false;
-                } else {
-                     setActivePoi(null);
-                     isDragging = true;
-                     lastPosX = opt.e.clientX;
-                     lastPosY = opt.e.clientY;
-                }
-            } else if (canvas.isDrawingMode) {
-                setIsDrawing(true);
-                currentPathRef.current = null;
-            }
-        });
-        
-        canvas.on('path:created', (opt) => {
-            // @ts-ignore
-            const path = opt.path as fabric.Path;
-            path.selectable = false;
-            path.evented = false;
-            currentPathRef.current = path;
-            const finalDistance = calculatePathDistance(path);
-            setDrawingDistance(finalDistance);
-            setIsDrawing(false);
-        });
-
-        canvas.on('mouse:move', function(opt) {
-            if (activeTool === 'pan' && isDragging) {
-                const e = opt.e;
-                const vpt = canvas.viewportTransform;
-                if (vpt) {
-                    vpt[4] += e.clientX - lastPosX;
-                    vpt[5] += e.clientY - lastPosY;
-                    canvas.requestRenderAll();
-                }
-                lastPosX = e.clientX;
-                lastPosY = e.clientY;
-            } else if (canvas.isDrawingMode && isDrawing) {
-                 // The 'path:created' event handles the final path, but we can try to get the current one for real-time
-                 // @ts-ignore This is an internal property, but useful here.
-                 const currentDrawingPath = canvas._currentPath;
-                 if (currentDrawingPath) {
-                    const currentDistance = calculatePathDistance(currentDrawingPath);
-                    setDrawingDistance(currentDistance);
                  }
-            }
-        });
+            })
+            
+            canvas.freeDrawingBrush.color = '#ef4444';
+            canvas.freeDrawingBrush.width = 5;
+            // @ts-ignore
+            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+                blur: 10,
+                color: '#ef4444',
+                offsetX: 0,
+                offsetY: 0
+            });
 
-        canvas.on('mouse:up', () => {
-             if (activeTool === 'pan') {
-                isDragging = false;
-             }
-        })
-        
-        canvas.freeDrawingBrush.color = '#ef4444';
-        canvas.freeDrawingBrush.width = 5;
-        // @ts-ignore
-        canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-            blur: 10,
-            color: '#ef4444',
-            offsetX: 0,
-            offsetY: 0
-        });
+            const handleResize = () => {
+                canvas.setWidth(canvasRef.current?.parentElement?.clientWidth || 0);
+                canvas.setHeight(canvasRef.current?.parentElement?.clientHeight || 0);
+                canvas.renderAll();
+            };
 
-        const handleResize = () => {
-            canvas.setWidth(canvasRef.current?.parentElement?.clientWidth || 0);
-            canvas.setHeight(canvasRef.current?.parentElement?.clientHeight || 0);
-            canvas.renderAll();
+            window.addEventListener('resize', handleResize);
+
+            toggleTool('pan');
+            
+            return () => {
+                window.removeEventListener('resize', handleResize);
+                canvas.dispose();
+            };
         };
-
-        window.addEventListener('resize', handleResize);
-
-        toggleTool('pan');
         
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            canvas.dispose();
-        };
-    }, []);
+        initFabric();
+
+    }, [activeTool]);
 
 
     return (
