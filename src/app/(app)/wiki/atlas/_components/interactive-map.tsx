@@ -46,19 +46,19 @@ const DrawingLayer = ({
     }
 
     return (
-        <>
+        <g>
             <path d={pathData} strokeWidth={3 / mapZoom} stroke="hsl(var(--accent))" fill="none" strokeLinejoin="round" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 3px hsl(var(--accent)))`}} />
             {ticks.map((tick, i) => (
                 <line key={i} x1={tick.x - 5/mapZoom} y1={tick.y} x2={tick.x + 5/mapZoom} y2={tick.y} stroke="hsl(var(--accent))" strokeWidth={4/mapZoom} transform={`rotate(90 ${tick.x} ${tick.y})`} />
             ))}
-        </>
+        </g>
     );
 };
 
 const DrawingToolbar = ({ onClear, distance, unit = 'km' }: { onClear: () => void, distance: number, unit?: string }) => {
     return (
         <motion.div 
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
@@ -88,7 +88,6 @@ export function InteractiveMap() {
     const [drawingDistance, setDrawingDistance] = useState(0);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapMotionRef = useRef<HTMLDivElement>(null);
     
     const PIXELS_PER_UNIT = 50;
     const UNIT_NAME = 'km';
@@ -107,7 +106,7 @@ export function InteractiveMap() {
     }
     
     const handleMapClick = (e: React.MouseEvent) => {
-        if (activeTool === 'pan' && e.target === mapMotionRef.current) {
+        if (activeTool === 'pan' && (e.target as HTMLElement).closest('.map-image-container')) {
             setActivePoi(null);
         }
     }
@@ -130,32 +129,31 @@ export function InteractiveMap() {
         setDrawingDistance(calculatedDistance);
     }, [drawingPoints]);
 
-    const getPointFromEvent = (e: MouseEvent<SVGElement>): Point => {
-        const mapRect = mapMotionRef.current!.getBoundingClientRect();
+    const getPointFromEvent = (e: MouseEvent<HTMLDivElement>): Point => {
         const containerRect = mapContainerRef.current!.getBoundingClientRect();
-        // Calculate cursor position relative to the viewport
         const clientX = e.clientX;
         const clientY = e.clientY;
         
-        // Calculate position inside the scaled and dragged map div
-        const mapX = (clientX - mapRect.left) / zoom;
-        const mapY = (clientY - mapRect.top) / zoom;
+        const mapX = (clientX - containerRect.left - x.get()) / zoom;
+        const mapY = (clientY - containerRect.top - y.get()) / zoom;
         
         return { x: mapX, y: mapY };
     }
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
         if (activeTool !== 'draw') return;
+        // Check if the click is on the map background, not on a UI element
+        if ((e.target as HTMLElement).closest('.map-ui-element')) return;
         e.preventDefault();
         setIsDrawing(true);
-        const newPoint = getPointFromEvent(e as any);
+        const newPoint = getPointFromEvent(e);
         setDrawingPoints([newPoint]);
     };
 
     const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         if (!isDrawing || activeTool !== 'draw') return;
         e.preventDefault();
-        const newPoint = getPointFromEvent(e as any);
+        const newPoint = getPointFromEvent(e);
         setDrawingPoints(prev => [...prev, newPoint]);
     };
     
@@ -174,14 +172,16 @@ export function InteractiveMap() {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
             style={{ cursor: activeTool === 'draw' ? 'crosshair' : 'default' }}
+            onClick={handleMapClick}
         >
             <motion.div
-                ref={mapMotionRef}
-                className={cn("absolute top-0 left-0", activeTool === 'pan' && "cursor-grab active:cursor-grabbing")}
+                className={cn(
+                    "absolute top-0 left-0 map-image-container",
+                    activeTool === 'pan' && "cursor-grab active:cursor-grabbing"
+                )}
                 style={{ x, y, scale: zoom, width: '2000px', height: '1500px' }}
                 drag={activeTool === 'pan'}
                 dragMomentum={false}
-                onClick={handleMapClick}
             >
                 <Image
                     src={mapImage.imageUrl}
@@ -193,20 +193,19 @@ export function InteractiveMap() {
                     data-ai-hint={mapImage.imageHint}
                     draggable={false}
                 />
-                
-                {/* SVG for drawing, now lives inside the scaled div to match coordinates */}
-                <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+
+                {/* SVG for drawing, correctly scaled with the map */}
+                <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-20">
                     <DrawingLayer points={drawingPoints} mapZoom={zoom} />
                 </svg>
 
                 {pointsOfInterest.map(poi => (
                     <motion.div
                         key={poi.id}
-                        className="absolute"
+                        className="absolute z-30"
                         style={{ 
                             left: `${poi.position.x}%`, 
                             top: `${poi.position.y}%`,
-                            transform: `scale(${1 / zoom}) translate(-50%, -100%)`
                         }}
                         initial={{ scale: 1/zoom }}
                         animate={{ scale: 1/zoom }}
@@ -217,7 +216,7 @@ export function InteractiveMap() {
                                 <TooltipTrigger asChild>
                                     <button 
                                         onClick={() => activeTool === 'pan' && setActivePoi(poi)} 
-                                        className='focus:outline-none' 
+                                        className='focus:outline-none -translate-x-1/2 -translate-y-full' 
                                         style={{ cursor: activeTool === 'pan' ? 'pointer' : 'default' }}
                                     >
                                         <MapPin className={cn(
@@ -235,7 +234,8 @@ export function InteractiveMap() {
                 ))}
             </motion.div>
 
-            <div className="absolute top-4 left-4 z-10">
+            {/* UI Elements - Should have highest z-index */}
+            <div className="absolute top-4 left-4 z-40 map-ui-element">
                 <ToggleGroup type="single" value={activeTool} onValueChange={(value) => setActiveTool(value as AtlasTool || 'pan')} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
                     <ToggleGroupItem value="pan" aria-label="Mover Mapa">
                         <MousePointer />
@@ -246,7 +246,7 @@ export function InteractiveMap() {
                 </ToggleGroup>
             </div>
 
-            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+            <div className="absolute top-4 right-4 flex flex-col gap-2 z-40 map-ui-element">
                 <Button size="icon" onClick={() => handleZoom('in')} variant="outline"><ZoomIn /></Button>
                 <Button size="icon" onClick={() => handleZoom('out')} variant="outline"><ZoomOut /></Button>
                 <Button size="icon" onClick={centerAndReset} variant="outline"><Maximize /></Button>
@@ -257,7 +257,7 @@ export function InteractiveMap() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
-                    className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20"
+                    className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 map-ui-element"
                 >
                     <Card className="w-80 glassmorphic-card">
                         <CardHeader>
