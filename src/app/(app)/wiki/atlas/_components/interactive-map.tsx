@@ -49,6 +49,7 @@ export function InteractiveMap() {
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [drawingDistance, setDrawingDistance] = useState(0);
     const [isDrawing, setIsDrawing] = useState(false);
+    const currentPathRef = useRef<fabric.Path | null>(null);
 
     const toggleTool = (tool: AtlasTool) => {
         setActiveTool(tool);
@@ -97,7 +98,27 @@ export function InteractiveMap() {
         objects.forEach(obj => canvas.remove(obj));
         setDrawingDistance(0);
         setIsDrawing(false);
+        currentPathRef.current = null;
         canvas.renderAll();
+    }
+    
+    const calculatePathDistance = (path: fabric.Path) => {
+        let totalLength = 0;
+        if (path.path) {
+             for (let i = 0; i < path.path.length - 1; i++) {
+                const p1Arr = path.path[i];
+                const p2Arr = path.path[i+1];
+                 if(p1Arr.length >= 3 && p2Arr.length >=3) {
+                    const p1 = { x: p1Arr[1], y: p1Arr[2] };
+                    const p2 = { x: p2Arr[1], y: p2Arr[2] };
+                    if(p1 && p2){
+                        totalLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                    }
+                }
+            }
+        }
+        const zoom = fabricRef.current?.getZoom() || 1;
+        return (totalLength / PIXELS_PER_UNIT / zoom) * UNIT_CONVERSION;
     }
 
     useEffect(() => {
@@ -119,7 +140,7 @@ export function InteractiveMap() {
             pointsOfInterest.forEach(poi => {
                 const pin = new fabric.Circle({
                     radius: 10,
-                    fill: 'hsl(var(--accent))',
+                    fill: 'hsl(0, 70%, 60%)',
                     stroke: 'white',
                     strokeWidth: 2,
                     left: (img.width || 2000) * (poi.position.x / 100),
@@ -144,32 +165,32 @@ export function InteractiveMap() {
             if (opt.target && 'poiData' in opt.target) {
                 // @ts-ignore
                 setActivePoi(opt.target.poiData);
-            } else {
+            } else if (!opt.target) {
                  setActivePoi(null);
             }
 
             if (canvas.isDrawingMode) {
                 setIsDrawing(true);
+                currentPathRef.current = null;
             }
         });
         
         canvas.on('path:created', (opt) => {
             // @ts-ignore
             const path = opt.path as fabric.Path;
-            let totalLength = 0;
-            if (path.path) {
-                for (let i = 0; i < path.path.length - 1; i++) {
-                    const p1 = { x: path.path[i][1], y: path.path[i][2] };
-                    const p2 = { x: path.path[i+1][1], y: path.path[i+1][2] };
-                     if(p1 && p2){
-                        totalLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-                    }
-                }
-            }
-            setDrawingDistance((totalLength / PIXELS_PER_UNIT) * UNIT_CONVERSION);
             path.selectable = false;
             path.evented = false;
+            currentPathRef.current = path;
+            const finalDistance = calculatePathDistance(path);
+            setDrawingDistance(finalDistance);
         });
+
+        canvas.on('mouse:up', () => {
+             if (canvas.isDrawingMode) {
+                // isDrawing is set to false here, but the toolbar remains
+                // until clearDrawing is called.
+             }
+        })
         
         canvas.freeDrawingBrush.color = '#ef4444';
         canvas.freeDrawingBrush.width = 5;
@@ -210,6 +231,10 @@ export function InteractiveMap() {
                 }
                 lastPosX = e.clientX;
                 lastPosY = e.clientY;
+            }
+            if (canvas.isDrawingMode && canvas._currentPath) {
+                 const currentDistance = calculatePathDistance(canvas._currentPath);
+                 setDrawingDistance(currentDistance);
             }
         });
         canvas.on('mouse:up', function(opt) {
