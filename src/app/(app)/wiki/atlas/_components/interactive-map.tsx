@@ -159,7 +159,7 @@ export function InteractiveMap() {
             const canvas = new fabric.Canvas(canvasRef.current, {
                 width: canvasRef.current?.parentElement?.clientWidth,
                 height: canvasRef.current?.parentElement?.clientHeight,
-                selection: false, // selection managed by tool
+                selection: false,
                 backgroundColor: '#000',
             });
             fabricRef.current = canvas;
@@ -185,8 +185,6 @@ export function InteractiveMap() {
                         originY: 'center',
                         hasControls: false,
                         hasBorders: false,
-                        selectable: true,
-                        evented: true,
                         // @ts-ignore - custom property
                         poiData: poi, 
                     });
@@ -194,6 +192,7 @@ export function InteractiveMap() {
                     canvas.add(pin);
                 });
 
+                toggleTool('pan');
                 canvas.renderAll();
             }, { crossOrigin: 'anonymous' });
 
@@ -201,7 +200,8 @@ export function InteractiveMap() {
             let lastPosX: number, lastPosY: number;
 
             canvas.on('mouse:down', (opt) => {
-                 if (activeTool === 'pan') {
+                const e = opt.e;
+                if (activeTool === 'pan') {
                     if (opt.target && 'poiData' in opt.target) {
                         // @ts-ignore
                         setActivePoi(opt.target.poiData);
@@ -209,10 +209,10 @@ export function InteractiveMap() {
                     } else {
                          setActivePoi(null);
                          isDragging = true;
-                         lastPosX = opt.e.clientX;
-                         lastPosY = opt.e.clientY;
+                         lastPosX = e.clientX;
+                         lastPosY = e.clientY;
                     }
-                } else if (canvas.isDrawingMode) {
+                } else if (activeTool === 'draw') {
                     setIsDrawing(true);
                     currentPathRef.current = null;
                 }
@@ -240,18 +240,18 @@ export function InteractiveMap() {
                     }
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
-                } else if (canvas.isDrawingMode && isDrawing) {
-                     // The 'path:created' event handles the final path, but we can try to get the current one for real-time
-                     if (currentPathRef.current) {
-                        const currentDistance = calculatePathDistance(currentPathRef.current);
-                        setDrawingDistance(currentDistance);
-                     }
+                } else if (activeTool === 'draw' && isDrawing && currentPathRef.current) {
+                     const currentDistance = calculatePathDistance(currentPathRef.current);
+                     setDrawingDistance(currentDistance);
                 }
             });
 
             canvas.on('mouse:up', () => {
                  if (activeTool === 'pan') {
                     isDragging = false;
+                 }
+                 if(activeTool === 'draw') {
+                     setIsDrawing(false);
                  }
             })
             
@@ -272,8 +272,6 @@ export function InteractiveMap() {
             };
 
             window.addEventListener('resize', handleResize);
-
-            toggleTool('pan');
             
             return () => {
                 window.removeEventListener('resize', handleResize);
@@ -283,7 +281,7 @@ export function InteractiveMap() {
         
         initFabric();
 
-    }, [activeTool]);
+    }, []);
 
 
     return (
