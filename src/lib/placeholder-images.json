@@ -3,25 +3,25 @@
     {
       "id": "campaign-1",
       "description": "A mystical forest with glowing mushrooms and ancient trees.",
-      "imageUrl": "https://picsum.photos/seed/101/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1649144389486-e3496dc3f0eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxteXN0aWNhbCUyMGZvcmVzdHxlbnwwfHx8fDE3NjA5NjYxOTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "mystical forest"
     },
     {
       "id": "campaign-2",
       "description": "The entrance to a dark, foreboding dungeon carved into a mountainside.",
-      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1756048996859-c7df472f4b82?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkdW5nZW9uJTIwZW50cmFuY2V8ZW58MHx8fHwxNzYwOTczOTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "dungeon entrance"
     },
     {
       "id": "campaign-3",
       "description": "A grand castle hall with high-arched ceilings and ornate tapestries.",
-      "imageUrl": "https://picsum.photos/seed/103/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1584148133977-c78fa4c00057?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjYXN0bGUlMjBoYWxsfGVufDB8fHx8MTc2MDg3MjA5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "castle hall"
     },
     {
       "id": "campaign-4",
       "description": "A bustling fantasy city market square filled with various races.",
-      "imageUrl": "https://picsum.photos/seed/104/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1722498256995-fcc480892dfd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwbWFya2V0fGVufDB8fHx8MTc2MDkxNTIzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "fantasy market"
     },
     {
@@ -33,8 +33,14 @@
     {
       "id": "campaign-6",
       "description": "A serene elven village built among the treetops.",
-      "imageUrl": "https://picsum.photos/seed/106/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1656853463386-fd79ea101702?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxlbHZlbiUyMHZpbGxhZ2V8ZW58MHx8fHwxNzYwOTczOTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "elven village"
+    },
+    {
+      "id": "world-map",
+      "description": "A high-resolution fantasy world map for the Atlas.",
+      "imageUrl": "https://images.unsplash.com/photo-1677295922463-147d7f2f718c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwd29ybGQlMjBtYXB8ZW58MHx8fHwxNzYwOTczOTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fantasy world map"
     }
   ]
 }

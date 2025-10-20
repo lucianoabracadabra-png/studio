@@ -205,20 +205,23 @@ export const pointsOfInterest = [
         name: 'Cidade das Mil Estrelas',
         position: { x: 55, y: 40 },
         portalId: 'grimorio-do-mundo',
-        pageId: 'historia-geografia',
     },
     {
         id: 'poi-2',
         name: 'Criptas Esquecidas',
         position: { x: 25, y: 60 },
         portalId: 'catalogo-da-criacao',
-        pageId: 'bestiario',
     },
     {
         id: 'poi-3',
         name: 'Montanha do Rei Carmesim',
         position: { x: 75, y: 75 },
-        portalId: 'grimorio-do-mundo',
-        pageId: 'faccoes-culturas',
+        portalId: 'manto-do-arquiteto',
+    },
+    {
+        id: 'poi-4',
+        name: 'Floresta Sussurrante',
+        position: { x: 30, y: 25 },
+        portalId: 'caminho-do-heroi',
     }
 ]

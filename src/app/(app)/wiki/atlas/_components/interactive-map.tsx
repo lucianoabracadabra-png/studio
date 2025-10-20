@@ -12,7 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 
-const mapImage = PlaceHolderImages.find(p => p.id === 'campaign-3')!;
+const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 export function InteractiveMap() {
     const [zoom, setZoom] = useState(1);
@@ -51,13 +51,13 @@ export function InteractiveMap() {
             >
                 <div className="relative" style={{ width: '2000px', height: '1500px' }}>
                     <Image
-                        src="https://picsum.photos/seed/worldmap/2000/1500"
-                        alt="Mapa do Mundo"
+                        src={mapImage.imageUrl}
+                        alt={mapImage.description}
                         layout="fill"
                         objectFit="cover"
                         priority
                         className='select-none'
-                        data-ai-hint="fantasy world map"
+                        data-ai-hint={mapImage.imageHint}
                     />
 
                     {pointsOfInterest.map(poi => (
