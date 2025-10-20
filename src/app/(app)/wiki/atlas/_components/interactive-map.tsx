@@ -46,7 +46,6 @@ const calculatePathDistance = (path: fabric.Path, canvas: fabric.Canvas) => {
     for (let i = 1; i < path.path.length; i++) {
         const p1 = path.path[i-1];
         const p2 = path.path[i];
-        // p1 and p2 are arrays like ['M', x, y] or ['L', x, y]
         const dx = p2[1] - p1[1];
         const dy = p2[2] - p1[2];
         distance += Math.sqrt(dx*dx + dy*dy);
@@ -67,9 +66,8 @@ export function InteractiveMap() {
     useEffect(() => {
         const initFabric = async () => {
             const { fabric: fabric_ } = await import('fabric');
-            const fabric = fabric_ as any;
             
-            const canvas = new fabric.Canvas(canvasRef.current, {
+            const canvas = new fabric_.Canvas(canvasRef.current, {
                 width: canvasRef.current?.parentElement?.clientWidth,
                 height: canvasRef.current?.parentElement?.clientHeight,
                 selection: false,
@@ -77,7 +75,7 @@ export function InteractiveMap() {
             });
             fabricRef.current = canvas;
 
-            fabric.Image.fromURL(mapImage.imageUrl, (img: fabric.Image) => {
+            fabric_.Image.fromURL(mapImage.imageUrl, (img: fabric.Image) => {
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
                     originX: 'left',
                     originY: 'top',
@@ -87,7 +85,7 @@ export function InteractiveMap() {
                 canvas.setZoom(0.5);
 
                 pointsOfInterest.forEach(poi => {
-                    const pin = new fabric.Circle({
+                    const pin = new fabric_.Circle({
                         radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
                         stroke: 'white',
@@ -117,7 +115,7 @@ export function InteractiveMap() {
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setActivePoi(null);
-                    currentPathRef.current = null;
+                    currentPathRef.current = null; // Clear previous path ref
                 } else if (opt.target && 'poiData' in opt.target) {
                     // @ts-ignore
                     setActivePoi(opt.target.poiData);
@@ -129,18 +127,11 @@ export function InteractiveMap() {
                     setActivePoi(null);
                 }
             });
-
+            
             canvas.on('before:path:created', (opt: { path: fabric.Path }) => {
                 currentPathRef.current = opt.path;
             });
             
-            canvas.on('path:created', (opt: { path: fabric.Path }) => {
-                const path = opt.path;
-                path.selectable = false;
-                path.evented = false;
-                // Keep currentPathRef until next drawing starts
-            });
-
             canvas.on('mouse:move', function(opt) {
                 if (activeTool === 'pan' && isDragging) {
                     const e = opt.e;
@@ -152,12 +143,9 @@ export function InteractiveMap() {
                     }
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
-                } else if (canvas.isDrawingMode && isDrawing) {
-                    const currentPath = canvas.getObjects().at(-1) as fabric.Path;
-                    if (currentPath && currentPath.type === 'path') {
-                        const distance = calculatePathDistance(currentPath, canvas);
-                        setDrawingDistance(distance);
-                    }
+                } else if (canvas.isDrawingMode && isDrawing && currentPathRef.current) {
+                    const distance = calculatePathDistance(currentPathRef.current, canvas);
+                    setDrawingDistance(distance);
                 }
             });
 
@@ -170,7 +158,7 @@ export function InteractiveMap() {
             
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5;
-            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+            canvas.freeDrawingBrush.shadow = new fabric_.Shadow({
                 blur: 10,
                 color: '#ef4444',
                 offsetX: 0,
@@ -230,6 +218,7 @@ export function InteractiveMap() {
         objects.forEach(obj => canvas.remove(obj));
         setDrawingDistance(0);
         setIsDrawing(false);
+        currentPathRef.current = null;
         canvas.renderAll();
     };
 
