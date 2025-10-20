@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'generateItemLootPrompt',
   input: {schema: GenerateItemLootInputSchema},
   output: {schema: GenerateItemLootOutputSchema},
-  model: 'googleai/gemini-1.0-pro',
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are an expert fantasy item generator for role-playing games. Given the item type, rarity, setting, and any additional details, you will generate a unique and interesting item for the players.
 
 Item Type: {{{itemType}}}
