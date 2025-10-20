@@ -46,13 +46,11 @@ const calculatePathDistance = (path: fabric.Path, canvas: fabric.Canvas) => {
     for (let i = 1; i < path.path.length; i++) {
         const p1 = path.path[i-1];
         const p2 = path.path[i];
+        // p1 and p2 are arrays like ['M', x, y] or ['L', x, y]
         const dx = p2[1] - p1[1];
         const dy = p2[2] - p1[2];
         distance += Math.sqrt(dx*dx + dy*dy);
     }
-    // A distância é calculada em pixels no espaço do canvas (não afetado pelo zoom).
-    // O desenho, no entanto, é feito no fundo "zoomed".
-    // Então, precisamos ajustar a distância de pixel pelo zoom atual para obter a distância "real" no mapa.
     return (distance / PIXELS_PER_UNIT) * (UNIT_CONVERSION / zoom);
 };
 
@@ -119,6 +117,7 @@ export function InteractiveMap() {
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setActivePoi(null);
+                    currentPathRef.current = null;
                 } else if (opt.target && 'poiData' in opt.target) {
                     // @ts-ignore
                     setActivePoi(opt.target.poiData);
@@ -139,7 +138,7 @@ export function InteractiveMap() {
                 const path = opt.path;
                 path.selectable = false;
                 path.evented = false;
-                currentPathRef.current = null;
+                // Keep currentPathRef until next drawing starts
             });
 
             canvas.on('mouse:move', function(opt) {
@@ -153,9 +152,12 @@ export function InteractiveMap() {
                     }
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
-                } else if (canvas.isDrawingMode && isDrawing && currentPathRef.current) {
-                    const distance = calculatePathDistance(currentPathRef.current, canvas);
-                    setDrawingDistance(distance);
+                } else if (canvas.isDrawingMode && isDrawing) {
+                    const currentPath = canvas.getObjects().at(-1) as fabric.Path;
+                    if (currentPath && currentPath.type === 'path') {
+                        const distance = calculatePathDistance(currentPath, canvas);
+                        setDrawingDistance(distance);
+                    }
                 }
             });
 
