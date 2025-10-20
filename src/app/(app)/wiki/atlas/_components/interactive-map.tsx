@@ -39,6 +39,24 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
     );
 }
 
+const calculatePathDistance = (path: fabric.Path, canvas: fabric.Canvas) => {
+    if (!path || !path.path) return 0;
+    const zoom = canvas.getZoom();
+    let distance = 0;
+    for (let i = 1; i < path.path.length; i++) {
+        const p1 = path.path[i-1];
+        const p2 = path.path[i];
+        const dx = p2[1] - p1[1];
+        const dy = p2[2] - p1[2];
+        distance += Math.sqrt(dx*dx + dy*dy);
+    }
+    // A distância é calculada em pixels no espaço do canvas (não afetado pelo zoom).
+    // O desenho, no entanto, é feito no fundo "zoomed".
+    // Então, precisamos ajustar a distância de pixel pelo zoom atual para obter a distância "real" no mapa.
+    return (distance / PIXELS_PER_UNIT) * (UNIT_CONVERSION / zoom);
+};
+
+
 export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<fabric.Canvas | null>(null);
@@ -48,26 +66,10 @@ export function InteractiveMap() {
     const [isDrawing, setIsDrawing] = useState(false);
     const currentPathRef = useRef<fabric.Path | null>(null);
 
-
-    const calculatePathDistance = useCallback((path: fabric.Path) => {
-        if (!path || !path.path) return 0;
-        const baseMapZoom = 0.5; // The zoom level at which the map is initially rendered
-        let distance = 0;
-        for (let i = 1; i < path.path.length; i++) {
-            const p1 = path.path[i-1];
-            const p2 = path.path[i];
-            const dx = p2[1] - p1[1];
-            const dy = p2[2] - p1[2];
-            distance += Math.sqrt(dx*dx + dy*dy);
-        }
-        return (distance / PIXELS_PER_UNIT) * (UNIT_CONVERSION / baseMapZoom);
-    }, []);
-
-
     useEffect(() => {
         const initFabric = async () => {
             const { fabric: fabric_ } = await import('fabric');
-            const fabric = fabric_ as any; // Use 'any' to bypass potential type issues with a dynamic import
+            const fabric = fabric_ as any;
             
             const canvas = new fabric.Canvas(canvasRef.current, {
                 width: canvasRef.current?.parentElement?.clientWidth,
@@ -86,7 +88,7 @@ export function InteractiveMap() {
                 });
                 canvas.setZoom(0.5);
 
-                 pointsOfInterest.forEach(poi => {
+                pointsOfInterest.forEach(poi => {
                     const pin = new fabric.Circle({
                         radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
@@ -114,13 +116,13 @@ export function InteractiveMap() {
 
             canvas.on('mouse:down', (opt) => {
                 const e = opt.e;
-                if (opt.target && 'poiData' in opt.target) {
+                if (canvas.isDrawingMode) {
+                    setIsDrawing(true);
+                    setActivePoi(null);
+                } else if (opt.target && 'poiData' in opt.target) {
                     // @ts-ignore
                     setActivePoi(opt.target.poiData);
                     isDragging = false;
-                } else if (canvas.isDrawingMode) {
-                    setIsDrawing(true);
-                    setActivePoi(null);
                 } else if(activeTool === 'pan'){
                     isDragging = true;
                     lastPosX = e.clientX;
@@ -151,8 +153,8 @@ export function InteractiveMap() {
                     }
                     lastPosX = e.clientX;
                     lastPosY = e.clientY;
-                } else if (canvas.isDrawingMode && currentPathRef.current) {
-                    const distance = calculatePathDistance(currentPathRef.current);
+                } else if (canvas.isDrawingMode && isDrawing && currentPathRef.current) {
+                    const distance = calculatePathDistance(currentPathRef.current, canvas);
                     setDrawingDistance(distance);
                 }
             });
