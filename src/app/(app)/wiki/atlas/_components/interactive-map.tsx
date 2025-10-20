@@ -171,12 +171,12 @@ export function InteractiveMap() {
             path.evented = false;
         });
         
-        canvas.freeDrawingBrush.color = 'hsl(var(--accent))';
+        canvas.freeDrawingBrush.color = '#ef4444';
         canvas.freeDrawingBrush.width = 5;
         // @ts-ignore
         canvas.freeDrawingBrush.shadow = new fabric.Shadow({
             blur: 10,
-            color: 'hsl(var(--accent))',
+            color: '#ef4444',
             offsetX: 0,
             offsetY: 0
         });
