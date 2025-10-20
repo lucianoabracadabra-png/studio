@@ -14,8 +14,9 @@ export default function WikiPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in-up" style={{ animationDelay: '200ms' }}>
         {portals.map((portal, i) => {
           const Icon = iconMap[portal.icon];
+          const href = portal.href || `/wiki/${portal.id}`;
           return (
-            <Link href={`/wiki/${portal.id}`} key={portal.id} className="block group">
+            <Link href={href} key={portal.id} className="block group">
               <Card className="glassmorphic-card h-full flex flex-col" style={{ animationDelay: `${i * 100}ms`}}>
                 <CardHeader className="flex-row items-center gap-4">
                   <div className="p-3 rounded-md">

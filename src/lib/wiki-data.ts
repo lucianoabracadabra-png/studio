@@ -1,4 +1,4 @@
-import { BookCopy, User, DraftingCompass, ScrollText, type LucideIcon } from "lucide-react";
+import { BookCopy, User, DraftingCompass, ScrollText, Map, type LucideIcon } from "lucide-react";
 
 export type WikiPage = {
     id: string;
@@ -15,9 +15,20 @@ export type Portal = {
     icon: keyof typeof iconMap;
     colorHue: number;
     pages: WikiPage[];
+    href?: string;
 };
 
 export const portals: Portal[] = [
+    {
+        id: 'atlas-do-mundo',
+        title: 'Atlas do Mundo',
+        subtitle: 'Explore o mapa interativo',
+        description: 'Navegue pelo mundo, descubra locais de poder, cidades vibrantes e reinos esquecidos. Cada ponto no mapa é um portal para uma nova história.',
+        icon: 'Map',
+        colorHue: 200,
+        href: '/wiki/atlas',
+        pages: [],
+    },
     {
         id: 'grimorio-do-mundo',
         title: 'O Grimório do Mundo',
@@ -185,4 +196,29 @@ export const iconMap: { [key: string]: LucideIcon } = {
     User,
     DraftingCompass,
     ScrollText,
+    Map
 };
+
+export const pointsOfInterest = [
+    {
+        id: 'poi-1',
+        name: 'Cidade das Mil Estrelas',
+        position: { x: 55, y: 40 },
+        portalId: 'grimorio-do-mundo',
+        pageId: 'historia-geografia',
+    },
+    {
+        id: 'poi-2',
+        name: 'Criptas Esquecidas',
+        position: { x: 25, y: 60 },
+        portalId: 'catalogo-da-criacao',
+        pageId: 'bestiario',
+    },
+    {
+        id: 'poi-3',
+        name: 'Montanha do Rei Carmesim',
+        position: { x: 75, y: 75 },
+        portalId: 'grimorio-do-mundo',
+        pageId: 'faccoes-culturas',
+    }
+]
