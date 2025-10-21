@@ -1,6 +1,6 @@
 'use client';
-import { useState, useRef, useEffect, useCallback } from 'react';
-import type { fabric } from 'fabric';
+import { useState, useRef, useEffect } from 'react';
+import type { fabric as FabricType } from 'fabric';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { pointsOfInterest } from '@/lib/wiki-data';
 import { ZoomIn, ZoomOut, Maximize, MousePointer, Pen, Eraser } from 'lucide-react';
@@ -39,7 +39,7 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
     );
 }
 
-const calculatePathDistance = (path: fabric.Path, canvas: fabric.Canvas) => {
+const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas) => {
     if (!path || !path.path) return 0;
     const zoom = canvas.getZoom();
     let distance = 0;
@@ -52,24 +52,28 @@ const calculatePathDistance = (path: fabric.Path, canvas: fabric.Canvas) => {
         distance += Math.sqrt(dx*dx + dy*dy);
     }
     // Divide by pixel-per-unit ratio and adjust for zoom
-    return (distance / PIXELS_PER_UNIT) * UNIT_CONVERSION;
+    return (distance / PIXELS_PER_UNIT) * UNIT_CONVERSION / zoom;
 };
 
 
 export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const fabricRef = useRef<fabric.Canvas | null>(null);
+    const fabricRef = useRef<FabricType.Canvas | null>(null);
+    const isDragging = useRef(false);
+    const lastPosX = useRef(0);
+    const lastPosY = useRef(0);
+    const currentPathRef = useRef<FabricType.Path | null>(null);
+    
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [drawingDistance, setDrawingDistance] = useState(0);
     const [isDrawing, setIsDrawing] = useState(false);
-    const currentPathRef = useRef<fabric.Path | null>(null);
 
     useEffect(() => {
         const initFabric = async () => {
-            const { fabric: fabric_ } = await import('fabric');
+            const { fabric } = await import('fabric');
             
-            const canvas = new fabric_.Canvas(canvasRef.current, {
+            const canvas = new fabric.Canvas(canvasRef.current, {
                 width: canvasRef.current?.parentElement?.clientWidth,
                 height: canvasRef.current?.parentElement?.clientHeight,
                 selection: false,
@@ -77,17 +81,15 @@ export function InteractiveMap() {
             });
             fabricRef.current = canvas;
 
-            fabric_.Image.fromURL(mapImage.imageUrl, (img: fabric.Image) => {
+            fabric.Image.fromURL(mapImage.imageUrl, (img: FabricType.Image) => {
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
                     originX: 'left',
                     originY: 'top',
-                    selectable: false,
-                    evented: false,
                 });
                 canvas.setZoom(0.5);
 
                 pointsOfInterest.forEach(poi => {
-                    const pin = new fabric_.Circle({
+                    const pin = new fabric.Circle({
                         radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
                         stroke: 'white',
@@ -105,62 +107,65 @@ export function InteractiveMap() {
                     });
                     canvas.add(pin);
                 });
-
                 canvas.renderAll();
             }, { crossOrigin: 'anonymous' });
 
-            let isDragging = false;
-            let lastPosX: number, lastPosY: number;
-
+            // --- Event Listeners ---
             canvas.on('mouse:down', (opt) => {
                 const e = opt.e;
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setActivePoi(null);
-                    currentPathRef.current = null; // Clear previous path ref
-                } else if (opt.target && 'poiData' in opt.target) {
+                    currentPathRef.current = null;
+                    return;
+                }
+                
+                // @ts-ignore
+                if (opt.target && opt.target.poiData) {
                     // @ts-ignore
                     setActivePoi(opt.target.poiData);
-                    isDragging = false;
-                } else if(activeTool === 'pan'){
-                    isDragging = true;
-                    lastPosX = e.clientX;
-                    lastPosY = e.clientY;
+                    return;
+                }
+                
+                if (activeTool === 'pan') {
+                    isDragging.current = true;
+                    lastPosX.current = e.clientX;
+                    lastPosY.current = e.clientY;
                     setActivePoi(null);
                 }
             });
-            
-            canvas.on('path:created', (opt: { path: fabric.Path }) => {
-                currentPathRef.current = opt.path;
-            });
-            
-            canvas.on('mouse:move', function(opt) {
-                if (activeTool === 'pan' && isDragging) {
+
+            canvas.on('mouse:move', (opt) => {
+                if (activeTool === 'pan' && isDragging.current) {
                     const e = opt.e;
                     const vpt = canvas.viewportTransform;
                     if (vpt) {
-                        vpt[4] += e.clientX - lastPosX;
-                        vpt[5] += e.clientY - lastPosY;
+                        vpt[4] += e.clientX - lastPosX.current;
+                        vpt[5] += e.clientY - lastPosY.current;
                         canvas.requestRenderAll();
                     }
-                    lastPosX = e.clientX;
-                    lastPosY = e.clientY;
+                    lastPosX.current = e.clientX;
+                    lastPosY.current = e.clientY;
                 } else if (canvas.isDrawingMode && isDrawing && currentPathRef.current) {
                     const distance = calculatePathDistance(currentPathRef.current, canvas);
                     setDrawingDistance(distance);
                 }
             });
-
+            
             canvas.on('mouse:up', () => {
-                 isDragging = false;
+                 isDragging.current = false;
                  if (isDrawing) {
-                     setIsDrawing(false);
+                    setIsDrawing(false);
                  }
+            });
+
+            canvas.on('before:path:created', (opt: { path: FabricType.Path }) => {
+                currentPathRef.current = opt.path;
             });
             
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5;
-            canvas.freeDrawingBrush.shadow = new fabric_.Shadow({
+            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
                 blur: 10,
                 color: '#ef4444',
                 offsetX: 0,
@@ -172,7 +177,6 @@ export function InteractiveMap() {
                 canvas.setHeight(canvasRef.current?.parentElement?.clientHeight || 0);
                 canvas.renderAll();
             };
-
             window.addEventListener('resize', handleResize);
             
             return () => {
@@ -185,25 +189,24 @@ export function InteractiveMap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const toggleTool = (tool: AtlasTool) => {
-        setActiveTool(tool);
+    // Effect to handle tool switching
+    useEffect(() => {
         const canvas = fabricRef.current;
         if (!canvas) return;
 
-        if (tool === 'draw') {
+        if (activeTool === 'draw') {
             canvas.isDrawingMode = true;
         } else { // pan
             canvas.isDrawingMode = false;
         }
-        canvas.renderAll();
-    };
+    }, [activeTool]);
 
     const handleZoom = (direction: 'in' | 'out') => {
         const canvas = fabricRef.current;
         if (!canvas) return;
         const zoom = canvas.getZoom();
         const newZoom = direction === 'in' ? zoom * 1.2 : zoom / 1.2;
-        canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), Math.max(0.2, Math.min(5, newZoom)));
+        canvas.zoomToPoint({ x: canvas.width / 2, y: canvas.height / 2 }, Math.max(0.2, Math.min(5, newZoom)));
     };
     
     const centerAndReset = () => {
@@ -231,7 +234,7 @@ export function InteractiveMap() {
             <canvas ref={canvasRef} />
 
             <div className="absolute top-4 left-4 z-40">
-                <ToggleGroup type="single" value={activeTool} onValueChange={(value) => value && toggleTool(value as AtlasTool)} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
+                <ToggleGroup type="single" value={activeTool} onValueChange={(value) => value && setActiveTool(value as AtlasTool)} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
                     <ToggleGroupItem value="pan" aria-label="Mover Mapa"><MousePointer /></ToggleGroupItem>
                     <ToggleGroupItem value="draw" aria-label="Desenhar Rota"><Pen /></ToggleGroupItem>
                 </ToggleGroup>
