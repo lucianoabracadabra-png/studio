@@ -46,11 +46,13 @@ const calculatePathDistance = (path: fabric.Path, canvas: fabric.Canvas) => {
     for (let i = 1; i < path.path.length; i++) {
         const p1 = path.path[i-1];
         const p2 = path.path[i];
+        // p1 and p2 are arrays like ['M', x, y] or ['L', x, y]
         const dx = p2[1] - p1[1];
         const dy = p2[2] - p1[2];
         distance += Math.sqrt(dx*dx + dy*dy);
     }
-    return (distance / PIXELS_PER_UNIT) * (UNIT_CONVERSION / zoom);
+    // Divide by pixel-per-unit ratio and adjust for zoom
+    return (distance / PIXELS_PER_UNIT) * UNIT_CONVERSION;
 };
 
 
@@ -128,7 +130,7 @@ export function InteractiveMap() {
                 }
             });
             
-            canvas.on('before:path:created', (opt: { path: fabric.Path }) => {
+            canvas.on('path:created', (opt: { path: fabric.Path }) => {
                 currentPathRef.current = opt.path;
             });
             
@@ -201,7 +203,7 @@ export function InteractiveMap() {
         if (!canvas) return;
         const zoom = canvas.getZoom();
         const newZoom = direction === 'in' ? zoom * 1.2 : zoom / 1.2;
-        canvas.setZoom(Math.max(0.2, Math.min(5, newZoom)));
+        canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), Math.max(0.2, Math.min(5, newZoom)));
     };
     
     const centerAndReset = () => {
