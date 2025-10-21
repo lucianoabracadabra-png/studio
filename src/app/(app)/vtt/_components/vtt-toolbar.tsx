@@ -2,40 +2,41 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ZoomIn, ZoomOut, Maximize, MousePointer, Ruler, Cloud, Pen, Zap } from 'lucide-react';
+import { Users, PenTool, Cloud, Layers, Swords, Settings, LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { VttTool } from './vtt-layout';
+
+export type VttTool = 'tokens' | 'drawing' | 'fog' | 'layers' | 'combat' | 'settings';
 
 interface VttToolbarProps {
-    activeTool: VttTool;
-    onToolSelect: (tool: VttTool) => void;
-    onZoomIn: () => void;
-    onZoomOut: () => void;
-    onCenter: () => void;
-    zoomLevel: number;
+    activeTool: VttTool | null;
+    onToolToggle: (tool: VttTool) => void;
 }
 
-const mainTools: { id: VttTool, label: string, icon: React.ElementType }[] = [
-    { id: 'select', label: 'Selecionar & Mover', icon: MousePointer },
-    { id: 'measure', label: 'Medir Distância', icon: Ruler },
+const tools: { id: VttTool, label: string, icon: LucideIcon }[] = [
+    { id: 'tokens', label: 'Tokens', icon: Users },
+    { id: 'drawing', label: 'Desenho e Medição', icon: PenTool },
     { id: 'fog', label: 'Névoa de Guerra', icon: Cloud },
-    { id: 'draw', label: 'Desenhar', icon: Pen },
-    { id: 'ping', label: 'Pingar no Mapa', icon: Zap },
-]
+    { id: 'layers', label: 'Camadas do Mapa', icon: Layers },
+    { id: 'combat', label: 'Rastreador de Combate', icon: Swords },
+    { id: 'settings', label: 'Configurações', icon: Settings },
+];
 
-export function VttToolbar({ activeTool, onToolSelect, onZoomIn, onZoomOut, onCenter, zoomLevel }: VttToolbarProps) {
+export function VttToolbar({ activeTool, onToolToggle }: VttToolbarProps) {
     return (
-        <div className='h-full w-16 bg-card/90 border-r border-white/10 flex flex-col items-center p-2 gap-2'>
-            {mainTools.map(tool => (
+        <div className='absolute top-0 left-0 h-full w-16 bg-gray-900/80 border-r border-white/10 flex flex-col items-center p-2 gap-2 z-20'>
+            {tools.map(tool => (
                 <TooltipProvider key={tool.id}>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button 
-                                variant={activeTool === tool.id ? 'secondary' : 'ghost'} 
+                                variant={'ghost'} 
                                 size="icon" 
-                                onClick={() => onToolSelect(tool.id)}
-                                className="h-12 w-12"
+                                onClick={() => onToolToggle(tool.id)}
+                                className={cn(
+                                    "h-12 w-12 text-white/70 hover:text-white hover:bg-white/10 transition-all",
+                                    activeTool === tool.id && "text-cyan-400 bg-cyan-400/10 shadow-[0_0_15px_rgba(74,222,222,0.5)]"
+                                )}
                             >
                                 <tool.icon />
                             </Button>
@@ -46,32 +47,6 @@ export function VttToolbar({ activeTool, onToolSelect, onZoomIn, onZoomOut, onCe
                     </Tooltip>
                 </TooltipProvider>
             ))}
-            <div className='flex-grow' />
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button variant="ghost" size="icon" onClick={onZoomIn} className="h-10 w-10"><ZoomIn /></Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right"><p>Aproximar</p></TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-            <div className="font-mono text-xs p-1 rounded-md bg-muted">{Math.round(zoomLevel * 100)}%</div>
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={onZoomOut} className="h-10 w-10"><ZoomOut /></Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right"><p>Afastar</p></TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-             <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={onCenter} className="h-10 w-10"><Maximize /></Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right"><p>Centralizar Mapa</p></TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
         </div>
     )
 }

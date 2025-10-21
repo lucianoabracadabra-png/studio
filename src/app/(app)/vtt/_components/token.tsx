@@ -16,9 +16,10 @@ interface TokenProps {
   mapZoom: number;
   shape: TokenShape;
   isActive: boolean;
+  isDraggingDisabled?: boolean; // Added this prop
 }
 
-export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape, isActive }: TokenProps) {
+export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, mapZoom, shape, isActive, isDraggingDisabled }: TokenProps) {
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     onDragEnd(id, info);
@@ -28,7 +29,7 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
 
   return (
     <motion.div
-      drag
+      drag={!isDraggingDisabled} // Use the prop here
       onDragEnd={handleDragEnd}
       dragMomentum={false}
       initial={false}
@@ -56,7 +57,7 @@ export function Token({ id, name, imageUrl, color, initialPosition, onDragEnd, m
           height={50}
           className={cn(
               "object-cover w-full h-full pointer-events-none select-none",
-              shape === 'circle' ? 'rounded-full' : ''
+              shape === 'circle' ? '' : ''
             )}
         />
       </div>

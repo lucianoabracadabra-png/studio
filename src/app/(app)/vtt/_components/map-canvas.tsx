@@ -3,8 +3,9 @@
 import React, { useRef } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import { Token } from './token';
-import type { Token as TokenType, VttState, Point } from './vtt-layout';
-import type { VttTool } from './vtt-layout';
+import { DrawingLayer } from './drawing-layer';
+import type { Token as TokenType, VttState, Point, VttTool } from './vtt-layout';
+import type { DraftShape } from './drawing-layer'; // Import DraftShape
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -14,8 +15,10 @@ interface MapCanvasProps {
   onTokenDragEnd: (id: number, info: PanInfo) => void;
   mapState: VttState['map'];
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
-  activeTool: VttTool;
   layers: VttState['layers'];
+  drawingState: VttState['drawing'];
+  onAddShape: (shape: DraftShape) => void; // Correctly use DraftShape
+  activeTool: VttTool | null;
 }
 
 const GridLayer = ({ gridSize, mapDimensions }: { gridSize: number, mapDimensions: { width: number, height: number }}) => {
@@ -32,27 +35,33 @@ const GridLayer = ({ gridSize, mapDimensions }: { gridSize: number, mapDimension
     )
 }
 
-export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, setMapState, activeTool, layers }: MapCanvasProps) {
+export function MapCanvas({ 
+    tokens, 
+    activeTokenId, 
+    onTokenDragEnd, 
+    mapState, 
+    setMapState, 
+    layers, 
+    drawingState, 
+    onAddShape,
+    activeTool
+}: MapCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   
   const handleMapDrag = (event: any, info: any) => {
-    if(activeTool === 'select' || activeTool === 'measure') {
+    if(activeTool === 'select') {
         const currentPosition = mapState.position;
         setMapState(prev => ({ ...prev, position: { x: currentPosition.x + info.delta.x, y: currentPosition.y + info.delta.y }}));
     }
   };
   
   const getCursor = () => {
-    switch (activeTool) {
-      case 'select': return 'grab';
-      case 'measure': return 'crosshair';
-      case 'fog': return 'cell';
-      case 'ping': return 'pointer';
-      default: return 'default';
-    }
+    if (drawingState.activeTool) return 'crosshair';
+    if (activeTool === 'select') return 'grab';
+    return 'default';
   }
 
-  const isPanDisabled = activeTool !== 'select' && activeTool !== 'measure';
+  const isPanDisabled = activeTool !== 'select' || !!drawingState.activeTool;
 
   return (
     <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative" style={{ cursor: getCursor() }}>
@@ -60,6 +69,12 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
         drag={!isPanDisabled}
         dragMomentum={false}
         onDrag={handleMapDrag}
+        onDragStart={() => {
+            if(activeTool === 'select') document.body.style.cursor = 'grabbing';
+        }}
+        onDragEnd={() => {
+            if(activeTool === 'select') document.body.style.cursor = 'grab';
+        }}
         className={cn("absolute top-0 left-0", !mapState.url && "grass-texture")}
         style={{ 
           x: mapState.position.x, 
@@ -80,6 +95,20 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
         />}
 
         {layers.isGridVisible && <GridLayer gridSize={50} mapDimensions={mapState.dimensions} />}
+        
+        <motion.div 
+            className="absolute top-0 left-0"
+            style={{
+                width: mapState.dimensions.width,
+                height: mapState.dimensions.height,
+                x: -mapState.position.x / mapState.zoom,
+                y: -mapState.position.y / mapState.zoom,
+            }}
+        >
+            {drawingState.shapes.map(shape => (
+                <div key={shape.id}></div>
+            ))}
+        </motion.div>
 
         <div className="absolute top-0 left-0 w-full h-full">
           {tokens.map(token => (
@@ -94,9 +123,19 @@ export function MapCanvas({ tokens, activeTokenId, onTokenDragEnd, mapState, set
               mapZoom={mapState.zoom}
               shape={token.shape}
               isActive={token.id === activeTokenId}
+              isDraggingDisabled={!!drawingState.activeTool}
             />
           ))}
         </div>
+
+         <DrawingLayer 
+            width={mapState.dimensions.width}
+            height={mapState.dimensions.height}
+            activeDrawingTool={drawingState.activeTool}
+            drawingOptions={drawingState.options}
+            onShapeAdd={onAddShape}
+        />
+
       </motion.div>
     </div>
   );

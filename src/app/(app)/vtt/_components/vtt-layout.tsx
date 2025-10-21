@@ -2,14 +2,17 @@
 
 import React, { useState } from 'react';
 import { MapCanvas } from './map-canvas';
-import { VttSidebar } from './vtt-sidebar';
+import { VttToolbar, VttTool } from './vtt-toolbar';
+import { ToolPanelContainer } from './tool-panel-container';
 import type { PanInfo } from 'framer-motion';
+import type { Shape, DraftShape } from './drawing-layer';
 
-export type TokenShape = 'circle' | 'square';
-export type TokenType = 'hero' | 'enemy';
-export type VttTool = 'select' | 'measure' | 'fog' | 'ping';
+// Core Types
 export type Point = { x: number, y: number };
 
+// Token Types
+export type TokenShape = 'circle' | 'square';
+export type TokenType = 'hero' | 'enemy';
 export interface Token {
   id: number;
   name: string;
@@ -20,6 +23,15 @@ export interface Token {
   type: TokenType;
 }
 
+// Drawing Types
+export type DrawingToolType = 'circle' | 'square' | 'cone' | 'freehand' | 'ruler';
+export interface DrawingOptions {
+    color: string;
+    fill: boolean;
+    strokeWidth: number;
+}
+
+// VTT State
 export interface VttState {
   map: {
     url: string;
@@ -37,8 +49,10 @@ export interface VttState {
     turnOrder: number[];
     activeTurnIndex: number;
   };
-  ui: {
-    activeTool: VttTool;
+  drawing: {
+    activeTool: DrawingToolType | null;
+    options: DrawingOptions;
+    shapes: Shape[];
   };
 }
 
@@ -49,7 +63,10 @@ const initialVttState: VttState = {
     position: { x: 0, y: 0 },
     dimensions: { width: 2560, height: 1440 }
   },
-  tokens: [],
+  tokens: [
+      { id: 1, name: 'Player 1', imageUrl: '/tokens/token-1.png', color: '#3b82f6', position: { x: 600, y: 800 }, shape: 'circle', type: 'hero' },
+      { id: 2, name: 'Goblin A', imageUrl: '/tokens/token-2.png', color: '#ef4444', position: { x: 800, y: 750 }, shape: 'square', type: 'enemy' },
+  ],
   layers: {
     isFogOfWarActive: false,
     isLightLayerActive: false,
@@ -59,27 +76,26 @@ const initialVttState: VttState = {
     turnOrder: [],
     activeTurnIndex: -1,
   },
-  ui: {
-    activeTool: 'select',
-  },
+  drawing: {
+    activeTool: null,
+    options: {
+        color: '#ff0000',
+        fill: false,
+        strokeWidth: 3,
+    },
+    shapes: [],
+  }
 };
 
 export function VttLayout() {
   const [vttState, setVttState] = useState<VttState>(initialVttState);
+  const [activeTool, setActiveTool] = useState<VttTool | null>('select'); // Default to select
 
-  const handleZoom = (newZoom: number) => {
-    setVttState(prev => ({ ...prev, map: {...prev.map, zoom: Math.max(0.1, Math.min(3, newZoom))} }));
-  };
-
-  const centerMap = () => {
-    setVttState(prev => ({
-        ...prev,
-        map: {
-            ...prev.map,
-            position: {x: 0, y: 0 },
-            zoom: 0.5
-        }
-    }))
+  const handleToolToggle = (tool: VttTool) => {
+    setActiveTool(prev => prev === tool ? null : tool);
+    if (tool !== 'drawing') {
+      setDrawing(prev => ({ ...prev, activeTool: null }));
+    }
   };
 
   const setTokens = (updater: React.SetStateAction<VttState['tokens']>) => {
@@ -103,9 +119,19 @@ export function VttLayout() {
   const setCombat = (updater: React.SetStateAction<VttState['combat']>) => {
     setVttState(prev => ({ ...prev, combat: typeof updater === 'function' ? updater(prev.combat) : updater }));
   }
+
+  const setDrawing = (updater: React.SetStateAction<VttState['drawing']>) => {
+    setVttState(prev => ({ ...prev, drawing: typeof updater === 'function' ? updater(prev.drawing) : updater }));
+  }
   
-  const setActiveTool = (tool: VttTool) => {
-      setVttState(prev => ({ ...prev, ui: { ...prev.ui, activeTool: tool }}));
+  const handleAddShape = (draftShape: DraftShape) => {
+    const { zoom } = vttState.map;
+    const completeShape: Shape = {
+      ...draftShape,
+      id: Date.now().toString(),
+      points: draftShape.points.map(p => ({ x: p.x / zoom, y: p.y / zoom })),
+    };
+    setDrawing(prev => ({ ...prev, shapes: [...prev.shapes, completeShape]}));
   }
 
   const handleTokenDragEnd = (id: number, info: PanInfo) => {
@@ -128,28 +154,23 @@ export function VttLayout() {
   };
 
   return (
-    <div className="w-full h-full grid grid-cols-[1fr_auto] bg-black">
-      <div className="flex-grow h-full relative">
-        <MapCanvas 
-          tokens={vttState.tokens}
-          activeTokenId={vttState.combat.turnOrder[vttState.combat.activeTurnIndex]}
-          onTokenDragEnd={handleTokenDragEnd}
-          mapState={vttState.map}
-          setMapState={setMapState}
-          activeTool={vttState.ui.activeTool}
-          layers={vttState.layers}
-        />
-      </div>
-      <VttSidebar
-        vttState={vttState}
-        setTokens={setTokens}
+    <div className="w-full h-full bg-black relative">
+      <VttToolbar activeTool={activeTool} onToolToggle={handleToolToggle} />
+      <ToolPanelContainer 
+        activeTool={activeTool} 
+        drawingState={vttState.drawing}
+        setDrawingState={setDrawing}
+      />
+      <MapCanvas 
+        tokens={vttState.tokens}
+        activeTokenId={vttState.combat.turnOrder[vttState.combat.activeTurnIndex]}
+        onTokenDragEnd={handleTokenDragEnd}
+        mapState={vttState.map}
         setMapState={setMapState}
-        setLayers={setLayers}
-        setCombat={setCombat}
-        onToolSelect={setActiveTool}
-        onZoomIn={() => handleZoom(vttState.map.zoom * 1.2)}
-        onZoomOut={() => handleZoom(vttState.map.zoom / 1.2)}
-        onCenter={centerMap}
+        layers={vttState.layers}
+        drawingState={vttState.drawing}
+        onAddShape={handleAddShape}
+        activeTool={activeTool}
       />
     </div>
   );

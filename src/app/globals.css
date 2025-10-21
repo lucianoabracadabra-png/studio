@@ -204,7 +204,7 @@
 
   /* ESTRUTURA DE ATRIBUTOS E PERÍCIAS */
   .sub-painel { @apply bg-card/60 border border-white/10 rounded-lg; }
-  .atributos-grid-interno { @apply grid grid-cols-1 md:grid-cols-2 gap-x-5; }
+  .atributos-grid-interno { @apply grid grid-cols-2 gap-5; }
   .pericias-lista { @apply flex flex-col; }
   .item-lista { @apply flex flex-col py-2; }
   .item-header { @apply flex justify-between items-center w-full; }
