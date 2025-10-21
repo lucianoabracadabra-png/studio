@@ -17,8 +17,6 @@ type AtlasTool = 'pan' | 'draw';
 const PIXELS_PER_UNIT = 50;
 const UNIT_NAME = 'km';
 const UNIT_CONVERSION = 10;
-const THROTTLE_PIXELS = 10;
-
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -43,21 +41,22 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
 
 const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas) => {
     if (!path || !path.path) return 0;
-    // Fabric's path length calculation is not public, so we estimate it.
+    
     let length = 0;
-    for(let i = 0; i < path.path.length - 1; i++) {
-        const p1 = path.path[i];
-        const p2 = path.path[i+1];
-        if (p1[0] === 'M' || p2[0] === 'M') continue;
-        const x1 = p1[p1.length - 2];
-        const y1 = p1[p1.length - 1];
-        const x2 = p2[p2.length - 2];
-        const y2 = p2[p2.length - 1];
-        length += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    // Fabric's native path length calculation seems to be complex/private, let's estimate
+    for(let i = 0; i < path.path.length; i++) {
+        const p1Info = path.path[i];
+        const p2Info = path.path[i+1];
+        
+        if (p1Info && p2Info && p1Info.length >= 3 && p2Info.length >= 3) {
+            const p1 = { x: p1Info[1], y: p1Info[2] };
+            const p2 = { x: p2Info[1], y: p2Info[2] };
+            length += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
     }
 
     const zoom = canvas.getZoom();
-    return (length / zoom) / PIXELS_PER_UNIT * UNIT_CONVERSION;
+    return (length) / PIXELS_PER_UNIT * UNIT_CONVERSION;
 };
 
 
@@ -94,10 +93,10 @@ export function InteractiveMap() {
 
                 pointsOfInterest.forEach(poi => {
                     const pin = new fabric.Circle({
-                        radius: 10 / canvas.getZoom(),
+                        radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
                         stroke: 'white',
-                        strokeWidth: 2 / canvas.getZoom(),
+                        strokeWidth: 2,
                         left: (img.width || 2000) * (poi.position.x / 100),
                         top: (img.height || 1500) * (poi.position.y / 100),
                         originX: 'center',
@@ -129,7 +128,7 @@ export function InteractiveMap() {
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setDrawingDistance(0);
-                    currentPathRef.current = null; // Reset path ref
+                    currentPathRef.current = null;
                     return;
                 }
                 
@@ -161,7 +160,6 @@ export function InteractiveMap() {
                     lastPosXRef.current = e.clientX;
                     lastPosYRef.current = e.clientY;
                 } else if (canvas.isDrawingMode && currentPathRef.current) {
-                    // This is where the magic happens
                     const distance = calculatePathDistance(currentPathRef.current, canvas);
                     setDrawingDistance(distance);
                 }
@@ -178,12 +176,11 @@ export function InteractiveMap() {
                  isDraggingRef.current = false;
             });
             
-            canvas.on('path:created', (opt: { path: FabricType.Path }) => {
+            canvas.on('before:path:created', (opt: { path: FabricType.Path }) => {
                 if (canvas.isDrawingMode) {
                     currentPathRef.current = opt.path;
                 }
             });
-
             
             const handleResize = () => {
                 canvas.setWidth(canvasRef.current?.parentElement?.clientWidth || 0);
@@ -259,7 +256,7 @@ export function InteractiveMap() {
             <canvas ref={canvasRef} />
 
             <div className="absolute top-4 left-4 z-40">
-                <ToggleGroup type="single" value={activeTool} onValueChange={(value) => value && setActiveTool(value as AtlasTool)} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
+                <ToggleGroup type="single" value={activeTool} onValueChange={(value) => {if (value) setActiveTool(value as AtlasTool)}} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
                     <ToggleGroupItem value="pan" aria-label="Mover Mapa"><MousePointer /></ToggleGroupItem>
                     <ToggleGroupItem value="draw" aria-label="Desenhar Rota"><Pen /></ToggleGroupItem>
                 </ToggleGroup>
@@ -300,5 +297,3 @@ export function InteractiveMap() {
         </div>
     );
 }
-
-    
