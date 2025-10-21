@@ -43,7 +43,6 @@ const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas)
     if (!path || !path.path) return 0;
     
     let length = 0;
-    // Fabric's native path length calculation seems to be complex/private, let's estimate
     for(let i = 0; i < path.path.length; i++) {
         const p1Info = path.path[i];
         const p2Info = path.path[i+1];
@@ -56,16 +55,13 @@ const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas)
     }
 
     const zoom = canvas.getZoom();
-    return (length) / PIXELS_PER_UNIT * UNIT_CONVERSION;
+    return (length / zoom) / PIXELS_PER_UNIT * UNIT_CONVERSION;
 };
 
 
 export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<FabricType.Canvas | null>(null);
-    const isDraggingRef = useRef(false);
-    const lastPosXRef = useRef(0);
-    const lastPosYRef = useRef(0);
     const currentPathRef = useRef<FabricType.Path | null>(null);
     
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
@@ -115,7 +111,7 @@ export function InteractiveMap() {
 
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5;
-             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
                 blur: 10,
                 color: '#ef4444',
                 offsetX: 0,
@@ -124,11 +120,10 @@ export function InteractiveMap() {
             
             // --- Event Listeners ---
             canvas.on('mouse:down', (opt) => {
-                const evt = opt.e;
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setDrawingDistance(0);
-                    currentPathRef.current = null;
+                    currentPathRef.current = null; // Reset path ref
                     return;
                 }
                 
@@ -136,30 +131,13 @@ export function InteractiveMap() {
                 if (opt.target && opt.target.poiData) {
                     // @ts-ignore
                     setActivePoi(opt.target.poiData);
-                    isDraggingRef.current = false;
                     return;
                 }
                 setActivePoi(null);
-                
-                if (activeTool === 'pan') {
-                    isDraggingRef.current = true;
-                    lastPosXRef.current = evt.clientX;
-                    lastPosYRef.current = evt.clientY;
-                }
             });
 
-            canvas.on('mouse:move', (opt) => {
-                const e = opt.e;
-                if (activeTool === 'pan' && isDraggingRef.current) {
-                    const vpt = canvas.viewportTransform;
-                    if(vpt) {
-                        vpt[4] += e.clientX - lastPosXRef.current;
-                        vpt[5] += e.clientY - lastPosYRef.current;
-                        canvas.requestRenderAll();
-                    }
-                    lastPosXRef.current = e.clientX;
-                    lastPosYRef.current = e.clientY;
-                } else if (canvas.isDrawingMode && currentPathRef.current) {
+            canvas.on('mouse:move', () => {
+                if (isDrawing && canvas.isDrawingMode && currentPathRef.current) {
                     const distance = calculatePathDistance(currentPathRef.current, canvas);
                     setDrawingDistance(distance);
                 }
@@ -167,13 +145,8 @@ export function InteractiveMap() {
             
             canvas.on('mouse:up', () => {
                  if (canvas.isDrawingMode) {
-                    if (currentPathRef.current) {
-                       const distance = calculatePathDistance(currentPathRef.current, canvas);
-                       setDrawingDistance(distance);
-                    }
                     setIsDrawing(false);
                  }
-                 isDraggingRef.current = false;
             });
             
             canvas.on('before:path:created', (opt: { path: FabricType.Path }) => {
@@ -205,8 +178,54 @@ export function InteractiveMap() {
 
         if (activeTool === 'draw') {
             canvas.isDrawingMode = true;
+            canvas.defaultCursor = 'crosshair';
+            canvas.setCursor('crosshair');
+            // Disable pan
+            canvas.on('mouse:down', (opt) => {
+                 if (opt.e.altKey === true) {
+                     // @ts-ignore
+                    canvas.isDragging = true;
+                    // @ts-ignore
+                    canvas.selection = false;
+                    // @ts-ignore
+                    canvas.lastPosX = opt.e.clientX;
+                    // @ts-ignore
+                    canvas.lastPosY = opt.e.clientY;
+                 }
+            });
         } else { // pan tool
             canvas.isDrawingMode = false;
+            canvas.defaultCursor = 'grab';
+            canvas.setCursor('grab');
+            
+            let isDragging = false;
+            let lastPosX: number, lastPosY: number;
+            
+            canvas.on('mouse:down', (opt) => {
+                const evt = opt.e;
+                 // @ts-ignore
+                if (opt.target && opt.target.poiData) return;
+                
+                isDragging = true;
+                lastPosX = evt.clientX;
+                lastPosY = evt.clientY;
+            });
+            canvas.on('mouse:move', (opt) => {
+                if (isDragging) {
+                    const e = opt.e;
+                    const vpt = canvas.viewportTransform;
+                    if (vpt) {
+                        vpt[4] += e.clientX - lastPosX;
+                        vpt[5] += e.clientY - lastPosY;
+                        canvas.requestRenderAll();
+                    }
+                    lastPosX = e.clientX;
+                    lastPosY = e.clientY;
+                }
+            });
+            canvas.on('mouse:up', () => {
+                isDragging = false;
+            });
         }
     }, [activeTool]);
 
