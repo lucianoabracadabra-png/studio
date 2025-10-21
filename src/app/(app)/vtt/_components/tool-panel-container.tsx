@@ -5,6 +5,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { VttTool } from './vtt-toolbar';
 import { TokenPanel } from './panels/token-panel';
 import { DrawingPanel } from './panels/drawing-panel';
+import { FogPanel } from './panels/fog-panel';
+import { LayersPanel } from './panels/layers-panel';
+import { CombatPanel } from './panels/combat-panel';
+import { SettingsPanel } from './panels/settings-panel';
 import type { VttState } from './vtt-layout';
 
 interface ToolPanelContainerProps {
@@ -33,7 +37,14 @@ export function ToolPanelContainer({
                 return <TokenPanel />;
             case 'drawing':
                 return <DrawingPanel drawingState={drawingState} setDrawingState={setDrawingState} />;
-            // Add cases for other tools here
+            case 'fog':
+                return <FogPanel />;
+            case 'layers':
+                return <LayersPanel />;
+            case 'combat':
+                return <CombatPanel />;
+            case 'settings':
+                return <SettingsPanel />;
             default:
                 return <div className='p-4 text-white'>Panel for {activeTool}</div>
         }
