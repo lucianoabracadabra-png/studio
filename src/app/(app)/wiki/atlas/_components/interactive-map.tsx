@@ -43,9 +43,21 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
 
 const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas) => {
     if (!path || !path.path) return 0;
-    const pathLength = path.calcPathInfo ? path.calcPathInfo().length : 0;
+    // Fabric's path length calculation is not public, so we estimate it.
+    let length = 0;
+    for(let i = 0; i < path.path.length - 1; i++) {
+        const p1 = path.path[i];
+        const p2 = path.path[i+1];
+        if (p1[0] === 'M' || p2[0] === 'M') continue;
+        const x1 = p1[p1.length - 2];
+        const y1 = p1[p1.length - 1];
+        const x2 = p2[p2.length - 2];
+        const y2 = p2[p2.length - 1];
+        length += Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
     const zoom = canvas.getZoom();
-    return (pathLength / zoom) / PIXELS_PER_UNIT * UNIT_CONVERSION;
+    return (length / zoom) / PIXELS_PER_UNIT * UNIT_CONVERSION;
 };
 
 
@@ -56,7 +68,6 @@ export function InteractiveMap() {
     const lastPosXRef = useRef(0);
     const lastPosYRef = useRef(0);
     const currentPathRef = useRef<FabricType.Path | null>(null);
-    const lastMovePos = useRef<{x: number, y: number} | null>(null);
     
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
@@ -118,8 +129,7 @@ export function InteractiveMap() {
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setDrawingDistance(0);
-                    currentPathRef.current = null;
-                    lastMovePos.current = { x: evt.clientX, y: evt.clientY };
+                    currentPathRef.current = null; // Reset path ref
                     return;
                 }
                 
@@ -151,34 +161,29 @@ export function InteractiveMap() {
                     lastPosXRef.current = e.clientX;
                     lastPosYRef.current = e.clientY;
                 } else if (canvas.isDrawingMode && currentPathRef.current) {
-                    if (lastMovePos.current) {
-                        const dx = e.clientX - lastMovePos.current.x;
-                        const dy = e.clientY - lastMovePos.current.y;
-                        if (Math.sqrt(dx * dx + dy * dy) >= THROTTLE_PIXELS) {
-                            const distance = calculatePathDistance(currentPathRef.current, canvas);
-                            setDrawingDistance(distance);
-                            lastMovePos.current = { x: e.clientX, y: e.clientY };
-                        }
-                    }
+                    // This is where the magic happens
+                    const distance = calculatePathDistance(currentPathRef.current, canvas);
+                    setDrawingDistance(distance);
                 }
             });
             
             canvas.on('mouse:up', () => {
                  if (canvas.isDrawingMode) {
                     if (currentPathRef.current) {
-                        const distance = calculatePathDistance(currentPathRef.current, canvas);
-                        setDrawingDistance(distance);
+                       const distance = calculatePathDistance(currentPathRef.current, canvas);
+                       setDrawingDistance(distance);
                     }
                     setIsDrawing(false);
                  }
                  isDraggingRef.current = false;
             });
             
-            canvas.on('before:path:created', (opt: { path: FabricType.Path }) => {
+            canvas.on('path:created', (opt: { path: FabricType.Path }) => {
                 if (canvas.isDrawingMode) {
                     currentPathRef.current = opt.path;
                 }
             });
+
             
             const handleResize = () => {
                 canvas.setWidth(canvasRef.current?.parentElement?.clientWidth || 0);
@@ -221,11 +226,11 @@ export function InteractiveMap() {
         const canvas = fabricRef.current;
         if (!canvas) return;
         const bgImage = canvas.backgroundImage;
-        if (bgImage && typeof bgImage !== 'string' && bgImage.width) {
-            const canvasWidth = canvas.width ?? 0;
-            const canvasHeight = canvas.height ?? 0;
+        if (bgImage && typeof bgImage !== 'string' && bgImage.width && canvas.width) {
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height || 0;
             const zoomX = canvasWidth / bgImage.width;
-            const zoomY = canvasHeight / bgImage.height;
+            const zoomY = canvasHeight / (bgImage.height || 0);
             const newZoom = Math.min(zoomX, zoomY, 1);
             canvas.setZoom(newZoom);
             canvas.absolutePan({ x: 0, y: 0});
