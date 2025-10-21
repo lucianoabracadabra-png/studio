@@ -17,6 +17,8 @@ type AtlasTool = 'pan' | 'draw';
 const PIXELS_PER_UNIT = 50;
 const UNIT_NAME = 'km';
 const UNIT_CONVERSION = 10;
+const THROTTLE_PIXELS = 10;
+
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -41,21 +43,9 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
 
 const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas) => {
     if (!path || !path.path) return 0;
-    const pathLength = path.path.reduce((acc, segment, i, segments) => {
-        if (i === 0) return acc;
-        const prevSegment = segments[i-1];
-        // segment is ['L', x2, y2] or ['Q', cx, cy, x2, y2], prevSegment is similar
-        const x1 = prevSegment[prevSegment.length - 2];
-        const y1 = prevSegment[prevSegment.length - 1];
-        const x2 = segment[segment.length - 2];
-        const y2 = segment[segment.length - 1];
-
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        return acc + Math.sqrt(dx * dx + dy * dy);
-    }, 0);
-
-    return (pathLength / canvas.getZoom()) / PIXELS_PER_UNIT * UNIT_CONVERSION;
+    const pathLength = path.calcPathInfo ? path.calcPathInfo().length : 0;
+    const zoom = canvas.getZoom();
+    return (pathLength / zoom) / PIXELS_PER_UNIT * UNIT_CONVERSION;
 };
 
 
@@ -65,6 +55,8 @@ export function InteractiveMap() {
     const isDraggingRef = useRef(false);
     const lastPosXRef = useRef(0);
     const lastPosYRef = useRef(0);
+    const currentPathRef = useRef<FabricType.Path | null>(null);
+    const lastMovePos = useRef<{x: number, y: number} | null>(null);
     
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
@@ -112,9 +104,9 @@ export function InteractiveMap() {
             }, { crossOrigin: 'anonymous' });
 
             canvas.freeDrawingBrush.color = '#ef4444';
-            canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
-            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-                blur: 10 / canvas.getZoom(),
+            canvas.freeDrawingBrush.width = 5;
+             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+                blur: 10,
                 color: '#ef4444',
                 offsetX: 0,
                 offsetY: 0
@@ -122,13 +114,15 @@ export function InteractiveMap() {
             
             // --- Event Listeners ---
             canvas.on('mouse:down', (opt) => {
+                const evt = opt.e;
                 if (canvas.isDrawingMode) {
                     setIsDrawing(true);
                     setDrawingDistance(0);
+                    currentPathRef.current = null;
+                    lastMovePos.current = { x: evt.clientX, y: evt.clientY };
                     return;
                 }
                 
-                const evt = opt.e;
                 // @ts-ignore
                 if (opt.target && opt.target.poiData) {
                     // @ts-ignore
@@ -146,8 +140,8 @@ export function InteractiveMap() {
             });
 
             canvas.on('mouse:move', (opt) => {
+                const e = opt.e;
                 if (activeTool === 'pan' && isDraggingRef.current) {
-                    const e = opt.e;
                     const vpt = canvas.viewportTransform;
                     if(vpt) {
                         vpt[4] += e.clientX - lastPosXRef.current;
@@ -156,20 +150,33 @@ export function InteractiveMap() {
                     }
                     lastPosXRef.current = e.clientX;
                     lastPosYRef.current = e.clientY;
+                } else if (canvas.isDrawingMode && currentPathRef.current) {
+                    if (lastMovePos.current) {
+                        const dx = e.clientX - lastMovePos.current.x;
+                        const dy = e.clientY - lastMovePos.current.y;
+                        if (Math.sqrt(dx * dx + dy * dy) >= THROTTLE_PIXELS) {
+                            const distance = calculatePathDistance(currentPathRef.current, canvas);
+                            setDrawingDistance(distance);
+                            lastMovePos.current = { x: e.clientX, y: e.clientY };
+                        }
+                    }
                 }
             });
             
             canvas.on('mouse:up', () => {
                  if (canvas.isDrawingMode) {
+                    if (currentPathRef.current) {
+                        const distance = calculatePathDistance(currentPathRef.current, canvas);
+                        setDrawingDistance(distance);
+                    }
                     setIsDrawing(false);
                  }
                  isDraggingRef.current = false;
             });
-
-            canvas.on('path:created', (opt: { path: FabricType.Path }) => {
+            
+            canvas.on('before:path:created', (opt: { path: FabricType.Path }) => {
                 if (canvas.isDrawingMode) {
-                    const distance = calculatePathDistance(opt.path, canvas);
-                    setDrawingDistance(distance);
+                    currentPathRef.current = opt.path;
                 }
             });
             
@@ -215,8 +222,10 @@ export function InteractiveMap() {
         if (!canvas) return;
         const bgImage = canvas.backgroundImage;
         if (bgImage && typeof bgImage !== 'string' && bgImage.width) {
-            const zoomX = (canvas.width || 0) / bgImage.width;
-            const zoomY = (canvas.height || 0) / bgImage.height;
+            const canvasWidth = canvas.width ?? 0;
+            const canvasHeight = canvas.height ?? 0;
+            const zoomX = canvasWidth / bgImage.width;
+            const zoomY = canvasHeight / bgImage.height;
             const newZoom = Math.min(zoomX, zoomY, 1);
             canvas.setZoom(newZoom);
             canvas.absolutePan({ x: 0, y: 0});
@@ -234,6 +243,7 @@ export function InteractiveMap() {
         objects.forEach(obj => canvas.remove(obj));
         setDrawingDistance(0);
         setIsDrawing(false);
+        currentPathRef.current = null;
         canvas.renderAll();
     };
 
