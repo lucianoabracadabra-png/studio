@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { fabric as FabricType } from 'fabric';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { pointsOfInterest } from '@/lib/wiki-data';
@@ -41,18 +41,23 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
 export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<FabricType.Canvas | null>(null);
-    const currentPathRef = useRef<FabricType.Path | null>(null);
-    const totalDistanceRef = useRef<number>(0);
 
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
-    const [isDrawing, setIsDrawing] = useState(false);
     const [displayDistance, setDisplayDistance] = useState(0);
 
-    const calculatePathLength = (path: FabricType.Path): number => {
+    const isDrawingRef = useRef(false);
+    const totalDistanceRef = useRef(0);
+    const currentPathDistanceRef = useRef(0);
+    const currentPathRef = useRef<FabricType.Path | null>(null);
+
+    const updateDisplay = () => {
+        setDisplayDistance(totalDistanceRef.current + currentPathDistanceRef.current);
+    }
+    
+    const calculatePathDistance = (path: FabricType.Path | null): number => {
         if (!path || !path.path) return 0;
         let length = 0;
-        const zoom = fabricRef.current?.getZoom() || 1;
         for (let i = 1; i < path.path.length; i++) {
             const p1 = path.path[i-1];
             const p2 = path.path[i];
@@ -62,9 +67,9 @@ export function InteractiveMap() {
             const p2y = p2[2] as number;
             length += Math.sqrt(Math.pow(p2x - p1x, 2) + Math.pow(p2y - p1y, 2));
         }
-        return (length / zoom) / PIXELS_PER_KM;
+        return length / PIXELS_PER_KM;
     };
-    
+
     useEffect(() => {
         const initFabric = async () => {
             const { fabric } = await import('fabric');
@@ -85,10 +90,10 @@ export function InteractiveMap() {
 
                 pointsOfInterest.forEach(poi => {
                     const pin = new fabric.Circle({
-                        radius: 10 / (canvas.getZoom() || 1),
+                        radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
                         stroke: 'white',
-                        strokeWidth: 2 / (canvas.getZoom() || 1),
+                        strokeWidth: 2,
                         left: (img.width || 2000) * (poi.position.x / 100),
                         top: (img.height || 1500) * (poi.position.y / 100),
                         originX: 'center',
@@ -102,9 +107,20 @@ export function InteractiveMap() {
                     });
                     canvas.add(pin);
                 });
+                
+                canvas.on('object:scaling', (e) => {
+                    const obj = e.target;
+                    if (!obj || !(obj instanceof fabric.Circle)) return;
+                    const zoom = canvas.getZoom();
+                    obj.set({
+                        radius: 10 / zoom,
+                        strokeWidth: 2 / zoom,
+                    });
+                });
+
                 canvas.renderAll();
             }, { crossOrigin: 'anonymous' });
-
+            
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5;
             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
@@ -113,11 +129,11 @@ export function InteractiveMap() {
                 offsetX: 0,
                 offsetY: 0
             });
-
+            
             // --- Event Listeners ---
             canvas.on('mouse:down', (opt) => {
                 if (canvas.isDrawingMode) {
-                    setIsDrawing(true);
+                    isDrawingRef.current = true;
                 } else {
                     // @ts-ignore
                     if (opt.target && opt.target.poiData) {
@@ -132,23 +148,21 @@ export function InteractiveMap() {
             canvas.on('before:path:created', (opt) => {
                 currentPathRef.current = opt.path;
             });
-
+            
             canvas.on('mouse:move', () => {
-                if (isDrawing && currentPathRef.current) {
-                    const currentStrokeDistance = calculatePathLength(currentPathRef.current);
-                    setDisplayDistance(totalDistanceRef.current + currentStrokeDistance);
+                if (isDrawingRef.current) {
+                    currentPathDistanceRef.current = calculatePathDistance(currentPathRef.current);
+                    updateDisplay();
                 }
             });
-            
+
             canvas.on('mouse:up', () => {
-                 if (isDrawing) {
-                    setIsDrawing(false);
-                    if (currentPathRef.current) {
-                        const finalStrokeDistance = calculatePathLength(currentPathRef.current);
-                        totalDistanceRef.current += finalStrokeDistance;
-                        setDisplayDistance(totalDistanceRef.current);
-                    }
+                 if (isDrawingRef.current) {
+                    totalDistanceRef.current += currentPathDistanceRef.current;
+                    currentPathDistanceRef.current = 0;
                     currentPathRef.current = null;
+                    isDrawingRef.current = false;
+                    updateDisplay();
                  }
             });
             
@@ -178,7 +192,7 @@ export function InteractiveMap() {
     
         const onPanMouseDown = (opt: FabricType.IEvent) => {
              // @ts-ignore
-            if (opt.target && opt.target.poiData) return; // Don't pan if clicking a POI
+            if (opt.target && opt.target.poiData) return;
             const evt = opt.e;
             isDragging = true;
             canvas.setCursor('grabbing');
@@ -212,14 +226,16 @@ export function InteractiveMap() {
             canvas.defaultCursor = 'grab';
             canvas.setCursor('grab');
             canvas.selection = false;
-            canvas.getObjects().forEach(o => o.set('evented', true));
+            canvas.getObjects().forEach(o => {
+                // @ts-ignore
+                o.set('evented', o.poiData !== undefined)
+            });
             
             canvas.on('mouse:down', onPanMouseDown);
             canvas.on('mouse:move', onPanMouseMove);
             canvas.on('mouse:up', onPanMouseUp);
 
         } else if (activeTool === 'draw') {
-            // Remove pan listeners to avoid conflicts
             canvas.off('mouse:down', onPanMouseDown);
             canvas.off('mouse:move', onPanMouseMove);
             canvas.off('mouse:up', onPanMouseUp);
@@ -237,7 +253,7 @@ export function InteractiveMap() {
                 canvas.off('mouse:up', onPanMouseUp);
             }
         };
-    }, [activeTool, isDrawing]);
+    }, [activeTool]);
 
     const handleZoom = (direction: 'in' | 'out') => {
         const canvas = fabricRef.current;
@@ -280,15 +296,18 @@ export function InteractiveMap() {
         if (!canvas) return;
         const objects = canvas.getObjects('path');
         objects.forEach(obj => canvas.remove(obj));
+        
         totalDistanceRef.current = 0;
-        setDisplayDistance(0);
-        setIsDrawing(false);
+        currentPathDistanceRef.current = 0;
+        isDrawingRef.current = false;
         currentPathRef.current = null;
+        updateDisplay();
+        
         canvas.renderAll();
     };
     
     const toggleTool = (tool: AtlasTool) => {
-        setActiveTool(tool);
+        if(tool) setActiveTool(tool);
     };
 
     return (
@@ -296,7 +315,7 @@ export function InteractiveMap() {
             <canvas ref={canvasRef} />
 
             <div className="absolute top-4 left-4 z-40">
-                <ToggleGroup type="single" value={activeTool} onValueChange={(value) => {if (value) toggleTool(value as AtlasTool)}} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
+                <ToggleGroup type="single" value={activeTool} onValueChange={toggleTool} className="bg-card/80 backdrop-blur-sm rounded-lg p-1 border">
                     <ToggleGroupItem value="pan" aria-label="Mover Mapa"><MousePointer /></ToggleGroupItem>
                     <ToggleGroupItem value="draw" aria-label="Desenhar Rota"><Pen /></ToggleGroupItem>
                 </ToggleGroup>
@@ -330,7 +349,7 @@ export function InteractiveMap() {
             </AnimatePresence>
             
             <AnimatePresence>
-                {(isDrawing || totalDistanceRef.current > 0) && (
+                {(isDrawingRef.current || totalDistanceRef.current > 0) && (
                     <DrawingToolbar onClear={clearDrawing} distance={displayDistance} />
                 )}
             </AnimatePresence>
