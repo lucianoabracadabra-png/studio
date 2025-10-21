@@ -14,7 +14,7 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 type AtlasTool = 'pan' | 'draw';
 
-const UNIT_NAME = 'km';
+const PIXELS_PER_KM = 2; // Ajuste este valor conforme a escala do seu mapa
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -30,7 +30,7 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
                 </Button>
                 <div className='flex items-baseline gap-2'>
                     <span className='text-muted-foreground text-sm'>Distância:</span>
-                    <span className='font-bold font-mono text-lg'>{distance.toFixed(0)}{UNIT_NAME}</span>
+                    <span className='font-bold font-mono text-lg'>{distance.toFixed(0)}km</span>
                 </div>
             </Card>
         </motion.div>
@@ -47,12 +47,8 @@ export function InteractiveMap() {
 
     const isDrawingRef = useRef(false);
     const totalDistanceRef = useRef(0);
-    const moveCountRef = useRef(0);
+    const lastPointRef = useRef<{ x: number; y: number } | null>(null);
     
-    const updateDisplay = () => {
-        setDisplayDistance(totalDistanceRef.current + moveCountRef.current);
-    }
-
     useEffect(() => {
         const initFabric = async () => {
             const { fabric } = await import('fabric');
@@ -114,8 +110,9 @@ export function InteractiveMap() {
             });
             
             const handleResize = () => {
-                canvas.setWidth(canvasRef.current?.parentElement?.clientWidth || 0);
-                canvas.setHeight(canvasRef.current?.parentElement?.clientHeight || 0);
+                if (!canvasRef.current || !canvasRef.current.parentElement) return;
+                canvas.setWidth(canvasRef.current.parentElement.clientWidth);
+                canvas.setHeight(canvasRef.current.parentElement.clientHeight);
                 canvas.renderAll();
             };
             window.addEventListener('resize', handleResize);
@@ -168,27 +165,33 @@ export function InteractiveMap() {
             }
         };
 
-        const onDrawMouseDown = (opt: FabricType.IEvent) => {
+        const onDrawMouseDown = (opt: FabricType.IEvent<MouseEvent>) => {
             isDrawingRef.current = true;
-            moveCountRef.current = 0;
-            // @ts-ignore
-            if (opt.target && opt.target.poiData) {
-                // @ts-ignore
-                setActivePoi(opt.target.poiData)
-            };
+            const pointer = canvas.getPointer(opt.e);
+            lastPointRef.current = { x: pointer.x, y: pointer.y };
         };
 
-        const onDrawMouseMove = () => {
+        const onDrawMouseMove = (opt: FabricType.IEvent<MouseEvent>) => {
             if (!isDrawingRef.current) return;
-            moveCountRef.current += 1;
-            updateDisplay();
+            const pointer = canvas.getPointer(opt.e);
+            const lastPoint = lastPointRef.current;
+            if (lastPoint) {
+                const dx = pointer.x - lastPoint.x;
+                const dy = pointer.y - lastPoint.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                const zoom = canvas.getZoom();
+                const distanceInKm = distance / (zoom * PIXELS_PER_KM);
+                
+                totalDistanceRef.current += distanceInKm;
+                setDisplayDistance(totalDistanceRef.current);
+            }
+            lastPointRef.current = { x: pointer.x, y: pointer.y };
         };
 
         const onDrawMouseUp = () => {
             isDrawingRef.current = false;
-            totalDistanceRef.current += moveCountRef.current;
-            moveCountRef.current = 0;
-            updateDisplay();
+            lastPointRef.current = null;
         };
         
         const onPinClick = (opt: FabricType.IEvent) => {
@@ -200,7 +203,6 @@ export function InteractiveMap() {
                setActivePoi(null);
            }
         };
-
 
         // Clear all previous listeners to avoid duplicates
         canvas.off();
@@ -218,7 +220,7 @@ export function InteractiveMap() {
             canvas.on('mouse:down', onPanMouseDown);
             canvas.on('mouse:move', onPanMouseMove);
             canvas.on('mouse:up', onPanMouseUp);
-            canvas.on('mouse:down', onPinClick);
+            canvas.on('mouse:down:before', onPinClick);
 
         } else if (activeTool === 'draw') {
             canvas.isDrawingMode = true;
@@ -277,7 +279,6 @@ export function InteractiveMap() {
         objects.forEach(obj => canvas.remove(obj));
         
         totalDistanceRef.current = 0;
-        moveCountRef.current = 0;
         setDisplayDistance(0);
         
         canvas.renderAll();
