@@ -63,11 +63,13 @@ export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<FabricType.Canvas | null>(null);
     const currentPathRef = useRef<FabricType.Path | null>(null);
+    const isDrawingRef = useRef(false);
     
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [drawingDistance, setDrawingDistance] = useState(0);
-    const [isDrawing, setIsDrawing] = useState(false);
+    const [showToolbar, setShowToolbar] = useState(false);
+    
 
     useEffect(() => {
         const initFabric = async () => {
@@ -121,9 +123,10 @@ export function InteractiveMap() {
             // --- Event Listeners ---
             canvas.on('mouse:down', (opt) => {
                 if (canvas.isDrawingMode) {
-                    setIsDrawing(true);
+                    isDrawingRef.current = true;
+                    setShowToolbar(true);
                     setDrawingDistance(0);
-                    currentPathRef.current = null; // Reset path ref
+                    currentPathRef.current = null;
                     return;
                 }
                 
@@ -137,15 +140,15 @@ export function InteractiveMap() {
             });
 
             canvas.on('mouse:move', () => {
-                if (isDrawing && canvas.isDrawingMode && currentPathRef.current) {
+                if (isDrawingRef.current && canvas.isDrawingMode && currentPathRef.current) {
                     const distance = calculatePathDistance(currentPathRef.current, canvas);
                     setDrawingDistance(distance);
                 }
             });
             
             canvas.on('mouse:up', () => {
-                 if (canvas.isDrawingMode) {
-                    setIsDrawing(false);
+                 if (isDrawingRef.current) {
+                    isDrawingRef.current = false;
                  }
             });
             
@@ -180,23 +183,21 @@ export function InteractiveMap() {
             canvas.isDrawingMode = true;
             canvas.defaultCursor = 'crosshair';
             canvas.setCursor('crosshair');
+            canvas.selection = false;
+            canvas.getObjects().forEach(o => o.set('evented', false));
             // Disable pan
+            let isDragging = false;
             canvas.on('mouse:down', (opt) => {
-                 if (opt.e.altKey === true) {
-                     // @ts-ignore
-                    canvas.isDragging = true;
-                    // @ts-ignore
-                    canvas.selection = false;
-                    // @ts-ignore
-                    canvas.lastPosX = opt.e.clientX;
-                    // @ts-ignore
-                    canvas.lastPosY = opt.e.clientY;
+                 if (opt.e.altKey === true || canvas.isDrawingMode) {
+                     isDragging = false;
                  }
             });
         } else { // pan tool
             canvas.isDrawingMode = false;
             canvas.defaultCursor = 'grab';
             canvas.setCursor('grab');
+            canvas.selection = false;
+            canvas.getObjects().forEach(o => o.set('evented', true));
             
             let isDragging = false;
             let lastPosX: number, lastPosY: number;
@@ -263,12 +264,10 @@ export function InteractiveMap() {
         const objects = canvas.getObjects('path');
         objects.forEach(obj => canvas.remove(obj));
         setDrawingDistance(0);
-        setIsDrawing(false);
+        setShowToolbar(false);
         currentPathRef.current = null;
         canvas.renderAll();
     };
-
-    const showDrawingToolbar = isDrawing || drawingDistance > 0;
 
     return (
         <div className="w-full h-full relative overflow-hidden bg-gray-900">
@@ -309,7 +308,7 @@ export function InteractiveMap() {
             </AnimatePresence>
 
             <AnimatePresence>
-                {showDrawingToolbar && (
+                {(showToolbar || drawingDistance > 0) && (
                     <DrawingToolbar onClear={clearDrawing} distance={drawingDistance} />
                 )}
             </AnimatePresence>
