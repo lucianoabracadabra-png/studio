@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import type { fabric as FabricType } from 'fabric';
@@ -16,7 +15,7 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 type AtlasTool = 'pan' | 'draw';
 
 const UNIT_NAME = 'km';
-const PIXELS_PER_KM = 0.5; // Each pixel represents 0.5km
+const PIXELS_PER_KM = 0.5;
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -43,15 +42,16 @@ export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<FabricType.Canvas | null>(null);
     const currentPathRef = useRef<FabricType.Path | null>(null);
-    const isDrawingRef = useRef(false);
-    const currentPathDistanceRef = useRef(0);
 
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
-    const [drawingDistance, setDrawingDistance] = useState(0);
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [displayDistance, setDisplayDistance] = useState(0);
     
+    // State for total accumulated distance across multiple drawing strokes
+    const [drawingDistance, setDrawingDistance] = useState(0);
+    // State for the real-time display distance (total + current stroke)
+    const [displayDistance, setDisplayDistance] = useState(0);
+    // State to track if the user is currently drawing
+    const [isDrawing, setIsDrawing] = useState(false);
 
     useEffect(() => {
         const initFabric = async () => {
@@ -105,25 +105,23 @@ export function InteractiveMap() {
             // --- Event Listeners ---
             canvas.on('mouse:down', (opt) => {
                 if (canvas.isDrawingMode) {
-                    isDrawingRef.current = true;
                     setIsDrawing(true);
-                    currentPathDistanceRef.current = 0;
-                    return;
-                }
-                
-                // @ts-ignore
-                if (opt.target && opt.target.poiData) {
+                } else {
                     // @ts-ignore
-                    setActivePoi(opt.target.poiData);
-                    return;
+                    if (opt.target && opt.target.poiData) {
+                        // @ts-ignore
+                        setActivePoi(opt.target.poiData);
+                    } else {
+                        setActivePoi(null);
+                    }
                 }
-                setActivePoi(null);
             });
-            
+
             canvas.on('before:path:created', (opt) => {
+                // Capture the path object as it's being created
                 currentPathRef.current = opt.path;
             });
-            
+
             const calculatePathLength = (path: FabricType.Path) => {
                 if (!path || !path.path) return 0;
                 let length = 0;
@@ -134,25 +132,23 @@ export function InteractiveMap() {
                 }
                 return length;
             };
-
+            
             canvas.on('mouse:move', () => {
-                if (isDrawingRef.current && currentPathRef.current) {
-                    const pathLength = calculatePathLength(currentPathRef.current);
+                if (isDrawing && currentPathRef.current) {
+                    const pathLengthInPixels = calculatePathLength(currentPathRef.current);
                     const zoom = canvas.getZoom();
-                    currentPathDistanceRef.current = (pathLength / zoom) * PIXELS_PER_KM;
-                    setDisplayDistance(drawingDistance + currentPathDistanceRef.current);
+                    const realLengthInPixels = pathLengthInPixels / zoom;
+                    const currentStrokeDistance = realLengthInPixels / PIXELS_PER_KM;
+                    setDisplayDistance(drawingDistance + currentStrokeDistance);
                 }
             });
-            
+
             canvas.on('mouse:up', () => {
-                 if (isDrawingRef.current) {
-                    isDrawingRef.current = false;
+                 if (isDrawing) {
                     setIsDrawing(false);
-                    if (currentPathRef.current) {
-                        setDrawingDistance(prev => prev + currentPathDistanceRef.current);
-                    }
+                    // Add the final distance of the current stroke to the total
+                    setDrawingDistance(displayDistance);
                     currentPathRef.current = null;
-                    currentPathDistanceRef.current = 0;
                  }
             });
             
@@ -182,9 +178,9 @@ export function InteractiveMap() {
 
         const onMouseDown = (opt: FabricType.IEvent) => {
             const evt = opt.e;
-             // @ts-ignore
-            if (opt.target && opt.target.poiData) return;
             if (activeTool === 'pan') {
+                // @ts-ignore
+                if (opt.target && opt.target.poiData) return;
                 isDragging = true;
                 canvas.setCursor('grabbing');
                 lastPosX = evt.clientX;
@@ -228,7 +224,7 @@ export function InteractiveMap() {
             canvas.setCursor('crosshair');
             canvas.selection = false;
             canvas.getObjects().forEach(o => o.set('evented', false));
-            // Remove pan listeners
+            // Remove pan listeners to avoid conflicts
             canvas.off('mouse:down', onMouseDown);
             canvas.off('mouse:move', onMouseMove);
             canvas.off('mouse:up', onMouseUp);
@@ -241,7 +237,7 @@ export function InteractiveMap() {
                 canvas.off('mouse:up', onMouseUp);
             }
         };
-    }, [activeTool]);
+    }, [activeTool, isDrawing, drawingDistance, displayDistance]);
 
 
     const handleZoom = (direction: 'in' | 'out') => {
@@ -287,9 +283,7 @@ export function InteractiveMap() {
         setDrawingDistance(0);
         setDisplayDistance(0);
         setIsDrawing(false);
-        isDrawingRef.current = false;
         currentPathRef.current = null;
-        currentPathDistanceRef.current = 0;
         canvas.renderAll();
     };
 
@@ -330,9 +324,9 @@ export function InteractiveMap() {
                 </motion.div>
             )}
             </AnimatePresence>
-
+            
             <AnimatePresence>
-                {(isDrawing || displayDistance > 0) && (
+                {(isDrawing || drawingDistance > 0) && (
                     <DrawingToolbar onClear={clearDrawing} distance={displayDistance} />
                 )}
             </AnimatePresence>
