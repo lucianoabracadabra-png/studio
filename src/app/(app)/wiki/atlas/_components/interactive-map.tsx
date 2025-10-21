@@ -101,9 +101,9 @@ export function InteractiveMap() {
             }, { crossOrigin: 'anonymous' });
             
             canvas.freeDrawingBrush.color = '#ef4444';
-            canvas.freeDrawingBrush.width = 5;
+            canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-                blur: 10,
+                blur: 10 / canvas.getZoom(),
                 color: '#ef4444',
                 offsetX: 0,
                 offsetY: 0
@@ -164,26 +164,25 @@ export function InteractiveMap() {
                 canvas.setCursor('grab');
             }
         };
-
+        
         const onDrawMouseDown = (opt: FabricType.IEvent<MouseEvent>) => {
             isDrawingRef.current = true;
             const pointer = canvas.getPointer(opt.e);
             lastPointRef.current = { x: pointer.x, y: pointer.y };
+            setActivePoi(null);
         };
 
         const onDrawMouseMove = (opt: FabricType.IEvent<MouseEvent>) => {
             if (!isDrawingRef.current) return;
             const pointer = canvas.getPointer(opt.e);
             const lastPoint = lastPointRef.current;
+
             if (lastPoint) {
                 const dx = pointer.x - lastPoint.x;
                 const dy = pointer.y - lastPoint.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                const zoom = canvas.getZoom();
-                const distanceInKm = distance / (zoom * PIXELS_PER_KM);
-                
-                totalDistanceRef.current += distanceInKm;
+                const distance = Math.sqrt(dx*dx + dy*dy) / canvas.getZoom() / PIXELS_PER_KM;
+
+                totalDistanceRef.current += distance;
                 setDisplayDistance(totalDistanceRef.current);
             }
             lastPointRef.current = { x: pointer.x, y: pointer.y };
@@ -197,14 +196,13 @@ export function InteractiveMap() {
         const onPinClick = (opt: FabricType.IEvent) => {
             // @ts-ignore
             if (opt.target && opt.target.poiData) {
-                // @ts-ignore
+                 // @ts-ignore
                setActivePoi(opt.target.poiData);
            } else {
                setActivePoi(null);
            }
         };
 
-        // Clear all previous listeners to avoid duplicates
         canvas.off();
         
         if (activeTool === 'pan') {
@@ -220,7 +218,7 @@ export function InteractiveMap() {
             canvas.on('mouse:down', onPanMouseDown);
             canvas.on('mouse:move', onPanMouseMove);
             canvas.on('mouse:up', onPanMouseUp);
-            canvas.on('mouse:down:before', onPinClick);
+            canvas.on('mouse:down', onPinClick); // Corrigido: Restaurado o evento de clique nos pins
 
         } else if (activeTool === 'draw') {
             canvas.isDrawingMode = true;
@@ -242,6 +240,9 @@ export function InteractiveMap() {
         const newZoom = direction === 'in' ? zoom * 1.2 : zoom / 1.2;
         const center = canvas.getCenter();
         canvas.zoomToPoint({ x: center.left, y: center.top }, Math.max(0.2, Math.min(5, newZoom)));
+        
+        canvas.freeDrawingBrush.width = 5 / newZoom;
+        canvas.freeDrawingBrush.shadow.blur = 10 / newZoom;
     };
     
     const centerAndReset = () => {
@@ -270,18 +271,14 @@ export function InteractiveMap() {
              canvas.setZoom(0.5);
              canvas.absolutePan({ x: 0, y: 0});
         }
+        
+        canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
+        canvas.freeDrawingBrush.shadow.blur = 10 / canvas.getZoom();
     };
     
     const clearDrawing = () => {
-        const canvas = fabricRef.current;
-        if (!canvas) return;
-        const objects = canvas.getObjects('path');
-        objects.forEach(obj => canvas.remove(obj));
-        
         totalDistanceRef.current = 0;
         setDisplayDistance(0);
-        
-        canvas.renderAll();
     };
     
     const toggleTool = (tool: AtlasTool) => {
@@ -327,7 +324,7 @@ export function InteractiveMap() {
             </AnimatePresence>
             
             <AnimatePresence>
-                {activeTool === 'draw' && (
+                {(isDrawingRef.current || totalDistanceRef.current > 0) && activeTool === 'draw' && (
                     <DrawingToolbar onClear={clearDrawing} distance={displayDistance} />
                 )}
             </AnimatePresence>
