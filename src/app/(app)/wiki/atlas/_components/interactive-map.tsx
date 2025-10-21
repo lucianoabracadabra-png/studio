@@ -14,9 +14,9 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 type AtlasTool = 'pan' | 'draw';
 
-const PIXELS_PER_UNIT = 50;
 const UNIT_NAME = 'km';
-const UNIT_CONVERSION = 10;
+const KM_PER_CHUNK = 5;
+const PIXELS_PER_CHUNK = 10;
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
     return (
@@ -39,31 +39,12 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: 
     );
 }
 
-const calculatePathDistance = (path: FabricType.Path, canvas: FabricType.Canvas) => {
-    if (!path || !path.path) return 0;
-    
-    let length = 0;
-    for(let i = 0; i < path.path.length; i++) {
-        const p1Info = path.path[i];
-        const p2Info = path.path[i+1];
-        
-        if (p1Info && p2Info && p1Info.length >= 3 && p2Info.length >= 3) {
-            const p1 = { x: p1Info[1], y: p1Info[2] };
-            const p2 = { x: p2Info[1], y: p2Info[2] };
-            length += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-        }
-    }
-
-    const zoom = canvas.getZoom();
-    return (length / zoom) / PIXELS_PER_UNIT * UNIT_CONVERSION;
-};
-
-
 export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<FabricType.Canvas | null>(null);
     const currentPathRef = useRef<FabricType.Path | null>(null);
     const isDrawingRef = useRef(false);
+    const lastPathLengthRef = useRef(0);
     
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
@@ -126,7 +107,8 @@ export function InteractiveMap() {
                     isDrawingRef.current = true;
                     setShowToolbar(true);
                     setDrawingDistance(0);
-                    currentPathRef.current = null;
+                    lastPathLengthRef.current = 0;
+                    currentPathRef.current = null; // Reset path reference
                     return;
                 }
                 
@@ -138,11 +120,31 @@ export function InteractiveMap() {
                 }
                 setActivePoi(null);
             });
+            
+            const calculatePathLength = (path: FabricType.Path) => {
+                if (!path || !path.path) return 0;
+                let length = 0;
+                // @ts-ignore
+                for (let i = 1; i < path.path.length; i++) {
+                    // @ts-ignore
+                    const p1 = path.path[i-1];
+                    // @ts-ignore
+                    const p2 = path.path[i];
+                    length += Math.sqrt(Math.pow(p2[1] - p1[1], 2) + Math.pow(p2[2] - p1[2], 2));
+                }
+                return length;
+            }
 
-            canvas.on('mouse:move', () => {
-                if (isDrawingRef.current && canvas.isDrawingMode && currentPathRef.current) {
-                    const distance = calculatePathDistance(currentPathRef.current, canvas);
-                    setDrawingDistance(distance);
+            canvas.on('mouse:move', (opt) => {
+                if (isDrawingRef.current && currentPathRef.current) {
+                    const currentLength = calculatePathLength(currentPathRef.current);
+                    const lengthDelta = currentLength - lastPathLengthRef.current;
+
+                    if (lengthDelta >= PIXELS_PER_CHUNK) {
+                        const chunks = Math.floor(lengthDelta / PIXELS_PER_CHUNK);
+                        setDrawingDistance(prev => prev + (chunks * KM_PER_CHUNK));
+                        lastPathLengthRef.current = currentLength;
+                    }
                 }
             });
             
@@ -185,13 +187,14 @@ export function InteractiveMap() {
             canvas.setCursor('crosshair');
             canvas.selection = false;
             canvas.getObjects().forEach(o => o.set('evented', false));
-            // Disable pan
-            let isDragging = false;
-            canvas.on('mouse:down', (opt) => {
-                 if (opt.e.altKey === true || canvas.isDrawingMode) {
-                     isDragging = false;
-                 }
+
+            // Disable pan when in draw mode
+            canvas.on('mouse:down', function(opt) {
+                if (canvas.isDrawingMode) {
+                    opt.e.stopPropagation();
+                }
             });
+
         } else { // pan tool
             canvas.isDrawingMode = false;
             canvas.defaultCursor = 'grab';
@@ -212,7 +215,7 @@ export function InteractiveMap() {
                 lastPosY = evt.clientY;
             });
             canvas.on('mouse:move', (opt) => {
-                if (isDragging) {
+                if (isDragging && !canvas.isDrawingMode) {
                     const e = opt.e;
                     const vpt = canvas.viewportTransform;
                     if (vpt) {
@@ -266,6 +269,7 @@ export function InteractiveMap() {
         setDrawingDistance(0);
         setShowToolbar(false);
         currentPathRef.current = null;
+        lastPathLengthRef.current = 0;
         canvas.renderAll();
     };
 
