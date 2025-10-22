@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useReducer } from 'react';
-import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState } from '@/lib/character-data';
+import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState, AlignmentAxis, getNextAlignmentState } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -242,14 +242,14 @@ const ArmorCardDetails = ({ armor }: { armor: Armor }) => (
         <p className="text-sm text-muted-foreground">{armor.extras}</p>
         <Separator/>
         <div className='grid grid-cols-3 gap-2 text-center'>
-            <div><Label>Cortante</Label><p className='font-mono text-foreground'>{armor.slashing}</p></div>
-            <div><Label>Esmagamento</Label><p className='font-mono text-foreground'>{armor.bludgeoning}</p></div>
-            <div><Label>Perfurante</Label><p className='font-mono text-foreground'>{armor.piercing}</p></div>
+            <div><Label className='text-muted-foreground'>Cortante</Label><p className='font-mono text-foreground'>{armor.slashing}</p></div>
+            <div><Label className='text-muted-foreground'>Esmagamento</Label><p className='font-mono text-foreground'>{armor.bludgeoning}</p></div>
+            <div><Label className='text-muted-foreground'>Perfurante</Label><p className='font-mono text-foreground'>{armor.piercing}</p></div>
         </div>
         <div className='grid grid-cols-3 gap-2 text-center'>
-            <div><Label>Resistência</Label><p className='font-mono text-foreground'>{armor.resistance}</p></div>
-            <div><Label>Durabilidade</Label><p className='font-mono text-foreground'>{armor.durability}</p></div>
-            <div><Label>Peso</Label><p className='font-mono text-foreground'>{armor.weight}kg</p></div>
+            <div><Label className='text-muted-foreground'>Resistência</Label><p className='font-mono text-foreground'>{armor.resistance}</p></div>
+            <div><Label className='text-muted-foreground'>Durabilidade</Label><p className='font-mono text-foreground'>{armor.durability}</p></div>
+            <div><Label className='text-muted-foreground'>Peso</Label><p className='font-mono text-foreground'>{armor.weight}kg</p></div>
         </div>
     </div>
 );
@@ -262,10 +262,10 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             <div>
                 <h4 className='font-semibold text-accent mb-2'>Thrust</h4>
                 <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                    <div><Label>Dano</Label><p className='text-foreground'>{weapon.thrust.damage}</p></div>
-                    <div><Label>Tipo</Label><p className='text-foreground'>{weapon.thrust.type}</p></div>
-                    <div><Label>AP</Label><p className='text-foreground'>{weapon.thrust.ap}</p></div>
-                    <div><Label>Precisão</Label><p className='text-foreground'>{weapon.thrust.accuracy}</p></div>
+                    <div><Label className='text-muted-foreground'>Dano</Label><p className='text-foreground'>{weapon.thrust.damage}</p></div>
+                    <div><Label className='text-muted-foreground'>Tipo</Label><p className='text-foreground'>{weapon.thrust.type}</p></div>
+                    <div><Label className='text-muted-foreground'>AP</Label><p className='text-foreground'>{weapon.thrust.ap}</p></div>
+                    <div><Label className='text-muted-foreground'>Precisão</Label><p className='text-foreground'>{weapon.thrust.accuracy}</p></div>
                 </div>
             </div>
         )}
@@ -273,16 +273,16 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             <div>
                 <h4 className='font-semibold text-accent mb-2'>Swing</h4>
                 <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                    <div><Label>Dano</Label><p className='text-foreground'>{weapon.swing.damage}</p></div>
-                    <div><Label>Tipo</Label><p className='text-foreground'>{weapon.swing.type}</p></div>
-                    <div><Label>AP</Label><p className='text-foreground'>{weapon.swing.ap}</p></div>
-                    <div><Label>Precisão</Label><p className='text-foreground'>{weapon.swing.accuracy}</p></div>
+                    <div><Label className='text-muted-foreground'>Dano</Label><p className='text-foreground'>{weapon.swing.damage}</p></div>
+                    <div><Label className='text-muted-foreground'>Tipo</Label><p className='text-foreground'>{weapon.swing.type}</p></div>
+                    <div><Label className='text-muted-foreground'>AP</Label><p className='text-foreground'>{weapon.swing.ap}</p></div>
+                    <div><Label className='text-muted-foreground'>Precisão</Label><p className='text-foreground'>{weapon.swing.accuracy}</p></div>
                 </div>
             </div>
         )}
         <div className='grid grid-cols-2 gap-2 text-center pt-2 border-t border-border'>
-            <div><Label>Peso</Label><p className='font-mono text-foreground'>{weapon.weight}kg</p></div>
-            <div><Label>Tamanho</Label><p className='font-mono uppercase text-foreground'>{weapon.size}</p></div>
+            <div><Label className='text-muted-foreground'>Peso</Label><p className='font-mono text-foreground'>{weapon.weight}kg</p></div>
+            <div><Label className='text-muted-foreground'>Tamanho</Label><p className='font-mono uppercase text-foreground'>{weapon.size}</p></div>
         </div>
     </div>
 );
@@ -292,11 +292,12 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
         <p className="text-sm text-muted-foreground">{accessory.typeAndDescription}</p>
         <Separator/>
         <div className='grid grid-cols-2 gap-2 text-center'>
-            <div><Label>Peso</Label><p className='font-mono text-foreground'>{accessory.weight}kg</p></div>
-            <div><Label>Efeito</Label><p className='font-mono text-foreground'>{accessory.effect}</p></div>
+            <div><Label className='text-muted-foreground'>Peso</Label><p className='font-mono text-foreground'>{accessory.weight}kg</p></div>
+            <div><Label className='text-muted-foreground'>Efeito</Label><p className='font-mono text-foreground'>{accessory.effect}</p></div>
         </div>
     </div>
 );
+
 
 const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, type: 'armor' | 'weapon' | 'accessory' }) => {
     const { openItem, isItemOpen } = useMovableWindow();
@@ -444,6 +445,16 @@ const DomainCard = ({ domain }: { domain: Character['soul']['domains'][0] }) => 
     </div>
 );
 
+const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (name: string) => void }) => {
+    return (
+        <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between'>
+            <span className='text-muted-foreground'>{axis.poles[0]}</span>
+            <span className='font-bold text-foreground'>{axis.state}</span>
+            <span className='text-muted-foreground'>{axis.poles[1]}</span>
+        </Button>
+    )
+}
+
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
         const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
@@ -472,11 +483,23 @@ export function CharacterSheet() {
         });
     };
 
+    const handleAlignmentToggle = (axisName: string) => {
+        setCharacter(prev => {
+            const newAlignment = prev.spirit.alignment.map(axis => {
+                if (axis.name === axisName) {
+                    return { ...axis, state: getNextAlignmentState(axis.state, axis.poles) };
+                }
+                return axis;
+            });
+            return { ...prev, spirit: { ...prev.spirit, alignment: newAlignment } };
+        })
+    }
+
     return (
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             
             <Collapsible open={isInfoPanelOpen} onOpenChange={setIsInfoPanelOpen}>
-                <CollapsibleTrigger asChild>
+                <CollapsibleTrigger className='w-full'>
                    <InfoPanelSummary character={character} isOpen={isInfoPanelOpen} />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -520,19 +543,10 @@ export function CharacterSheet() {
                             </div>
                         </div>
                         <Separator />
-                        <div className="space-y-4">
-                            <h3 className='font-semibold text-center text-muted-foreground'>Alinhamento</h3>
-                            {character.spirit.alignment.map(a => (
-                                <div key={a.name} className='flex flex-col items-center'>
-                                     <Label className='text-sm mb-1'>{a.name}</Label>
-                                     <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
-                                        <span>{a.poles[0]}</span>
-                                        <span>{a.poles[1]}</span>
-                                     </div>
-                                     <div className='w-full h-2 bg-muted rounded-full overflow-hidden'>
-                                        <div className='h-full bg-primary' style={{ width: `${(a.value + 5) * 10}%`}}></div>
-                                     </div>
-                                </div>
+                        <div className="space-y-2">
+                            <h3 className='font-semibold text-center text-muted-foreground mb-4'>Alinhamento</h3>
+                            {character.spirit.alignment.map(axis => (
+                                <AlignmentButton key={axis.name} axis={axis} onToggle={handleAlignmentToggle} />
                             ))}
                         </div>
                     </CardContent>

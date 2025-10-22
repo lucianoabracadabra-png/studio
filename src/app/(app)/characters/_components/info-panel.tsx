@@ -5,11 +5,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import type { Character } from '@/lib/character-data';
 import { languages } from '@/lib/character-data';
-import { LanguagesIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { LanguagesIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-
 
 type InfoPanelProps = {
     character: Character;
@@ -68,7 +67,7 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
                         />
                     </div>
                     <div className='flex-grow'>
-                        <p className='font-bold text-xl'>{name}</p>
+                        <p className='font-bold text-xl text-foreground'>{name}</p>
                         <p className='text-sm text-muted-foreground'>{concept}</p>
                     </div>
                     <div className='text-right'>
@@ -76,7 +75,7 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
                         <p className='text-xs text-muted-foreground'>/ {info.experiencia.total} XP</p>
                     </div>
                     <div className='px-2'>
-                        {isOpen ? <ChevronUp className='text-muted-foreground' /> : <ChevronDown className='text-muted-foreground' />}
+                        <ChevronDown className={cn('text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
                     </div>
                 </div>
             </CardContent>
@@ -103,7 +102,7 @@ export function InfoPanel({ character }: InfoPanelProps) {
                     </div>
                     <div className='md:col-span-2 space-y-4'>
                         <div className='border-b pb-2'>
-                            <p className='text-3xl font-bold'>{name}</p>
+                            <p className='text-3xl font-bold text-foreground'>{name}</p>
                             <p className='text-muted-foreground'>{character.concept}</p>
                         </div>
                          <div className='grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm'>

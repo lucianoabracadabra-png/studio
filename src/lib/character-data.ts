@@ -97,6 +97,12 @@ export type SoulDomain = {
     symbol: string;
 }
 
+export type AlignmentAxis = {
+  name: string;
+  state: string; // The current state, e.g., "Altruísmo", "Ordem"
+  poles: [string, string, string]; // [Negative Pole, Neutral, Positive Pole]
+};
+
 export type Character = {
   name: string;
   concept: string;
@@ -134,7 +140,7 @@ export type Character = {
   };
   spirit: {
     personality: { name: string; value: number }[];
-    alignment: { name: string; value: number; poles: [string, string] }[];
+    alignment: AlignmentAxis[];
   };
   soul: {
     anima: {
@@ -164,6 +170,12 @@ export const languages: LanguageFamily[] = [
     { root: 'Botokata', dialects: ['Tokamey', 'Bomatan', 'Akobo'] },
     { root: 'Dongalin', dialects: ['Kahakaka', 'Ogoron'] }
 ];
+
+export const getNextAlignmentState = (currentState: string, poles: [string, string, string]): string => {
+    const currentIndex = poles.indexOf(currentState);
+    const nextIndex = (currentIndex + 1) % poles.length;
+    return poles[nextIndex];
+}
 
 
 export const characterData: Character = {
@@ -280,8 +292,12 @@ export const characterData: Character = {
         { name: 'Serenidade', value: 1 },
     ],
     alignment: [
-      { name: 'Moral', value: 2, poles: ['Egoísmo', 'Altruísmo'] },
-      { name: 'Ética', value: -1, poles: ['Rebeldia', 'Ordem'] },
+      { name: 'Moral', state: 'Altruísmo', poles: ['Egoísmo', 'Neutralidade', 'Altruísmo'] },
+      { name: 'Ética', state: 'Ordem', poles: ['Rebeldia', 'Neutralidade', 'Ordem'] },
+      { name: 'Identidade', state: 'Individualismo', poles: ['Comunitarismo', 'Neutralidade', 'Individualismo'] },
+      { name: 'Abordagem', state: 'Instinto', poles: ['Lógica', 'Neutralidade', 'Instinto'] },
+      { name: 'Verdade', state: 'Pragmatismo', poles: ['Idealismo', 'Neutralidade', 'Pragmatismo'] },
+      { name: 'Poder', state: 'Contenção', poles: ['Liberdade', 'Neutralidade', 'Contenção'] },
     ],
   },
   soul: {
