@@ -71,7 +71,7 @@ export const Die3DModel = ({ type, hue, position, onRoll }: Die3DModelProps) => 
   });
 
   return (
-    <group ref={groupRef} position={position} onClick={handleClick} dispose={null}>
+    <group ref={groupRef} position={position} onClick={handleClick}>
       <primitive object={clonedScene} scale={type === 'd10' ? 0.9 : 1} />
     </group>
   );
