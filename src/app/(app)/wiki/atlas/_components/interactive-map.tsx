@@ -10,7 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
+const mapImage = PlaceHolderImages.find(p => p.id === 'world-map');
 
 type AtlasTool = 'pan' | 'draw';
 
@@ -56,10 +56,11 @@ export function InteractiveMap() {
     const clearDrawing = () => {
         const canvas = fabricRef.current;
         if (canvas) {
-            const objects = canvas.getObjects();
+             const objects = canvas.getObjects();
             for (let i = objects.length - 1; i >= 0; i--) {
                 const obj = objects[i];
-                if (obj.isNotClickable()) {
+                // Check if the object is a drawing path before removing
+                if (obj.isType('path')) {
                     canvas.remove(obj);
                 }
             }
@@ -106,34 +107,44 @@ export function InteractiveMap() {
                 selection: false,
             });
             fabricRef.current = canvas;
+            
+            if (!mapImage) {
+                console.error("Map image not found in placeholder data.");
+                return;
+            }
 
             // Load background image
             try {
                 const img = await fabric.Image.fromURL(mapImage.imageUrl, { crossOrigin: 'anonymous' });
-                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-                    originX: 'left',
-                    originY: 'top',
-                });
-                centerAndReset();
-
-                 pointsOfInterest.forEach(poi => {
-                    const pin = new fabric.Circle({
-                        radius: 10,
-                        fill: 'hsl(0, 70%, 60%)',
-                        stroke: 'white',
-                        strokeWidth: 2,
-                        left: (img.width || 2000) * (poi.position.x / 100),
-                        top: (img.height || 1500) * (poi.position.y / 100),
-                        originX: 'center',
-                        originY: 'center',
-                        hasControls: false,
-                        hasBorders: false,
-                        selectable: false,
-                        // @ts-ignore - Custom property to identify POIs
-                        poiData: poi,
+                
+                if (img) {
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                        originX: 'left',
+                        originY: 'top',
                     });
-                    canvas?.add(pin);
-                });
+                    centerAndReset();
+
+                    pointsOfInterest.forEach(poi => {
+                        const pin = new fabric.Circle({
+                            radius: 10,
+                            fill: 'hsl(0, 70%, 60%)',
+                            stroke: 'white',
+                            strokeWidth: 2,
+                            left: (img.width || 2000) * (poi.position.x / 100),
+                            top: (img.height || 1500) * (poi.position.y / 100),
+                            originX: 'center',
+                            originY: 'center',
+                            hasControls: false,
+                            hasBorders: false,
+                            selectable: false,
+                            // @ts-ignore - Custom property to identify POIs
+                            poiData: poi,
+                        });
+                        canvas?.add(pin);
+                    });
+                } else {
+                     console.error("Fabric.js failed to load the image from URL:", mapImage.imageUrl);
+                }
 
             } catch (error) {
                 console.error("Error loading map image:", error);
@@ -272,7 +283,7 @@ export function InteractiveMap() {
             }
         }
 
-    }, [activeTool, canvasRef.current]);
+    }, [activeTool]);
 
     const handleZoom = (direction: 'in' | 'out') => {
         const canvas = fabricRef.current;
