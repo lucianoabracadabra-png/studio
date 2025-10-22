@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import type { Character } from '@/lib/character-data';
 import { languages } from '@/lib/character-data';
-import { LanguagesIcon } from 'lucide-react';
+import { LanguagesIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -15,25 +15,18 @@ type InfoPanelProps = {
     character: Character;
 };
 
-const InfoRow = ({ label, value }: { label: string; value: string | number }) => (
-    <div className='flex justify-between items-baseline border-b border-white/10 pb-1'>
-        <p className='font-bold text-sm text-foreground/80'>{label}:</p>
-        <p className='text-right'>{value}</p>
-    </div>
-);
-
 const LanguagePopover = ({ knownLanguages }: { knownLanguages: string[] }) => (
     <Popover>
         <PopoverTrigger asChild>
              <Button variant="link" className="text-foreground/80 p-0 h-auto justify-start">
                 <LanguagesIcon className="mr-2 h-4 w-4" />
-                <span>Idiomas Conhecidos</span>
+                <span className='text-foreground/80'>Idiomas Conhecidos</span>
             </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 glassmorphic-card">
             <div className="grid gap-4">
                 <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Idiomas</h4>
+                    <h4 className="font-medium leading-none text-foreground">Idiomas</h4>
                     <p className="text-sm text-muted-foreground">
                         Idiomas conhecidos pelo personagem.
                     </p>
@@ -46,7 +39,7 @@ const LanguagePopover = ({ knownLanguages }: { knownLanguages: string[] }) => (
                             </p>
                             <div className='pl-4 border-l-2 border-border ml-1'>
                                 {family.dialects.map(dialect => (
-                                     <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground" : "text-muted-foreground/50")}>
+                                     <p key={dialect} className={cn("text-foreground/80", knownLanguages.includes(dialect) ? "text-foreground" : "text-muted-foreground/50")}>
                                         {dialect}
                                      </p>
                                 ))}
@@ -59,10 +52,42 @@ const LanguagePopover = ({ knownLanguages }: { knownLanguages: string[] }) => (
     </Popover>
 );
 
+export function InfoPanelSummary({ character, isOpen }: { character: Character, isOpen: boolean }) {
+    const { info, name, concept } = character;
+    return (
+        <Card className='glassmorphic-card hover:bg-card/70 transition-colors cursor-pointer'>
+            <CardContent className='p-3'>
+                <div className='flex items-center gap-4'>
+                    <div className='relative w-16 h-16 rounded-md overflow-hidden border-2 border-white/20 shadow-md flex-shrink-0'>
+                        <Image
+                            src={info.imageUrl}
+                            alt={`Portrait of ${name}`}
+                            fill
+                            className='object-cover'
+                            data-ai-hint={info.imageHint}
+                        />
+                    </div>
+                    <div className='flex-grow'>
+                        <p className='font-headline text-2xl magical-glow'>{name}</p>
+                        <p className='text-sm text-muted-foreground'>{concept}</p>
+                    </div>
+                    <div className='text-right'>
+                        <p className='font-mono text-lg font-bold text-foreground'>{info.experiencia.atual}</p>
+                        <p className='text-xs text-muted-foreground'>/ {info.experiencia.total} XP</p>
+                    </div>
+                    <div className='px-2'>
+                        {isOpen ? <ChevronUp className='text-muted-foreground' /> : <ChevronDown className='text-muted-foreground' />}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
 export function InfoPanel({ character }: InfoPanelProps) {
     const { info, name } = character;
     return (
-        <Card className='glassmorphic-card'>
+        <Card className='glassmorphic-card mt-2 animate-in fade-in'>
             <CardContent className='p-4 md:p-6'>
                 <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
                     <div className='md:col-span-1'>
@@ -83,49 +108,49 @@ export function InfoPanel({ character }: InfoPanelProps) {
                         </div>
                          <div className='grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm'>
                             <div className='space-y-1'>
-                                <Label>Altura</Label>
-                                <p>{info.altura}</p>
+                                <Label className='text-muted-foreground'>Altura</Label>
+                                <p className='text-foreground/80'>{info.altura}</p>
                             </div>
                              <div className='space-y-1'>
-                                <Label>Peso</Label>
-                                <p>{info.peso}</p>
+                                <Label className='text-muted-foreground'>Peso</Label>
+                                <p className='text-foreground/80'>{info.peso}</p>
                             </div>
                              <div className='space-y-1'>
-                                <Label>Cabelo</Label>
-                                <p>{info.cabelo}</p>
+                                <Label className='text-muted-foreground'>Cabelo</Label>
+                                <p className='text-foreground/80'>{info.cabelo}</p>
                             </div>
                              <div className='space-y-1'>
-                                <Label>Olhos</Label>
-                                <p>{info.olhos}</p>
+                                <Label className='text-muted-foreground'>Olhos</Label>
+                                <p className='text-foreground/80'>{info.olhos}</p>
                             </div>
                              <div className='space-y-1'>
-                                <Label>Pele</Label>
-                                <p>{info.pele}</p>
+                                <Label className='text-muted-foreground'>Pele</Label>
+                                <p className='text-foreground/80'>{info.pele}</p>
                             </div>
                             <div className='space-y-1'>
-                                <Label>Idade</Label>
-                                <p>{info.idade}</p>
+                                <Label className='text-muted-foreground'>Idade</Label>
+                                <p className='text-foreground/80'>{info.idade}</p>
                             </div>
                         </div>
                         <Separator />
                         <div className='grid grid-cols-2 gap-6 text-sm'>
                              <div className='space-y-1'>
-                                <Label>Ideais</Label>
-                                <p>{info.ideais}</p>
+                                <Label className='text-muted-foreground'>Ideais</Label>
+                                <p className='text-foreground/80'>{info.ideais}</p>
                             </div>
                              <div className='space-y-1'>
-                                <Label>Origem</Label>
-                                <p>{info.origem}</p>
+                                <Label className='text-muted-foreground'>Origem</Label>
+                                <p className='text-foreground/80'>{info.origem}</p>
                             </div>
                         </div>
                          <div className='space-y-1 text-sm'>
-                            <Label>Idiomas</Label>
+                            <Label className='text-muted-foreground'>Idiomas</Label>
                             <LanguagePopover knownLanguages={character.info.idiomas} />
                         </div>
                         <Separator />
                         <div className='space-y-1 text-sm'>
-                            <Label>Experiência</Label>
-                            <p className='font-mono text-lg'>{info.experiencia.atual} / {info.experiencia.total}</p>
+                            <Label className='text-muted-foreground'>Experiência</Label>
+                            <p className='font-mono text-lg text-foreground'>{info.experiencia.atual} / {info.experiencia.total}</p>
                         </div>
                     </div>
                 </div>

@@ -1,24 +1,22 @@
 'use client';
 
 import React, { useState, useEffect, useReducer } from 'react';
-import Image from 'next/image';
-import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, Projectile, BagItem, HealthState } from '@/lib/character-data';
+import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight, BookOpen, Circle } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMovableWindow } from '@/context/movable-window-context';
-import { InfoPanel } from './info-panel';
+import { InfoPanel, InfoPanelSummary } from './info-panel';
 import { HealthPanel } from './health-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Label } from '@/components/ui/label';
 
 const TorsoIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
@@ -116,9 +114,15 @@ const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps
                 <span className="nome">{name}</span>
             </div>
             <div className="item-control">
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <Circle className='text-muted-foreground/30 hover:text-primary' />
-                </Button>
+                <div className='dots-container'>
+                    {[...Array(15)].map((_, i) => (
+                        <span
+                            key={i}
+                            className={cn('dot-sm', { 'selected': i < level })}
+                            onClick={() => onLevelChange(name, i + 1)}
+                        ></span>
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -174,26 +178,31 @@ type FocusState = {
 };
 
 type FocusAction = 
-    | { type: 'SET_ATTRIBUTE'; payload: { name: string; level: number } }
+    | { type: 'SET_ATTRIBUTE'; payload: { name: string; level: number, baseLevel: number } }
     | { type: 'RESET' };
 
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
     switch (action.type) {
         case 'SET_ATTRIBUTE': {
-            const { name, level } = action.payload;
-            const currentLevel = state.attributes[name] || 0;
-            const levelDifference = level - currentLevel;
+            const { name, level, baseLevel } = action.payload;
+            const newAttributes = { ...state.attributes, [name]: level };
 
-            // Simple cost: 1 point per level
-            const costDifference = levelDifference;
+            const spentPoints = Object.entries(newAttributes).reduce((total, [attrName, currentLevel]) => {
+                const base = initialCharacterData.focus.physical.attributes.find(a => a.name === attrName)?.value || 
+                             initialCharacterData.focus.mental.attributes.find(a => a.name === attrName)?.value ||
+                             initialCharacterData.focus.social.attributes.find(a => a.name === attrName)?.value || 0;
+                
+                if (currentLevel > base) {
+                    // Simple cost: 1 point for each level above base.
+                    total += (currentLevel - base);
+                }
+                return total;
+            }, 0);
 
             return {
                 ...state,
-                attributes: {
-                    ...state.attributes,
-                    [name]: level,
-                },
-                spentPoints: state.spentPoints + costDifference,
+                attributes: newAttributes,
+                spentPoints: spentPoints,
             };
         }
         case 'RESET':
@@ -202,6 +211,7 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
             return state;
     }
 }
+
 
 const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
     const pilarClass = `pilar-${pilar.toLowerCase()}`;
@@ -217,18 +227,9 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
     const [state, dispatch] = useReducer(focusReducer, initialAttributeState);
 
     const handleAttributeChange = (name: string, newLevel: number) => {
-        // This is a simplified handler. The reducer should manage complex state.
-        const currentLevel = state.attributes[name];
-        const updatedLevel = Math.max(0, Math.min(15, newLevel));
-        
-        // Dispatching the change to the reducer
-        const levelDifference = updatedLevel - currentLevel;
-        const cost = levelDifference; // Simplified cost logic
-        // This is a bit of a hack as we should calculate from base, not incrementally
-        // For a real app, this logic would be more robust.
-        dispatch({ type: 'SET_ATTRIBUTE', payload: { name: name, level: updatedLevel }});
+        const baseLevel = focusData.attributes.find((a: any) => a.name === name)?.value || 0;
+        dispatch({ type: 'SET_ATTRIBUTE', payload: { name, level: newLevel, baseLevel }});
     };
-
 
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
     const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
@@ -248,7 +249,7 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
                         <CardTitle className='border-b-2 border-dotted border-primary pb-1'>ATRIBUTOS</CardTitle>
                     </CardHeader>
                     <CardContent className='space-y-2'>
-                        {focusData.attributes.map((attr: {name: string}) => (
+                        {focusData.attributes.map((attr: {name: string, value: number}) => (
                             <AttributeItem 
                                 key={attr.name} 
                                 name={attr.name} 
@@ -331,7 +332,7 @@ const ArmorCardDetails = ({ armor }: { armor: Armor }) => (
         <div className='grid grid-cols-3 gap-2 text-center'>
             <div className='space-y-1'><Label>Resistência</Label><p className='font-mono'>{armor.resistance}</p></div>
             <div className='space-y-1'><Label>Durabilidade</Label><p className='font-mono'>{armor.durability}</p></div>
-            <div className='spacey-1'><Label>Peso</Label><p className='font-mono'>{armor.weight}kg</p></div>
+            <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{armor.weight}kg</p></div>
         </div>
     </div>
 );
@@ -449,15 +450,15 @@ const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) =
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
-                    <h3 className="font-headline text-lg text-center">Armaduras</h3>
+                    <h3 className="font-headline text-lg text-center text-muted-foreground">Armaduras</h3>
                     {equippedArmors.length > 0 ? equippedArmors.map(item => <EquippedItemCard key={item.name} item={item} type="armor" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma armadura equipada.</p>}
                 </div>
                  <div className="space-y-3">
-                    <h3 className="font-headline text-lg text-center">Armas</h3>
+                    <h3 className="font-headline text-lg text-center text-muted-foreground">Armas</h3>
                     {equippedWeapons.length > 0 ? equippedWeapons.map(item => <EquippedItemCard key={item.name} item={item} type="weapon" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma arma equipada.</p>}
                 </div>
                  <div className="space-y-3">
-                    <h3 className="font-headline text-lg text-center">Acessórios</h3>
+                    <h3 className="font-headline text-lg text-center text-muted-foreground">Acessórios</h3>
                     {equippedAccessories.length > 0 ? equippedAccessories.map(item => <EquippedItemCard key={item.name} item={item} type="accessory" />) : <p className="text-xs text-center text-muted-foreground">Nenhum acessório equipado.</p>}
                 </div>
             </CardContent>
@@ -482,7 +483,7 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
             <CardHeader>
                 <div className="flex justify-between items-baseline">
                     <CardTitle className='font-headline text-2xl magical-glow'>Inventário</CardTitle>
-                    <p className="font-mono text-muted-foreground flex items-center gap-2"><Weight className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
+                    <p className="font-mono text-muted-foreground flex items-center gap-2"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
                 </div>
             </CardHeader>
             <CardContent>
@@ -520,6 +521,8 @@ export function CharacterSheet() {
         return initialCharacterData;
     });
 
+    const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
+
     const handleHealthChange = (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => {
         setCharacter(prev => {
             const newBodyParts = { ...prev.health.bodyParts };
@@ -540,32 +543,35 @@ export function CharacterSheet() {
     return (
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in-up">
             
-            <section>
-                <InfoPanel character={character} />
-            </section>
+            <Collapsible open={isInfoPanelOpen} onOpenChange={setIsInfoPanelOpen}>
+                <CollapsibleTrigger asChild>
+                   <InfoPanelSummary character={character} isOpen={isInfoPanelOpen} />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                    <InfoPanel character={character} />
+                </CollapsibleContent>
+            </Collapsible>
             
-            <section>
-                <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
-            </section>
+            <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
             
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="glassmorphic-card">
                     <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ALMA</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                         <div className="grid grid-cols-2 gap-4 text-center">
                             <div className="space-y-1">
-                                <Label className="flex items-center justify-center gap-1">
+                                <Label className="flex items-center justify-center gap-1 text-muted-foreground">
                                     Fluxo
                                     <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Energia cósmica que permeia tudo.</p></TooltipContent></Tooltip></TooltipProvider>
                                 </Label>
-                                <p className="text-3xl font-bold">{character.soul.anima.flow}</p>
+                                <p className="text-3xl font-bold text-foreground">{character.soul.anima.flow}</p>
                             </div>
                             <div className="space-y-1">
-                                <Label className="flex items-center justify-center gap-1">
+                                <Label className="flex items-center justify-center gap-1 text-muted-foreground">
                                     Patrono
                                     <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Vínculo com uma entidade poderosa.</p></TooltipContent></Tooltip></TooltipProvider>
                                 </Label>
-                                <p className="text-3xl font-bold">{character.soul.anima.patron}</p>
+                                <p className="text-3xl font-bold text-foreground">{character.soul.anima.patron}</p>
                             </div>
                         </div>
                         <Separator/>
@@ -574,7 +580,7 @@ export function CharacterSheet() {
                             <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                                 {character.soul.domains.map(d => (
                                     <div key={d.name} className="flex justify-between items-center">
-                                        <Label>{d.name}</Label>
+                                        <Label className='text-foreground/80'>{d.name}</Label>
                                         <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
                                     </div>
                                 ))}
@@ -601,8 +607,8 @@ export function CharacterSheet() {
                             {character.spirit.personality.map(p => (
                                 <div key={p.name} className="space-y-2">
                                     <div className="flex justify-between items-center text-sm">
-                                        <Label>{p.name}</Label>
-                                        <span className="font-mono">{p.value}</span>
+                                        <Label className='text-foreground/80'>{p.name}</Label>
+                                        <span className="font-mono text-foreground">{p.value}</span>
                                     </div>
                                     <Slider defaultValue={[p.value]} max={10} step={1} />
                                 </div>
@@ -614,9 +620,9 @@ export function CharacterSheet() {
                             {character.spirit.alignment.map(a => (
                                 <div key={a.name} className="space-y-2">
                                     <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className='font-semibold text-left'>{a.poles[0]}</span>
-                                        <Label className='font-bold'>{a.name}</Label>
-                                        <span className='font-semibold text-right'>{a.poles[1]}</span>
+                                        <span className='font-semibold text-left text-foreground/80'>{a.poles[0]}</span>
+                                        <Label className='font-bold text-foreground/80'>{a.name}</Label>
+                                        <span className='font-semibold text-right text-foreground/80'>{a.poles[1]}</span>
                                     </div>
                                     <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
                                 </div>
@@ -624,38 +630,34 @@ export function CharacterSheet() {
                         </div>
                     </CardContent>
                 </Card>
-            </section>
+            </div>
 
-            <section>
-                <Card className='glassmorphic-card'>
-                    <CardHeader>
-                        <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS DE DESENVOLVIMENTO</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Tabs defaultValue="physical" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="physical" className='flex items-center gap-2'><PersonStanding />Físico</TabsTrigger>
-                                <TabsTrigger value="mental" className='flex items-center gap-2'><BrainCircuit />Mental</TabsTrigger>
-                                <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="physical" className='pt-6'>
-                                <FocusBranch focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
-                            </TabsContent>
-                            <TabsContent value="mental" className='pt-6'>
-                                <FocusBranch focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
-                            </TabsContent>
-                            <TabsContent value="social" className='pt-6'>
-                                <FocusBranch focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
-                            </TabsContent>
-                        </Tabs>
-                    </CardContent>
-                </Card>
-            </section>
+            <Card className='glassmorphic-card'>
+                <CardHeader>
+                    <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS DE DESENVOLVIMENTO</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="physical" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="physical" className='flex items-center gap-2'><PersonStanding />Físico</TabsTrigger>
+                            <TabsTrigger value="mental" className='flex items-center gap-2'><BrainCircuit />Mental</TabsTrigger>
+                            <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="physical" className='pt-6'>
+                            <FocusBranch focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
+                        </TabsContent>
+                        <TabsContent value="mental" className='pt-6'>
+                            <FocusBranch focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
+                        </TabsContent>
+                        <TabsContent value="social" className='pt-6'>
+                            <FocusBranch focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
              
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <EquippedSection equipment={character.equipment} />
-                 <InventorySection equipment={character.equipment} inventory={character.inventory} />
-            </section>
+            <EquippedSection equipment={character.equipment} />
+            <InventorySection equipment={character.equipment} inventory={character.inventory} />
         </div>
     );
 }

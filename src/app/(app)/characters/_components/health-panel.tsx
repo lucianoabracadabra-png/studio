@@ -23,7 +23,7 @@ const BodyPartIcon = ({ part }: { part: keyof Character['health']['bodyParts'] }
         leftLeg: <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full" transform="scale(-1, 1) translate(-24, 0)"><path d="M15 11h4v10h-4z" /></svg>,
         rightLeg: <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full"><path d="M5 11h4v10H5z" /></svg>
     }
-    return <div className="w-8 h-8 md:w-10 md:h-10 text-white/80">{abstractIcons[part]}</div>
+    return <div className="w-10 h-10 md:w-12 md:h-12 text-white/80">{abstractIcons[part]}</div>
 }
 
 const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, partId: keyof Character['health']['bodyParts'], onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void }) => {
@@ -35,11 +35,18 @@ const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, pa
     };
 
     const stateStyles = {
-        clean: 'bg-green-500/30 border-green-500/50',
-        simple: 'bg-blue-500/70 border-blue-400',
-        lethal: 'bg-yellow-500/70 border-yellow-400',
-        aggravated: 'bg-red-500/70 border-red-400',
+        clean: 'bg-green-500/20 border-green-500/40',
+        simple: 'bg-blue-500/20 border-blue-500/40',
+        lethal: 'bg-yellow-500/20 border-yellow-500/40',
+        aggravated: 'bg-red-500/20 border-red-500/40',
     };
+
+    const stateFillStyles = {
+        clean: 'bg-green-500/80',
+        simple: 'bg-blue-500/80',
+        lethal: 'bg-yellow-500/80',
+        aggravated: 'bg-red-500/80',
+    }
     
     return (
         <div className="health-grid" style={{ '--grid-cols': partId === 'torso' ? 4 : 3 } as React.CSSProperties}>
@@ -49,7 +56,9 @@ const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, pa
                     className={cn("health-box", stateStyles[state])}
                     onClick={() => handleClick(i)}
                     aria-label={`Health box ${i+1} for ${part.name}, state: ${state}`}
-                />
+                >
+                    <div className={cn("inner-box", stateFillStyles[state])}></div>
+                </button>
             ))}
         </div>
     );
