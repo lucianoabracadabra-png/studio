@@ -518,7 +518,6 @@ export function CharacterSheet() {
                                     </div>
                                 ))}
                             </div>
-                            <div className='personality-table-bonus'>+2</div>
                         </div>
                         <Separator />
                         <div className="space-y-4">
