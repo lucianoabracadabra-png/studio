@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useReducer } from 'react';
-import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState, AlignmentAxis, getNextAlignmentState } from '@/lib/character-data';
+import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState, AlignmentAxis, getNextAlignmentState, Fluxo, Patrono } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, CheckSquare, Square, Flame, UserCheck } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -445,6 +445,42 @@ const DomainCard = ({ domain }: { domain: Character['soul']['domains'][0] }) => 
     </div>
 );
 
+const FluxoPatronoCard = ({ title, data, icon: Icon }: { title: string, data: Fluxo | Patrono, icon: React.ElementType }) => {
+    return (
+        <div className='fluxo-patrono-card'>
+            <div className='fluxo-patrono-header'>
+                <span>+</span>
+                <h3 className='title'>{title}</h3>
+                <span>+</span>
+            </div>
+            <div className='fluxo-patrono-body'>
+                <div className='stats'>
+                    <div>
+                        <p className='label'>LEVEL</p>
+                        <p className='value'>{data.level}</p>
+                    </div>
+                    <div>
+                        <p className='label'>MOD</p>
+                        <p className='value-mod'>{data.mod}</p>
+                    </div>
+                </div>
+                <div className='checkboxes'>
+                    {data.checkboxes.map((row, rowIndex) => (
+                        <div key={rowIndex} className={cn('row', rowIndex === 0 && 'first-row')}>
+                            {row.map((checked, colIndex) => (
+                                checked ? <CheckSquare key={colIndex} className='box checked' /> : <Square key={colIndex} className='box' />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className='fluxo-patrono-footer'>
+                <Icon className="h-10 w-10" />
+            </div>
+        </div>
+    );
+};
+
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
         const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
@@ -502,7 +538,7 @@ export function CharacterSheet() {
             
             <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
@@ -521,22 +557,32 @@ export function CharacterSheet() {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="personality-table-container">
-                            <div className='personality-table-header'>PERSONALIDADE</div>
-                            <div className='personality-table-body'>
-                                {character.spirit.personality.map(p => (
-                                    <div key={p.name} className='personality-table-cell'>
-                                        <div className='value'>{p.value}</div>
-                                        <div className='name'>{p.name}</div>
-                                    </div>
-                                ))}
+                <div className='md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <Card>
+                        <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="personality-table-container">
+                                <div className='personality-table-header'>PERSONALIDADE</div>
+                                <div className='personality-table-body'>
+                                    {character.spirit.personality.map(p => (
+                                        <div key={p.name} className='personality-table-cell'>
+                                            <div className='value'>{p.value}</div>
+                                            <div className='name'>{p.name}</div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader><CardTitle className='text-center'>Anima</CardTitle></CardHeader>
+                        <CardContent className="flex justify-around items-start gap-4">
+                            <FluxoPatronoCard title="FLUXO" data={character.soul.anima.fluxo} icon={UserCheck} />
+                            <FluxoPatronoCard title="PATRONO" data={character.soul.anima.patrono} icon={Flame} />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             <Card>

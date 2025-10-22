@@ -103,6 +103,19 @@ export type AlignmentAxis = {
   poles: [string, string, string]; // [Negative Pole, Neutral, Positive Pole]
 };
 
+export type Fluxo = {
+  level: number;
+  mod: number;
+  checkboxes: boolean[][];
+};
+
+export type Patrono = {
+  level: number;
+  mod: number;
+  checkboxes: boolean[][];
+};
+
+
 export type Character = {
   name: string;
   concept: string;
@@ -144,8 +157,8 @@ export type Character = {
   };
   soul: {
     anima: {
-      flow: number;
-      patron: number;
+      fluxo: Fluxo;
+      patrono: Patrono;
     };
     domains: SoulDomain[];
     cracks: number;
@@ -302,8 +315,26 @@ export const characterData: Character = {
   },
   soul: {
     anima: {
-      flow: 3,
-      patron: 2,
+      fluxo: {
+        level: 5,
+        mod: 10,
+        checkboxes: [
+            [true, true],
+            [false, false],
+            [false]
+        ]
+      },
+      patrono: {
+        level: 10,
+        mod: 15,
+        checkboxes: [
+            [true, true],
+            [false, false],
+            [false, false],
+            [false, false],
+            [false, false],
+        ]
+      },
     },
     domains: [
       { name: 'Terra', level: 0, bonus: 1, color: '#22c55e', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12h20M12 2v20"/></svg>' },
