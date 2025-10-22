@@ -290,7 +290,7 @@
     from { 
         transform: rotateY(740deg);
         box-shadow: 
-          inset -3px 0 8px rgba(0,0_0,0.3), 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
           0 0 40px hsla(var(--book-color-hue, 0), 50%, 70%, 1.5),
           0 0 20px hsla(var(--book-color-hue, 0), 50%, 70%, 1),
           0 0 8px hsl(var(--book-color-hue, 0), 50%, 80%);
@@ -298,7 +298,7 @@
     to { 
         transform: rotateY(2180deg); /* 4 more spins */
         box-shadow: 
-          inset -3px 0 8px rgba(0,0_0,0.3), 
+          inset -3px 0 8px rgba(0,0,0,0.3), 
           0 0 100px hsla(var(--book-color-hue, 0), 60%, 75%, 2),
           0 0 40px hsla(var(--book-color-hue, 0), 60%, 75%, 1.5),
           0 0 15px hsl(var(--book-color-hue, 0), 60%, 85%);
@@ -382,14 +382,13 @@
     .health-diagram {
         display: grid;
         grid-template-areas:
-            ". head ."
-            "left-arm torso right-arm"
-            ". torso ."
-            "left-leg . right-leg";
+            "left-arm head right-arm"
+            "left-leg torso right-leg";
         grid-template-columns: 1fr auto 1fr;
         gap: 1rem;
         justify-items: center;
-        align-items: center;
+        align-items: start;
+        width: 100%;
     }
 
     .body-part-head { grid-area: head; }
@@ -400,33 +399,23 @@
     .body-part-rightLeg { grid-area: right-leg; }
     
     .body-part-container { @apply flex flex-col items-center gap-2 relative; }
-    .icon-container { @apply bg-black rounded-md w-12 h-12 md:w-14 md:h-14 p-1 flex items-center justify-center; }
+    .icon-container { @apply bg-black/40 rounded-md w-12 h-12 md:w-14 md:h-14 p-1 flex items-center justify-center; }
 
     .health-grid {
         display: grid;
         grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
         gap: 4px;
+        padding: 4px;
+        background-color: theme('colors.black / 0.2');
+        border-radius: theme('borderRadius.md');
     }
     
     .health-box {
         @apply w-3 h-3 rounded-sm cursor-pointer transition-all duration-200 relative border;
     }
-
-    .health-box-inner {
-        @apply w-full h-full rounded-sm flex items-center justify-center;
-    }
-
+    
     .health-box:hover {
         transform: scale(1.2);
+        filter: brightness(1.2);
     }
-    
-    .head-wounds {
-      @apply absolute -top-4 flex gap-1;
-    }
-    .head-wound-box {
-      @apply w-3 h-3 rounded-sm border border-black/50;
-    }
-    .head-wound-box.blue { @apply bg-blue-500; }
-    .head-wound-box.yellow { @apply bg-yellow-500; }
-    .head-wound-box.red { @apply bg-red-500; }
 }
