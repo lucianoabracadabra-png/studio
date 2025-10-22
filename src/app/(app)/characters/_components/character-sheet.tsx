@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMovableWindow } from '@/context/movable-window-context';
 import { InfoPanel } from './info-panel';
+import { HealthPanel } from './health-panel';
 
 
 const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
@@ -433,6 +434,22 @@ export function CharacterSheet() {
         return initialCharacterData;
     });
 
+    const handleHealthChange = (partId: keyof Character['health']['bodyParts'], newHealth: number) => {
+        setCharacter(prev => ({
+            ...prev,
+            health: {
+                ...prev.health,
+                bodyParts: {
+                    ...prev.health.bodyParts,
+                    [partId]: {
+                        ...prev.health.bodyParts[partId],
+                        current: newHealth,
+                    }
+                }
+            }
+        }));
+    };
+
     return (
         <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 animate-in fade-in-up">
             <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
@@ -440,6 +457,9 @@ export function CharacterSheet() {
                     <InfoPanel characterInfo={character.info} name={character.name} />
                 </div>
                 <div className="xl:col-span-2 space-y-6">
+                    <section>
+                        <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
+                    </section>
                      {/* SOUL & SPIRIT PANEL */}
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* SPIRIT */}
@@ -520,12 +540,12 @@ export function CharacterSheet() {
                             </CardContent>
                         </Card>
                     </section>
-                    <section>
-                         <EquippedSection equipment={character.equipment} />
-                    </section>
                 </div>
 
             </div>
+             <section>
+                 <EquippedSection equipment={character.equipment} />
+            </section>
 
             {/* FOCUS PANEL */}
             <section>

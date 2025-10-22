@@ -77,6 +77,13 @@ type SocialFocus = FocusData & {
   artes: Stat[];
 };
 
+export type BodyPartHealth = {
+    name: string;
+    max: number;
+    current: number;
+    wounds: ('light' | 'serious' | 'critical')[];
+};
+
 export type Character = {
   name: string;
   concept: string;
@@ -95,6 +102,16 @@ export type Character = {
     experiencia: {
         atual: number;
         total: number;
+    }
+  },
+  health: {
+    bodyParts: {
+        head: BodyPartHealth;
+        torso: BodyPartHealth;
+        leftArm: BodyPartHealth;
+        rightArm: BodyPartHealth;
+        leftLeg: BodyPartHealth;
+        rightLeg: BodyPartHealth;
     }
   },
   focus: {
@@ -144,6 +161,16 @@ export const characterData: Character = {
         atual: 0,
         total: 369
     }
+  },
+  health: {
+      bodyParts: {
+          head: { name: 'Cabeça', max: 6, current: 6, wounds: [] },
+          torso: { name: 'Tronco', max: 12, current: 12, wounds: [] },
+          leftArm: { name: 'Braço Esquerdo', max: 9, current: 9, wounds: [] },
+          rightArm: { name: 'Braço Direito', max: 9, current: 9, wounds: [] },
+          leftLeg: { name: 'Perna Esquerda', max: 9, current: 9, wounds: [] },
+          rightLeg: { name: 'Perna Direita', max: 9, current: 9, wounds: [] },
+      }
   },
   focus: {
     physical: {
