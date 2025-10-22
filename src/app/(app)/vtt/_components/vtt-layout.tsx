@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { MapCanvas } from './map-canvas';
-import { VttToolbar, VttTool } from './vtt-toolbar';
+import { VttSidebar } from './vtt-sidebar';
 import { ToolPanelContainer } from './tool-panel-container';
 import type { PanInfo } from 'framer-motion';
 import type { Shape, DraftShape } from './drawing-layer';
@@ -30,6 +31,10 @@ export interface DrawingOptions {
     fill: boolean;
     strokeWidth: number;
 }
+
+// Toolbar types
+export type VttTool = 'tokens' | 'drawing' | 'fog' | 'layers' | 'combat' | 'settings' | 'pan';
+
 
 // VTT State
 export interface VttState {
@@ -90,12 +95,16 @@ const initialVttState: VttState = {
 
 export function VttLayout() {
   const [vttState, setVttState] = useState<VttState>(initialVttState);
-  const [activeToolbar, setActiveToolbar] = useState<VttTool | null>(null);
+  const [activeToolPanel, setActiveToolPanel] = useState<VttTool | null>(null);
 
-  const handleToolToggle = (tool: VttTool) => {
-    setActiveToolbar(prev => {
+  const handleToolToggle = (tool: VttTool | null) => {
+    setActiveToolPanel(prev => {
         const newTool = prev === tool ? null : tool;
-        // Se o novo painel NÃO for o de desenho, desativamos qualquer ferramenta de desenho ativa.
+        if (newTool === 'pan' || newTool === null) {
+            setVttState(s => ({ ...s, drawing: { ...s.drawing, activeTool: null } }));
+            return null;
+        }
+        
         if (newTool !== 'drawing') {
             setVttState(s => ({ ...s, drawing: { ...s.drawing, activeTool: null } }));
         }
@@ -137,14 +146,15 @@ export function VttLayout() {
     });
   };
   
-  const isMapInteractionEnabled = activeToolbar === null || (activeToolbar === 'drawing' && vttState.drawing.activeTool === null);
+  const isPanEnabled = activeToolPanel === null || activeToolPanel === 'pan';
+  const isTokenInteractionEnabled = isPanEnabled && vttState.drawing.activeTool === null;
 
   return (
     <div className="w-full h-full bg-black relative">
-      <VttToolbar activeTool={activeToolbar} onToolToggle={handleToolToggle} />
+      <VttSidebar activeTool={activeToolPanel} onToolToggle={handleToolToggle} />
       
       <ToolPanelContainer 
-        activeTool={activeToolbar} 
+        activeTool={activeToolPanel} 
         vttState={vttState}
         setVttState={setVttState}
       />
@@ -158,8 +168,8 @@ export function VttLayout() {
         layers={vttState.layers}
         drawingState={vttState.drawing}
         onAddShape={handleAddShape}
-        isPanEnabled={isMapInteractionEnabled}
-        isTokenInteractionEnabled={isMapInteractionEnabled}
+        isPanEnabled={isPanEnabled}
+        isTokenInteractionEnabled={isTokenInteractionEnabled}
       />
     </div>
   );

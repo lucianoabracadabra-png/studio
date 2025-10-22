@@ -7,9 +7,11 @@ export default function AtlasPage() {
           <h1 className="text-4xl font-headline magical-glow">Atlas do Mundo</h1>
           <p className="text-lg text-muted-foreground mt-1">Navegue pelo mapa e descubra os segredos do nosso universo.</p>
       </header>
-      <div className="flex-grow animate-in fade-in-up">
+      <div className="flex-grow animate-in fade-in-up p-6 pt-0">
         <InteractiveMap />
       </div>
     </div>
   );
 }
+
+    

@@ -7,10 +7,9 @@ import { Users, PenTool, Cloud, Layers, Swords, Settings, LucideIcon, Hand } fro
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import type { VttTool } from './vtt-layout';
 
-export type VttTool = 'tokens' | 'drawing' | 'fog' | 'layers' | 'combat' | 'settings' | 'pan';
-
-interface VttToolbarProps {
+interface VttSidebarProps {
     activeTool: VttTool | null;
     onToolToggle: (tool: VttTool | null) => void;
 }
@@ -26,7 +25,7 @@ const tools: { id: VttTool, label: string, icon: LucideIcon }[] = [
 
 const settingsTool = { id: 'settings' as VttTool, label: 'Configurações', icon: Settings };
 
-export function VttToolbar({ activeTool, onToolToggle }: VttToolbarProps) {
+export function VttSidebar({ activeTool, onToolToggle }: VttSidebarProps) {
     
     const currentActiveTool = activeTool === null ? 'pan' : activeTool;
 

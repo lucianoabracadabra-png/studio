@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import type { fabric as FabricType } from 'fabric';
+import { fabric as FabricType } from 'fabric';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { pointsOfInterest } from '@/lib/wiki-data';
 import { ZoomIn, ZoomOut, Maximize, MousePointer, Pen, Eraser } from 'lucide-react';
@@ -14,28 +14,32 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map')!;
 
 type AtlasTool = 'pan' | 'draw';
 
-const PIXELS_PER_KM = 2; 
+const PIXELS_PER_KM = 2;
 
-const DrawingToolbar = ({ onClear, distance }: { onClear: () => void, distance: number }) => {
+const DrawingToolbar = ({ onClear, distance }: { onClear: () => void; distance: number }) => {
     return (
-        <motion.div
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-        >
-            <Card className="glassmorphic-card flex items-center gap-4 p-2">
-                <Button onClick={onClear} variant="destructive" size="icon">
-                    <Eraser />
-                </Button>
-                <div className='flex items-baseline gap-2'>
-                    <span className='text-muted-foreground text-sm'>Distância:</span>
-                    <span className='font-bold font-mono text-lg'>{distance.toFixed(0)}km</span>
-                </div>
-            </Card>
-        </motion.div>
+        <AnimatePresence>
+            {(distance > 0) && (
+                <motion.div
+                    className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
+                    initial={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 100, opacity: 0 }}
+                >
+                    <Card className="glassmorphic-card flex items-center gap-4 p-2">
+                        <Button onClick={onClear} variant="destructive" size="icon">
+                            <Eraser />
+                        </Button>
+                        <div className='flex items-baseline gap-2'>
+                            <span className='text-muted-foreground text-sm'>Distância:</span>
+                            <span className='font-bold font-mono text-lg'>{distance.toFixed(0)}km</span>
+                        </div>
+                    </Card>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
-}
+};
 
 export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,7 +48,7 @@ export function InteractiveMap() {
     const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [displayDistance, setDisplayDistance] = useState(0);
-
+    
     const isDrawingRef = useRef(false);
     const totalDistanceRef = useRef(0);
     const lastPointRef = useRef<{ x: number, y: number } | null>(null);
@@ -55,9 +59,8 @@ export function InteractiveMap() {
             const objects = canvas.getObjects();
             for (let i = objects.length - 1; i >= 0; i--) {
                 const obj = objects[i];
-                // @ts-ignore
-                if (obj.isDrawingObject !== false) {
-                     canvas.remove(obj);
+                if (obj.isNotClickable()) {
+                    canvas.remove(obj);
                 }
             }
             canvas.renderAll();
@@ -70,50 +73,50 @@ export function InteractiveMap() {
         const canvas = fabricRef.current;
         if (!canvas) return;
         const bgImage = canvas.backgroundImage;
+        const canvasWidth = canvas.getWidth();
+        const canvasHeight = canvas.getHeight();
 
-        // @ts-ignore
-        if (bgImage && bgImage.width && canvas.width) {
-             // @ts-ignore
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height || 0;
-             // @ts-ignore
+        if (bgImage && bgImage.width && bgImage.height) {
             const imgWidth = bgImage.width;
-             // @ts-ignore
             const imgHeight = bgImage.height;
-
             const zoomX = canvasWidth / imgWidth;
             const zoomY = canvasHeight / imgHeight;
             const newZoom = Math.min(zoomX, zoomY, 1);
             
             canvas.setZoom(newZoom);
-            canvas.absolutePan({ x: 0, y: 0});
         } else {
-             canvas.setZoom(0.5);
-             canvas.absolutePan({ x: 0, y: 0});
+            canvas.setZoom(0.5);
         }
+        canvas.absolutePan({ x: 0, y: 0 });
     };
-    
+
     useEffect(() => {
+        let canvas: FabricType.Canvas | null = null;
+        let resizeObserver: ResizeObserver | null = null;
+
         const initFabric = async () => {
             const { fabric } = await import('fabric');
             
             if (!canvasRef.current) return;
 
-            const canvas = new fabric.Canvas(canvasRef.current, {
+            // Initialize canvas
+            canvas = new fabric.Canvas(canvasRef.current, {
                 width: canvasRef.current.parentElement?.clientWidth,
                 height: canvasRef.current.parentElement?.clientHeight,
                 selection: false,
             });
             fabricRef.current = canvas;
 
-            fabric.Image.fromURL(mapImage.imageUrl, (img: FabricType.Image) => {
+            // Load background image
+            try {
+                const img = await fabric.Image.fromURL(mapImage.imageUrl, { crossOrigin: 'anonymous' });
                 canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
                     originX: 'left',
                     originY: 'top',
                 });
                 centerAndReset();
 
-                pointsOfInterest.forEach(poi => {
+                 pointsOfInterest.forEach(poi => {
                     const pin = new fabric.Circle({
                         radius: 10,
                         fill: 'hsl(0, 70%, 60%)',
@@ -126,49 +129,37 @@ export function InteractiveMap() {
                         hasControls: false,
                         hasBorders: false,
                         selectable: false,
-                        // @ts-ignore
+                        // @ts-ignore - Custom property to identify POIs
                         poiData: poi,
-                        isDrawingObject: false,
                     });
-                    canvas.add(pin);
-                });
-                
-                canvas.on('object:scaling', (e) => {
-                    const obj = e.target;
-                    if (!obj || !(obj instanceof fabric.Circle)) return;
-                    const zoom = canvas.getZoom();
-                    obj.set({
-                        radius: 10 / zoom,
-                        strokeWidth: 2 / zoom,
-                    });
+                    canvas?.add(pin);
                 });
 
-                canvas.renderAll();
-            }, { crossOrigin: 'anonymous' });
+            } catch (error) {
+                console.error("Error loading map image:", error);
+            }
 
-            const handleResize = () => {
-                if (!canvasRef.current || !canvasRef.current.parentElement) return;
-                canvas.setWidth(canvasRef.current.parentElement.clientWidth);
-                canvas.setHeight(canvasRef.current.parentElement.clientHeight);
-                canvas.renderAll();
-            };
-            window.addEventListener('resize', handleResize);
-            
-            return () => {
-                window.removeEventListener('resize', handleResize);
-                if (fabricRef.current) {
-                    fabricRef.current.dispose();
-                    fabricRef.current = null;
-                }
-            };
+            // Handle responsive resizing
+            if (canvasRef.current.parentElement) {
+                resizeObserver = new ResizeObserver(entries => {
+                    const { width, height } = entries[0].contentRect;
+                    canvas?.setDimensions({ width, height });
+                });
+                resizeObserver.observe(canvasRef.current.parentElement);
+            }
         };
-        
-        const cleanupPromise = initFabric();
-        
+
+        initFabric();
+
         return () => {
-            cleanupPromise.then(cleanup => cleanup && cleanup());
+            if (resizeObserver && canvasRef.current?.parentElement) {
+                resizeObserver.unobserve(canvasRef.current.parentElement);
+            }
+            if (fabricRef.current) {
+                fabricRef.current.dispose();
+                fabricRef.current = null;
+            }
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -180,8 +171,7 @@ export function InteractiveMap() {
     
         const onPanMouseDown = (opt: FabricType.IEvent) => {
             const e = opt.e;
-            // @ts-ignore
-            if (opt.target && opt.target.poiData) return;
+            if (opt.target && 'poiData' in opt.target) return;
             isPanning = true;
             canvas.setCursor('grabbing');
             lastPosX = e.clientX;
@@ -203,12 +193,18 @@ export function InteractiveMap() {
         };
 
         const onPanMouseUp = () => {
-            if (isPanning) {
-                isPanning = false;
-                canvas.setCursor('grab');
+            isPanning = false;
+            canvas.setCursor('grab');
+        };
+
+        const onPinClick = (opt: FabricType.IEvent) => {
+            if (opt.target && 'poiData' in opt.target) {
+                setActivePoi(opt.target.poiData as (typeof pointsOfInterest)[0]);
+            } else if (!isDrawingRef.current) {
+                setActivePoi(null);
             }
         };
-        
+
         const onDrawMouseDown = (opt: FabricType.IEvent<MouseEvent>) => {
             isDrawingRef.current = true;
             const pointer = canvas.getPointer(opt.e);
@@ -217,43 +213,32 @@ export function InteractiveMap() {
         };
 
         const onDrawMouseMove = (opt: FabricType.IEvent<MouseEvent>) => {
-            if (!isDrawingRef.current) return;
+            if (!isDrawingRef.current || !lastPointRef.current) return;
             const pointer = canvas.getPointer(opt.e);
-            const lastPoint = lastPointRef.current;
+            
+            const dx = pointer.x - lastPointRef.current.x;
+            const dy = pointer.y - lastPointRef.current.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (lastPoint) {
-                const dx = pointer.x - lastPoint.x;
-                const dy = pointer.y - lastPoint.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                totalDistanceRef.current += distance / PIXELS_PER_KM;
-                setDisplayDistance(totalDistanceRef.current);
-            }
+            totalDistanceRef.current += distance / canvas.getZoom() / PIXELS_PER_KM;
+            setDisplayDistance(totalDistanceRef.current);
+
             lastPointRef.current = { x: pointer.x, y: pointer.y };
         };
-
+        
         const onDrawMouseUp = () => {
             isDrawingRef.current = false;
             lastPointRef.current = null;
         };
-        
-        const onPinClick = (opt: FabricType.IEvent) => {
-           // @ts-ignore
-           if (opt.target && opt.target.poiData) {
-              // @ts-ignore
-              setActivePoi(opt.target.poiData);
-          } else if (!isDrawingRef.current) {
-              setActivePoi(null);
-          }
-        };
 
+        // Reset all event listeners before adding new ones
         canvas.off();
         
         if (activeTool === 'pan') {
             canvas.isDrawingMode = false;
             canvas.defaultCursor = 'grab';
-            canvas.setCursor('grab');
             canvas.selection = false;
-            canvas.getObjects().forEach(o => o.set('evented', true));
+            canvas.forEachObject(o => o.set('evented', true));
             
             canvas.on('mouse:down', onPanMouseDown);
             canvas.on('mouse:move', onPanMouseMove);
@@ -264,28 +249,30 @@ export function InteractiveMap() {
             canvas.isDrawingMode = true;
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
-             canvas.freeDrawingBrush.shadow = new fabric.Shadow({
+            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
                 blur: 10 / canvas.getZoom(),
                 color: '#ef4444',
                 offsetX: 0,
                 offsetY: 0
             });
+            
             canvas.defaultCursor = 'crosshair';
-            canvas.setCursor('crosshair');
-            canvas.getObjects().forEach(o => o.set('evented', false));
+            canvas.selection = false;
+            canvas.forEachObject(o => o.set('evented', false));
 
-            canvas.on('mouse:down:before', onDrawMouseDown);
+            canvas.on('mouse:down', onDrawMouseDown);
             canvas.on('mouse:move', onDrawMouseMove);
             canvas.on('mouse:up', onDrawMouseUp);
         }
+        canvas.setCursor(canvas.defaultCursor!);
 
         return () => {
-            if(canvas) {
+            if (canvas) {
                 canvas.off();
             }
         }
 
-    }, [activeTool]);
+    }, [activeTool, canvasRef.current]);
 
     const handleZoom = (direction: 'in' | 'out') => {
         const canvas = fabricRef.current;
@@ -301,7 +288,7 @@ export function InteractiveMap() {
     };
 
     return (
-        <div className="w-full h-full relative overflow-hidden bg-gray-900">
+        <div className="w-full h-full relative overflow-hidden bg-gray-900 rounded-lg border">
             <canvas ref={canvasRef} />
 
             <div className="absolute top-4 left-4 z-40">
@@ -318,24 +305,24 @@ export function InteractiveMap() {
             </div>
 
             <AnimatePresence>
-            {activePoi && activeTool === 'pan' && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
-                    transition={{ duration: 0.2 }}
-                >
-                    <Card className="w-80 glassmorphic-card">
-                        <CardHeader><CardTitle className="text-xl font-headline">{activePoi.name}</CardTitle></CardHeader>
-                        <CardContent>
-                            <Button asChild className="w-full font-bold">
-                                <Link href={`/wiki/${activePoi.portalId}`}>Ver na Wiki</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
+                {activePoi && activeTool === 'pan' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Card className="w-80 glassmorphic-card">
+                            <CardHeader><CardTitle className="text-xl font-headline">{activePoi.name}</CardTitle></CardHeader>
+                            <CardContent>
+                                <Button asChild className="w-full font-bold">
+                                    <Link href={`/wiki/${activePoi.portalId}`}>Ver na Wiki</Link>
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
             </AnimatePresence>
             
             <AnimatePresence>
@@ -346,3 +333,5 @@ export function InteractiveMap() {
         </div>
     );
 }
+
+    
