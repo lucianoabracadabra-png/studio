@@ -1,22 +1,23 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ItemGenerator } from "./_components/item-generator";
+import { NpcGenerator } from "./_components/npc-generator";
 
 export default function GeneratorPage() {
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8">Geradores de IA</h1>
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <FlaskConical className="h-16 w-16 text-primary" />
-          </div>
-          <CardTitle className="text-3xl">Geradores de IA</CardTitle>
-          <CardDescription>Este recurso está atualmente em desenvolvimento.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Ferramentas para gerar NPCs, itens, e mais conteúdo para as suas aventuras estão a ser forjadas. Volte em breve para acelerar a sua criação de mundos!</p>
-        </CardContent>
-      </Card>
+      <h1 className="text-3xl font-bold mb-4">Geradores de IA</h1>
+      <Tabs defaultValue="npc" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="npc">Gerador de NPC</TabsTrigger>
+          <TabsTrigger value="item">Gerador de Item</TabsTrigger>
+        </TabsList>
+        <TabsContent value="npc" className="pt-6">
+          <NpcGenerator />
+        </TabsContent>
+        <TabsContent value="item" className="pt-6">
+          <ItemGenerator />
+        </TabsContent>
+      </Tabs>
     </>
   );
 }
