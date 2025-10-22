@@ -74,9 +74,9 @@ const Book = ({ link, isActive }: { link: {label: string, href: string, icon: Lu
                                     boxShadow: `0 0 15px hsl(${link.colorHue}, 90%, 70%)`
                                 }}
                                 variants={{
-                                    inactive: { opacity: 0, scale: 0.8 },
-                                    active: { opacity: 0.4, scale: 1.05 },
-                                    hover: { opacity: 0.2, scale: 1 }
+                                    inactive: { opacity: 0 },
+                                    active: { opacity: 0.7 },
+                                    hover: { opacity: 0.6 }
                                 }}
                                 transition={{ duration: 0.3 }}
                             />
