@@ -29,9 +29,9 @@
     --chart-4: 283 100% 41%;
     --chart-5: 342.1 92.5% 61.4%;
 
-    --cor-fisico: #E04A2F;
-    --cor-mental: #3A7BE0;
-    --cor-social: #5E8C4F;
+    --cor-fisico: hsl(10, 75%, 55%);
+    --cor-mental: hsl(220, 75%, 60%);
+    --cor-social: hsl(140, 55%, 50%);
   }
 
   .dark {
@@ -209,6 +209,10 @@
   .item-header .nome { @apply text-base font-semibold; }
   .item-control { @apply w-full pt-3 relative; }
 
+  .pilar-fisico { --pilar-color: var(--cor-fisico); }
+  .pilar-mental { --pilar-color: var(--cor-mental); }
+  .pilar-social { --pilar-color: var(--cor-social); }
+  
   .pilar-fisico .custo-display b, .pilar-fisico .stepper-value { color: var(--cor-fisico); }
   .pilar-mental .custo-display b, .pilar-mental .stepper-value { color: var(--cor-mental); }
   .pilar-social .custo-display b, .pilar-social .stepper-value { color: var(--cor-social); }
@@ -228,6 +232,36 @@
   .pilar-fisico .dot.selected { background-color: var(--cor-fisico); }
   .pilar-mental .dot.selected { background-color: var(--cor-mental); }
   .pilar-social .dot.selected { background-color: var(--cor-social); }
+  
+  /* FOCUS SCROLLS (ACCORDION) */
+    .scroll-section .scroll-item {
+        @apply border-none;
+    }
+    .scroll-trigger {
+        @apply flex justify-center items-center h-16 rounded-md px-6 py-2 text-foreground/80 no-underline;
+        background: 
+            linear-gradient(to right, transparent, hsl(var(--background) / 0.8), transparent),
+            url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="p" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 L10 5" stroke="hsl(0 0% 100% / 0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23p)"/></svg>'),
+            linear-gradient(to right, hsl(var(--card)) 20%, hsl(var(--background)) 50%, hsl(var(--card)) 80%);
+        border-top: 2px solid hsl(var(--border));
+        border-bottom: 2px solid hsl(var(--border));
+        border-image: linear-gradient(to right, transparent, var(--pilar-color), transparent) 1;
+        box-shadow: 0 4px 15px -5px hsl(var(--pilar-color) / 0.3);
+        transition: all 0.3s ease-in-out;
+    }
+    .scroll-trigger:hover {
+        @apply text-foreground;
+        box-shadow: 0 6px 20px -5px hsl(var(--pilar-color) / 0.5);
+        transform: translateY(-2px);
+    }
+    .scroll-trigger > svg:last-child { @apply hidden; } /* Hide default chevron */
+
+    .scroll-content {
+        @apply p-4 mt-[-8px] rounded-b-lg border-x-2 border-b-2;
+        background: radial-gradient(ellipse at top, hsl(var(--card)), transparent), hsl(var(--background));
+        border-color: hsl(var(--pilar-color) / 0.3);
+    }
+
 
   .grass-texture {
     background-color: #3a592a;

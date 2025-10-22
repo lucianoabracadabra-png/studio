@@ -11,13 +11,18 @@ import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight, BookOpen, Circle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMovableWindow } from '@/context/movable-window-context';
 import { InfoPanel } from './info-panel';
 import { HealthPanel } from './health-panel';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 
 const TorsoIcon = () => (
@@ -203,7 +208,7 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
     }
 }
 
-const FocusSection = ({ focusData, title, pilar, icon }: { focusData: any, title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
+const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
     const pilarClass = `pilar-${pilar.toLowerCase()}`;
     
     const initialAttributeState: FocusState = {
@@ -635,28 +640,38 @@ export function CharacterSheet() {
             </section>
 
             {/* FOCUS PANEL */}
-            <section>
+            <section className='scroll-section'>
                 <Card className='glassmorphic-card'>
                     <CardHeader>
-                        <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS</CardTitle>
+                        <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS DE DESENVOLVIMENTO</CardTitle>
                     </CardHeader>
                     <CardContent>
-                         <Tabs defaultValue="physical">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="physical"><PersonStanding className='mr-2'/>Físico</TabsTrigger>
-                                <TabsTrigger value="mental"><BrainCircuit className='mr-2'/>Mental</TabsTrigger>
-                                <TabsTrigger value="social"><Users className='mr-2'/>Social</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="physical" className='mt-4'>
-                                <FocusSection focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
-                            </TabsContent>
-                             <TabsContent value="mental" className='mt-4'>
-                                <FocusSection focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
-                            </TabsContent>
-                             <TabsContent value="social" className='mt-4'>
-                                <FocusSection focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
-                            </TabsContent>
-                        </Tabs>
+                        <Accordion type="single" collapsible className="w-full space-y-4">
+                            <AccordionItem value="physical" className='scroll-item pilar-fisico'>
+                                <AccordionTrigger className='scroll-trigger'>
+                                    <h3 className='font-headline text-xl flex items-center gap-3'><PersonStanding />FÍSICO</h3>
+                                </AccordionTrigger>
+                                <AccordionContent className='scroll-content'>
+                                    <FocusBranch focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="mental" className='scroll-item pilar-mental'>
+                                <AccordionTrigger className='scroll-trigger'>
+                                    <h3 className='font-headline text-xl flex items-center gap-3'><BrainCircuit />MENTAL</h3>
+                                </AccordionTrigger>
+                                <AccordionContent className='scroll-content'>
+                                    <FocusBranch focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="social" className='scroll-item pilar-social'>
+                                <AccordionTrigger className='scroll-trigger'>
+                                    <h3 className='font-headline text-xl flex items-center gap-3'><Users />SOCIAL</h3>
+                                </AccordionTrigger>
+                                <AccordionContent className='scroll-content'>
+                                    <FocusBranch focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </CardContent>
                 </Card>
             </section>
