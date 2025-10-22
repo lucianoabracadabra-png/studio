@@ -39,12 +39,12 @@ const FocusHeaderCard = ({ title, icon, resource, spentPoints }: { title: string
                 <p className='font-mono text-lg text-accent font-bold'>{spentPoints > 0 ? spentPoints : ''}</p>
                 <div className='space-y-1'>
                     <div className='flex justify-between items-baseline'>
-                        <p className='font-bold'>{resource.name}</p>
-                        <p className='font-mono'>{resource.value} / {resource.max}</p>
+                        <p className='font-bold text-foreground'>{resource.name}</p>
+                        <p className='font-mono text-foreground'>{resource.value} / {resource.max}</p>
                     </div>
                     <div className='flex justify-between items-baseline'>
                         <p className='text-muted-foreground'>Gasto:</p>
-                        <p className='font-mono'>{spentPoints}</p>
+                        <p className='font-mono text-muted-foreground'>{spentPoints}</p>
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@ const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps
                 >
                     {level}
                 </span>
-                <span className="nome">{name}</span>
+                <span className="nome text-foreground">{name}</span>
             </div>
             <div className="item-control">
                 <div className='dots-container'>
@@ -149,7 +149,7 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
     return (
          <div className="item-lista">
             <div className="item-header">
-                <span className="nome">{name}</span>
+                <span className="nome text-foreground">{name}</span>
             </div>
             <div className="item-control">
                 <div 
@@ -246,7 +246,7 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
             <div className="md:col-span-1">
                 <Card className='sub-painel h-full'>
                     <CardHeader>
-                        <CardTitle className='border-b-2 border-dotted border-primary pb-1'>ATRIBUTOS</CardTitle>
+                        <CardTitle className='border-b-2 border-dotted border-primary pb-1 text-foreground'>ATRIBUTOS</CardTitle>
                     </CardHeader>
                     <CardContent className='space-y-2'>
                         {focusData.attributes.map((attr: {name: string, value: number}) => (
@@ -265,7 +265,7 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
             <div className="md:col-span-2">
                 <Card className='sub-painel'>
                     <CardHeader>
-                        <CardTitle>Perícias</CardTitle>
+                        <CardTitle className='text-foreground'>Perícias</CardTitle>
                     </CardHeader>
                     <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
                         {focusData.skills.map((skill: {name: string, value: number}) => (
@@ -279,7 +279,7 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
                 <div className="md:col-span-2">
                     <Card className='sub-painel'>
                         <CardHeader>
-                            <CardTitle>{modularSkillsTitle}</CardTitle>
+                            <CardTitle className='text-foreground'>{modularSkillsTitle}</CardTitle>
                         </CardHeader>
                         <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
                             {modularSkills.map((skill: {name: string, value: number}) => (
@@ -325,14 +325,14 @@ const ArmorCardDetails = ({ armor }: { armor: Armor }) => (
         <p className="text-sm text-muted-foreground">{armor.extras}</p>
         <Separator/>
         <div className='grid grid-cols-3 gap-2 text-center'>
-            <div className='space-y-1'><Label>Cortante</Label><p className='font-mono'>{armor.slashing}</p></div>
-            <div className='space-y-1'><Label>Esmagamento</Label><p className='font-mono'>{armor.bludgeoning}</p></div>
-            <div className='space-y-1'><Label>Perfurante</Label><p className='font-mono'>{armor.piercing}</p></div>
+            <div className='space-y-1'><Label>Cortante</Label><p className='font-mono text-foreground'>{armor.slashing}</p></div>
+            <div className='space-y-1'><Label>Esmagamento</Label><p className='font-mono text-foreground'>{armor.bludgeoning}</p></div>
+            <div className='space-y-1'><Label>Perfurante</Label><p className='font-mono text-foreground'>{armor.piercing}</p></div>
         </div>
         <div className='grid grid-cols-3 gap-2 text-center'>
-            <div className='space-y-1'><Label>Resistência</Label><p className='font-mono'>{armor.resistance}</p></div>
-            <div className='space-y-1'><Label>Durabilidade</Label><p className='font-mono'>{armor.durability}</p></div>
-            <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{armor.weight}kg</p></div>
+            <div className='space-y-1'><Label>Resistência</Label><p className='font-mono text-foreground'>{armor.resistance}</p></div>
+            <div className='space-y-1'><Label>Durabilidade</Label><p className='font-mono text-foreground'>{armor.durability}</p></div>
+            <div className='space-y-1'><Label>Peso</Label><p className='font-mono text-foreground'>{armor.weight}kg</p></div>
         </div>
     </div>
 );
@@ -345,10 +345,10 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             <div>
                 <h4 className='font-semibold text-accent mb-2'>Thrust</h4>
                 <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                    <div><Label>Dano</Label><p>{weapon.thrust.damage}</p></div>
-                    <div><Label>Tipo</Label><p>{weapon.thrust.type}</p></div>
-                    <div><Label>AP</Label><p>{weapon.thrust.ap}</p></div>
-                    <div><Label>Precisão</Label><p>{weapon.thrust.accuracy}</p></div>
+                    <div><Label>Dano</Label><p className='text-foreground'>{weapon.thrust.damage}</p></div>
+                    <div><Label>Tipo</Label><p className='text-foreground'>{weapon.thrust.type}</p></div>
+                    <div><Label>AP</Label><p className='text-foreground'>{weapon.thrust.ap}</p></div>
+                    <div><Label>Precisão</Label><p className='text-foreground'>{weapon.thrust.accuracy}</p></div>
                 </div>
             </div>
         )}
@@ -356,16 +356,16 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             <div>
                 <h4 className='font-semibold text-accent mb-2'>Swing</h4>
                 <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                    <div><Label>Dano</Label><p>{weapon.swing.damage}</p></div>
-                    <div><Label>Tipo</Label><p>{weapon.swing.type}</p></div>
-                    <div><Label>AP</Label><p>{weapon.swing.ap}</p></div>
-                    <div><Label>Precisão</Label><p>{weapon.swing.accuracy}</p></div>
+                    <div><Label>Dano</Label><p className='text-foreground'>{weapon.swing.damage}</p></div>
+                    <div><Label>Tipo</Label><p className='text-foreground'>{weapon.swing.type}</p></div>
+                    <div><Label>AP</Label><p className='text-foreground'>{weapon.swing.ap}</p></div>
+                    <div><Label>Precisão</Label><p className='text-foreground'>{weapon.swing.accuracy}</p></div>
                 </div>
             </div>
         )}
         <div className='grid grid-cols-2 gap-2 text-center pt-2 border-t border-border'>
-            <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{weapon.weight}kg</p></div>
-            <div className='space-y-1'><Label>Tamanho</Label><p className='font-mono uppercase'>{weapon.size}</p></div>
+            <div className='space-y-1'><Label>Peso</Label><p className='font-mono text-foreground'>{weapon.weight}kg</p></div>
+            <div className='space-y-1'><Label>Tamanho</Label><p className='font-mono uppercase text-foreground'>{weapon.size}</p></div>
         </div>
     </div>
 );
@@ -375,8 +375,8 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
         <p className="text-sm text-muted-foreground">{accessory.typeAndDescription}</p>
         <Separator/>
         <div className='grid grid-cols-2 gap-2 text-center'>
-            <div className='space-y-1'><Label>Peso</Label><p className='font-mono'>{accessory.weight}kg</p></div>
-            <div className='space-y-1'><Label>Efeito</Label><p className='font-mono'>{accessory.effect}</p></div>
+            <div className='space-y-1'><Label>Peso</Label><p className='font-mono text-foreground'>{accessory.weight}kg</p></div>
+            <div className='space-y-1'><Label>Efeito</Label><p className='font-mono text-foreground'>{accessory.effect}</p></div>
         </div>
     </div>
 );
@@ -415,7 +415,7 @@ const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, ty
         >
             <div className="flex items-center gap-3">
                 <span className={cn("text-accent transition-colors", isOpen && "text-primary")}>{iconMap[type]}</span>
-                <p className="text-base font-semibold">{item.name}</p>
+                <p className="text-base font-semibold text-foreground">{item.name}</p>
             </div>
         </Button>
     );
@@ -499,10 +499,10 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
                     <TableBody>
                         {unequippedItems.map(item => (
                             <TableRow key={item.name}>
-                                <TableCell className="font-medium">{item.name}</TableCell>
+                                <TableCell className="font-medium text-foreground">{item.name}</TableCell>
                                 <TableCell className="text-muted-foreground">{item.type}</TableCell>
-                                <TableCell className='text-center'>{item.quantity}</TableCell>
-                                <TableCell className='text-right font-mono'>{(item.weight * item.quantity).toFixed(2)}kg</TableCell>
+                                <TableCell className='text-center text-foreground'>{item.quantity}</TableCell>
+                                <TableCell className='text-right font-mono text-foreground'>{(item.weight * item.quantity).toFixed(2)}kg</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
