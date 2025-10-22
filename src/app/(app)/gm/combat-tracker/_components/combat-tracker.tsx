@@ -58,8 +58,8 @@ type LogEntry = {
 
 const MAX_AP_ON_TIMELINE = 50;
 
-const allLinks = [...mainLinks, ...gmToolsLinks, profileLink].map(link => ({...link, colorHue: Math.floor(Math.random() * 360)}));
-const bookColors = allLinks.filter(l => l.colorHue > 0).map(link => link.colorHue);
+const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
+const bookColors = [...new Set(allLinks.filter(l => l.colorHue > 0).map(link => link.colorHue))];
 const hueToNameMap = allLinks.reduce((acc, link) => {
     if (link.colorHue > 0) {
         acc[link.colorHue] = link.label;
