@@ -54,9 +54,9 @@ export function EnvironmentGenerator() {
   };
 
   return (
-    <Card className="glassmorphic-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Descritor de Ambientes</CardTitle>
+        <CardTitle>Descritor de Ambientes</CardTitle>
         <CardDescription>Gere descrições ricas e atmosféricas para o seu mundo de jogo.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -108,8 +108,8 @@ export function EnvironmentGenerator() {
               </Button>
             </form>
           </Form>
-          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
-            <h3 className="font-headline text-xl text-center">Descrição Gerada</h3>
+          <div className="rounded-lg border bg-muted/50 p-4 space-y-4 min-h-[300px]">
+            <h3 className="font-semibold text-lg text-center">Descrição Gerada</h3>
             {isLoading && (
               <div className="space-y-2 pt-4">
                 <Skeleton className="h-4 w-full" />

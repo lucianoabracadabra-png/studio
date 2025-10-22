@@ -57,9 +57,9 @@ export function ItemGenerator() {
   };
 
   return (
-    <Card className="glassmorphic-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Gerador de Itens & Tesouros</CardTitle>
+        <CardTitle>Gerador de Itens & Tesouros</CardTitle>
         <CardDescription>Crie itens e tesouros únicos para suas campanhas.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -142,8 +142,8 @@ export function ItemGenerator() {
               </Button>
             </form>
           </Form>
-          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
-            <h3 className="font-headline text-xl text-center">Item Gerado</h3>
+          <div className="rounded-lg border bg-muted/50 p-4 space-y-4 min-h-[300px]">
+            <h3 className="font-semibold text-lg text-center">Item Gerado</h3>
             {isLoading && (
               <div className="space-y-4">
                 <Skeleton className="h-6 w-1/2 mx-auto" />
@@ -157,7 +157,7 @@ export function ItemGenerator() {
             )}
             {result && (
               <div className="text-center space-y-2 animate-in fade-in-50">
-                <h4 className="text-2xl font-headline text-primary">{result.itemName}</h4>
+                <h4 className="text-2xl font-bold text-primary">{result.itemName}</h4>
                 <p className="text-sm text-accent font-bold">{result.itemValue}</p>
                 <p className="text-left text-foreground/80 whitespace-pre-wrap pt-2">{result.itemDescription}</p>
               </div>

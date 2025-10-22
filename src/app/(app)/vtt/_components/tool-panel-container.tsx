@@ -46,7 +46,7 @@ export function ToolPanelContainer({
             case 'settings':
                 return <SettingsPanel />;
             default:
-                return <div className='p-4 text-white'>Panel for {activeTool}</div>;
+                return <div className='p-4'>Panel for {activeTool}</div>;
         }
     }
 
@@ -55,7 +55,7 @@ export function ToolPanelContainer({
             {activeTool && activeTool !== 'pan' && (
                  <motion.div 
                     key={activeTool}
-                    className='absolute top-0 left-16 z-10 h-full w-80 bg-gray-800/90 shadow-lg backdrop-blur-sm border-r border-white/10'
+                    className='absolute top-0 left-16 z-10 h-full w-80 bg-card shadow-lg border-r'
                     variants={panelVariants}
                     initial='hidden'
                     animate='visible'

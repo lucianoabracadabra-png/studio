@@ -18,78 +18,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 
-const TorsoIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M4.5 8.5A2.5 2.5 0 0 1 7 6h10a2.5 2.5 0 0 1 2.5 2.5v7.5a2.5 2.5 0 0 1-2.5 2.5H7a2.5 2.5 0 0 1-2.5-2.5v-7.5Z"></path>
-        <path d="M7 16.5v-8"></path>
-        <path d="M17 16.5v-8"></path>
-        <path d="M7 8.5v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
-    </svg>
-)
-
 const FocusHeaderCard = ({ title, icon, resource, spentPoints }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }, spentPoints: number }) => (
-    <Card className='glassmorphic-card h-full'>
+    <Card>
         <CardContent className='pt-6 space-y-2'>
             <div className='flex items-center justify-between'>
-                 <h3 className='font-headline text-2xl magical-glow'>{title}</h3>
+                 <h3 className='font-bold text-xl'>{title}</h3>
                  <span className='text-primary'>{React.createElement(icon)}</span>
             </div>
             <Separator />
-            <div className='grid grid-cols-[auto_1fr] gap-x-4 items-center text-sm'>
-                <p className='font-mono text-lg text-accent font-bold'>{spentPoints > 0 ? spentPoints : ''}</p>
-                <div className='space-y-1'>
-                    <div className='flex justify-between items-baseline'>
-                        <p className='font-bold text-foreground'>{resource.name}</p>
-                        <p className='font-mono text-foreground'>{resource.value} / {resource.max}</p>
-                    </div>
-                    <div className='flex justify-between items-baseline'>
-                        <p className='text-muted-foreground'>Gasto:</p>
-                        <p className='font-mono text-muted-foreground'>{spentPoints}</p>
-                    </div>
+            <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
+                <div>
+                    <p className='font-bold'>{resource.name}</p>
+                    <p className='font-mono'>{resource.value} / {resource.max}</p>
+                </div>
+                <div>
+                    <p className='text-muted-foreground'>Gasto:</p>
+                    <p className='font-mono'>{spentPoints}</p>
                 </div>
             </div>
         </CardContent>
     </Card>
 );
-
-const getEffectClasses = (level: number, type: 'attribute' | 'skill') => {
-    const classes: string[] = [];
-    let glowLevel = 0;
-
-    if (type === 'attribute') {
-        if (level >= 5) {
-            if (level >= 15) classes.push('shaking-4');
-            else if (level >= 11) classes.push('shaking-3');
-            else if (level >= 8) classes.push('shaking-2');
-            else classes.push('shaking-1');
-        }
-        if (level >= 10) {
-            classes.push('pulsing');
-        }
-        if (level >= 5) {
-            if (level >= 14) glowLevel = (level === 14) ? 6 : 7;
-            else glowLevel = Math.ceil((level - 4) / 2);
-        }
-    } else { // skill
-        if (level >= 7) {
-            classes.push('shaking');
-        }
-        if (level >= 5) {
-            classes.push('pulsing');
-            if (level === 5) classes.push('pulsing-1');
-            else if (level === 6) classes.push('pulsing-2');
-            else if (level === 7) classes.push('pulsing-3');
-        }
-        if (level >= 3) {
-            glowLevel = level - 2;
-        }
-    }
-
-    return {
-        animationClasses: classes.join(' '),
-        glowLevel: glowLevel
-    };
-};
 
 type AttributeItemProps = {
     name: string;
@@ -99,30 +48,22 @@ type AttributeItemProps = {
 };
 
 const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps) => {
-    const { animationClasses, glowLevel } = getEffectClasses(level, 'attribute');
-
     return (
         <div className="flex justify-between items-center">
             <div className='flex items-center gap-2'>
-                <span 
-                    className={cn('font-bold font-headline text-lg w-5 text-center', `pilar-${pilar}`, animationClasses)}
-                    data-glow-level={glowLevel}
-                    style={{ '--glow-color': `var(--cor-${pilar})`, '--glow-pulse-distance': `${15 + (level - 10) * 8}px` } as React.CSSProperties}
-                >
+                <span className='font-bold text-lg w-5 text-center text-primary'>
                     {level}
                 </span>
-                <span className="nome text-foreground">{name}</span>
+                <span className="text-foreground">{name}</span>
             </div>
-            <div className="item-control">
-                <div className='dots-container'>
-                    {[...Array(15)].map((_, i) => (
-                        <span
-                            key={i}
-                            className={cn('dot-sm', { 'selected': i < level })}
-                            onClick={() => onLevelChange(name, i + 1)}
-                        ></span>
-                    ))}
-                </div>
+            <div className="flex items-center gap-1">
+                {[...Array(15)].map((_, i) => (
+                    <button
+                        key={i}
+                        className={cn('w-2 h-2 rounded-full cursor-pointer transition-all', i < level ? 'bg-primary' : 'bg-muted')}
+                        onClick={() => onLevelChange(name, i + 1)}
+                    />
+                ))}
             </div>
         </div>
     );
@@ -130,15 +71,7 @@ const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps
 
 const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social' }) => {
     const [level, setLevel] = useState(initialValue);
-    const [animationDelays, setAnimationDelays] = useState<string[]>([]);
-    const { animationClasses, glowLevel } = getEffectClasses(level, 'skill');
     
-    useEffect(() => {
-        const delays = Array.from({ length: 7 }, () => `-${Math.random() * 2.5}s`);
-        setAnimationDelays(delays);
-    }, []);
-
-
     const handleDotClick = (newLevel: number) => {
         setLevel(currentLevel => {
             const finalLevel = newLevel === currentLevel ? newLevel - 1 : newLevel;
@@ -147,26 +80,16 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
     };
 
     return (
-         <div className="item-lista">
-            <div className="item-header">
-                <span className="nome text-foreground">{name}</span>
-            </div>
-            <div className="item-control">
-                <div 
-                    className={cn('dots-container', `pilar-${pilar}`, animationClasses)}
-                    data-glow-level={glowLevel}
-                    style={{ '--pulse-color': `var(--cor-${pilar})` } as React.CSSProperties}
-                >
-                    {[...Array(7)].map((_, i) => (
-                        <span
-                            key={i}
-                            className={cn('dot', { 'selected': i < level })}
-                            data-level={i + 1}
-                            onClick={() => handleDotClick(i + 1)}
-                            style={{ animationDelay: animationDelays[i] }}
-                        ></span>
-                    ))}
-                </div>
+         <div className="flex justify-between items-center py-1">
+            <span className="text-foreground">{name}</span>
+            <div className='flex gap-1.5 items-center'>
+                {[...Array(7)].map((_, i) => (
+                    <button
+                        key={i}
+                        className={cn('w-3 h-3 bg-muted cursor-pointer transition-all rounded-sm transform rotate-45', { 'bg-primary': i < level })}
+                        onClick={() => handleDotClick(i + 1)}
+                    />
+                ))}
             </div>
         </div>
     );
@@ -184,7 +107,7 @@ type FocusAction =
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
     switch (action.type) {
         case 'SET_ATTRIBUTE': {
-            const { name, level, baseLevel } = action.payload;
+            const { name, level } = action.payload;
             const newAttributes = { ...state.attributes, [name]: level };
 
             const spentPoints = Object.entries(newAttributes).reduce((total, [attrName, currentLevel]) => {
@@ -193,7 +116,6 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
                              initialCharacterData.focus.social.attributes.find(a => a.name === attrName)?.value || 0;
                 
                 if (currentLevel > base) {
-                    // Simple cost: 1 point for each level above base.
                     total += (currentLevel - base);
                 }
                 return total;
@@ -214,8 +136,6 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
 
 
 const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
-    const pilarClass = `pilar-${pilar.toLowerCase()}`;
-    
     const initialAttributeState: FocusState = {
         attributes: focusData.attributes.reduce((acc: any, attr: any) => {
             acc[attr.name] = attr.value;
@@ -235,18 +155,17 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
     const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
 
     const resource = focusData.vigor || focusData.focus || focusData.grace;
-    const IconComponent = pilar === 'fisico' ? TorsoIcon : icon;
 
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${pilarClass}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
             <div className="md:col-span-1">
-                <FocusHeaderCard title={title} icon={IconComponent} resource={resource} spentPoints={state.spentPoints} />
+                <FocusHeaderCard title={title} icon={icon} resource={resource} spentPoints={state.spentPoints} />
             </div>
             
             <div className="md:col-span-1">
-                <Card className='sub-painel h-full'>
+                <Card>
                     <CardHeader>
-                        <CardTitle className='border-b-2 border-dotted border-primary pb-1 text-foreground'>ATRIBUTOS</CardTitle>
+                        <CardTitle className='text-base'>Atributos</CardTitle>
                     </CardHeader>
                     <CardContent className='space-y-2'>
                         {focusData.attributes.map((attr: {name: string, value: number}) => (
@@ -263,11 +182,11 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
             </div>
 
             <div className="md:col-span-2">
-                <Card className='sub-painel'>
+                <Card>
                     <CardHeader>
-                        <CardTitle className='text-foreground'>Perícias</CardTitle>
+                        <CardTitle className='text-base'>Perícias</CardTitle>
                     </CardHeader>
-                    <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
+                    <CardContent className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
                         {focusData.skills.map((skill: {name: string, value: number}) => (
                             <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
                         ))}
@@ -277,11 +196,11 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
 
             {modularSkills && (
                 <div className="md:col-span-2">
-                    <Card className='sub-painel'>
+                    <Card>
                         <CardHeader>
-                            <CardTitle className='text-foreground'>{modularSkillsTitle}</CardTitle>
+                            <CardTitle className='text-base'>{modularSkillsTitle}</CardTitle>
                         </CardHeader>
-                        <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
+                        <CardContent className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
                             {modularSkills.map((skill: {name: string, value: number}) => (
                                 <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
                             ))}
@@ -304,7 +223,7 @@ const SoulCracks = ({ value }: { value: number }) => {
                         <Tooltip>
                             <TooltipTrigger>
                                 {isCracked ? (
-                                    <HeartCrack className="h-6 w-6 text-red-500 animate-in fade-in" style={{ filter: 'drop-shadow(0 0 3px #ef4444)'}} />
+                                    <HeartCrack className="h-6 w-6 text-red-500" />
                                 ) : (
                                     <Heart className="h-6 w-6 text-muted-foreground/50" />
                                 )}
@@ -325,14 +244,14 @@ const ArmorCardDetails = ({ armor }: { armor: Armor }) => (
         <p className="text-sm text-muted-foreground">{armor.extras}</p>
         <Separator/>
         <div className='grid grid-cols-3 gap-2 text-center'>
-            <div className='space-y-1'><Label>Cortante</Label><p className='font-mono text-foreground'>{armor.slashing}</p></div>
-            <div className='space-y-1'><Label>Esmagamento</Label><p className='font-mono text-foreground'>{armor.bludgeoning}</p></div>
-            <div className='space-y-1'><Label>Perfurante</Label><p className='font-mono text-foreground'>{armor.piercing}</p></div>
+            <div><Label>Cortante</Label><p className='font-mono text-foreground'>{armor.slashing}</p></div>
+            <div><Label>Esmagamento</Label><p className='font-mono text-foreground'>{armor.bludgeoning}</p></div>
+            <div><Label>Perfurante</Label><p className='font-mono text-foreground'>{armor.piercing}</p></div>
         </div>
         <div className='grid grid-cols-3 gap-2 text-center'>
-            <div className='space-y-1'><Label>Resistência</Label><p className='font-mono text-foreground'>{armor.resistance}</p></div>
-            <div className='space-y-1'><Label>Durabilidade</Label><p className='font-mono text-foreground'>{armor.durability}</p></div>
-            <div className='space-y-1'><Label>Peso</Label><p className='font-mono text-foreground'>{armor.weight}kg</p></div>
+            <div><Label>Resistência</Label><p className='font-mono text-foreground'>{armor.resistance}</p></div>
+            <div><Label>Durabilidade</Label><p className='font-mono text-foreground'>{armor.durability}</p></div>
+            <div><Label>Peso</Label><p className='font-mono text-foreground'>{armor.weight}kg</p></div>
         </div>
     </div>
 );
@@ -364,8 +283,8 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             </div>
         )}
         <div className='grid grid-cols-2 gap-2 text-center pt-2 border-t border-border'>
-            <div className='space-y-1'><Label>Peso</Label><p className='font-mono text-foreground'>{weapon.weight}kg</p></div>
-            <div className='space-y-1'><Label>Tamanho</Label><p className='font-mono uppercase text-foreground'>{weapon.size}</p></div>
+            <div><Label>Peso</Label><p className='font-mono text-foreground'>{weapon.weight}kg</p></div>
+            <div><Label>Tamanho</Label><p className='font-mono uppercase text-foreground'>{weapon.size}</p></div>
         </div>
     </div>
 );
@@ -375,8 +294,8 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
         <p className="text-sm text-muted-foreground">{accessory.typeAndDescription}</p>
         <Separator/>
         <div className='grid grid-cols-2 gap-2 text-center'>
-            <div className='space-y-1'><Label>Peso</Label><p className='font-mono text-foreground'>{accessory.weight}kg</p></div>
-            <div className='space-y-1'><Label>Efeito</Label><p className='font-mono text-foreground'>{accessory.effect}</p></div>
+            <div><Label>Peso</Label><p className='font-mono text-foreground'>{accessory.weight}kg</p></div>
+            <div><Label>Efeito</Label><p className='font-mono text-foreground'>{accessory.effect}</p></div>
         </div>
     </div>
 );
@@ -408,13 +327,13 @@ const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, ty
         <Button
             variant="outline"
             className={cn(
-                "w-full justify-start h-auto p-3 bg-muted/30 hover:bg-muted/50 transition-all",
-                isOpen && "bg-primary/20 border-primary/50 shadow-inner shadow-primary/20"
+                "w-full justify-start h-auto p-3",
+                isOpen && "bg-primary/20 border-primary/50"
             )}
             onClick={handleOpen}
         >
             <div className="flex items-center gap-3">
-                <span className={cn("text-accent transition-colors", isOpen && "text-primary")}>{iconMap[type]}</span>
+                <span className={cn("text-accent", isOpen && "text-primary")}>{iconMap[type]}</span>
                 <p className="text-base font-semibold text-foreground">{item.name}</p>
             </div>
         </Button>
@@ -438,27 +357,27 @@ const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) =
     };
 
     return (
-        <Card className="glassmorphic-card">
+        <Card>
             <CardHeader>
                 <div className='flex justify-between items-center'>
-                    <CardTitle className='font-headline text-2xl magical-glow'>Equipamento</CardTitle>
+                    <CardTitle>Equipamento</CardTitle>
                     <Button variant="outline" size="sm" onClick={handleOpenAll}>
                         <BookOpen className="mr-2 h-4 w-4" />
                         Abrir Todos
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                    <h3 className="font-headline text-lg text-center text-muted-foreground">Armaduras</h3>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <h3 className="font-semibold text-center text-muted-foreground">Armaduras</h3>
                     {equippedArmors.length > 0 ? equippedArmors.map(item => <EquippedItemCard key={item.name} item={item} type="armor" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma armadura equipada.</p>}
                 </div>
-                 <div className="space-y-3">
-                    <h3 className="font-headline text-lg text-center text-muted-foreground">Armas</h3>
+                 <div className="space-y-2">
+                    <h3 className="font-semibold text-center text-muted-foreground">Armas</h3>
                     {equippedWeapons.length > 0 ? equippedWeapons.map(item => <EquippedItemCard key={item.name} item={item} type="weapon" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma arma equipada.</p>}
                 </div>
-                 <div className="space-y-3">
-                    <h3 className="font-headline text-lg text-center text-muted-foreground">Acessórios</h3>
+                 <div className="space-y-2">
+                    <h3 className="font-semibold text-center text-muted-foreground">Acessórios</h3>
                     {equippedAccessories.length > 0 ? equippedAccessories.map(item => <EquippedItemCard key={item.name} item={item} type="accessory" />) : <p className="text-xs text-center text-muted-foreground">Nenhum acessório equipado.</p>}
                 </div>
             </CardContent>
@@ -479,11 +398,11 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
     const totalWeight = unequippedItems.reduce((acc, item) => acc + (item.weight * item.quantity), 0);
 
     return (
-        <Card className="glassmorphic-card">
+        <Card>
             <CardHeader>
                 <div className="flex justify-between items-baseline">
-                    <CardTitle className='font-headline text-2xl magical-glow'>Inventário</CardTitle>
-                    <p className="font-mono text-muted-foreground flex items-center gap-2"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
+                    <CardTitle>Inventário</CardTitle>
+                    <p className="font-mono text-muted-foreground flex items-center gap-2 text-sm"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
                 </div>
             </CardHeader>
             <CardContent>
@@ -541,7 +460,7 @@ export function CharacterSheet() {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in-up">
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             
             <Collapsible open={isInfoPanelOpen} onOpenChange={setIsInfoPanelOpen}>
                 <CollapsibleTrigger asChild>
@@ -554,33 +473,27 @@ export function CharacterSheet() {
             
             <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="glassmorphic-card">
-                    <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ALMA</CardTitle></CardHeader>
-                    <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4 text-center">
-                            <div className="space-y-1">
-                                <Label className="flex items-center justify-center gap-1 text-muted-foreground">
-                                    Fluxo
-                                    <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Energia cósmica que permeia tudo.</p></TooltipContent></Tooltip></TooltipProvider>
-                                </Label>
-                                <p className="text-3xl font-bold text-foreground">{character.soul.anima.flow}</p>
+                            <div>
+                                <Label className="text-sm text-muted-foreground">Fluxo</Label>
+                                <p className="text-2xl font-bold text-foreground">{character.soul.anima.flow}</p>
                             </div>
-                            <div className="space-y-1">
-                                <Label className="flex items-center justify-center gap-1 text-muted-foreground">
-                                    Patrono
-                                    <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Vínculo com uma entidade poderosa.</p></TooltipContent></Tooltip></TooltipProvider>
-                                </Label>
-                                <p className="text-3xl font-bold text-foreground">{character.soul.anima.patron}</p>
+                            <div>
+                                <Label className="text-sm text-muted-foreground">Patrono</Label>
+                                <p className="text-2xl font-bold text-foreground">{character.soul.anima.patron}</p>
                             </div>
                         </div>
                         <Separator/>
                         <div className="space-y-2">
                             <h3 className='font-semibold text-center text-muted-foreground'>Domínios</h3>
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-1">
                                 {character.soul.domains.map(d => (
                                     <div key={d.name} className="flex justify-between items-center">
-                                        <Label className='text-foreground/80'>{d.name}</Label>
+                                        <Label className='text-sm text-foreground/80'>{d.name}</Label>
                                         <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
                                     </div>
                                 ))}
@@ -588,10 +501,7 @@ export function CharacterSheet() {
                         </div>
                         <Separator/>
                         <div className="space-y-3">
-                            <h3 className='font-semibold text-center text-muted-foreground flex items-center justify-center gap-1'>
-                                Rachaduras
-                                <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Corrupção da alma pelo uso indevido de poder.</p></TooltipContent></Tooltip></TooltipProvider>
-                            </h3>
+                            <h3 className='font-semibold text-center text-muted-foreground'>Rachaduras</h3>
                             <div className="flex justify-center">
                                 <SoulCracks value={character.soul.cracks} />
                             </div>
@@ -599,15 +509,15 @@ export function CharacterSheet() {
                     </CardContent>
                 </Card>
 
-                <Card className="glassmorphic-card">
-                    <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ESPÍRITO</CardTitle></CardHeader>
+                <Card>
+                    <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-4">
                             <h3 className='font-semibold text-center text-muted-foreground'>Personalidade</h3>
                             {character.spirit.personality.map(p => (
                                 <div key={p.name} className="space-y-2">
                                     <div className="flex justify-between items-center text-sm">
-                                        <Label className='text-foreground/80'>{p.name}</Label>
+                                        <Label>{p.name}</Label>
                                         <span className="font-mono text-foreground">{p.value}</span>
                                     </div>
                                     <Slider defaultValue={[p.value]} max={10} step={1} />
@@ -620,9 +530,9 @@ export function CharacterSheet() {
                             {character.spirit.alignment.map(a => (
                                 <div key={a.name} className="space-y-2">
                                     <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className='font-semibold text-left text-foreground/80'>{a.poles[0]}</span>
-                                        <Label className='font-bold text-foreground/80'>{a.name}</Label>
-                                        <span className='font-semibold text-right text-foreground/80'>{a.poles[1]}</span>
+                                        <span className='text-xs text-left text-muted-foreground'>{a.poles[0]}</span>
+                                        <Label className='text-sm'>{a.name}</Label>
+                                        <span className='text-xs text-right text-muted-foreground'>{a.poles[1]}</span>
                                     </div>
                                     <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
                                 </div>
@@ -632,9 +542,9 @@ export function CharacterSheet() {
                 </Card>
             </div>
 
-            <Card className='glassmorphic-card'>
+            <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS DE DESENVOLVIMENTO</CardTitle>
+                    <CardTitle className='text-center'>Focos de Desenvolvimento</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="physical" className="w-full">
@@ -644,13 +554,13 @@ export function CharacterSheet() {
                             <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
-                            <FocusBranch focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
+                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} />
                         </TabsContent>
                         <TabsContent value="social" className='pt-6'>
-                            <FocusBranch focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
+                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

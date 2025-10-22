@@ -26,7 +26,7 @@ const DrawingToolbar = ({ onClear, distance }: { onClear: () => void; distance: 
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 100, opacity: 0 }}
                 >
-                    <Card className="glassmorphic-card flex items-center gap-4 p-2">
+                    <Card className="flex items-center gap-4 p-2">
                         <Button onClick={onClear} variant="destructive" size="icon">
                             <Eraser />
                         </Button>
@@ -124,7 +124,7 @@ export function InteractiveMap() {
                     pointsOfInterest.forEach(poi => {
                         const pin = new fabric.Circle({
                             radius: 10,
-                            fill: 'hsl(0, 70%, 60%)',
+                            fill: 'hsl(var(--primary))',
                             stroke: 'white',
                             strokeWidth: 2,
                             left: (img.width || 2000) * (poi.position.x / 100),
@@ -253,12 +253,6 @@ export function InteractiveMap() {
             canvas.isDrawingMode = true;
             canvas.freeDrawingBrush.color = '#ef4444';
             canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
-            canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-                blur: 10 / canvas.getZoom(),
-                color: '#ef4444',
-                offsetX: 0,
-                offsetY: 0
-            });
             
             canvas.defaultCursor = 'crosshair';
             canvas.selection = false;
@@ -292,7 +286,7 @@ export function InteractiveMap() {
     };
 
     return (
-        <div className="w-full h-full relative overflow-hidden bg-gray-900 rounded-lg border">
+        <div className="w-full h-full relative overflow-hidden bg-muted rounded-lg border">
             <canvas ref={canvasRef} />
 
             <div className="absolute top-4 left-4 z-40">
@@ -317,8 +311,8 @@ export function InteractiveMap() {
                         className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40"
                         transition={{ duration: 0.2 }}
                     >
-                        <Card className="w-80 glassmorphic-card">
-                            <CardHeader><CardTitle className="text-xl font-headline">{activePoi.name}</CardTitle></CardHeader>
+                        <Card className="w-80">
+                            <CardHeader><CardTitle className="text-xl">{activePoi.name}</CardTitle></CardHeader>
                             <CardContent>
                                 <Button asChild className="w-full font-bold">
                                     <Link href={`/wiki/${activePoi.portalId}`}>Ver na Wiki</Link>

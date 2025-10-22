@@ -4,13 +4,13 @@ import { Volume2 } from "lucide-react";
 export default function SoundboardPage() {
   return (
     <>
-      <h1 className="text-3xl font-headline magical-glow mb-8 animate-in fade-in-down">Soundboard</h1>
-      <Card className="w-full max-w-md text-center animate-in fade-in-up">
+      <h1 className="text-3xl font-bold mb-8">Soundboard</h1>
+      <Card className="w-full max-w-md text-center">
         <CardHeader>
           <div className="flex justify-center mb-4">
             <Volume2 className="h-16 w-16 text-primary" />
           </div>
-          <CardTitle className="font-headline text-3xl">Soundboard</CardTitle>
+          <CardTitle className="text-3xl">Soundboard</CardTitle>
           <CardDescription>This feature is currently under development.</CardDescription>
         </CardHeader>
         <CardContent>

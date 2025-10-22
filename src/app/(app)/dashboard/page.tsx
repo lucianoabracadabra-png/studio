@@ -33,17 +33,17 @@ const campaigns = [
 export default function DashboardPage() {
   return (
     <>
-      <div className="flex items-center justify-between animate-in fade-in-down">
-        <h1 className="text-3xl font-headline magical-glow">Painel de Controle</h1>
-        <Button className="group">
-          <PlusCircle className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Painel de Controle</h1>
+        <Button>
+          <PlusCircle className="mr-2 h-4 w-4" />
           Criar Campanha
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in-up">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {campaigns.map((campaign, i) => (
-          <Card key={campaign.name} className="glassmorphic-card overflow-hidden flex flex-col group" style={{ animationDelay: `${i * 100}ms` }}>
+          <Card key={campaign.name} className="overflow-hidden flex flex-col group">
             <CardHeader className="p-0">
                 <div className="relative h-48 w-full overflow-hidden">
                     <Image
@@ -56,7 +56,7 @@ export default function DashboardPage() {
                 </div>
             </CardHeader>
             <CardContent className="p-4 flex-grow">
-              <CardTitle className="font-headline text-xl mb-2">{campaign.name}</CardTitle>
+              <CardTitle className="text-xl mb-2">{campaign.name}</CardTitle>
               <CardDescription>{campaign.description}</CardDescription>
             </CardContent>
             <CardFooter className="p-4">

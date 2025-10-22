@@ -10,12 +10,12 @@ export default function WikiClientLayout({ portal }: { portal: Portal }) {
     const [activePage, setActivePage] = useState<WikiPage>(portal.pages[0]);
 
     return (
-        <div className="w-full max-w-6xl mx-auto flex flex-col gap-6 py-6">
-             <header className="animate-in fade-in-down">
-                <h1 className="text-4xl font-headline magical-glow">{portal.title}</h1>
+        <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
+             <header>
+                <h1 className="text-4xl font-bold">{portal.title}</h1>
                 <p className="text-lg text-muted-foreground mt-1">{portal.subtitle}</p>
             </header>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start animate-in fade-in-up flex-grow">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start flex-grow">
                 <aside className="md:col-span-1 sticky top-6">
                     <nav className="flex flex-col gap-1">
                         {portal.pages.map(page => (
@@ -25,7 +25,7 @@ export default function WikiClientLayout({ portal }: { portal: Portal }) {
                                 onClick={() => setActivePage(page)}
                                 className={cn(
                                     'justify-start text-left h-auto py-2',
-                                    activePage.id === page.id ? 'bg-muted/80 text-foreground font-bold' : 'text-muted-foreground'
+                                    activePage.id === page.id ? 'bg-muted text-foreground font-semibold' : 'text-muted-foreground'
                                 )}
                             >
                                 {page.title}
@@ -35,9 +35,9 @@ export default function WikiClientLayout({ portal }: { portal: Portal }) {
                 </aside>
 
                 <main className="md:col-span-3">
-                    <Card className="glassmorphic-card">
+                    <Card>
                         <CardHeader>
-                            <CardTitle className='font-headline text-2xl'>{activePage.title}</CardTitle>
+                            <CardTitle className='text-2xl'>{activePage.title}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <p className="font-semibold text-accent">{activePage.summary}</p>

@@ -37,19 +37,16 @@ export function VttToolbar({ activeTool, onToolToggle }: VttToolbarProps) {
     };
 
     return (
-        <div className='absolute top-0 left-0 h-full w-16 bg-gray-900/80 border-r border-white/10 flex flex-col items-center p-2 gap-2 z-20'>
+        <div className='absolute top-0 left-0 h-full w-16 bg-card border-r flex flex-col items-center p-2 gap-2 z-20'>
             {tools.map(tool => (
                 <TooltipProvider key={tool.id}>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button 
-                                variant={'ghost'} 
+                                variant={currentActiveTool === tool.id ? 'default' : 'ghost'} 
                                 size="icon" 
                                 onClick={() => handleToolClick(tool.id)}
-                                className={cn(
-                                    "h-12 w-12 text-white/70 hover:text-white hover:bg-white/10 transition-all",
-                                    currentActiveTool === tool.id && "text-cyan-400 bg-cyan-400/10 shadow-[0_0_15px_rgba(74,222,222,0.5)]"
-                                )}
+                                className="h-12 w-12"
                             >
                                 <tool.icon />
                             </Button>
@@ -68,13 +65,10 @@ export function VttToolbar({ activeTool, onToolToggle }: VttToolbarProps) {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
-                            variant={'ghost'}
+                            variant={currentActiveTool === settingsTool.id ? 'default' : 'ghost'}
                             size="icon"
                             onClick={() => handleToolClick(settingsTool.id)}
-                            className={cn(
-                                "h-12 w-12 text-white/70 hover:text-white hover:bg-white/10 transition-all",
-                                currentActiveTool === settingsTool.id && "text-cyan-400 bg-cyan-400/10 shadow-[0_0_15px_rgba(74,222,222,0.5)]"
-                            )}
+                            className="h-12 w-12"
                         >
                             <settingsTool.icon />
                         </Button>

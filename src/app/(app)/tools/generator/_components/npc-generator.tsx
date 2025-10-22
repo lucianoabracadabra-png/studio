@@ -56,9 +56,9 @@ export function NpcGenerator() {
   };
 
   return (
-    <Card className="glassmorphic-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Gerador de NPC</CardTitle>
+        <CardTitle>Gerador de NPC</CardTitle>
         <CardDescription>Crie Personagens Não-Jogadores memoráveis para o seu mundo.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -123,8 +123,8 @@ export function NpcGenerator() {
               </Button>
             </form>
           </Form>
-          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
-            <h3 className="font-headline text-xl text-center">NPC Gerado</h3>
+          <div className="rounded-lg border bg-muted/50 p-4 space-y-4 min-h-[300px]">
+            <h3 className="font-semibold text-lg text-center">NPC Gerado</h3>
             {isLoading && (
               <div className="space-y-4">
                 <Skeleton className="h-6 w-1/2 mx-auto" />
@@ -141,7 +141,7 @@ export function NpcGenerator() {
             )}
             {result && (
               <div className="space-y-4 animate-in fade-in-50">
-                <h4 className="text-2xl font-headline text-primary text-center">{result.name}</h4>
+                <h4 className="text-2xl font-bold text-primary text-center">{result.name}</h4>
                 <div>
                     <h5 className="font-bold text-accent mb-1">Descrição</h5>
                     <p className="text-foreground/80 whitespace-pre-wrap">{result.description}</p>

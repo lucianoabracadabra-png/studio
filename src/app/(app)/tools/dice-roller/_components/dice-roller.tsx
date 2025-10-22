@@ -53,9 +53,9 @@ export function DiceRoller() {
   };
 
   return (
-    <Card className="glassmorphic-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="font-headline flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2">
           <Dices className="h-6 w-6" />
           Rolador de Dados
         </CardTitle>
@@ -71,7 +71,7 @@ export function DiceRoller() {
               <TabsTrigger value="skill">Perícias</TabsTrigger>
             </TabsList>
             <TabsContent value="attribute" className="space-y-4">
-               <Card className='bg-background/30 border-white/10'>
+               <Card className='bg-background/50'>
                 <CardHeader>
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
                   <CardDescription>Clique em um dado para rolar.</CardDescription>
@@ -86,7 +86,7 @@ export function DiceRoller() {
               </Card>
             </TabsContent>
             <TabsContent value="skill" className="space-y-4">
-              <Card className='bg-background/30 border-white/10'>
+              <Card className='bg-background/50'>
                 <CardHeader>
                   <CardTitle className='text-lg'>Teste de Perícia</CardTitle>
                   <CardDescription>Role uma quantidade de d10.</CardDescription>
@@ -102,10 +102,10 @@ export function DiceRoller() {
             </TabsContent>
           </Tabs>
 
-          <div className="rounded-lg border border-white/10 bg-background/30 p-4 space-y-4 min-h-[300px]">
+          <div className="rounded-lg border bg-muted/50 p-4 space-y-4 min-h-[300px]">
             <div className="text-center space-y-2">
                 <p className="text-muted-foreground">Resultado</p>
-                <p className="font-headline text-7xl font-bold magical-glow">
+                <p className="text-7xl font-bold text-primary">
                     {lastRoll ? lastRoll.total : '...'}
                 </p>
                 {lastRoll && (
@@ -121,10 +121,10 @@ export function DiceRoller() {
             <Separator />
             
             <div className="space-y-2">
-              <h3 className="font-headline text-lg flex items-center gap-2 text-muted-foreground"><History className="h-5 w-5" /> Histórico de Rolagens</h3>
+              <h3 className="text-lg flex items-center gap-2 text-muted-foreground"><History className="h-5 w-5" /> Histórico de Rolagens</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {results.length > 0 ? results.map((r, i) => (
-                  <div key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
+                  <div key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-background/50">
                     <div className='font-mono'>
                       <span className="font-mono text-accent">{r.notation}</span>
                       {r.rolls.length > 1 && (

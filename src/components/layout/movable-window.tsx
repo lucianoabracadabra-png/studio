@@ -5,22 +5,21 @@ import { useMovableWindow } from '@/context/movable-window-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, GripVertical } from 'lucide-react';
-import { Separator } from '../ui/separator';
 
 const SubWindow = ({ item }: { item: { id: string; title: string; content: React.ReactNode } }) => {
     const { closeItem } = useMovableWindow();
     return (
-        <div className='bg-card/50 rounded-lg border border-border'>
-            <div className='flex items-center justify-between p-2 pl-3 bg-muted/30 rounded-t-lg'>
-                <h4 className='font-semibold text-sm'>{item.title}</h4>
+        <Card>
+            <CardHeader className='flex flex-row items-center justify-between p-2 pl-3 bg-muted rounded-t-lg'>
+                <CardTitle className='font-semibold text-sm'>{item.title}</CardTitle>
                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => closeItem(item.id)}>
                     <X className="h-3 w-3" />
                 </Button>
-            </div>
-            <div className='p-3'>
+            </CardHeader>
+            <CardContent className='p-3'>
                 {item.content}
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     )
 }
 
@@ -66,7 +65,6 @@ export function MovableWindowManager() {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
-    // Prevent dragging if the click is on a button
     if ((e.target as HTMLElement).closest('button')) {
       return;
     }
@@ -93,9 +91,9 @@ export function MovableWindowManager() {
       }}
     >
       <style>{`.no-select { user-select: none; }`}</style>
-      <Card className="glassmorphic-card w-96 shadow-2xl shadow-primary/30 border-primary/50">
+      <Card className="w-96 shadow-2xl border-primary">
         <CardHeader
-          className="flex flex-row items-center justify-between p-2 pl-3 bg-muted/50 rounded-t-lg"
+          className="flex flex-row items-center justify-between p-2 pl-3 bg-muted rounded-t-lg"
           onMouseDown={handleMouseDown}
           style={{ cursor: 'move' }}
         >

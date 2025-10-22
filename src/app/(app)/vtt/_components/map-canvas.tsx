@@ -28,7 +28,7 @@ const GridLayer = ({ gridSize, mapDimensions }: { gridSize: number, mapDimension
         <svg width="100%" height="100%" className="absolute top-0 left-0 pointer-events-none">
             <defs>
                 <pattern id={gridId} width={gridSize} height={gridSize} patternUnits="userSpaceOnUse">
-                    <path d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+                    <path d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`} fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="1" />
                 </pattern>
             </defs>
             <rect width={mapDimensions.width} height={mapDimensions.height} fill={`url(#${gridId})`} />
@@ -63,7 +63,7 @@ export function MapCanvas({
   }
 
   return (
-    <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative" style={{ cursor: getCursor() }}>
+    <div ref={canvasRef} className="flex-grow w-full h-full bg-muted overflow-hidden relative" style={{ cursor: getCursor() }}>
       <motion.div
         drag={isPanEnabled}
         dragMomentum={false}
@@ -76,7 +76,7 @@ export function MapCanvas({
         }}
         className={cn(
             "absolute top-0 left-0", 
-            !mapState.url && "grass-texture"
+            !mapState.url && "bg-green-800"
         )}
         style={{ 
           x: mapState.position.x, 

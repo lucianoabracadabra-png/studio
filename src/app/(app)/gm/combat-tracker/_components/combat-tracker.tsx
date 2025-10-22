@@ -58,7 +58,7 @@ type LogEntry = {
 
 const MAX_AP_ON_TIMELINE = 50;
 
-const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
+const allLinks = [...mainLinks, ...gmToolsLinks, profileLink].map(link => ({...link, colorHue: Math.floor(Math.random() * 360)}));
 const bookColors = allLinks.filter(l => l.colorHue > 0).map(link => link.colorHue);
 const hueToNameMap = allLinks.reduce((acc, link) => {
     if (link.colorHue > 0) {
@@ -73,13 +73,7 @@ const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: numbe
         <div className={cn('flex flex-wrap gap-2', disabled && 'opacity-50')}>
             {bookColors.map(hue => {
                 const isSelected = selectedHue === hue;
-                const glowStyle = isSelected ? {
-                    boxShadow: `
-                        0 0 25px hsla(${hue}, 90%, 70%, 1),
-                        0 0 12px hsla(${hue}, 90%, 70%, 0.7),
-                        0 0 5px hsl(${hue}, 90%, 70%)`
-                } : {};
-
+                
                 return (
                     <button
                         key={hue}
@@ -87,14 +81,11 @@ const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: numbe
                         onClick={() => !disabled && onSelect(hue)}
                         disabled={disabled}
                         className={cn(
-                            'w-8 h-8 rounded-full transition-all flex items-center justify-center',
-                            isSelected ? 'scale-110' : 'hover:scale-105',
+                            'w-8 h-8 rounded-full transition-all flex items-center justify-center border-2',
+                            isSelected ? 'scale-110 border-white' : 'border-transparent hover:scale-105',
                             disabled ? 'cursor-not-allowed' : ''
                         )}
-                        style={{ 
-                            backgroundColor: `hsl(${hue}, 90%, 70%)`,
-                            ...glowStyle 
-                        }}
+                        style={{ backgroundColor: `hsl(${hue}, 90%, 70%)`}}
                         aria-label={`Select color hue ${hue}`}
                     >
                         {isSelected && <Check className='h-5 w-5 text-white' />}
@@ -278,10 +269,10 @@ export function CombatTracker() {
 
   return (
     <div className="flex flex-col gap-6">
-        <Card className="glassmorphic-card w-full">
+        <Card className="w-full">
             <CardHeader>
-                <CardTitle className="font-headline flex items-center justify-between">
-                    <span className="magical-glow">Linha do Tempo de Ação</span>
+                <CardTitle className="flex items-center justify-between">
+                    <span>Linha do Tempo de Ação</span>
                      {combatStarted ? (
                         <Button onClick={resetCombat} variant="destructive">
                             <RefreshCw className="mr-2" />
@@ -308,7 +299,7 @@ export function CombatTracker() {
                     <div className="relative space-y-2" style={{minHeight: `${rosterOrder.length * 3.5}rem`}}>
                         <div className="absolute top-0 bottom-0 left-0 right-0">
                             {timelineMarkers.map(marker => (
-                                <div key={marker} className="absolute h-full w-px bg-white/10" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%`, top: 0, bottom: 0 }}></div>
+                                <div key={marker} className="absolute h-full w-px bg-border" style={{ left: `${(marker / MAX_AP_ON_TIMELINE) * 100}%`, top: 0, bottom: 0 }}></div>
                             ))}
                         </div>
 
@@ -317,10 +308,6 @@ export function CombatTracker() {
                             const isActive = c.id === activeCombatantId;
                             const topPosition = `${index * 3.5}rem`;
 
-                            const glowStyle = isActive ? {
-                                boxShadow: `0 0 12px hsl(${c.colorHue}, 90%, 70%), 0 0 5px hsl(${c.colorHue}, 90%, 70%)`
-                            } : {};
-                            
                             return (
                                 <div key={c.id} className="absolute w-full" style={{ top: topPosition, height: '3rem' }}>
                                     {combatStarted && <ActionTrailDots combatantId={c.id} isPlayer={c.isPlayer} />}
@@ -334,18 +321,17 @@ export function CombatTracker() {
                                                 >
                                                      <Avatar 
                                                         className={cn(
-                                                            "h-4 w-4 transition-all",
+                                                            "h-4 w-4 transition-all border-2",
+                                                            isActive ? 'border-white' : 'border-transparent',
                                                             c.isPlayer ? 'rounded-full' : '',
                                                         )}
-                                                        style={isActive ? glowStyle : {}}
                                                      >
                                                       <AvatarFallback 
                                                         className={cn(
                                                           'h-full w-full p-0',
-                                                          c.isPlayer ? 'rounded-full' : 'rounded-none',
-                                                          isActive ? 'bg-transparent' : ''
+                                                          c.isPlayer ? 'rounded-full' : 'rounded-none'
                                                           )}
-                                                        style={{ backgroundColor: !isActive ? `hsl(${c.colorHue}, 90%, 70%)` : undefined }}
+                                                        style={{ backgroundColor: `hsl(${c.colorHue}, 90%, 70%)` }}
                                                       >
                                                       </AvatarFallback>
                                                     </Avatar>
@@ -367,9 +353,9 @@ export function CombatTracker() {
         </Card>
 
         {combatStarted && activeCombatant ? (
-            <Card className="glassmorphic-card">
+            <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><Crown /> Turno Ativo: {activeCombatant.name}</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Crown /> Turno Ativo: {activeCombatant.name}</CardTitle>
                     <CardDescription>AP Atual: {activeCombatant.ap}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
@@ -389,9 +375,9 @@ export function CombatTracker() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-1 flex flex-col gap-6">
-            <Card className="glassmorphic-card">
+            <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><UserPlus /> Adicionar Combatente</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><UserPlus /> Adicionar Combatente</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid grid-cols-[1fr_auto] gap-4">
@@ -418,26 +404,21 @@ export function CombatTracker() {
                     </div>
                     <Button 
                         onClick={addCombatant} 
-                        className="w-full font-bold transition-all" 
+                        className="w-full font-bold" 
                         disabled={combatStarted}
-                        style={{
-                            backgroundColor: `hsl(${newCombatant.colorHue}, 90%, 70%)`,
-                            color: `hsl(${newCombatant.colorHue}, 10%, 15%)`,
-                            boxShadow: `0 0 15px hsla(${newCombatant.colorHue}, 90%, 70%, 0.6)`
-                        }}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Adicionar ao Encontro
                     </Button>
                 </CardContent>
             </Card>
 
-            <Card className="glassmorphic-card flex-grow">
+            <Card className="flex-grow">
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2"><History /> Registro de Combate</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><History /> Registro de Combate</CardTitle>
                 </CardHeader>
                 <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
                     {log.length > 0 ? log.map(entry => (
-                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted/50 relative flex items-center gap-3">
+                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted relative flex items-center gap-3">
                            {entry.colorHue !== undefined && (
                              entry.isPlayer ? (
                                <Circle className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
@@ -458,9 +439,9 @@ export function CombatTracker() {
         </div>
 
 
-        <Card className="lg:col-span-2 glassmorphic-card">
+        <Card className="lg:col-span-2">
             <CardHeader>
-                <CardTitle className='font-headline'>Lista do Encontro</CardTitle>
+                <CardTitle>Lista do Encontro</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-2 max-h-[30rem] overflow-y-auto">
@@ -468,7 +449,7 @@ export function CombatTracker() {
                         <p className="text-sm text-muted-foreground text-center py-4">Nenhum combatente adicionado.</p>
                     ) : (
                         rosterOrder.map(c => (
-                            <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/30 rounded-md">
+                            <div key={c.id} className="flex items-center gap-4 p-2 bg-muted/50 rounded-md">
                                 <Avatar className={cn('h-9 w-9', c.isPlayer ? 'rounded-full' : 'rounded-none')}>
                                     <AvatarFallback
                                         className={cn(c.isPlayer ? 'rounded-full' : 'rounded-none')}

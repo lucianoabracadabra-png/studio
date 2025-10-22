@@ -51,11 +51,11 @@ export function DrawingPanel({ vttState, setVttState }: DrawingPanelProps) {
     const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'];
 
     return (
-        <div className="p-4 text-white">
+        <div className="p-4">
             <h3 className="text-lg font-bold mb-4">Desenho e Medição</h3>
             
             <div className='space-y-2'>
-                <p className='text-sm text-white/70'>Formas</p>
+                <p className='text-sm text-muted-foreground'>Formas</p>
                 <div className='grid grid-cols-3 gap-2'>
                     <ToolButton label="Círculo" icon={Circle} onClick={() => handleToolSelect('circle')} isActive={drawing.activeTool === 'circle'} />
                     <ToolButton label="Quadrado" icon={Square} onClick={() => handleToolSelect('square')} isActive={drawing.activeTool === 'square'} />
@@ -63,20 +63,20 @@ export function DrawingPanel({ vttState, setVttState }: DrawingPanelProps) {
                 </div>
             </div>
 
-            <Separator className='my-4 bg-white/10' />
+            <Separator className='my-4' />
 
             <div className='space-y-2'>
-                <p className='text-sm text-white/70'>Ferramentas</p>
+                <p className='text-sm text-muted-foreground'>Ferramentas</p>
                  <div className='grid grid-cols-3 gap-2'>
                     <ToolButton label="Desenho Livre" icon={Pen} onClick={() => handleToolSelect('freehand')} isActive={drawing.activeTool === 'freehand'} />
                     <ToolButton label="Régua" icon={Ruler} onClick={() => handleToolSelect('ruler')} isActive={drawing.activeTool === 'ruler'} />
                 </div>
             </div>
             
-            <Separator className='my-4 bg-white/10' />
+            <Separator className='my-4' />
 
             <div className='space-y-4'>
-                 <p className='text-sm text-white/70'>Opções</p>
+                 <p className='text-sm text-muted-foreground'>Opções</p>
                  <div className='space-y-2'>
                     <Label>Cor</Label>
                     <div className='flex flex-wrap gap-2'>
@@ -85,7 +85,7 @@ export function DrawingPanel({ vttState, setVttState }: DrawingPanelProps) {
                                 key={color}
                                 onClick={() => handleColorChange(color)}
                                 className={cn('w-7 h-7 rounded-full border-2 transition-all',
-                                    drawing.options.color === color ? 'border-white scale-110' : 'border-transparent'
+                                    drawing.options.color === color ? 'border-ring scale-110' : 'border-transparent'
                                 )}
                                 style={{ backgroundColor: color }}
                             />
@@ -98,7 +98,7 @@ export function DrawingPanel({ vttState, setVttState }: DrawingPanelProps) {
                  </div>
             </div>
 
-            <Separator className='my-4 bg-white/10' />
+            <Separator className='my-4' />
             
             <Button variant='destructive' className='w-full' onClick={clearDrawings}>
                 <Trash2 className='mr-2' />
@@ -120,8 +120,8 @@ function ToolButton({ label, icon: Icon, onClick, isActive, isDisabled }: ToolBu
         <Button 
             variant='outline' 
             className={cn(
-                'w-full h-20 flex-col gap-1 border-white/20 hover:bg-white/10 text-white',
-                isActive && 'bg-cyan-400/20 border-cyan-400',
+                'w-full h-20 flex-col gap-1 hover:bg-muted',
+                isActive && 'bg-primary/20 border-primary',
                 isDisabled && 'opacity-50 cursor-not-allowed'
             )}
             onClick={onClick}

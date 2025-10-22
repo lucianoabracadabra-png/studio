@@ -28,11 +28,11 @@ export function LayersPanel({ vttState, setVttState }: LayersPanelProps) {
     };
 
     return (
-        <div className="p-4 text-white">
+        <div className="p-4">
             <h3 className="text-lg font-bold mb-4">Camadas do Mapa</h3>
             <div className='space-y-4'>
                 <div className="space-y-2">
-                    <Label htmlFor="map-url" className='text-white/70'>URL do Fundo do Mapa</Label>
+                    <Label htmlFor="map-url" className='text-muted-foreground'>URL do Fundo do Mapa</Label>
                     <Input 
                         id="map-url" 
                         placeholder="https://exemplo.com/mapa.jpg" 
@@ -40,13 +40,13 @@ export function LayersPanel({ vttState, setVttState }: LayersPanelProps) {
                         onChange={handleMapUrlChange}
                     />
                 </div>
-                 <div className="flex items-center justify-between rounded-lg border border-white/10 p-3">
+                 <div className="flex items-center justify-between rounded-lg border p-3">
                     <Label htmlFor="grid-layer" className="font-medium">
                         Camada da Grelha
                     </Label>
                     <Switch id="grid-layer" checked={vttState.layers.isGridVisible} onCheckedChange={handleGridToggle} />
                 </div>
-                 <p className='text-xs text-center text-white/50 pt-8'>Mais funcionalidades em desenvolvimento.</p>
+                 <p className='text-xs text-center text-muted-foreground pt-8'>Mais funcionalidades em desenvolvimento.</p>
             </div>
         </div>
     );
