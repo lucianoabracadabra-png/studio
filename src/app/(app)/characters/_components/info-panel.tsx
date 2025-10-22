@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import type { Character } from '@/lib/character-data';
+import type { Character, LanguageFamily, AlignmentAxis } from '@/lib/character-data';
 import { languages } from '@/lib/character-data';
 import { LanguagesIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,44 +12,46 @@ import { Separator } from '@/components/ui/separator';
 
 type InfoPanelProps = {
     character: Character;
+    onAlignmentToggle: (axisName: string) => void;
 };
 
-const LanguagePopover = ({ knownLanguages }: { knownLanguages: string[] }) => (
+const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
     <Popover>
         <PopoverTrigger asChild>
-             <Button variant="link" className="text-foreground p-0 h-auto justify-start">
-                <LanguagesIcon className="mr-2 h-4 w-4" />
-                <span className='text-foreground'>Idiomas Conhecidos</span>
+             <Button variant="outline" className="text-foreground justify-start text-left h-auto">
+                <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
+                <span>{family.root}</span>
             </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80">
             <div className="grid gap-4">
                 <div className="space-y-2">
-                    <h4 className="font-medium leading-none text-foreground">Idiomas</h4>
+                    <h4 className="font-medium leading-none text-foreground">{family.root}</h4>
                     <p className="text-sm text-muted-foreground">
-                        Idiomas conhecidos pelo personagem.
+                        Dialetos conhecidos da família {family.root}.
                     </p>
                 </div>
-                <div className="grid gap-2">
-                    {languages.map(family => (
-                        <div key={family.root} className="text-sm">
-                             <p className={cn("font-bold", knownLanguages.includes(family.root) ? "text-primary" : "text-muted-foreground")}>
-                                {family.root}
-                            </p>
-                            <div className='pl-4 border-l-2 border-border ml-1'>
-                                {family.dialects.map(dialect => (
-                                     <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground" : "text-muted-foreground/50")}>
-                                        {dialect}
-                                     </p>
-                                ))}
-                            </div>
-                        </div>
+                 <div className='pl-4 border-l-2 border-border ml-1 space-y-1'>
+                    {family.dialects.map(dialect => (
+                         <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground font-semibold" : "text-muted-foreground/50")}>
+                            {dialect}
+                         </p>
                     ))}
                 </div>
             </div>
         </PopoverContent>
     </Popover>
 );
+
+const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (name: string) => void }) => {
+    return (
+        <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between'>
+            <span className='text-muted-foreground'>{axis.poles[0]}</span>
+            <span className='font-bold text-foreground'>{axis.state}</span>
+            <span className='text-muted-foreground'>{axis.poles[1]}</span>
+        </Button>
+    )
+}
 
 export function InfoPanelSummary({ character, isOpen }: { character: Character, isOpen: boolean }) {
     const { info, name, concept } = character;
@@ -83,7 +85,7 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
     )
 }
 
-export function InfoPanel({ character }: InfoPanelProps) {
+export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
     const { info, name } = character;
     return (
         <Card className='mt-2 animate-in fade-in'>
@@ -142,9 +144,22 @@ export function InfoPanel({ character }: InfoPanelProps) {
                                 <p className='text-foreground'>{info.origem}</p>
                             </div>
                         </div>
-                         <div className='space-y-1 text-sm'>
+                         <div className='space-y-2 text-sm'>
                             <Label className='text-muted-foreground'>Idiomas</Label>
-                            <LanguagePopover knownLanguages={character.info.idiomas} />
+                            <div className="grid grid-cols-2 gap-2 pt-1">
+                                {languages.map(family => (
+                                    <LanguagePopover key={family.root} family={family} knownLanguages={character.info.idiomas} />
+                                ))}
+                            </div>
+                        </div>
+                        <Separator />
+                         <div className="space-y-2">
+                            <Label className='text-muted-foreground'>Alinhamento</Label>
+                            <div className="grid grid-cols-2 gap-2 pt-1">
+                                {character.spirit.alignment.map(axis => (
+                                    <AlignmentButton key={axis.name} axis={axis} onToggle={onAlignmentToggle} />
+                                ))}
+                            </div>
                         </div>
                         <Separator />
                         <div className='space-y-1 text-sm'>

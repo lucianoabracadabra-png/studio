@@ -445,16 +445,6 @@ const DomainCard = ({ domain }: { domain: Character['soul']['domains'][0] }) => 
     </div>
 );
 
-const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (name: string) => void }) => {
-    return (
-        <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between'>
-            <span className='text-muted-foreground'>{axis.poles[0]}</span>
-            <span className='font-bold text-foreground'>{axis.state}</span>
-            <span className='text-muted-foreground'>{axis.poles[1]}</span>
-        </Button>
-    )
-}
-
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
         const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
@@ -503,7 +493,10 @@ export function CharacterSheet() {
                    <InfoPanelSummary character={character} isOpen={isInfoPanelOpen} />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <InfoPanel character={character} />
+                    <InfoPanel 
+                        character={character}
+                        onAlignmentToggle={handleAlignmentToggle}
+                    />
                 </CollapsibleContent>
             </Collapsible>
             
@@ -541,13 +534,6 @@ export function CharacterSheet() {
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                        <Separator />
-                        <div className="space-y-2">
-                            <h3 className='font-semibold text-center text-muted-foreground mb-4'>Alinhamento</h3>
-                            {character.spirit.alignment.map(axis => (
-                                <AlignmentButton key={axis.name} axis={axis} onToggle={handleAlignmentToggle} />
-                            ))}
                         </div>
                     </CardContent>
                 </Card>
