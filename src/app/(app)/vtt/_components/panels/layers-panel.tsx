@@ -34,5 +34,7 @@ export function LayersPanel() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
+
+export default LayersPanel;

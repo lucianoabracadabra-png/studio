@@ -3,12 +3,12 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { VttTool } from './vtt-toolbar';
-import { TokenPanel } from './panels/token-panel';
-import { DrawingPanel } from './panels/drawing-panel';
-import { FogPanel } from './panels/fog-panel';
-import { LayersPanel } from './panels/layers-panel';
-import { CombatPanel } from './panels/combat-panel';
-import { SettingsPanel } from './panels/settings-panel';
+import TokenPanel from './panels/token-panel';
+import DrawingPanel from './panels/drawing-panel';
+import FogPanel from './panels/fog-panel';
+import LayersPanel from './panels/layers-panel';
+import CombatPanel from './panels/combat-panel';
+import SettingsPanel from './panels/settings-panel';
 import type { VttState } from './vtt-layout';
 
 interface ToolPanelContainerProps {

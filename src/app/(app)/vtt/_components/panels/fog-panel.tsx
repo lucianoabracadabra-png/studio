@@ -26,5 +26,7 @@ export function FogPanel() {
                 </Button>
             </div>
         </div>
-    )
+    );
 }
+
+export default FogPanel;

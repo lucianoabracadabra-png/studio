@@ -8,5 +8,7 @@ export function SettingsPanel() {
             <h3 className="text-lg font-bold mb-4">Configurações</h3>
              <p className='text-sm text-center text-white/50 py-8'>As configurações do VTT aparecerão aqui.</p>
         </div>
-    )
+    );
 }
+
+export default SettingsPanel;

@@ -77,3 +77,5 @@ function ToolButton({ label, icon: Icon, onClick, isActive }: ToolButtonProps) {
         </Button>
     )
 }
+
+export default DrawingPanel;

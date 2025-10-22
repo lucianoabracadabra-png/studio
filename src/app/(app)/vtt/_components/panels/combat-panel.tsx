@@ -15,5 +15,7 @@ export function CombatPanel() {
                  <Button variant='destructive' className='text-white'><RotateCcw /></Button>
             </div>
         </div>
-    )
+    );
 }
+
+export default CombatPanel;
