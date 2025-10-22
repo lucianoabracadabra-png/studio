@@ -17,12 +17,7 @@ import { cn } from '@/lib/utils';
 import { useMovableWindow } from '@/context/movable-window-context';
 import { InfoPanel } from './info-panel';
 import { HealthPanel } from './health-panel';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const TorsoIcon = () => (
@@ -543,140 +538,123 @@ export function CharacterSheet() {
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 animate-in fade-in-up">
-            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
-                <div className='xl:col-span-1'>
-                    <InfoPanel character={character} />
-                </div>
-                <div className="xl:col-span-2 space-y-6">
-                    <section>
-                        <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
-                    </section>
-                     {/* SOUL & SPIRIT PANEL */}
-                    <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* SPIRIT */}
-                        <Card className="glassmorphic-card">
-                            <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ESPÍRITO</CardTitle></CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-4">
-                                    <h3 className='font-semibold text-center text-muted-foreground'>Personalidade</h3>
-                                    {character.spirit.personality.map(p => (
-                                        <div key={p.name} className="space-y-2">
-                                            <div className="flex justify-between items-center text-sm">
-                                                <Label>{p.name}</Label>
-                                                <span className="font-mono">{p.value}</span>
-                                            </div>
-                                            <Slider defaultValue={[p.value]} max={10} step={1} />
-                                        </div>
-                                    ))}
-                                </div>
-                                <Separator />
-                                <div className="space-y-4">
-                                    <h3 className='font-semibold text-center text-muted-foreground'>Alinhamento</h3>
-                                    {character.spirit.alignment.map(a => (
-                                        <div key={a.name} className="space-y-2">
-                                            <div className="flex justify-between items-center text-sm mb-1">
-                                                <span className='font-semibold text-left'>{a.poles[0]}</span>
-                                                <Label className='font-bold'>{a.name}</Label>
-                                                <span className='font-semibold text-right'>{a.poles[1]}</span>
-                                            </div>
-                                            <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in-up">
+            
+            <section>
+                <InfoPanel character={character} />
+            </section>
+            
+            <section>
+                <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
+            </section>
+            
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card className="glassmorphic-card">
+                    <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ALMA</CardTitle></CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                            <div className="space-y-1">
+                                <Label className="flex items-center justify-center gap-1">
+                                    Fluxo
+                                    <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Energia cósmica que permeia tudo.</p></TooltipContent></Tooltip></TooltipProvider>
+                                </Label>
+                                <p className="text-3xl font-bold">{character.soul.anima.flow}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="flex items-center justify-center gap-1">
+                                    Patrono
+                                    <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Vínculo com uma entidade poderosa.</p></TooltipContent></Tooltip></TooltipProvider>
+                                </Label>
+                                <p className="text-3xl font-bold">{character.soul.anima.patron}</p>
+                            </div>
+                        </div>
+                        <Separator/>
+                        <div className="space-y-2">
+                            <h3 className='font-semibold text-center text-muted-foreground'>Domínios</h3>
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                                {character.soul.domains.map(d => (
+                                    <div key={d.name} className="flex justify-between items-center">
+                                        <Label>{d.name}</Label>
+                                        <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <Separator/>
+                        <div className="space-y-3">
+                            <h3 className='font-semibold text-center text-muted-foreground flex items-center justify-center gap-1'>
+                                Rachaduras
+                                <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Corrupção da alma pelo uso indevido de poder.</p></TooltipContent></Tooltip></TooltipProvider>
+                            </h3>
+                            <div className="flex justify-center">
+                                <SoulCracks value={character.soul.cracks} />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-                        {/* SOUL */}
-                        <Card className="glassmorphic-card">
-                            <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ALMA</CardTitle></CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-2 gap-4 text-center">
-                                    <div className="space-y-1">
-                                        <Label className="flex items-center justify-center gap-1">
-                                            Fluxo
-                                            <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Energia cósmica que permeia tudo.</p></TooltipContent></Tooltip></TooltipProvider>
-                                        </Label>
-                                        <p className="text-3xl font-bold">{character.soul.anima.flow}</p>
+                <Card className="glassmorphic-card">
+                    <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ESPÍRITO</CardTitle></CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-4">
+                            <h3 className='font-semibold text-center text-muted-foreground'>Personalidade</h3>
+                            {character.spirit.personality.map(p => (
+                                <div key={p.name} className="space-y-2">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <Label>{p.name}</Label>
+                                        <span className="font-mono">{p.value}</span>
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label className="flex items-center justify-center gap-1">
-                                            Patrono
-                                            <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Vínculo com uma entidade poderosa.</p></TooltipContent></Tooltip></TooltipProvider>
-                                        </Label>
-                                        <p className="text-3xl font-bold">{character.soul.anima.patron}</p>
-                                    </div>
+                                    <Slider defaultValue={[p.value]} max={10} step={1} />
                                 </div>
-                                <Separator/>
-                                <div className="space-y-2">
-                                    <h3 className='font-semibold text-center text-muted-foreground'>Domínios</h3>
-                                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                                        {character.soul.domains.map(d => (
-                                            <div key={d.name} className="flex justify-between items-center">
-                                                <Label>{d.name}</Label>
-                                                <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
-                                            </div>
-                                        ))}
+                            ))}
+                        </div>
+                        <Separator />
+                        <div className="space-y-4">
+                            <h3 className='font-semibold text-center text-muted-foreground'>Alinhamento</h3>
+                            {character.spirit.alignment.map(a => (
+                                <div key={a.name} className="space-y-2">
+                                    <div className="flex justify-between items-center text-sm mb-1">
+                                        <span className='font-semibold text-left'>{a.poles[0]}</span>
+                                        <Label className='font-bold'>{a.name}</Label>
+                                        <span className='font-semibold text-right'>{a.poles[1]}</span>
                                     </div>
+                                    <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
                                 </div>
-                                <Separator/>
-                                <div className="space-y-3">
-                                    <h3 className='font-semibold text-center text-muted-foreground flex items-center justify-center gap-1'>
-                                        Rachaduras
-                                        <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Corrupção da alma pelo uso indevido de poder.</p></TooltipContent></Tooltip></TooltipProvider>
-                                    </h3>
-                                    <div className="flex justify-center">
-                                        <SoulCracks value={character.soul.cracks} />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </section>
-                </div>
-
-            </div>
-             <section>
-                 <EquippedSection equipment={character.equipment} />
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             </section>
 
-            {/* FOCUS PANEL */}
-            <section className='scroll-section'>
+            <section>
                 <Card className='glassmorphic-card'>
                     <CardHeader>
                         <CardTitle className='font-headline text-3xl magical-glow text-center'>FOCOS DE DESENVOLVIMENTO</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Accordion type="single" collapsible className="w-full space-y-4">
-                            <AccordionItem value="physical" className='scroll-item pilar-fisico'>
-                                <AccordionTrigger className='scroll-trigger'>
-                                    <h3 className='font-headline text-xl flex items-center gap-3'><PersonStanding />FÍSICO</h3>
-                                </AccordionTrigger>
-                                <AccordionContent className='scroll-content'>
-                                    <FocusBranch focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="mental" className='scroll-item pilar-mental'>
-                                <AccordionTrigger className='scroll-trigger'>
-                                    <h3 className='font-headline text-xl flex items-center gap-3'><BrainCircuit />MENTAL</h3>
-                                </AccordionTrigger>
-                                <AccordionContent className='scroll-content'>
-                                    <FocusBranch focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="social" className='scroll-item pilar-social'>
-                                <AccordionTrigger className='scroll-trigger'>
-                                    <h3 className='font-headline text-xl flex items-center gap-3'><Users />SOCIAL</h3>
-                                </AccordionTrigger>
-                                <AccordionContent className='scroll-content'>
-                                    <FocusBranch focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
+                        <Tabs defaultValue="physical" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="physical" className='flex items-center gap-2'><PersonStanding />Físico</TabsTrigger>
+                                <TabsTrigger value="mental" className='flex items-center gap-2'><BrainCircuit />Mental</TabsTrigger>
+                                <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="physical" className='pt-6'>
+                                <FocusBranch focusData={character.focus.physical} title='FÍSICO' pilar='fisico' icon={PersonStanding} />
+                            </TabsContent>
+                            <TabsContent value="mental" className='pt-6'>
+                                <FocusBranch focusData={character.focus.mental} title='MENTAL' pilar='mental' icon={BrainCircuit} />
+                            </TabsContent>
+                            <TabsContent value="social" className='pt-6'>
+                                <FocusBranch focusData={character.focus.social} title='SOCIAL' pilar='social' icon={Users} />
+                            </TabsContent>
+                        </Tabs>
                     </CardContent>
                 </Card>
             </section>
-             <section>
-                <InventorySection equipment={character.equipment} inventory={character.inventory} />
+             
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <EquippedSection equipment={character.equipment} />
+                 <InventorySection equipment={character.equipment} inventory={character.inventory} />
             </section>
         </div>
     );

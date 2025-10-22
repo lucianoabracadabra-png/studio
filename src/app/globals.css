@@ -77,14 +77,9 @@
 
 @layer components {
   .glassmorphic-card {
-    @apply bg-card/50 backdrop-blur-lg border border-white/10 shadow-lg transition-all duration-300;
+    @apply bg-card/50 backdrop-blur-lg border border-white/10 shadow-lg;
   }
 
-  .glassmorphic-card:hover {
-    @apply shadow-2xl shadow-primary/20 border-white/20;
-    transform: translateY(-4px);
-  }
-  
   .book-wrapper {
     transform-style: preserve-3d;
     perspective: 1000px;
@@ -193,8 +188,8 @@
   
   .magical-glow {
     color: transparent;
-    background-image: linear-gradient(to right, hsl(var(--page-primary-color)), hsl(var(--page-accent-color)));
-    text-shadow: 0 0 8px hsl(var(--page-primary-color)), 0 0 16px hsl(var(--page-accent-color));
+    background-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+    text-shadow: 0 0 8px hsl(var(--primary)), 0 0 16px hsl(var(--accent));
     background-clip: text;
     -webkit-background-clip: text;
     user-select: none;
@@ -233,36 +228,6 @@
   .pilar-mental .dot.selected { background-color: var(--cor-mental); }
   .pilar-social .dot.selected { background-color: var(--cor-social); }
   
-  /* FOCUS SCROLLS (ACCORDION) */
-    .scroll-section .scroll-item {
-        @apply border-none;
-    }
-    .scroll-trigger {
-        @apply flex justify-center items-center h-16 rounded-md px-6 py-2 text-foreground/80 no-underline;
-        background: 
-            linear-gradient(to right, transparent, hsl(var(--background) / 0.8), transparent),
-            url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="p" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 L10 5" stroke="hsl(0 0% 100% / 0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23p)"/></svg>'),
-            linear-gradient(to right, hsl(var(--card)) 20%, hsl(var(--background)) 50%, hsl(var(--card)) 80%);
-        border-top: 2px solid hsl(var(--border));
-        border-bottom: 2px solid hsl(var(--border));
-        border-image: linear-gradient(to right, transparent, var(--pilar-color), transparent) 1;
-        box-shadow: 0 4px 15px -5px hsl(var(--pilar-color) / 0.3);
-        transition: all 0.3s ease-in-out;
-    }
-    .scroll-trigger:hover {
-        @apply text-foreground;
-        box-shadow: 0 6px 20px -5px hsl(var(--pilar-color) / 0.5);
-        transform: translateY(-2px);
-    }
-    .scroll-trigger > svg:last-child { @apply hidden; } /* Hide default chevron */
-
-    .scroll-content {
-        @apply p-4 mt-[-8px] rounded-b-lg border-x-2 border-b-2;
-        background: radial-gradient(ellipse at top, hsl(var(--card)), transparent), hsl(var(--background));
-        border-color: hsl(var(--pilar-color) / 0.3);
-    }
-
-
   .grass-texture {
     background-color: #3a592a;
     background-image: 
@@ -421,8 +386,9 @@
         grid-template-columns: 1fr auto 1fr;
         gap: 1rem;
         justify-items: center;
-        align-items: start;
+        align-items: center;
         width: 100%;
+        padding: 0 1rem;
     }
 
     .body-part-head { grid-area: head; }
@@ -445,7 +411,7 @@
     }
     
     .health-box {
-        @apply w-3 h-3 rounded-sm cursor-pointer transition-all duration-200 relative border;
+        @apply w-4 h-4 rounded-sm cursor-pointer transition-all duration-200 relative border;
     }
     
     .health-box:hover {

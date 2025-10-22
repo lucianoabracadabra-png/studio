@@ -23,7 +23,7 @@ const InfoRow = ({ label, value }: { label: string; value: string | number }) =>
 const LanguagePopover = ({ knownLanguages }: { knownLanguages: string[] }) => (
     <Popover>
         <PopoverTrigger asChild>
-            <Button variant="link" className="text-foreground/80 p-0 h-auto justify-start">
+             <Button variant="link" className="text-foreground/80 p-0 h-auto justify-start">
                 <LanguagesIcon className="mr-2 h-4 w-4" />
                 <span>Idiomas Conhecidos</span>
             </Button>
@@ -39,7 +39,7 @@ const LanguagePopover = ({ knownLanguages }: { knownLanguages: string[] }) => (
                 <div className="grid gap-2">
                     {languages.map(family => (
                         <div key={family.root} className="text-sm">
-                            <p className={cn("font-bold", knownLanguages.includes(family.root) ? "text-primary" : "text-muted-foreground")}>
+                             <p className={cn("font-bold", knownLanguages.includes(family.root) ? "text-primary" : "text-muted-foreground")}>
                                 {family.root}
                             </p>
                             <div className='pl-4 border-l-2 border-border ml-1'>
@@ -61,13 +61,10 @@ export function InfoPanel({ character }: InfoPanelProps) {
     const { info, name } = character;
     return (
         <Card className='glassmorphic-card'>
-            <CardHeader className='p-0 border-b-2 border-primary/20'>
-                <p className='font-headline text-2xl text-center p-1 magical-glow'>INFORMAÇÕES</p>
-            </CardHeader>
-            <CardContent className='p-2 space-y-2'>
-                <div className='grid grid-cols-3 gap-2'>
-                    <div className='col-span-1'>
-                        <div className='aspect-w-3 aspect-h-4 relative rounded-md overflow-hidden border-2 border-white/20'>
+            <CardContent className='p-4 md:p-6'>
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                    <div className='md:col-span-1'>
+                        <div className='aspect-[3/4] relative rounded-lg overflow-hidden border-2 border-white/20 shadow-lg'>
                              <Image 
                                 src={info.imageUrl}
                                 alt={`Portrait of ${name}`}
@@ -77,33 +74,58 @@ export function InfoPanel({ character }: InfoPanelProps) {
                             />
                         </div>
                     </div>
-                    <div className='col-span-2 space-y-2'>
-                        <div className='border border-white/10 rounded-md p-2 text-center bg-background/30'>
-                            <p className='font-headline text-2xl'>{name}</p>
+                    <div className='md:col-span-2 space-y-4'>
+                        <div className='border-b-2 border-primary/30 pb-2'>
+                            <p className='font-headline text-4xl magical-glow'>{name}</p>
+                            <p className='text-muted-foreground'>{character.concept}</p>
                         </div>
-                         <div className='space-y-2 p-2 border border-white/10 rounded-md bg-background/30 h-[calc(100%-3.5rem)]'>
-                            <InfoRow label="Altura" value={`${info.altura} cm`} />
-                            <InfoRow label="Peso" value={`${info.peso} kg`} />
-                            <InfoRow label="Cabelo" value={info.cabelo} />
-                            <InfoRow label="Olhos" value={info.olhos} />
-                            <InfoRow label="Pele" value={info.pele} />
-                            <InfoRow label="Idade" value={info.idade} />
+                         <div className='grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm'>
+                            <div className='space-y-1'>
+                                <Label>Altura</Label>
+                                <p>{info.altura}</p>
+                            </div>
+                             <div className='space-y-1'>
+                                <Label>Peso</Label>
+                                <p>{info.peso}</p>
+                            </div>
+                             <div className='space-y-1'>
+                                <Label>Cabelo</Label>
+                                <p>{info.cabelo}</p>
+                            </div>
+                             <div className='space-y-1'>
+                                <Label>Olhos</Label>
+                                <p>{info.olhos}</p>
+                            </div>
+                             <div className='space-y-1'>
+                                <Label>Pele</Label>
+                                <p>{info.pele}</p>
+                            </div>
+                            <div className='space-y-1'>
+                                <Label>Idade</Label>
+                                <p>{info.idade}</p>
+                            </div>
+                        </div>
+                        <Separator />
+                        <div className='grid grid-cols-2 gap-6 text-sm'>
+                             <div className='space-y-1'>
+                                <Label>Ideais</Label>
+                                <p>{info.ideais}</p>
+                            </div>
+                             <div className='space-y-1'>
+                                <Label>Origem</Label>
+                                <p>{info.origem}</p>
+                            </div>
+                        </div>
+                         <div className='space-y-1 text-sm'>
+                            <Label>Idiomas</Label>
+                            <LanguagePopover knownLanguages={character.info.idiomas} />
+                        </div>
+                        <Separator />
+                        <div className='space-y-1 text-sm'>
+                            <Label>Experiência</Label>
+                            <p className='font-mono text-lg'>{info.experiencia.atual} / {info.experiencia.total}</p>
                         </div>
                     </div>
-                </div>
-                <div className='space-y-2 p-2 border border-white/10 rounded-md bg-background/30'>
-                    <InfoRow label="Ideais" value={info.ideais} />
-                    <InfoRow label="Origem" value={info.origem} />
-                    <div className='flex justify-between items-baseline border-b border-white/10 pb-1'>
-                         <p className='font-bold text-sm text-foreground/80'>Idioma:</p>
-                         <LanguagePopover knownLanguages={character.info.idiomas} />
-                    </div>
-                    <div className='pt-1'>
-                        <InfoRow label="Experiência" value={`${info.experiencia.atual} / ${info.experiencia.total}`} />
-                    </div>
-                </div>
-                <div className='p-2 border border-white/10 rounded-md bg-background/30 text-center text-sm text-muted-foreground'>
-                    <p>Altruísmo | Emoção | Corrupção</p>
                 </div>
             </CardContent>
         </Card>

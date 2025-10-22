@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Character, BodyPartHealth, HealthState } from '@/lib/character-data';
 
@@ -75,8 +75,11 @@ type HealthPanelProps = {
 export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
 
     return (
-        <Card className="glassmorphic-card h-full">
-            <CardContent className="p-2 md:p-4 bg-gray-900/30 rounded-lg h-full flex items-center justify-center">
+        <Card className="glassmorphic-card">
+             <CardHeader>
+                <CardTitle className='font-headline text-2xl magical-glow'>Vitalidade</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 bg-gray-900/30 rounded-b-lg">
                 <div className="health-diagram">
                     <BodyPartDisplay part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" />
                     <BodyPartDisplay part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
