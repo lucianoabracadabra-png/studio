@@ -7,11 +7,11 @@ import {
   Map,
   Swords,
   Users,
-  FileText,
-  Volume2,
-  Dices,
   FlaskConical,
-  Icon,
+  Dices,
+  Volume2,
+  LucideIcon,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePathname } from 'next/navigation';
-import { Separator } from '../ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import React from 'react';
 import { Icons } from '@/components/ui/icons';
 
@@ -147,24 +147,27 @@ export function SidebarNav() {
           <Link href="/dashboard" className='px-4'>
             <Icons.logo className="h-8 w-8 text-primary" />
           </Link>
-          <Separator className='w-10' />
-          <nav className="flex flex-col items-center gap-4">
-              {mainLinks.map(link => (
-                  <Book 
-                    key={link.href} 
-                    link={link} 
-                    isActive={pathname.startsWith(link.href)} />
-              ))}
-          </nav>
-          <Separator className='my-2 w-10' />
-          <nav className="flex flex-col items-center gap-4">
-              {gmToolsLinks.map(link => (
-                  <Book 
-                    key={link.href} 
-                    link={link} 
-                    isActive={pathname.startsWith(link.href)} />
-              ))}
-          </nav>
+          
+          <ScrollArea className="w-full">
+            <div className="flex flex-col items-center gap-4 px-3 py-2">
+                {mainLinks.map(link => (
+                    <Book 
+                        key={link.href} 
+                        link={link} 
+                        isActive={pathname.startsWith(link.href)} />
+                ))}
+            
+                <div className='h-4' />
+
+                {gmToolsLinks.map(link => (
+                    <Book 
+                        key={link.href} 
+                        link={link} 
+                        isActive={pathname.startsWith(link.href)} />
+                ))}
+            </div>
+          </ScrollArea>
+          
           <div className='flex-grow'></div>
           <nav>
               <ProfileLink link={profileLink} isActive={pathname.startsWith(profileLink.href)} />
