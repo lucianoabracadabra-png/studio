@@ -3,58 +3,59 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { VttTool } from './vtt-toolbar';
-import TokenPanel from './panels/token-panel';
-import DrawingPanel from './panels/drawing-panel';
-import FogPanel from './panels/fog-panel';
-import LayersPanel from './panels/layers-panel';
-import CombatPanel from './panels/combat-panel';
-import SettingsPanel from './panels/settings-panel';
+import { TokenPanel } from './panels/token-panel';
+import { DrawingPanel } from './panels/drawing-panel';
+import { FogPanel } from './panels/fog-panel';
+import { LayersPanel } from './panels/layers-panel';
+import { CombatPanel } from './panels/combat-panel';
+import { SettingsPanel } from './panels/settings-panel';
 import type { VttState } from './vtt-layout';
 
 interface ToolPanelContainerProps {
     activeTool: VttTool | null;
-    drawingState: VttState['drawing'];
-    setDrawingState: (updater: React.SetStateAction<VttState['drawing']>) => void;
+    vttState: VttState;
+    setVttState: React.Dispatch<React.SetStateAction<VttState>>;
 }
 
 const panelVariants = {
     hidden: { x: '-100%', opacity: 0 },
     visible: { x: 0, opacity: 1 },
     exit: { x: '-100%', opacity: 0 },
-}
+};
 
 export function ToolPanelContainer({ 
     activeTool, 
-    drawingState,
-    setDrawingState 
+    vttState,
+    setVttState
 }: ToolPanelContainerProps) {
 
     const renderPanel = () => {
-        if (!activeTool) return null;
+        if (!activeTool || activeTool === 'pan') return null;
 
         switch (activeTool) {
             case 'tokens':
                 return <TokenPanel />;
             case 'drawing':
-                return <DrawingPanel drawingState={drawingState} setDrawingState={setDrawingState} />;
+                return <DrawingPanel vttState={vttState} setVttState={setVttState} />;
             case 'fog':
                 return <FogPanel />;
             case 'layers':
-                return <LayersPanel />;
+                return <LayersPanel vttState={vttState} setVttState={setVttState} />;
             case 'combat':
                 return <CombatPanel />;
             case 'settings':
                 return <SettingsPanel />;
             default:
-                return <div className='p-4 text-white'>Panel for {activeTool}</div>
+                return <div className='p-4 text-white'>Panel for {activeTool}</div>;
         }
     }
 
     return (
         <AnimatePresence>
-            {activeTool && (
+            {activeTool && activeTool !== 'pan' && (
                  <motion.div 
-                    className='absolute top-0 left-16 z-10 h-full w-80 bg-gray-800/90 shadow-lg backdrop-blur-sm'
+                    key={activeTool}
+                    className='absolute top-0 left-16 z-10 h-full w-80 bg-gray-800/90 shadow-lg backdrop-blur-sm border-r border-white/10'
                     variants={panelVariants}
                     initial='hidden'
                     animate='visible'
@@ -65,5 +66,5 @@ export function ToolPanelContainer({
                 </motion.div>
             )}
         </AnimatePresence>
-    )
+    );
 }

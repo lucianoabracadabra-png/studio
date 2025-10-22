@@ -13,8 +13,9 @@ export function TokenPanel() {
                 <PlusCircle className='mr-2' />
                 Adicionar Token
             </Button>
+            <div className='text-center py-8 text-white/50 text-sm'>
+                <p>Biblioteca de tokens em desenvolvimento.</p>
+            </div>
         </div>
     );
 }
-
-export default TokenPanel;

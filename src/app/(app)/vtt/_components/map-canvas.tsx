@@ -4,8 +4,8 @@ import React, { useRef } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import { Token } from './token';
 import { DrawingLayer } from './drawing-layer';
-import type { Token as TokenType, VttState, Point, VttTool } from './vtt-layout';
-import type { DraftShape } from './drawing-layer'; // Import DraftShape
+import type { Token as TokenType, VttState } from './vtt-layout';
+import type { DraftShape } from './drawing-layer';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -17,8 +17,9 @@ interface MapCanvasProps {
   setMapState: React.Dispatch<React.SetStateAction<VttState['map']>>;
   layers: VttState['layers'];
   drawingState: VttState['drawing'];
-  onAddShape: (shape: DraftShape) => void; // Correctly use DraftShape
-  activeTool: VttTool | null;
+  onAddShape: (shape: DraftShape) => void;
+  isPanEnabled: boolean;
+  isTokenInteractionEnabled: boolean;
 }
 
 const GridLayer = ({ gridSize, mapDimensions }: { gridSize: number, mapDimensions: { width: number, height: number }}) => {
@@ -44,38 +45,39 @@ export function MapCanvas({
     layers, 
     drawingState, 
     onAddShape,
-    activeTool
+    isPanEnabled,
+    isTokenInteractionEnabled,
 }: MapCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   
-  const handleMapDrag = (event: any, info: any) => {
-    if(activeTool === 'select') {
-        const currentPosition = mapState.position;
-        setMapState(prev => ({ ...prev, position: { x: currentPosition.x + info.delta.x, y: currentPosition.y + info.delta.y }}));
+  const handleMapDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if(isPanEnabled) {
+        setMapState(prev => ({ ...prev, position: { x: prev.position.x + info.delta.x, y: prev.position.y + info.delta.y }}));
     }
   };
   
   const getCursor = () => {
     if (drawingState.activeTool) return 'crosshair';
-    if (activeTool === 'select') return 'grab';
+    if (isPanEnabled) return 'grab';
     return 'default';
   }
-
-  const isPanDisabled = activeTool !== 'select' || !!drawingState.activeTool;
 
   return (
     <div ref={canvasRef} className="flex-grow w-full h-full bg-background/80 overflow-hidden relative" style={{ cursor: getCursor() }}>
       <motion.div
-        drag={!isPanDisabled}
+        drag={isPanEnabled}
         dragMomentum={false}
         onDrag={handleMapDrag}
         onDragStart={() => {
-            if(activeTool === 'select') document.body.style.cursor = 'grabbing';
+            if(isPanEnabled) document.body.style.cursor = 'grabbing';
         }}
         onDragEnd={() => {
-            if(activeTool === 'select') document.body.style.cursor = 'grab';
+            if(isPanEnabled) document.body.style.cursor = 'grab';
         }}
-        className={cn("absolute top-0 left-0", !mapState.url && "grass-texture")}
+        className={cn(
+            "absolute top-0 left-0", 
+            !mapState.url && "grass-texture"
+        )}
         style={{ 
           x: mapState.position.x, 
           y: mapState.position.y,
@@ -96,19 +98,10 @@ export function MapCanvas({
 
         {layers.isGridVisible && <GridLayer gridSize={50} mapDimensions={mapState.dimensions} />}
         
-        <motion.div 
-            className="absolute top-0 left-0"
-            style={{
-                width: mapState.dimensions.width,
-                height: mapState.dimensions.height,
-                x: -mapState.position.x / mapState.zoom,
-                y: -mapState.position.y / mapState.zoom,
-            }}
-        >
-            {drawingState.shapes.map(shape => (
-                <div key={shape.id}></div>
-            ))}
-        </motion.div>
+        {/* Placeholder for saved shapes */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+            {/* Render saved shapes here in the future */}
+        </div>
 
         <div className="absolute top-0 left-0 w-full h-full">
           {tokens.map(token => (
@@ -123,7 +116,7 @@ export function MapCanvas({
               mapZoom={mapState.zoom}
               shape={token.shape}
               isActive={token.id === activeTokenId}
-              isDraggingDisabled={!!drawingState.activeTool}
+              isDraggingDisabled={!isTokenInteractionEnabled || !!drawingState.activeTool}
             />
           ))}
         </div>

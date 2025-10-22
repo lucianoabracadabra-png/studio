@@ -17,5 +17,3 @@ export function CombatPanel() {
         </div>
     );
 }
-
-export default CombatPanel;

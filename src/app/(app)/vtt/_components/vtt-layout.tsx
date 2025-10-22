@@ -47,7 +47,7 @@ export interface VttState {
   };
   combat: {
     turnOrder: number[];
-    activeTurnIndex: number;
+    activeCombatantId: number | null;
   };
   drawing: {
     activeTool: DrawingToolType | null;
@@ -58,7 +58,7 @@ export interface VttState {
 
 const initialVttState: VttState = {
   map: {
-    url: '',
+    url: '/maps/fantasy-map-1.jpg',
     zoom: 0.5,
     position: { x: 0, y: 0 },
     dimensions: { width: 2560, height: 1440 }
@@ -66,6 +66,7 @@ const initialVttState: VttState = {
   tokens: [
       { id: 1, name: 'Player 1', imageUrl: '/tokens/token-1.png', color: '#3b82f6', position: { x: 600, y: 800 }, shape: 'circle', type: 'hero' },
       { id: 2, name: 'Goblin A', imageUrl: '/tokens/token-2.png', color: '#ef4444', position: { x: 800, y: 750 }, shape: 'square', type: 'enemy' },
+      { id: 3, name: 'Orc Leader', imageUrl: '/tokens/token-3.png', color: '#eab308', position: { x: 700, y: 650 }, shape: 'square', type: 'enemy' },
   ],
   layers: {
     isFogOfWarActive: false,
@@ -74,7 +75,7 @@ const initialVttState: VttState = {
   },
   combat: {
     turnOrder: [],
-    activeTurnIndex: -1,
+    activeCombatantId: null,
   },
   drawing: {
     activeTool: null,
@@ -89,53 +90,36 @@ const initialVttState: VttState = {
 
 export function VttLayout() {
   const [vttState, setVttState] = useState<VttState>(initialVttState);
-  const [activeTool, setActiveTool] = useState<VttTool | null>('select'); // Default to select
+  const [activeToolbar, setActiveToolbar] = useState<VttTool | null>(null);
 
   const handleToolToggle = (tool: VttTool) => {
-    setActiveTool(prev => prev === tool ? null : tool);
-    if (tool !== 'drawing') {
-      setDrawing(prev => ({ ...prev, activeTool: null }));
-    }
+    setActiveToolbar(prev => {
+        const newTool = prev === tool ? null : tool;
+        // Se o novo painel NÃO for o de desenho, desativamos qualquer ferramenta de desenho ativa.
+        if (newTool !== 'drawing') {
+            setVttState(s => ({ ...s, drawing: { ...s.drawing, activeTool: null } }));
+        }
+        return newTool;
+    });
   };
 
-  const setTokens = (updater: React.SetStateAction<VttState['tokens']>) => {
-    setVttState(prev => ({ ...prev, tokens: typeof updater === 'function' ? updater(prev.tokens) : updater }));
-  }
-
-  const setMapState = (updater: React.SetStateAction<VttState['map']>) => {
-     setVttState(prev => ({
-      ...prev,
-      map: typeof updater === 'function' ? updater(prev.map) : updater,
-    }));
-  }
-
-  const setLayers = (updater: React.SetStateAction<VttState['layers']>) => {
+  const setVttPart = <K extends keyof VttState>(key: K, updater: React.SetStateAction<VttState[K]>) => {
     setVttState(prev => ({
       ...prev,
-      layers: typeof updater === 'function' ? updater(prev.layers) : updater,
+      [key]: typeof updater === 'function' ? (updater as (prevState: VttState[K]) => VttState[K])(prev[key]) : updater,
     }));
   }
-  
-  const setCombat = (updater: React.SetStateAction<VttState['combat']>) => {
-    setVttState(prev => ({ ...prev, combat: typeof updater === 'function' ? updater(prev.combat) : updater }));
-  }
 
-  const setDrawing = (updater: React.SetStateAction<VttState['drawing']>) => {
-    setVttState(prev => ({ ...prev, drawing: typeof updater === 'function' ? updater(prev.drawing) : updater }));
-  }
-  
   const handleAddShape = (draftShape: DraftShape) => {
-    const { zoom } = vttState.map;
     const completeShape: Shape = {
       ...draftShape,
       id: Date.now().toString(),
-      points: draftShape.points.map(p => ({ x: p.x / zoom, y: p.y / zoom })),
     };
-    setDrawing(prev => ({ ...prev, shapes: [...prev.shapes, completeShape]}));
+    setVttPart('drawing', prev => ({ ...prev, shapes: [...prev.shapes, completeShape]}));
   }
 
   const handleTokenDragEnd = (id: number, info: PanInfo) => {
-    setTokens(currentTokens => {
+    setVttPart('tokens', currentTokens => {
       const tokenIndex = currentTokens.findIndex(t => t.id === id);
       if (tokenIndex === -1) return currentTokens;
 
@@ -152,25 +136,30 @@ export function VttLayout() {
       return newTokens;
     });
   };
+  
+  const isMapInteractionEnabled = activeToolbar === null || (activeToolbar === 'drawing' && vttState.drawing.activeTool === null);
 
   return (
     <div className="w-full h-full bg-black relative">
-      <VttToolbar activeTool={activeTool} onToolToggle={handleToolToggle} />
+      <VttToolbar activeTool={activeToolbar} onToolToggle={handleToolToggle} />
+      
       <ToolPanelContainer 
-        activeTool={activeTool} 
-        drawingState={vttState.drawing}
-        setDrawingState={setDrawing}
+        activeTool={activeToolbar} 
+        vttState={vttState}
+        setVttState={setVttState}
       />
+
       <MapCanvas 
         tokens={vttState.tokens}
-        activeTokenId={vttState.combat.turnOrder[vttState.combat.activeTurnIndex]}
+        activeTokenId={vttState.combat.activeCombatantId}
         onTokenDragEnd={handleTokenDragEnd}
         mapState={vttState.map}
-        setMapState={setMapState}
+        setMapState={(updater) => setVttPart('map', updater)}
         layers={vttState.layers}
         drawingState={vttState.drawing}
         onAddShape={handleAddShape}
-        activeTool={activeTool}
+        isPanEnabled={isMapInteractionEnabled}
+        isTokenInteractionEnabled={isMapInteractionEnabled}
       />
     </div>
   );

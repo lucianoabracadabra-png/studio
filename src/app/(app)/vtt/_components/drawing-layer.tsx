@@ -89,7 +89,8 @@ export function DrawingLayer({
             options: drawingOptions,
         };
 
-        onShapeAdd(newShape);
+        // For now, we don't save shapes, just draw temporarily
+        // onShapeAdd(newShape);
 
         setIsDrawing(false);
         setStartPoint(null);
@@ -105,7 +106,7 @@ export function DrawingLayer({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp} // End drawing if mouse leaves canvas
-            className="absolute top-0 left-0 z-10 pointer-events-auto"
+            className="absolute top-0 left-0"
             style={{ pointerEvents: activeDrawingTool ? 'auto' : 'none' }} // Only capture mouse when a tool is active
         />
     );
