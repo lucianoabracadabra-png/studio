@@ -59,7 +59,6 @@ export function InteractiveMap() {
              const objects = canvas.getObjects();
             for (let i = objects.length - 1; i >= 0; i--) {
                 const obj = objects[i];
-                // Check if the object is a drawing path before removing
                 if (obj.isType('path')) {
                     canvas.remove(obj);
                 }
@@ -100,7 +99,6 @@ export function InteractiveMap() {
             
             if (!canvasRef.current) return;
 
-            // Initialize canvas
             canvas = new fabric.Canvas(canvasRef.current, {
                 width: canvasRef.current.parentElement?.clientWidth,
                 height: canvasRef.current.parentElement?.clientHeight,
@@ -113,9 +111,8 @@ export function InteractiveMap() {
                 return;
             }
 
-            // Load background image
             try {
-                const img = await fabric.Image.fromURL(mapImage.imageUrl, { crossOrigin: 'anonymous' });
+                const img = await fabric.Image.fromURL(mapImage.imageUrl, undefined, { crossOrigin: 'anonymous' });
                 
                 if (img) {
                     canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
@@ -148,7 +145,6 @@ export function InteractiveMap() {
                 console.error("Error loading map image:", error);
             }
 
-            // Handle responsive resizing
             if (canvasRef.current.parentElement) {
                 resizeObserver = new ResizeObserver(entries => {
                     const { width, height } = entries[0].contentRect;
@@ -240,7 +236,6 @@ export function InteractiveMap() {
             lastPointRef.current = null;
         };
 
-        // Reset all event listeners before adding new ones
         canvas.off();
         
         if (activeTool === 'pan') {
