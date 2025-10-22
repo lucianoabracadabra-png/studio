@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,11 +13,6 @@ import { Dices, History } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mainLinks, gmToolsLinks } from '@/components/layout/sidebar-nav';
-import { type DiceType } from '@/components/features/dice/die-3d-model';
-import { DiceCanvas } from '@/components/features/dice/dice-canvas';
-import { Skeleton } from '@/components/ui/skeleton';
-
 
 type RollResult = {
   notation: string;
@@ -26,20 +21,13 @@ type RollResult = {
   timestamp: string;
 };
 
-const attributeDice: { type: DiceType, hue: number }[] = [
-    { type: 'd4', hue: mainLinks[0].colorHue },
-    { type: 'd6', hue: mainLinks[1].colorHue },
-    { type: 'd8', hue: mainLinks[2].colorHue },
-    { type: 'd10', hue: mainLinks[3].colorHue },
-    { type: 'd12', hue: gmToolsLinks[0].colorHue },
-    { type: 'd20', hue: gmToolsLinks[1].colorHue },
-];
+const attributeDice = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
 const skillDiceCounts = Array.from({ length: 10 }, (_, i) => i + 1);
 
 export function DiceRoller() {
   const [results, setResults] = useState<RollResult[]>([]);
   const [lastRoll, setLastRoll] = useState<RollResult | null>(null);
-  
+
   const handleRoll = (notation: string) => {
     const [countStr, dieStr] = notation.toLowerCase().split('d');
     const count = parseInt(countStr);
@@ -52,7 +40,7 @@ export function DiceRoller() {
       rolls.push(roll);
       total += roll;
     }
-    
+
     const newRoll: RollResult = {
       notation: `${count}d${die}`,
       rolls,
@@ -61,7 +49,7 @@ export function DiceRoller() {
     };
 
     setLastRoll(newRoll);
-    setResults([newRoll, ...results].slice(0, 10)); // Manter os últimos 10 resultados
+    setResults([newRoll, ...results].slice(0, 10));
   };
 
   return (
@@ -88,10 +76,12 @@ export function DiceRoller() {
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
                   <CardDescription>Clique em um dado para rolar.</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-4 min-h-[300px] aspect-square md:aspect-auto">
-                  <Suspense fallback={<Skeleton className="w-full h-full" />}>
-                    <DiceCanvas dice={attributeDice} onRoll={handleRoll} />
-                  </Suspense>
+                <CardContent className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                  {attributeDice.map(die => (
+                    <Button key={die} onClick={() => handleRoll(`1${die}`)} className="h-20 text-xl font-bold">
+                      {die.toUpperCase()}
+                    </Button>
+                  ))}
                 </CardContent>
               </Card>
             </TabsContent>
