@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import Image from 'next/image';
 import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, Projectile, BagItem } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight, BookOpen } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, Backpack, ArrowRight, Shirt, PersonStanding, BrainCircuit, Users, PlusCircle, Plus, Minus, ChevronDown, Weight, BookOpen, Circle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,18 +20,35 @@ import { InfoPanel } from './info-panel';
 import { HealthPanel } from './health-panel';
 
 
-const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
-    <Card className='glassmorphic-card'>
-        <CardHeader>
-            <CardTitle className='flex items-center justify-between font-headline text-2xl magical-glow'>
-                {title}
-                <Icon className='w-8 h-8' />
-            </CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-            <div className="flex items-baseline justify-between">
-                <p className='font-bold text-lg'>{resource.name}</p>
-                <p className='font-mono text-lg'>{resource.value} / {resource.max}</p>
+const TorsoIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+        <path d="M4.5 8.5A2.5 2.5 0 0 1 7 6h10a2.5 2.5 0 0 1 2.5 2.5v7.5a2.5 2.5 0 0 1-2.5 2.5H7a2.5 2.5 0 0 1-2.5-2.5v-7.5Z"></path>
+        <path d="M7 16.5v-8"></path>
+        <path d="M17 16.5v-8"></path>
+        <path d="M7 8.5v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"></path>
+    </svg>
+)
+
+const FocusHeaderCard = ({ title, icon, resource, spentPoints }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }, spentPoints: number }) => (
+    <Card className='glassmorphic-card h-full'>
+        <CardContent className='pt-6 space-y-2'>
+            <div className='flex items-center justify-between'>
+                 <h3 className='font-headline text-2xl magical-glow'>{title}</h3>
+                 <span className='text-primary'>{React.createElement(icon)}</span>
+            </div>
+            <Separator />
+            <div className='grid grid-cols-[auto_1fr] gap-x-4 items-center text-sm'>
+                <p className='font-mono text-lg text-accent font-bold'>{spentPoints > 0 ? spentPoints : ''}</p>
+                <div className='space-y-1'>
+                    <div className='flex justify-between items-baseline'>
+                        <p className='font-bold'>{resource.name}</p>
+                        <p className='font-mono'>{resource.value} / {resource.max}</p>
+                    </div>
+                    <div className='flex justify-between items-baseline'>
+                        <p className='text-muted-foreground'>Gasto:</p>
+                        <p className='font-mono'>{spentPoints}</p>
+                    </div>
+                </div>
             </div>
         </CardContent>
     </Card>
@@ -76,31 +93,32 @@ const getEffectClasses = (level: number, type: 'attribute' | 'skill') => {
     };
 };
 
-const AttributeItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social' }) => {
-    const [level, setLevel] = useState(initialValue);
+type AttributeItemProps = {
+    name: string;
+    level: number;
+    pilar: 'fisico' | 'mental' | 'social';
+    onLevelChange: (name: string, newLevel: number) => void;
+};
+
+const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps) => {
     const { animationClasses, glowLevel } = getEffectClasses(level, 'attribute');
 
-    const handleLevelChange = (amount: number) => {
-        setLevel(prev => Math.max(0, Math.min(15, prev + amount)));
-    }
-
     return (
-        <div className="item-lista">
-            <div className="item-header">
+        <div className="flex justify-between items-center">
+            <div className='flex items-center gap-2'>
+                <span 
+                    className={cn('font-bold font-headline text-lg w-5 text-center', `pilar-${pilar}`, animationClasses)}
+                    data-glow-level={glowLevel}
+                    style={{ '--glow-color': `var(--cor-${pilar})`, '--glow-pulse-distance': `${15 + (level - 10) * 8}px` } as React.CSSProperties}
+                >
+                    {level}
+                </span>
                 <span className="nome">{name}</span>
             </div>
             <div className="item-control">
-                <div className="stepper-container">
-                    <button className="stepper-btn" onClick={() => handleLevelChange(-1)}><Minus size={16}/></button>
-                    <span 
-                        className={cn('stepper-value', `pilar-${pilar}`, animationClasses)}
-                        data-glow-level={glowLevel}
-                        style={{ '--glow-color': `var(--cor-${pilar})`, '--glow-pulse-distance': `${15 + (level - 10) * 8}px` } as React.CSSProperties}
-                    >
-                        {level}
-                    </span>
-                    <button className="stepper-btn" onClick={() => handleLevelChange(1)}><Plus size={16}/></button>
-                </div>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <Circle className='text-muted-foreground/30 hover:text-primary' />
+                </Button>
             </div>
         </div>
     );
@@ -150,26 +168,94 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
     );
 };
 
+type FocusState = {
+    attributes: { [key: string]: number };
+    spentPoints: number;
+};
 
-const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character['focus']['physical'], title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
+type FocusAction = 
+    | { type: 'SET_ATTRIBUTE'; payload: { name: string; level: number } }
+    | { type: 'RESET' };
+
+function focusReducer(state: FocusState, action: FocusAction): FocusState {
+    switch (action.type) {
+        case 'SET_ATTRIBUTE': {
+            const { name, level } = action.payload;
+            const currentLevel = state.attributes[name] || 0;
+            const levelDifference = level - currentLevel;
+
+            // Simple cost: 1 point per level
+            const costDifference = levelDifference;
+
+            return {
+                ...state,
+                attributes: {
+                    ...state.attributes,
+                    [name]: level,
+                },
+                spentPoints: state.spentPoints + costDifference,
+            };
+        }
+        case 'RESET':
+            return { attributes: {}, spentPoints: 0 };
+        default:
+            return state;
+    }
+}
+
+const FocusSection = ({ focusData, title, pilar, icon }: { focusData: any, title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
     const pilarClass = `pilar-${pilar.toLowerCase()}`;
+    
+    const initialAttributeState: FocusState = {
+        attributes: focusData.attributes.reduce((acc: any, attr: any) => {
+            acc[attr.name] = attr.value;
+            return acc;
+        }, {}),
+        spentPoints: 0,
+    };
+
+    const [state, dispatch] = useReducer(focusReducer, initialAttributeState);
+
+    const handleAttributeChange = (name: string, newLevel: number) => {
+        // This is a simplified handler. The reducer should manage complex state.
+        const currentLevel = state.attributes[name];
+        const updatedLevel = Math.max(0, Math.min(15, newLevel));
+        
+        // Dispatching the change to the reducer
+        const levelDifference = updatedLevel - currentLevel;
+        const cost = levelDifference; // Simplified cost logic
+        // This is a bit of a hack as we should calculate from base, not incrementally
+        // For a real app, this logic would be more robust.
+        dispatch({ type: 'SET_ATTRIBUTE', payload: { name: name, level: updatedLevel }});
+    };
+
+
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
     const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
+
+    const resource = focusData.vigor || focusData.focus || focusData.grace;
+    const IconComponent = pilar === 'fisico' ? TorsoIcon : icon;
 
     return (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${pilarClass}`}>
             <div className="md:col-span-1">
-                <FocusHeaderCard title={title} icon={icon} resource={focusData.vigor || focusData.focus || focusData.grace} />
+                <FocusHeaderCard title={title} icon={IconComponent} resource={resource} spentPoints={state.spentPoints} />
             </div>
             
             <div className="md:col-span-1">
                 <Card className='sub-painel h-full'>
                     <CardHeader>
-                        <CardTitle>Atributos</CardTitle>
+                        <CardTitle className='border-b-2 border-dotted border-primary pb-1'>ATRIBUTOS</CardTitle>
                     </CardHeader>
-                    <CardContent className='atributos-grid-interno'>
-                        {focusData.attributes.map(attr => (
-                            <AttributeItem key={attr.name} name={attr.name} initialValue={attr.value} pilar={pilar} />
+                    <CardContent className='space-y-2'>
+                        {focusData.attributes.map((attr: {name: string}) => (
+                            <AttributeItem 
+                                key={attr.name} 
+                                name={attr.name} 
+                                level={state.attributes[attr.name]} 
+                                pilar={pilar}
+                                onLevelChange={(name, level) => handleAttributeChange(name, level)}
+                            />
                         ))}
                     </CardContent>
                 </Card>
@@ -181,7 +267,7 @@ const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character[
                         <CardTitle>Perícias</CardTitle>
                     </CardHeader>
                     <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
-                        {focusData.skills.map(skill => (
+                        {focusData.skills.map((skill: {name: string, value: number}) => (
                             <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
                         ))}
                     </CardContent>
@@ -195,7 +281,7 @@ const FocusSection = ({ focusData, title, pilar, icon }: { focusData: Character[
                             <CardTitle>{modularSkillsTitle}</CardTitle>
                         </CardHeader>
                         <CardContent className='pericias-lista md:grid md:grid-cols-2 md:gap-x-4'>
-                            {modularSkills.map(skill => (
+                            {modularSkills.map((skill: {name: string, value: number}) => (
                                 <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
                             ))}
                         </CardContent>
