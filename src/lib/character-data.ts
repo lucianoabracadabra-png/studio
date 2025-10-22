@@ -63,23 +63,40 @@ type FocusData = {
 };
 
 type PhysicalFocus = FocusData & {
-  vigor: { value: number; max: number };
+  vigor: { name: string; value: number; max: number };
   treinamentos: Stat[];
 };
 
 type MentalFocus = FocusData & {
-  focus: { value: number; max: number };
+  focus: { name: string; value: number; max: number };
   ciencias: Stat[];
 };
 
 type SocialFocus = FocusData & {
-  grace: { value: number; max: number };
+  grace: { name: string; value: number; max: number };
   artes: Stat[];
 };
 
 export type Character = {
   name: string;
   concept: string;
+  info: {
+    imageUrl: string;
+    imageHint: string;
+    altura: string;
+    peso: string;
+    cabelo: string;
+    olhos: string;
+    pele: string;
+    idade: string;
+    ideais: string;
+    origem: string;
+    idioma: string;
+    experiencia: {
+        atual: number;
+        total: number;
+    }
+  },
   focus: {
     physical: PhysicalFocus;
     mental: MentalFocus;
@@ -110,10 +127,27 @@ export type Character = {
 
 export const characterData: Character = {
   name: 'Dahl Maasen',
-  concept: 'Commonare da floresta',
+  concept: 'Guerreiro tribal das florestas do norte',
+  info: {
+    imageUrl: '', // Will be populated from placeholder-images
+    imageHint: 'male warrior fantasy',
+    altura: '185 cm',
+    peso: '140 kg',
+    cabelo: 'Castanho grisalho, longo',
+    olhos: 'Âmbar',
+    pele: 'Persa, queimada de sol',
+    idade: '29 anos',
+    ideais: 'Família, conhecimento e liberdade',
+    origem: 'Commonare da floresta',
+    idioma: 'Tupi, Geral, Anão',
+    experiencia: {
+        atual: 0,
+        total: 369
+    }
+  },
   focus: {
     physical: {
-      vigor: { value: 8, max: 10 },
+      vigor: { name: "Vigor", value: 8, max: 10 },
       attributes: [
         { name: 'Força', value: 3 },
         { name: 'Destreza', value: 4 },
@@ -138,7 +172,7 @@ export const characterData: Character = {
       ]
     },
     mental: {
-      focus: { value: 12, max: 12 },
+      focus: { name: "Foco", value: 12, max: 12 },
       attributes: [
         { name: 'Inteligência', value: 4 },
         { name: 'Percepção', value: 5 },
@@ -163,7 +197,7 @@ export const characterData: Character = {
       ]
     },
     social: {
-      grace: { value: 9, max: 10 },
+      grace: { name: "Graça", value: 9, max: 10 },
       attributes: [
         { name: 'Empatia', value: 3 },
         { name: 'Manipulação', value: 2 },

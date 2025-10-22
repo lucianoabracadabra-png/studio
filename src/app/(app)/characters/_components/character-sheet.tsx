@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, Projectile, BagItem } from '@/lib/character-data';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMovableWindow } from '@/context/movable-window-context';
+import { InfoPanel } from './info-panel';
 
 
 const FocusHeaderCard = ({ title, icon: Icon, resource }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }}) => (
@@ -422,15 +425,107 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
 }
 
 export function CharacterSheet() {
-    const [character, setCharacter] = useState<Character>(initialCharacterData);
+    const [character, setCharacter] = useState<Character>(() => {
+        const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
+        if (charImage) {
+            initialCharacterData.info.imageUrl = charImage.imageUrl;
+        }
+        return initialCharacterData;
+    });
 
     return (
         <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 animate-in fade-in-up">
-            {/* HEADER */}
-            <header className="flex justify-between items-baseline border-b-2 border-primary/20 pb-4">
-                <h1 className="font-headline text-5xl font-bold magical-glow">{character.name}</h1>
-                <p className="text-xl text-muted-foreground italic">&quot;{character.concept}&quot;</p>
-            </header>
+            <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
+                <div className='xl:col-span-1'>
+                    <InfoPanel characterInfo={character.info} name={character.name} />
+                </div>
+                <div className="xl:col-span-2 space-y-6">
+                     {/* SOUL & SPIRIT PANEL */}
+                    <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* SPIRIT */}
+                        <Card className="glassmorphic-card">
+                            <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ESPÍRITO</CardTitle></CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="space-y-4">
+                                    <h3 className='font-semibold text-center text-muted-foreground'>Personalidade</h3>
+                                    {character.spirit.personality.map(p => (
+                                        <div key={p.name} className="space-y-2">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <Label>{p.name}</Label>
+                                                <span className="font-mono">{p.value}</span>
+                                            </div>
+                                            <Slider defaultValue={[p.value]} max={10} step={1} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <Separator />
+                                <div className="space-y-4">
+                                    <h3 className='font-semibold text-center text-muted-foreground'>Alinhamento</h3>
+                                    {character.spirit.alignment.map(a => (
+                                        <div key={a.name} className="space-y-2">
+                                            <div className="flex justify-between items-center text-sm mb-1">
+                                                <span className='font-semibold text-left'>{a.poles[0]}</span>
+                                                <Label className='font-bold'>{a.name}</Label>
+                                                <span className='font-semibold text-right'>{a.poles[1]}</span>
+                                            </div>
+                                            <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* SOUL */}
+                        <Card className="glassmorphic-card">
+                            <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ALMA</CardTitle></CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4 text-center">
+                                    <div className="space-y-1">
+                                        <Label className="flex items-center justify-center gap-1">
+                                            Fluxo
+                                            <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Energia cósmica que permeia tudo.</p></TooltipContent></Tooltip></TooltipProvider>
+                                        </Label>
+                                        <p className="text-3xl font-bold">{character.soul.anima.flow}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="flex items-center justify-center gap-1">
+                                            Patrono
+                                            <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Vínculo com uma entidade poderosa.</p></TooltipContent></Tooltip></TooltipProvider>
+                                        </Label>
+                                        <p className="text-3xl font-bold">{character.soul.anima.patron}</p>
+                                    </div>
+                                </div>
+                                <Separator/>
+                                <div className="space-y-2">
+                                    <h3 className='font-semibold text-center text-muted-foreground'>Domínios</h3>
+                                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                                        {character.soul.domains.map(d => (
+                                            <div key={d.name} className="flex justify-between items-center">
+                                                <Label>{d.name}</Label>
+                                                <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <Separator/>
+                                <div className="space-y-3">
+                                    <h3 className='font-semibold text-center text-muted-foreground flex items-center justify-center gap-1'>
+                                        Rachaduras
+                                        <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Corrupção da alma pelo uso indevido de poder.</p></TooltipContent></Tooltip></TooltipProvider>
+                                    </h3>
+                                    <div className="flex justify-center">
+                                        <SoulCracks value={character.soul.cracks} />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                    <section>
+                         <EquippedSection equipment={character.equipment} />
+                    </section>
+                </div>
+
+            </div>
 
             {/* FOCUS PANEL */}
             <section>
@@ -457,90 +552,6 @@ export function CharacterSheet() {
                         </Tabs>
                     </CardContent>
                 </Card>
-            </section>
-
-             {/* SOUL & SPIRIT PANEL */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* SPIRIT */}
-                <Card className="glassmorphic-card">
-                    <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ESPÍRITO</CardTitle></CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-4">
-                            <h3 className='font-semibold text-center text-muted-foreground'>Personalidade</h3>
-                             {character.spirit.personality.map(p => (
-                                <div key={p.name} className="space-y-2">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <Label>{p.name}</Label>
-                                        <span className="font-mono">{p.value}</span>
-                                    </div>
-                                    <Slider defaultValue={[p.value]} max={10} step={1} />
-                                </div>
-                            ))}
-                        </div>
-                        <Separator />
-                        <div className="space-y-4">
-                            <h3 className='font-semibold text-center text-muted-foreground'>Alinhamento</h3>
-                            {character.spirit.alignment.map(a => (
-                                <div key={a.name} className="space-y-2">
-                                     <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className='font-semibold text-left'>{a.poles[0]}</span>
-                                        <Label className='font-bold'>{a.name}</Label>
-                                        <span className='font-semibold text-right'>{a.poles[1]}</span>
-                                    </div>
-                                    <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* SOUL */}
-                <Card className="glassmorphic-card">
-                     <CardHeader><CardTitle className="font-headline text-2xl magical-glow text-center">ALMA</CardTitle></CardHeader>
-                     <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                            <div className="space-y-1">
-                                <Label className="flex items-center justify-center gap-1">
-                                    Fluxo
-                                    <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Energia cósmica que permeia tudo.</p></TooltipContent></Tooltip></TooltipProvider>
-                                </Label>
-                                <p className="text-3xl font-bold">{character.soul.anima.flow}</p>
-                            </div>
-                             <div className="space-y-1">
-                                <Label className="flex items-center justify-center gap-1">
-                                    Patrono
-                                    <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Vínculo com uma entidade poderosa.</p></TooltipContent></Tooltip></TooltipProvider>
-                                </Label>
-                                <p className="text-3xl font-bold">{character.soul.anima.patron}</p>
-                            </div>
-                        </div>
-                        <Separator/>
-                         <div className="space-y-2">
-                            <h3 className='font-semibold text-center text-muted-foreground'>Domínios</h3>
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                                {character.soul.domains.map(d => (
-                                    <div key={d.name} className="flex justify-between items-center">
-                                        <Label>{d.name}</Label>
-                                        <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                         </div>
-                        <Separator/>
-                        <div className="space-y-3">
-                             <h3 className='font-semibold text-center text-muted-foreground flex items-center justify-center gap-1'>
-                                Rachaduras
-                                 <TooltipProvider><Tooltip><TooltipTrigger><Info className='h-3 w-3'/></TooltipTrigger><TooltipContent><p>Corrupção da alma pelo uso indevido de poder.</p></TooltipContent></Tooltip></TooltipProvider>
-                            </h3>
-                            <div className="flex justify-center">
-                                <SoulCracks value={character.soul.cracks} />
-                            </div>
-                        </div>
-                     </CardContent>
-                </Card>
-            </section>
-             <section>
-                <EquippedSection equipment={character.equipment} />
             </section>
              <section>
                 <InventorySection equipment={character.equipment} inventory={character.inventory} />
