@@ -77,11 +77,11 @@ type SocialFocus = FocusData & {
   artes: Stat[];
 };
 
+export type HealthState = 'clean' | 'simple' | 'lethal' | 'aggravated';
+
 export type BodyPartHealth = {
     name: string;
-    max: number;
-    current: number;
-    wounds: ('light' | 'serious' | 'critical')[];
+    states: HealthState[];
 };
 
 export type Character = {
@@ -164,12 +164,12 @@ export const characterData: Character = {
   },
   health: {
       bodyParts: {
-          head: { name: 'Cabeça', max: 6, current: 6, wounds: [] },
-          torso: { name: 'Tronco', max: 12, current: 12, wounds: [] },
-          leftArm: { name: 'Braço Esquerdo', max: 9, current: 9, wounds: [] },
-          rightArm: { name: 'Braço Direito', max: 9, current: 9, wounds: [] },
-          leftLeg: { name: 'Perna Esquerda', max: 9, current: 9, wounds: [] },
-          rightLeg: { name: 'Perna Direita', max: 9, current: 9, wounds: [] },
+          head: { name: 'Cabeça', states: Array(6).fill('clean') },
+          torso: { name: 'Tronco', states: Array(12).fill('clean') },
+          leftArm: { name: 'Braço Esquerdo', states: Array(9).fill('clean') },
+          rightArm: { name: 'Braço Direito', states: Array(9).fill('clean') },
+          leftLeg: { name: 'Perna Esquerda', states: Array(9).fill('clean') },
+          rightLeg: { name: 'Perna Direita', states: Array(9).fill('clean') },
       }
   },
   focus: {

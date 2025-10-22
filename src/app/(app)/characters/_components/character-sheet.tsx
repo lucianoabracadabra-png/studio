@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useReducer } from 'react';
 import Image from 'next/image';
-import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, Projectile, BagItem } from '@/lib/character-data';
+import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, Projectile, BagItem, HealthState } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -520,20 +520,21 @@ export function CharacterSheet() {
         return initialCharacterData;
     });
 
-    const handleHealthChange = (partId: keyof Character['health']['bodyParts'], newHealth: number) => {
-        setCharacter(prev => ({
-            ...prev,
-            health: {
-                ...prev.health,
-                bodyParts: {
-                    ...prev.health.bodyParts,
-                    [partId]: {
-                        ...prev.health.bodyParts[partId],
-                        current: newHealth,
-                    }
+    const handleHealthChange = (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => {
+        setCharacter(prev => {
+            const newBodyParts = { ...prev.health.bodyParts };
+            const newStates = [...newBodyParts[partId].states];
+            newStates[boxIndex] = newState;
+            newBodyParts[partId] = { ...newBodyParts[partId], states: newStates };
+
+            return {
+                ...prev,
+                health: {
+                    ...prev.health,
+                    bodyParts: newBodyParts
                 }
-            }
-        }));
+            };
+        });
     };
 
     return (
