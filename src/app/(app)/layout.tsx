@@ -32,9 +32,9 @@ export default function AuthenticatedAppLayout({
   const accentColorHue = (colorHue + 40) % 360;
   
   const pageStyle = {
-    '--page-primary-color': `${colorHue} 90% 70%`,
-    '--page-accent-color': `${accentColorHue} 90% 70%`,
-    '--ring': `hsl(${colorHue}, 90%, 70%)`
+    '--primary': `${colorHue} 90% 70%`,
+    '--accent': `${accentColorHue} 90% 70%`,
+    '--ring': `hsl(${colorHue} 90% 70%)`
   } as React.CSSProperties;
 
   return (
@@ -43,7 +43,7 @@ export default function AuthenticatedAppLayout({
         style={pageStyle}
       >
         <div
-          className="page-container-visuals"
+          className="page-container-visuals flex-grow flex flex-col"
         >
           {children}
         </div>

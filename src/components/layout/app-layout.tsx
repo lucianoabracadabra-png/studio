@@ -11,10 +11,10 @@ type AppLayoutProps = {
 export default function AppLayout({ children, style }: AppLayoutProps) {
 
   return (
-    <div className="grid grid-cols-[auto_1fr] min-h-screen w-full bg-background relative">
+    <div className="min-h-screen w-full bg-background relative">
         <SidebarNav />
         <main 
-            className={cn('ml-20 relative min-h-screen p-4 lg:p-6 page-container-visuals')}
+            className={cn('ml-20 relative min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col')}
             style={style}
         >
           {children}

@@ -23,8 +23,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePathname } from 'next/navigation';
 import { Separator } from '../ui/separator';
-import React, { useState, useEffect, useRef } from 'react';
-
+import React from 'react';
+import { Icons } from '@/components/ui/icons';
 
 export const mainLinks = [
   { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: 200, title: 'Painel' },
@@ -53,77 +53,58 @@ export const profileLink = {
   title: 'Perfil'
 };
 
-type AnimationState = 'off' | 'growing' | 'holding' | 'climax' | 'decaying-on' | 'on' | 'decaying-off';
-
-const useAnimationState = (isActive: boolean) => {
-    const [animationState, setAnimationState] = useState<AnimationState>(isActive ? 'on' : 'off');
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        const clearTimers = () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-                timerRef.current = null;
-            }
-        };
-
-        if (isActive) {
-            if (animationState === 'off' || animationState === 'decaying-off') {
-                clearTimers();
-                setAnimationState('growing');
-                timerRef.current = setTimeout(() => {
-                    setAnimationState('holding');
-                    timerRef.current = setTimeout(() => {
-                        setAnimationState('climax');
-                        timerRef.current = setTimeout(() => {
-                            setAnimationState('decaying-on');
-                            timerRef.current = setTimeout(() => {
-                                setAnimationState('on');
-                            }, 1000);
-                        }, 1000);
-                    }, 2000);
-                }, 1000);
-            }
-        } else {
-            if (animationState !== 'off' && animationState !== 'decaying-off') {
-                clearTimers();
-                setAnimationState('decaying-off');
-                timerRef.current = setTimeout(() => {
-                    setAnimationState('off');
-                }, 1000);
-            }
-        }
-        
-        return clearTimers;
-
-    }, [isActive, animationState]);
-
-    return animationState;
-};
 
 const Book = ({ link, isActive }: { link: (typeof mainLinks)[0], isActive: boolean }) => {
     const Icon = link.icon;
-    const animationState = useAnimationState(isActive);
-
     const isTool = gmToolsLinks.some(tool => tool.href === link.href);
 
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Link href={link.href} className="book-wrapper">
-                        <div
+                    <Link href={link.href} className="relative group">
+                       <div
                             className={cn(
-                                'book-nav-item',
-                                isTool && 'book-nav-item--tool',
-                                animationState !== 'off' && animationState,
-                                isActive && 'on'
+                                'relative w-14 h-16 transition-all duration-300 ease-in-out transform-gpu',
+                                'group-hover:-translate-y-1 group-hover:scale-105'
                             )}
-                            style={{ '--book-color-hue': link.colorHue } as React.CSSProperties}
                         >
-                            <div className="book-cover">
-                                <Icon className={cn('book-icon', (isActive || animationState !== 'off') && 'on')} />
+                            <div 
+                                className={cn(
+                                    'absolute inset-0 rounded-md rounded-l-lg transition-all duration-300',
+                                    'bg-gradient-to-br from-neutral-700 to-neutral-800',
+                                    'shadow-lg group-hover:shadow-2xl',
+                                    isActive && 'shadow-primary/50'
+                                )}
+                                style={{'--book-color-hue': `${link.colorHue}deg`} as React.CSSProperties}
+                            />
+                            
+                            {/* Book spine */}
+                            <div className={cn(
+                                'absolute top-0 left-0 h-full w-2 rounded-l-md bg-neutral-900',
+                                isActive ? 'bg-primary' : ''
+                            )} 
+                            style={{backgroundColor: isActive ? `hsl(${link.colorHue}, 90%, 60%)` : ''}}
+                            />
+                            
+                            {/* Icon on cover */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Icon className={cn(
+                                    'w-7 h-7 text-neutral-300/80 transition-all duration-300',
+                                    'group-hover:text-white group-hover:scale-110',
+                                    isActive && 'text-white drop-shadow-[0_0_5px_hsl(var(--primary))]'
+                                )} 
+                                style={{color: isActive ? `hsl(${link.colorHue}, 90%, 80%)` : ''}}
+                                />
                             </div>
+
+                             {/* Active glow */}
+                            {isActive && (
+                                <div 
+                                    className="absolute -inset-1 rounded-lg blur-md"
+                                    style={{backgroundColor: `hsl(${link.colorHue}, 90%, 70%)`, opacity: 0.3, zIndex: -1}}
+                                />
+                            )}
                         </div>
                     </Link>
                 </TooltipTrigger>
@@ -143,8 +124,8 @@ const ProfileLink = ({ link, isActive }: { link: typeof profileLink, isActive: b
             <Tooltip>
                 <TooltipTrigger asChild>
                     <Link href={link.href} className={cn(
-                        "flex items-center justify-center w-12 h-12 rounded-full transition-colors",
-                        isActive ? "ring-2 ring-primary" : ""
+                        "flex items-center justify-center w-12 h-12 rounded-full transition-all",
+                        isActive ? "ring-2 ring-primary scale-110" : "hover:scale-105"
                     )}>
                         <Icon />
                     </Link>
@@ -162,8 +143,12 @@ export function SidebarNav() {
     const pathname = usePathname();
 
     return (
-      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 bg-background border-r">
-          <nav className="flex flex-col items-center gap-2">
+      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 bg-background/50 backdrop-blur-sm border-r">
+          <Link href="/dashboard" className='px-4'>
+            <Icons.logo className="h-8 w-8 text-primary" />
+          </Link>
+          <Separator className='w-10' />
+          <nav className="flex flex-col items-center gap-4">
               {mainLinks.map(link => (
                   <Book 
                     key={link.href} 
@@ -171,8 +156,8 @@ export function SidebarNav() {
                     isActive={pathname.startsWith(link.href)} />
               ))}
           </nav>
-          <Separator className='my-2 w-8' />
-          <nav className="flex flex-col items-center gap-2">
+          <Separator className='my-2 w-10' />
+          <nav className="flex flex-col items-center gap-4">
               {gmToolsLinks.map(link => (
                   <Book 
                     key={link.href} 
