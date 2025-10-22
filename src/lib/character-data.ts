@@ -89,6 +89,14 @@ export type LanguageFamily = {
     dialects: string[];
 }
 
+export type SoulDomain = {
+    name: string;
+    level: number;
+    bonus: number;
+    color: string;
+    symbol: string;
+}
+
 export type Character = {
   name: string;
   concept: string;
@@ -133,7 +141,7 @@ export type Character = {
       flow: number;
       patron: number;
     };
-    domains: { name: string; level: number }[];
+    domains: SoulDomain[];
     cracks: number;
   };
   inventory: {
@@ -267,9 +275,9 @@ export const characterData: Character = {
   },
   spirit: {
     personality: [
-        { name: 'Coragem', value: 7 },
-        { name: 'Convicção', value: 8 },
-        { name: 'Compostura', value: 5 },
+        { name: 'Coragem', value: 2 },
+        { name: 'Convicção', value: 4 },
+        { name: 'Serenidade', value: 1 },
     ],
     alignment: [
       { name: 'Moral', value: 2, poles: ['Egoísmo', 'Altruísmo'] },
@@ -282,11 +290,11 @@ export const characterData: Character = {
       patron: 2,
     },
     domains: [
-      { name: 'Matéria', level: 2 },
-      { name: 'Mente', level: 1 },
-      { name: 'Espírito', level: 0 },
-      { name: 'Tempo', level: 0 },
-      { name: 'Espaço', level: 1 },
+      { name: 'Terra', level: 0, bonus: 1, color: '#22c55e', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12h20M12 2v20"/></svg>' },
+      { name: 'Fogo', level: 0, bonus: 1, color: '#ef4444', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>' },
+      { name: 'Anima', level: 1, bonus: 2, color: '#a855f7', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l3.09 6.31L22 9.31l-5.45 5.29L17.64 22 12 18.31 6.36 22l1.09-7.4L2 9.31l6.91-1L12 2z"/></svg>' },
+      { name: 'Ar', level: 0, bonus: 1, color: '#eab308', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22L2 2h20L12 22z"/></svg>' },
+      { name: 'Água', level: 0, bonus: 2, color: '#3b82f6', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22L2 12h20L12 22z"/></svg>' },
     ],
     cracks: 3,
   },

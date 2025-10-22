@@ -87,3 +87,50 @@
     display: none;
   }
 }
+
+@layer components {
+    .personality-table-container {
+        @apply border border-white/50 relative;
+    }
+    .personality-table-header {
+        @apply bg-black text-center font-bold tracking-widest py-1;
+        font-family: 'Metamorphous', serif;
+    }
+    .personality-table-body {
+        @apply grid grid-cols-3;
+    }
+    .personality-table-cell {
+        @apply text-center border-t border-r border-white/50 p-2;
+    }
+    .personality-table-cell:last-child {
+        @apply border-r-0;
+    }
+    .personality-table-cell .value {
+        @apply text-2xl font-bold;
+    }
+    .personality-table-cell .name {
+        @apply text-sm text-muted-foreground;
+    }
+    .personality-table-bonus {
+        @apply absolute -right-12 top-0 border border-dashed border-amber-400 text-amber-400 w-10 h-10 flex items-center justify-center font-bold;
+    }
+
+    .domain-card {
+      @apply relative w-16;
+    }
+    .domain-bonus {
+      @apply absolute -top-1 -right-1 w-6 h-6 flex items-center justify-center text-xs font-bold text-amber-400 border border-dashed border-amber-400 bg-background rounded-full;
+    }
+    .domain-content {
+      @apply w-16 h-24 bg-black border-2 border-amber-400 rounded-md flex flex-col items-center justify-around p-1;
+    }
+    .domain-name {
+      @apply text-sm font-bold;
+    }
+    .domain-value {
+      @apply text-lg font-bold text-white;
+    }
+    .domain-symbol svg {
+      @apply w-6 h-6;
+    }
+}

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useReducer } from 'react';
 import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -211,7 +210,6 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
         </div>
     );
 }
-
 
 const SoulCracks = ({ value }: { value: number }) => {
     return (
@@ -431,6 +429,21 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
     );
 }
 
+const DomainCard = ({ domain }: { domain: Character['soul']['domains'][0] }) => (
+    <div className='domain-card'>
+        <div className='domain-bonus'>
+            +{domain.bonus}
+        </div>
+        <div className='domain-content'>
+            <p className='domain-name' style={{ color: domain.color }}>{domain.name}</p>
+            <p className='domain-value'>{domain.level}</p>
+            <div className='domain-symbol' style={{ color: domain.color }}>
+                <div dangerouslySetInnerHTML={{ __html: domain.symbol }} />
+            </div>
+        </div>
+    </div>
+);
+
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
         const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
@@ -477,30 +490,13 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                            <div>
-                                <Label className="text-sm text-muted-foreground">Fluxo</Label>
-                                <p className="text-2xl font-bold text-foreground">{character.soul.anima.flow}</p>
-                            </div>
-                            <div>
-                                <Label className="text-sm text-muted-foreground">Patrono</Label>
-                                <p className="text-2xl font-bold text-foreground">{character.soul.anima.patron}</p>
-                            </div>
+                        <div className="flex justify-center items-center gap-2">
+                           {character.soul.domains.map(d => (
+                                <DomainCard key={d.name} domain={d} />
+                           ))}
                         </div>
                         <Separator/>
-                        <div className="space-y-2">
-                            <h3 className='font-semibold text-center text-muted-foreground'>Domínios</h3>
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                                {character.soul.domains.map(d => (
-                                    <div key={d.name} className="flex justify-between items-center">
-                                        <Label className='text-sm text-foreground/80'>{d.name}</Label>
-                                        <span className='font-mono font-bold text-primary'>{'●'.repeat(d.level)}{'○'.repeat(5-d.level)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <Separator/>
-                        <div className="space-y-3">
+                        <div className="space-y-3 pt-2">
                             <h3 className='font-semibold text-center text-muted-foreground'>Rachaduras</h3>
                             <div className="flex justify-center">
                                 <SoulCracks value={character.soul.cracks} />
@@ -512,29 +508,31 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="space-y-4">
-                            <h3 className='font-semibold text-center text-muted-foreground'>Personalidade</h3>
-                            {character.spirit.personality.map(p => (
-                                <div key={p.name} className="space-y-2">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <Label>{p.name}</Label>
-                                        <span className="font-mono text-foreground">{p.value}</span>
+                        <div className="personality-table-container">
+                            <div className='personality-table-header'>PERSONALIDADE</div>
+                            <div className='personality-table-body'>
+                                {character.spirit.personality.map(p => (
+                                    <div key={p.name} className='personality-table-cell'>
+                                        <div className='value'>{p.value}</div>
+                                        <div className='name'>{p.name}</div>
                                     </div>
-                                    <Slider defaultValue={[p.value]} max={10} step={1} />
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                            <div className='personality-table-bonus'>+2</div>
                         </div>
                         <Separator />
                         <div className="space-y-4">
                             <h3 className='font-semibold text-center text-muted-foreground'>Alinhamento</h3>
                             {character.spirit.alignment.map(a => (
-                                <div key={a.name} className="space-y-2">
-                                    <div className="flex justify-between items-center text-sm mb-1">
-                                        <span className='text-xs text-left text-muted-foreground'>{a.poles[0]}</span>
-                                        <Label className='text-sm'>{a.name}</Label>
-                                        <span className='text-xs text-right text-muted-foreground'>{a.poles[1]}</span>
-                                    </div>
-                                    <Slider defaultValue={[a.value]} min={-5} max={5} step={1} />
+                                <div key={a.name} className='flex flex-col items-center'>
+                                     <Label className='text-sm mb-1'>{a.name}</Label>
+                                     <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>{a.poles[0]}</span>
+                                        <span>{a.poles[1]}</span>
+                                     </div>
+                                     <div className='w-full h-2 bg-muted rounded-full overflow-hidden'>
+                                        <div className='h-full bg-primary' style={{ width: `${(a.value + 5) * 10}%`}}></div>
+                                     </div>
                                 </div>
                             ))}
                         </div>
