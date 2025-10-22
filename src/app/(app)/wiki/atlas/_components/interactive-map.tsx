@@ -91,17 +91,17 @@ export function InteractiveMap() {
     };
 
     useEffect(() => {
-        let canvas: FabricType.Canvas | null = null;
         let resizeObserver: ResizeObserver | null = null;
+        const parentElement = canvasRef.current?.parentElement;
 
         const initFabric = async () => {
             const { fabric } = await import('fabric');
             
-            if (!canvasRef.current) return;
+            if (!canvasRef.current || !parentElement) return;
 
-            canvas = new fabric.Canvas(canvasRef.current, {
-                width: canvasRef.current.parentElement?.clientWidth,
-                height: canvasRef.current.parentElement?.clientHeight,
+            const canvas = new fabric.Canvas(canvasRef.current, {
+                width: parentElement.clientWidth,
+                height: parentElement.clientHeight,
                 selection: false,
             });
             fabricRef.current = canvas;
@@ -145,25 +145,21 @@ export function InteractiveMap() {
                 console.error("Error loading map image:", error);
             }
 
-            if (canvasRef.current.parentElement) {
-                resizeObserver = new ResizeObserver(entries => {
-                    const { width, height } = entries[0].contentRect;
-                    canvas?.setDimensions({ width, height });
-                });
-                resizeObserver.observe(canvasRef.current.parentElement);
-            }
+            resizeObserver = new ResizeObserver(entries => {
+                const { width, height } = entries[0].contentRect;
+                fabricRef.current?.setDimensions({ width, height });
+            });
+            resizeObserver.observe(parentElement);
         };
 
         initFabric();
 
         return () => {
-            if (resizeObserver && canvasRef.current?.parentElement) {
-                resizeObserver.disconnect();
+            if (resizeObserver && parentElement) {
+                resizeObserver.unobserve(parentElement);
             }
-            if (fabricRef.current) {
-                fabricRef.current.dispose();
-                fabricRef.current = null;
-            }
+            fabricRef.current?.dispose();
+            fabricRef.current = null;
         };
     }, []);
 
@@ -331,3 +327,5 @@ export function InteractiveMap() {
         </div>
     );
 }
+
+    
