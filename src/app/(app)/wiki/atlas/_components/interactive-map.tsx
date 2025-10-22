@@ -142,8 +142,6 @@ export function InteractiveMap() {
                         });
                         canvas?.add(pin);
                     });
-                } else {
-                     console.error("Fabric.js failed to load the image from URL:", mapImage.imageUrl);
                 }
 
             } catch (error) {

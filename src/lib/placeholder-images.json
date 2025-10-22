@@ -39,7 +39,7 @@
     {
       "id": "world-map",
       "description": "A high-resolution fantasy world map for the Atlas.",
-      "imageUrl": "https://images.unsplash.com/photo-1677295922463-147d7f2f718c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwd29ybGQlMjBtYXB8ZW58MHx8fHwxNzYwOTczOTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmYW50YXN5JTIwd29ybGQlMjBtYXB8ZW58MHx8fHwxNzYxMTQ1NzAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "fantasy world map"
     }
   ]
