@@ -106,7 +106,7 @@ export function InteractiveMap() {
             });
             fabricRef.current = canvas;
             
-            if (!mapImage) {
+            if (!mapImage?.imageUrl) {
                 console.error("Map image not found in placeholder data.");
                 return;
             }
@@ -158,7 +158,7 @@ export function InteractiveMap() {
 
         return () => {
             if (resizeObserver && canvasRef.current?.parentElement) {
-                resizeObserver.unobserve(canvasRef.current.parentElement);
+                resizeObserver.disconnect();
             }
             if (fabricRef.current) {
                 fabricRef.current.dispose();
@@ -337,5 +337,3 @@ export function InteractiveMap() {
         </div>
     );
 }
-
-    
