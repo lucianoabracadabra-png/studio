@@ -84,6 +84,11 @@ export type BodyPartHealth = {
     states: HealthState[];
 };
 
+export type LanguageFamily = {
+    root: string;
+    dialects: string[];
+}
+
 export type Character = {
   name: string;
   concept: string;
@@ -98,7 +103,7 @@ export type Character = {
     idade: string;
     ideais: string;
     origem: string;
-    idioma: string;
+    idiomas: string[];
     experiencia: {
         atual: number;
         total: number;
@@ -142,6 +147,17 @@ export type Character = {
   };
 };
 
+export const languages: LanguageFamily[] = [
+    { root: 'Tantumá', dialects: ['Aztanak', 'Tupaguá', 'Mayantun', 'Anaské'] },
+    { root: 'Uhzdin', dialects: ['Voslank', 'Manzhufā', 'Han Gul', 'Ylavik'] },
+    { root: 'Eilen', dialects: ['Piogriessini', 'Battan', 'Semoari', 'Valius'] },
+    { root: 'Ma’isha', dialects: ['Meemiri', 'Ofoês', 'Igbalim', 'Bagi'] },
+    { root: 'Kamarin', dialects: ['Rakai', 'Mairake', 'Huo-ni'] },
+    { root: 'Botokata', dialects: ['Tokamey', 'Bomatan', 'Akobo'] },
+    { root: 'Dongalin', dialects: ['Kahakaka', 'Ogoron'] }
+];
+
+
 export const characterData: Character = {
   name: 'Dahl Maasen',
   concept: 'Guerreiro tribal das florestas do norte',
@@ -156,7 +172,7 @@ export const characterData: Character = {
     idade: '29 anos',
     ideais: 'Família, conhecimento e liberdade',
     origem: 'Commonare da floresta',
-    idioma: 'Tupi, Geral, Anão',
+    idiomas: ['Tantumá', 'Tupaguá', 'Uhzdin', 'Manzhufā'],
     experiencia: {
         atual: 0,
         total: 369

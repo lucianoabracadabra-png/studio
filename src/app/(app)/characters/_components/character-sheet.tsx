@@ -541,7 +541,7 @@ export function CharacterSheet() {
         <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 animate-in fade-in-up">
             <div className='grid grid-cols-1 xl:grid-cols-3 gap-6'>
                 <div className='xl:col-span-1'>
-                    <InfoPanel characterInfo={character.info} name={character.name} />
+                    <InfoPanel character={character} />
                 </div>
                 <div className="xl:col-span-2 space-y-6">
                     <section>

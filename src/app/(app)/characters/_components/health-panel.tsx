@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Plus, Minus, X, Asterisk } from 'lucide-react';
+import { Heart, Plus, Minus, X, Asterisk, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Character, BodyPartHealth, HealthState } from '@/lib/character-data';
 
@@ -11,9 +11,11 @@ const healthStateOrder: HealthState[] = ['clean', 'simple', 'lethal', 'aggravate
 
 const getNextHealthState = (currentState: HealthState): HealthState => {
     const currentIndex = healthStateOrder.indexOf(currentState);
-    const nextIndex = (currentIndex + 1) % healthStateOrder.length;
-    return healthStateOrder[nextIndex];
+    if (currentIndex === -1) return 'simple'; // Default to simple if state is unknown
+    if (currentIndex === healthStateOrder.length - 1) return 'clean'; // Cycle back to clean
+    return healthStateOrder[currentIndex + 1];
 };
+
 
 const BodyPartIcon = ({ part }: { part: 'head' | 'torso' | 'arm' | 'leg' | string }) => {
     const abstractIcons = {
@@ -46,16 +48,16 @@ const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, pa
     };
 
     const stateStyles = {
-        clean: 'bg-green-500',
-        simple: 'bg-blue-500',
-        lethal: 'bg-orange-500',
-        aggravated: 'bg-red-500',
+        clean: 'bg-green-500/50 border-green-500/80',
+        simple: 'bg-blue-500/80 border-blue-400',
+        lethal: 'bg-yellow-500/80 border-yellow-400',
+        aggravated: 'bg-red-500/80 border-red-400',
     };
     
     const stateIcons = {
-        simple: <div className="w-full h-1 bg-black/50" />,
-        lethal: <X className="w-2 h-2 text-black/80" strokeWidth={5} />,
-        aggravated: <Asterisk className="w-2 h-2 text-black/80" strokeWidth={4}/>
+        simple: <div className="w-full h-1/3 bg-black/50" />,
+        lethal: <X className="w-2/3 h-2/3 text-black/80" strokeWidth={5} />,
+        aggravated: <Asterisk className="w-2/3 h-2/3 text-black/80" strokeWidth={4}/>
     }
 
     return (
@@ -65,11 +67,11 @@ const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, pa
                     key={i} 
                     className={cn(
                         "health-box",
-                        state !== 'clean' ? stateStyles[state] : 'bg-gray-400 dark:bg-black/50',
+                        stateStyles[state],
                     )}
                     onClick={() => handleClick(i)}
                 >
-                    <div className={cn("health-box-inner", state === 'clean' ? stateStyles[state] : 'bg-transparent', 'flex items-center justify-center')}>
+                    <div className={cn("health-box-inner flex items-center justify-center")}>
                         {state !== 'clean' && stateIcons[state as keyof typeof stateIcons]}
                     </div>
                 </div>
@@ -89,7 +91,7 @@ const BodyPartDisplay = ({ part, onHealthChange, partId }: { part: BodyPartHealt
              {partId === 'head' && (
                 <div className="head-wounds">
                     <div className="head-wound-box blue"></div>
-                    <div className="head-wound-box orange"></div>
+                    <div className="head-wound-box yellow"></div>
                     <div className="head-wound-box red"></div>
                 </div>
             )}
@@ -103,42 +105,10 @@ type HealthPanelProps = {
 };
 
 export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
-    
-    const calculateDamage = () => {
-        let simple = 0;
-        let lethal = 0;
-        let aggravated = 0;
-        Object.values(healthData.bodyParts).forEach(part => {
-            part.states.forEach(state => {
-                if (state === 'simple') simple++;
-                if (state === 'lethal') lethal++;
-                if (state === 'aggravated') aggravated++;
-            });
-        });
-        return { simple, lethal, aggravated };
-    };
-
-    const damage = calculateDamage();
 
     return (
         <Card className="glassmorphic-card">
-            <CardHeader className='p-2 bg-yellow-600/10 border-b-2 border-yellow-400/50 rounded-t-lg'>
-                <div className='flex items-center justify-around h-8'>
-                     <div className='text-center'>
-                        <p className='text-xs font-bold text-white/70'>Simples</p>
-                        <p className='font-mono text-white text-lg'>{damage.simple}</p>
-                    </div>
-                    <div className='text-center'>
-                        <p className='text-xs font-bold text-white/70'>Letal</p>
-                        <p className='font-mono text-white text-lg'>{damage.lethal}</p>
-                    </div>
-                     <div className='text-center'>
-                        <p className='text-xs font-bold text-white/70'>Agravado</p>
-                        <p className='font-mono text-white text-lg'>{damage.aggravated}</p>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="p-4 bg-gray-300 dark:bg-gray-700/50">
+            <CardContent className="p-4 bg-gray-300 dark:bg-gray-700/50 rounded-lg">
                 <div className="health-diagram">
                     <BodyPartDisplay part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
                     <BodyPartDisplay part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" />
