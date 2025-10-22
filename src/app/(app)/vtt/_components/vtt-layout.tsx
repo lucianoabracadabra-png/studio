@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { MapCanvas } from './map-canvas';
-import { VttSidebar } from './vtt-sidebar';
+import { VttToolbar } from './vtt-toolbar';
 import { ToolPanelContainer } from './tool-panel-container';
 import type { PanInfo } from 'framer-motion';
 import type { Shape, DraftShape } from './drawing-layer';
@@ -151,7 +151,7 @@ export function VttLayout() {
 
   return (
     <div className="w-full h-full bg-black relative">
-      <VttSidebar activeTool={activeToolPanel} onToolToggle={handleToolToggle} />
+      <VttToolbar activeTool={activeToolPanel} onToolToggle={handleToolToggle} />
       
       <ToolPanelContainer 
         activeTool={activeToolPanel} 

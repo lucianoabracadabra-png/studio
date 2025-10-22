@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,8 +6,7 @@ import { Users, PenTool, Cloud, Layers, Swords, Settings, LucideIcon, Hand } fro
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-
-export type VttTool = 'tokens' | 'drawing' | 'fog' | 'layers' | 'combat' | 'settings' | 'pan';
+import type { VttTool } from './vtt-layout';
 
 interface VttToolbarProps {
     activeTool: VttTool | null;
