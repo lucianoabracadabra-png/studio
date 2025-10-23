@@ -498,18 +498,26 @@ export function CharacterSheet() {
                                 <TooltipProvider key={d.name}>
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <Book
-                                                icon={d.icon}
-                                                colorHsl={d.color}
-                                                isClickable={false}
-                                                showLabel={false}
-                                                label={d.name}
-                                                isActive={d.level > 0}
-                                            />
+                                            <div className="relative">
+                                                <Book
+                                                    icon={d.icon}
+                                                    colorHsl={d.color}
+                                                    isClickable={false}
+                                                    showLabel={false}
+                                                    label={d.name}
+                                                    isActive={d.level > 0}
+                                                />
+                                                {d.level > 0 && (
+                                                    <div className="absolute top-0 left-0 w-full h-full flex items-start justify-start pointer-events-none">
+                                                        <span className="text-xs font-bold text-white bg-black/50 rounded-full px-1.5 py-0.5 leading-none" style={{transform: 'translate(2px, 2px)'}}>
+                                                            {d.level}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p className='font-bold'>{d.name}</p>
-                                            <p>Nível: {d.level}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
