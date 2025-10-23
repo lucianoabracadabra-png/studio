@@ -5,7 +5,7 @@ import { characterData as initialCharacterData, Character, Armor, Weapon, Access
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus, MoveUpRight, ThumbsUp } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -19,14 +19,14 @@ import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
 
 const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any> }) => {
-    const pilar = title.toLowerCase() as 'físico' | 'mental' | 'social';
+    const pilarKey = title.toLowerCase() as 'físico' | 'mental' | 'social';
     
     const handleDecrement = () => {
-        dispatch({ type: 'DECREMENT_SPENT', pilar });
+        dispatch({ type: 'DECREMENT_SPENT', pilar: pilarKey });
     };
     
     const handleIncrement = () => {
-        dispatch({ type: 'INCREMENT_SPENT', pilar });
+        dispatch({ type: 'INCREMENT_SPENT', pilar: pilarKey });
     };
 
     return (
@@ -59,33 +59,24 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
 type AttributeItemProps = {
     name: string;
     level: number;
-    pilar: 'fisico' | 'mental' | 'social';
-    onLevelChange: (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => void;
+    pilar: 'físico' | 'mental' | 'social';
+    onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void;
 };
 
 const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps) => {
     return (
-        <div className="flex justify-between items-center">
-            <div className='flex items-center gap-2'>
-                <span className='font-bold text-lg w-5 text-center text-primary'>
-                    {level}
-                </span>
-                <span className="text-foreground">{name}</span>
-            </div>
-            <div className="flex items-center gap-1">
-                {[...Array(15)].map((_, i) => (
-                    <button
-                        key={i}
-                        className={cn('w-2 h-2 rounded-full cursor-pointer transition-all', i < level ? 'bg-primary' : 'bg-muted')}
-                        onClick={() => onLevelChange(pilar, name, i + 1)}
-                    />
-                ))}
+        <div className="flex justify-between items-center py-1">
+            <span className="text-foreground">{name}</span>
+            <div className="flex items-center gap-2">
+                <Button variant='outline' size='icon' className='h-6 w-6' onClick={() => onLevelChange(pilar, name, level - 1)}><Minus className='h-4 w-4'/></Button>
+                <span className='font-bold text-lg w-6 text-center text-primary'>{level}</span>
+                <Button variant='outline' size='icon' className='h-6 w-6' onClick={() => onLevelChange(pilar, name, level + 1)}><Plus className='h-4 w-4'/></Button>
             </div>
         </div>
     );
 };
 
-const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social' }) => {
+const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social' }) => {
     const [level, setLevel] = useState(initialValue);
     
     const handleDotClick = (newLevel: number) => {
@@ -117,7 +108,7 @@ type FocusPilarState = {
 };
 
 type FocusState = {
-    physical: FocusPilarState;
+    fisico: FocusPilarState;
     mental: FocusPilarState;
     social: FocusPilarState;
 };
@@ -132,13 +123,19 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
   switch (action.type) {
     case 'SET_ATTRIBUTE': {
       const { pilar, payload } = action;
+      const currentAttributes = state[pilar].attributes;
+      const oldLevel = currentAttributes[payload.name];
+      const newLevel = Math.max(0, Math.min(15, payload.level));
+
+      if (newLevel === oldLevel) return state;
+
       return {
         ...state,
         [pilar]: {
           ...state[pilar],
           attributes: {
             ...state[pilar].attributes,
-            [payload.name]: payload.level,
+            [payload.name]: newLevel,
           },
         },
       };
@@ -172,18 +169,17 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
 const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: { 
     focusData: any, 
     title: string, 
-    pilar: 'fisico' | 'mental' | 'social', 
+    pilar: 'físico' | 'mental' | 'social', 
     icon: React.ElementType,
     state: FocusPilarState,
     dispatch: React.Dispatch<FocusAction>
 }) => {
-    const handleAttributeChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
+    const handleAttributeChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
         dispatch({ type: 'SET_ATTRIBUTE', pilar, payload: { name, level: newLevel } });
     };
 
-    const pilarKey = pilar === 'fisico' ? 'physical' : pilar;
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
-    const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
+    const modularSkillsTitle = pilar === 'físico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
 
     const resource = focusData.vigor || focusData.focus || focusData.grace;
     
@@ -209,7 +205,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                     <CardHeader>
                         <CardTitle className='text-base'>Atributos</CardTitle>
                     </CardHeader>
-                    <CardContent className='space-y-2'>
+                    <CardContent className='space-y-2 divide-y divide-border'>
                         {focusData.attributes.map((attr: {name: string, value: number}) => (
                             <AttributeItem 
                                 key={attr.name} 
@@ -366,19 +362,17 @@ const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, ty
     };
 
     return (
-        <Button
-            variant="outline"
-            className={cn(
-                "w-full justify-start h-auto p-3",
-                isOpen && "bg-primary/20 border-primary/50"
-            )}
+        <Card 
+            className={cn("cursor-pointer transition-all hover:shadow-lg", isOpen && "border-primary shadow-lg")}
             onClick={handleOpen}
         >
-            <div className="flex items-center gap-3">
-                <span className={cn("text-accent", isOpen && "text-primary")}>{iconMap[type]}</span>
-                <p className="text-base font-semibold text-foreground">{item.name}</p>
-            </div>
-        </Button>
+            <CardContent className="p-3">
+                <div className="flex items-center gap-3">
+                    <span className={cn("text-accent", isOpen && "text-primary")}>{iconMap[type]}</span>
+                    <p className="text-base font-semibold text-foreground">{item.name}</p>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 
@@ -427,14 +421,39 @@ const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) =
     );
 }
 
+const InventoryItemCard = ({ item, isEquippable }: { item: any; isEquippable: boolean }) => {
+    return (
+        <Card>
+            <CardContent className="p-3 flex items-center justify-between">
+                <div>
+                    <p className="font-semibold">{item.name}</p>
+                    <p className="text-sm text-muted-foreground">{item.type} {item.quantity > 1 && `(x${item.quantity})`}</p>
+                </div>
+                {isEquippable ? (
+                    <Button variant="outline" size="sm">
+                        <MoveUpRight className="mr-2 h-4 w-4" />
+                        Equipar
+                    </Button>
+                ) : (
+                    <div className='text-right'>
+                        <p className='font-mono text-sm'>{item.weight.toFixed(2)}kg</p>
+                        <p className='text-xs text-muted-foreground'>Total: {(item.weight * item.quantity).toFixed(2)}kg</p>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
+
 const InventorySection = ({ equipment, inventory }: { equipment: Character['equipment'], inventory: Character['inventory'] }) => {
     
     const unequippedItems = [
-        ...equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Armadura'})),
-        ...equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Arma'})),
-        ...equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Acessório'})),
-        ...equipment.projectiles.map(i => ({...i, type: 'Projétil'})),
-        ...inventory.bag.map(i => ({...i, type: 'Item'})),
+        ...equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Armadura', equippable: true})),
+        ...equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Arma', equippable: true})),
+        ...equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Acessório', equippable: true})),
+        ...equipment.projectiles.map(i => ({...i, type: 'Projétil', equippable: false})),
+        ...inventory.bag.map(i => ({...i, type: 'Item', equippable: false})),
     ];
     
     const totalWeight = unequippedItems.reduce((acc, item) => acc + (item.weight * item.quantity), 0);
@@ -447,27 +466,10 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
                     <p className="font-mono text-muted-foreground flex items-center gap-2 text-sm"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
                 </div>
             </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nome</TableHead>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead className='text-center'>Qtd</TableHead>
-                            <TableHead className='text-right'>Peso</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {unequippedItems.map(item => (
-                            <TableRow key={item.name}>
-                                <TableCell className="font-medium text-foreground">{item.name}</TableCell>
-                                <TableCell className="text-muted-foreground">{item.type}</TableCell>
-                                <TableCell className='text-center text-foreground'>{item.quantity}</TableCell>
-                                <TableCell className='text-right font-mono text-foreground'>{(item.weight * item.quantity).toFixed(2)}kg</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                 {unequippedItems.map(item => (
+                    <InventoryItemCard key={item.name} item={item} isEquippable={item.equippable} />
+                ))}
             </CardContent>
         </Card>
     );
@@ -486,7 +488,7 @@ export function CharacterSheet() {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
 
     const initialFocusState: FocusState = {
-        physical: {
+        fisico: {
             attributes: character.focus.physical.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
             spentPoints: 0,
         },
@@ -632,7 +634,7 @@ export function CharacterSheet() {
                             <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.physical} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='físico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
                             <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
