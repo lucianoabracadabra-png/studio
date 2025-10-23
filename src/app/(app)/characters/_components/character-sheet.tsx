@@ -19,6 +19,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+
 
 const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'fisico' | 'mental' | 'social' }) => {
     
@@ -379,16 +381,16 @@ const iconMapInventory = {
     'Item': <Info />
 };
 
+const getItemType = (item: any): keyof typeof iconMapInventory => {
+    if ('slashing' in item) return 'Armadura';
+    if ('swing' in item || 'thrust' in item) return 'Arma';
+    if ('typeAndDescription' in item) return 'Acessório';
+    if ('ap' in item && 'accuracy' in item) return 'Projétil';
+    return 'Item';
+}
+
 const InventoryItemCard = ({ item }: { item: any }) => {
     const { openItem, isItemOpen } = useMovableWindow();
-
-    const getItemType = (item: any): keyof typeof iconMapInventory => {
-        if ('slashing' in item) return 'Armadura';
-        if ('swing' in item || 'thrust' in item) return 'Arma';
-        if ('typeAndDescription' in item) return 'Acessório';
-        if ('ap' in item && 'accuracy' in item) return 'Projétil';
-        return 'Item';
-    }
 
     const type = getItemType(item);
     const isOpen = isItemOpen(item.name);
@@ -406,7 +408,7 @@ const InventoryItemCard = ({ item }: { item: any }) => {
     
     return (
         <Card 
-            className={cn("cursor-pointer transition-all hover:shadow-md", isOpen && "border-primary shadow-lg", !item.equippable && "cursor-default hover:shadow-none")}
+            className={cn("transition-all", !item.equippable ? "cursor-default" : "cursor-grab hover:shadow-md", isOpen && "border-primary shadow-lg" )}
             onClick={item.equippable ? handleOpen : undefined}
         >
             <CardContent className="p-3 flex items-center justify-between">
@@ -420,12 +422,7 @@ const InventoryItemCard = ({ item }: { item: any }) => {
                     </div>
                 </div>
 
-                {item.equippable && !item.equipped ? (
-                    <Button variant="outline" size="sm">
-                        <MoveUpRight className="mr-2 h-4 w-4" />
-                        Equipar
-                    </Button>
-                ) : !item.equippable && (
+                {!item.equippable && (
                     <div className='text-right'>
                         <p className='font-mono text-sm'>{item.weight.toFixed(2)}kg</p>
                         <p className='text-xs text-muted-foreground'>Total: {(item.weight * item.quantity).toFixed(2)}kg</p>
@@ -437,21 +434,19 @@ const InventoryItemCard = ({ item }: { item: any }) => {
 };
 
 
-const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) => {
+const EquippedSection = ({ items }: { items: any[] }) => {
     const { openAllEquipped } = useMovableWindow();
-
-    const equippedItems = [
-        ...equipment.armors.filter(i => i.equipped),
-        ...equipment.weapons.filter(i => i.equipped),
-        ...equipment.accessories.filter(i => i.equipped),
-    ];
-
+    
     const handleOpenAll = () => {
-        const allEquippedItems = [
-            ...equipment.armors.filter(i => i.equipped).map(item => ({ id: item.name, title: item.name, content: <ArmorCardDetails armor={item} /> })),
-            ...equipment.weapons.filter(i => i.equipped).map(item => ({ id: item.name, title: item.name, content: <WeaponCardDetails weapon={item} /> })),
-            ...equipment.accessories.filter(i => i.equipped).map(item => ({ id: item.name, title: item.name, content: <AccessoryCardDetails accessory={item} /> })),
-        ];
+        const allEquippedItems = items.map(item => {
+            let content;
+            const type = getItemType(item);
+            if (type === 'Armadura') content = <ArmorCardDetails armor={item as Armor} />;
+            else if (type === 'Arma') content = <WeaponCardDetails weapon={item as Weapon} />;
+            else if (type === 'Acessório') content = <AccessoryCardDetails accessory={item as Accessory} />;
+            else return null;
+            return { id: item.name, title: item.name, content };
+        }).filter(Boolean) as { id: string; title: string; content: React.ReactNode; }[];
         openAllEquipped(allEquippedItems);
     };
 
@@ -466,24 +461,40 @@ const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) =
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                 {equippedItems.length > 0 ? equippedItems.map(item => <InventoryItemCard key={item.name} item={item} />) : <p className="text-xs text-center text-muted-foreground col-span-3 py-4">Nenhum item equipado.</p>}
-            </CardContent>
+            <Droppable droppableId="equipped">
+                {(provided, snapshot) => (
+                    <CardContent 
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg", snapshot.isDraggingOver && "bg-primary/10")}
+                    >
+                         {items.length > 0 ? items.map((item, index) => (
+                            <Draggable key={item.name} draggableId={item.name} index={index}>
+                                {(provided, snapshot) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        style={{...provided.draggableProps.style}}
+                                        className={cn(snapshot.isDragging && "shadow-xl")}
+                                    >
+                                        <InventoryItemCard item={{...item, equippable: true}} />
+                                    </div>
+                                )}
+                            </Draggable>
+                         )) : (
+                            !snapshot.isDraggingOver && <p className="text-xs text-center text-muted-foreground col-span-3 py-4">Nenhum item equipado. Arraste itens do inventário para cá.</p>
+                         )}
+                         {provided.placeholder}
+                    </CardContent>
+                )}
+            </Droppable>
         </Card>
     );
 }
 
-const InventorySection = ({ equipment, inventory }: { equipment: Character['equipment'], inventory: Character['inventory'] }) => {
-    
-    const unequippedItems = [
-        ...equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
-        ...equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
-        ...equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
-        ...equipment.projectiles.map(i => ({...i, equippable: false})),
-        ...inventory.bag.map(i => ({...i, equippable: false})),
-    ];
-    
-    const totalWeight = unequippedItems.reduce((acc, item) => acc + (item.weight * (item.quantity || 1)), 0);
+const InventorySection = ({ items }: { items: any[] }) => {
+    const totalWeight = items.reduce((acc, item) => acc + (item.weight * (item.quantity || 1)), 0);
 
     return (
         <Card>
@@ -493,11 +504,32 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
                     <p className="font-mono text-muted-foreground flex items-center gap-2 text-sm"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
                 </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                 {unequippedItems.map(item => (
-                    <InventoryItemCard key={item.name} item={item} />
-                ))}
-            </CardContent>
+            <Droppable droppableId="inventory">
+                {(provided, snapshot) => (
+                     <CardContent 
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg", snapshot.isDraggingOver && "bg-primary/10")}
+                    >
+                         {items.map((item, index) => (
+                            <Draggable key={item.name} draggableId={item.name} index={index} isDragDisabled={!item.equippable}>
+                                {(provided, snapshot) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        style={{...provided.draggableProps.style}}
+                                        className={cn(snapshot.isDragging && "shadow-xl")}
+                                    >
+                                        <InventoryItemCard item={item} />
+                                    </div>
+                                )}
+                             </Draggable>
+                        ))}
+                        {provided.placeholder}
+                    </CardContent>
+                )}
+            </Droppable>
         </Card>
     );
 }
@@ -568,11 +600,52 @@ export function CharacterSheet() {
         })
     }
     
-    const spiritBooks = [
-        ...character.spirit.personality,
-        character.soul.anima.fluxo,
-        character.soul.anima.patrono
+    const handleDragEnd = (result: DropResult) => {
+        const { source, destination, draggableId } = result;
+        
+        if (!destination || (source.droppableId === destination.droppableId)) {
+            return;
+        }
+
+        const itemType = getItemType(character.equipment.armors.find(i => i.name === draggableId) || character.equipment.weapons.find(i => i.name === draggableId) || character.equipment.accessories.find(i => i.name === draggableId));
+        
+        let itemCategory: 'armors' | 'weapons' | 'accessories';
+        switch(itemType) {
+            case 'Armadura': itemCategory = 'armors'; break;
+            case 'Arma': itemCategory = 'weapons'; break;
+            case 'Acessório': itemCategory = 'accessories'; break;
+            default: return;
+        }
+
+        setCharacter(prev => {
+            const newCharacter = { ...prev };
+            const items = [...newCharacter.equipment[itemCategory]];
+            const itemIndex = items.findIndex(item => item.name === draggableId);
+
+            if (itemIndex === -1) return prev;
+            
+            const newEquippedState = destination.droppableId === 'equipped';
+            items[itemIndex] = { ...items[itemIndex], equipped: newEquippedState };
+            
+            newCharacter.equipment[itemCategory] = items as any;
+            return newCharacter;
+        });
+    };
+
+    const equippedItems = [
+        ...character.equipment.armors.filter(i => i.equipped),
+        ...character.equipment.weapons.filter(i => i.equipped),
+        ...character.equipment.accessories.filter(i => i.equipped),
     ];
+
+    const unequippedItems = [
+        ...character.equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
+        ...character.equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
+        ...character.equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
+        ...character.equipment.projectiles.map(i => ({...i, equippable: false})),
+        ...character.inventory.bag.map(i => ({...i, equippable: false})),
+    ];
+    
 
     return (
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
@@ -733,8 +806,10 @@ export function CharacterSheet() {
                 </CardContent>
             </Card>
              
-            <EquippedSection equipment={character.equipment} />
-            <InventorySection equipment={character.equipment} inventory={character.inventory} />
+            <DragDropContext onDragEnd={handleDragEnd}>
+                <EquippedSection items={equippedItems} />
+                <InventorySection items={unequippedItems} />
+            </DragDropContext>
         </div>
     );
 }
