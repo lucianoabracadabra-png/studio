@@ -1,3 +1,7 @@
+import type { LucideIcon } from "lucide-react";
+import { Droplets, Wind, Star, Flame, Mountain } from 'lucide-react';
+
+
 export type BagItem = {
   name: string;
   quantity: number;
@@ -93,7 +97,7 @@ export type SoulDomain = {
     name: string;
     level: number;
     color: string;
-    symbol: string;
+    icon: LucideIcon;
 }
 
 export type AlignmentAxis = {
@@ -318,11 +322,11 @@ export const characterData: Character = {
       },
     },
     domains: [
-      { name: 'Água', level: 0, color: '#3b82f6', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22L2 12h20L12 22z"/></svg>' },
-      { name: 'Ar', level: 0, color: '#eab308', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22L2 2h20L12 22z"/></svg>' },
-      { name: 'Anima', level: 1, color: '#a855f7', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l3.09 6.31L22 9.31l-5.45 5.29L17.64 22 12 18.31 6.36 22l1.09-7.4L2 9.31l6.91-1L12 2z"/></svg>' },
-      { name: 'Fogo', level: 0, color: '#ef4444', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>' },
-      { name: 'Terra', level: 0, color: '#22c55e', symbol: '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M2 12h20M12 2v20"/></svg>' },
+      { name: 'Água', level: 0, color: '198 93% 60%', icon: Droplets },
+      { name: 'Ar', level: 0, color: '45 93% 60%', icon: Wind },
+      { name: 'Anima', level: 1, color: '265 90% 70%', icon: Star },
+      { name: 'Fogo', level: 0, color: '0 90% 70%', icon: Flame },
+      { name: 'Terra', level: 0, color: '30 90% 60%', icon: Mountain },
     ],
     cracks: 3,
   },

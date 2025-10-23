@@ -16,6 +16,7 @@ import { HealthPanel } from './health-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
+import { Book } from '@/components/layout/book';
 
 const FocusHeaderCard = ({ title, icon, resource, spentPoints }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }, spentPoints: number }) => (
     <Card>
@@ -430,17 +431,6 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
     );
 }
 
-const DomainCard = ({ domain }: { domain: Character['soul']['domains'][0] }) => (
-    <div className='domain-card'>
-        <div className='domain-content'>
-            <p className='domain-name' style={{ color: domain.color }}>{domain.name}</p>
-            <p className='domain-value'>{domain.level}</p>
-            <div className='domain-symbol' style={{ color: domain.color }}>
-                <div dangerouslySetInnerHTML={{ __html: domain.symbol }} />
-            </div>
-        </div>
-    </div>
-);
 
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
@@ -505,7 +495,24 @@ export function CharacterSheet() {
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-center gap-2">
                            {character.soul.domains.map(d => (
-                                <DomainCard key={d.name} domain={d} />
+                                <TooltipProvider key={d.name}>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <Book
+                                                icon={d.icon}
+                                                colorHsl={d.color}
+                                                isClickable={false}
+                                                showLabel={false}
+                                                label={d.name}
+                                                isActive={d.level > 0}
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className='font-bold'>{d.name}</p>
+                                            <p>Nível: {d.level}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                            ))}
                         </div>
                         <Separator/>
