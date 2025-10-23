@@ -19,7 +19,7 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
 
     const bookContent = (
         <motion.div 
-            className="relative w-14 h-14 rounded-md overflow-hidden"
+            className="relative w-14 h-14 rounded-md overflow-hidden group/book"
             whileHover={isClickable ? "hover" : "inactive"}
             animate={isActive ? "active" : "inactive"}
             onClick={onClick}
@@ -83,7 +83,7 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div className="relative group/book cursor-pointer">
+                    <div className={cn("relative cursor-pointer", isClickable && "group/book")}>
                         {bookContent}
                     </div>
                 </TooltipTrigger>
