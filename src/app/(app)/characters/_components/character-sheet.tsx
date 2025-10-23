@@ -5,7 +5,7 @@ import { characterData as initialCharacterData, Character, Armor, Weapon, Access
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus, MoveUpRight, ThumbsUp } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus, MoveUpRight, ThumbsUp, Head } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -56,34 +56,11 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     );
 };
 
-type AttributeItemProps = {
-    name: string;
-    level: number;
-    pilar: 'físico' | 'mental' | 'social';
-    onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void;
-};
-
-const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps) => {
-    return (
-        <div className="flex justify-between items-center py-1">
-            <span className="text-foreground">{name}</span>
-            <div className="flex items-center gap-2">
-                <Button variant='outline' size='icon' className='h-6 w-6' onClick={() => onLevelChange(pilar, name, level - 1)}><Minus className='h-4 w-4'/></Button>
-                <span className='font-bold text-lg w-6 text-center text-primary'>{level}</span>
-                <Button variant='outline' size='icon' className='h-6 w-6' onClick={() => onLevelChange(pilar, name, level + 1)}><Plus className='h-4 w-4'/></Button>
-            </div>
-        </div>
-    );
-};
-
-const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social' }) => {
-    const [level, setLevel] = useState(initialValue);
+const SkillItem = ({ name, initialValue, pilar, onLevelChange }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social', onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
     
     const handleDotClick = (newLevel: number) => {
-        setLevel(currentLevel => {
-            const finalLevel = newLevel === currentLevel ? newLevel - 1 : newLevel;
-            return Math.max(0, finalLevel);
-        });
+        const finalLevel = newLevel === initialValue ? newLevel - 1 : newLevel;
+        onLevelChange(pilar, name, Math.max(0, finalLevel));
     };
 
     return (
@@ -93,7 +70,7 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
                 {[...Array(7)].map((_, i) => (
                     <button
                         key={i}
-                        className={cn('w-3 h-3 bg-muted cursor-pointer transition-all rounded-sm transform rotate-45', { 'bg-primary': i < level })}
+                        className={cn('w-3 h-3 bg-muted cursor-pointer transition-all rounded-sm transform rotate-45', { 'bg-primary': i < initialValue })}
                         onClick={() => handleDotClick(i + 1)}
                     />
                 ))}
@@ -104,6 +81,8 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
 
 type FocusPilarState = {
   attributes: { [key: string]: number };
+  skills: { [key: string]: number };
+  modular: { [key: string]: number };
   spentPoints: number;
 };
 
@@ -115,49 +94,55 @@ type FocusState = {
 
 type FocusAction =
   | { type: 'SET_ATTRIBUTE'; pilar: keyof FocusState; payload: { name: string; level: number } }
+  | { type: 'SET_SKILL'; pilar: keyof FocusState; payload: { name: string; level: number } }
+  | { type: 'SET_MODULAR'; pilar: keyof FocusState; payload: { name: string; level: number } }
   | { type: 'INCREMENT_SPENT'; pilar: keyof FocusState }
   | { type: 'DECREMENT_SPENT'; pilar: keyof FocusState };
 
 
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
+  const { pilar } = action;
   switch (action.type) {
     case 'SET_ATTRIBUTE': {
-      const { pilar, payload } = action;
-      const currentAttributes = state[pilar].attributes;
-      const oldLevel = currentAttributes[payload.name];
-      const newLevel = Math.max(0, Math.min(15, payload.level));
-
-      if (newLevel === oldLevel) return state;
-
-      return {
-        ...state,
-        [pilar]: {
-          ...state[pilar],
-          attributes: {
-            ...state[pilar].attributes,
-            [payload.name]: newLevel,
-          },
-        },
-      };
+        const { payload } = action;
+        return {
+            ...state,
+            [pilar]: {
+                ...state[pilar],
+                attributes: { ...state[pilar].attributes, [payload.name]: payload.level },
+            },
+        };
+    }
+    case 'SET_SKILL': {
+        const { payload } = action;
+        return {
+            ...state,
+            [pilar]: {
+                ...state[pilar],
+                skills: { ...state[pilar].skills, [payload.name]: payload.level },
+            },
+        };
+    }
+    case 'SET_MODULAR': {
+        const { payload } = action;
+        return {
+            ...state,
+            [pilar]: {
+                ...state[pilar],
+                modular: { ...state[pilar].modular, [payload.name]: payload.level },
+            },
+        };
     }
     case 'INCREMENT_SPENT': {
-      const { pilar } = action;
       return {
         ...state,
-        [pilar]: {
-          ...state[pilar],
-          spentPoints: state[pilar].spentPoints + 1,
-        },
+        [pilar]: { ...state[pilar], spentPoints: state[pilar].spentPoints + 1 },
       };
     }
     case 'DECREMENT_SPENT': {
-      const { pilar } = action;
       return {
         ...state,
-        [pilar]: {
-          ...state[pilar],
-          spentPoints: Math.max(0, state[pilar].spentPoints - 1),
-        },
+        [pilar]: { ...state[pilar], spentPoints: Math.max(0, state[pilar].spentPoints - 1) },
       };
     }
     default:
@@ -176,6 +161,14 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
 }) => {
     const handleAttributeChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
         dispatch({ type: 'SET_ATTRIBUTE', pilar, payload: { name, level: newLevel } });
+    };
+    
+    const handleSkillChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
+        dispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
+    };
+
+    const handleModularChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
+        dispatch({ type: 'SET_MODULAR', pilar, payload: { name, level: newLevel } });
     };
 
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
@@ -206,14 +199,14 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                         <CardTitle className='text-base'>Atributos</CardTitle>
                     </CardHeader>
                     <CardContent className='space-y-2 divide-y divide-border'>
-                        {focusData.attributes.map((attr: {name: string, value: number}) => (
-                            <AttributeItem 
-                                key={attr.name} 
-                                name={attr.name} 
-                                level={state.attributes[attr.name]} 
-                                pilar={pilar}
-                                onLevelChange={handleAttributeChange}
-                            />
+                        {Object.entries(state.attributes).map(([name, level]) => (
+                             <SkillItem 
+                                key={name} 
+                                name={name} 
+                                initialValue={level} 
+                                pilar={pilar} 
+                                onLevelChange={handleAttributeChange} 
+                             />
                         ))}
                     </CardContent>
                 </Card>
@@ -225,8 +218,14 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                         <CardTitle className='text-base'>Perícias</CardTitle>
                     </CardHeader>
                     <CardContent className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
-                        {focusData.skills.map((skill: {name: string, value: number}) => (
-                            <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
+                        {Object.entries(state.skills).map(([name, level]) => (
+                            <SkillItem 
+                                key={name} 
+                                name={name} 
+                                initialValue={level} 
+                                pilar={pilar} 
+                                onLevelChange={handleSkillChange} 
+                            />
                         ))}
                     </CardContent>
                 </Card>
@@ -239,8 +238,14 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                             <CardTitle className='text-base'>{modularSkillsTitle}</CardTitle>
                         </CardHeader>
                         <CardContent className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
-                            {modularSkills.map((skill: {name: string, value: number}) => (
-                                <SkillItem key={skill.name} name={skill.name} initialValue={skill.value} pilar={pilar} />
+                            {Object.entries(state.modular).map(([name, level]) => (
+                                <SkillItem 
+                                    key={name} 
+                                    name={name} 
+                                    initialValue={level} 
+                                    pilar={pilar} 
+                                    onLevelChange={handleModularChange}
+                                />
                             ))}
                         </CardContent>
                     </Card>
@@ -475,6 +480,7 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
     );
 }
 
+const reduceArrayToState = (arr: {name: string, value: number}[]) => arr.reduce((acc, item) => ({ ...acc, [item.name]: item.value }), {});
 
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
@@ -486,18 +492,24 @@ export function CharacterSheet() {
     });
 
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
-
+    
     const initialFocusState: FocusState = {
         fisico: {
-            attributes: character.focus.physical.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
+            attributes: reduceArrayToState(character.focus.physical.attributes),
+            skills: reduceArrayToState(character.focus.physical.skills),
+            modular: reduceArrayToState(character.focus.physical.treinamentos),
             spentPoints: 0,
         },
         mental: {
-            attributes: character.focus.mental.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
+            attributes: reduceArrayToState(character.focus.mental.attributes),
+            skills: reduceArrayToState(character.focus.mental.skills),
+            modular: reduceArrayToState(character.focus.mental.ciencias),
             spentPoints: 0,
         },
         social: {
-            attributes: character.focus.social.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
+            attributes: reduceArrayToState(character.focus.social.attributes),
+            skills: reduceArrayToState(character.focus.social.skills),
+            modular: reduceArrayToState(character.focus.social.artes),
             spentPoints: 0,
         },
     };
@@ -651,7 +663,5 @@ export function CharacterSheet() {
         </div>
     );
 }
-
-    
 
     
