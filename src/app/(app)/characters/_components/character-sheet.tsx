@@ -357,57 +357,86 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
     </div>
 );
 
+const iconMap = {
+    'Armadura': <Shield />,
+    'Arma': <Swords />,
+    'Acessório': <Gem />,
+    'Projétil': <MoveUpRight />,
+    'Item': <Info />
+};
 
-const EquippedItemCard = ({ item, type }: { item: Armor | Weapon | Accessory, type: 'armor' | 'weapon' | 'accessory' }) => {
+const InventoryItemCard = ({ item }: { item: any }) => {
     const { openItem, isItemOpen } = useMovableWindow();
 
-    const iconMap = {
-        armor: <Shield />,
-        weapon: <Swords />,
-        accessory: <Gem />
-    };
-    
+    const getItemType = (item: any): keyof typeof iconMap => {
+        if ('slashing' in item) return 'Armadura';
+        if ('swing' in item || 'thrust' in item) return 'Arma';
+        if ('typeAndDescription' in item) return 'Acessório';
+        if ('ap' in item && 'accuracy' in item) return 'Projétil';
+        return 'Item';
+    }
+
+    const type = getItemType(item);
     const isOpen = isItemOpen(item.name);
 
     const handleOpen = () => {
+        if (!item.equippable) return;
         let content;
-        if (type === 'armor') {
-            content = <ArmorCardDetails armor={item as Armor} />;
-        } else if (type === 'weapon') {
-            content = <WeaponCardDetails weapon={item as Weapon} />;
-        } else {
-            content = <AccessoryCardDetails accessory={item as Accessory} />;
-        }
+        if (type === 'Armadura') content = <ArmorCardDetails armor={item as Armor} />;
+        else if (type === 'Arma') content = <WeaponCardDetails weapon={item as Weapon} />;
+        else if (type === 'Acessório') content = <AccessoryCardDetails accessory={item as Accessory} />;
+        else return;
+
         openItem({ id: item.name, title: item.name, content });
     };
-
+    
     return (
         <Card 
-            className={cn("cursor-pointer transition-all hover:shadow-lg", isOpen && "border-primary shadow-lg")}
-            onClick={handleOpen}
+            className={cn("cursor-pointer transition-all hover:shadow-md", isOpen && "border-primary shadow-lg", !item.equippable && "cursor-default hover:shadow-none")}
+            onClick={item.equippable ? handleOpen : undefined}
         >
-            <CardContent className="p-3">
-                <div className="flex items-center gap-3">
-                    <span className={cn("text-accent", isOpen && "text-primary")}>{iconMap[type]}</span>
-                    <p className="text-base font-semibold text-foreground">{item.name}</p>
+            <CardContent className="p-3 flex items-center justify-between">
+                <div className='flex items-center gap-3'>
+                    <span className={cn("text-accent", isOpen && "text-primary")}>
+                         {iconMap[type]}
+                    </span>
+                    <div>
+                        <p className="font-semibold">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">{type} {item.quantity > 1 && `(x${item.quantity})`}</p>
+                    </div>
                 </div>
+
+                {item.equippable && !item.equipped ? (
+                    <Button variant="outline" size="sm">
+                        <MoveUpRight className="mr-2 h-4 w-4" />
+                        Equipar
+                    </Button>
+                ) : !item.equippable && (
+                    <div className='text-right'>
+                        <p className='font-mono text-sm'>{item.weight.toFixed(2)}kg</p>
+                        <p className='text-xs text-muted-foreground'>Total: {(item.weight * item.quantity).toFixed(2)}kg</p>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
 };
 
+
 const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) => {
     const { openAllEquipped } = useMovableWindow();
 
-    const equippedArmors = equipment.armors.filter(i => i.equipped);
-    const equippedWeapons = equipment.weapons.filter(i => i.equipped);
-    const equippedAccessories = equipment.accessories.filter(i => i.equipped);
+    const equippedItems = [
+        ...equipment.armors.filter(i => i.equipped),
+        ...equipment.weapons.filter(i => i.equipped),
+        ...equipment.accessories.filter(i => i.equipped),
+    ];
 
     const handleOpenAll = () => {
         const allEquippedItems = [
-            ...equippedArmors.map(item => ({ id: item.name, title: item.name, content: <ArmorCardDetails armor={item} /> })),
-            ...equippedWeapons.map(item => ({ id: item.name, title: item.name, content: <WeaponCardDetails weapon={item} /> })),
-            ...equippedAccessories.map(item => ({ id: item.name, title: item.name, content: <AccessoryCardDetails accessory={item} /> })),
+            ...equipment.armors.filter(i => i.equipped).map(item => ({ id: item.name, title: item.name, content: <ArmorCardDetails armor={item} /> })),
+            ...equipment.weapons.filter(i => i.equipped).map(item => ({ id: item.name, title: item.name, content: <WeaponCardDetails weapon={item} /> })),
+            ...equipment.accessories.filter(i => i.equipped).map(item => ({ id: item.name, title: item.name, content: <AccessoryCardDetails accessory={item} /> })),
         ];
         openAllEquipped(allEquippedItems);
     };
@@ -423,60 +452,24 @@ const EquippedSection = ({ equipment }: { equipment: Character['equipment'] }) =
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <h3 className="font-semibold text-center text-muted-foreground">Armaduras</h3>
-                    {equippedArmors.length > 0 ? equippedArmors.map(item => <EquippedItemCard key={item.name} item={item} type="armor" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma armadura equipada.</p>}
-                </div>
-                 <div className="space-y-2">
-                    <h3 className="font-semibold text-center text-muted-foreground">Armas</h3>
-                    {equippedWeapons.length > 0 ? equippedWeapons.map(item => <EquippedItemCard key={item.name} item={item} type="weapon" />) : <p className="text-xs text-center text-muted-foreground">Nenhuma arma equipada.</p>}
-                </div>
-                 <div className="space-y-2">
-                    <h3 className="font-semibold text-center text-muted-foreground">Acessórios</h3>
-                    {equippedAccessories.length > 0 ? equippedAccessories.map(item => <EquippedItemCard key={item.name} item={item} type="accessory" />) : <p className="text-xs text-center text-muted-foreground">Nenhum acessório equipado.</p>}
-                </div>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                 {equippedItems.length > 0 ? equippedItems.map(item => <InventoryItemCard key={item.name} item={item} />) : <p className="text-xs text-center text-muted-foreground col-span-3 py-4">Nenhum item equipado.</p>}
             </CardContent>
         </Card>
     );
 }
 
-const InventoryItemCard = ({ item, isEquippable }: { item: any; isEquippable: boolean }) => {
-    return (
-        <Card>
-            <CardContent className="p-3 flex items-center justify-between">
-                <div>
-                    <p className="font-semibold">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">{item.type} {item.quantity > 1 && `(x${item.quantity})`}</p>
-                </div>
-                {isEquippable ? (
-                    <Button variant="outline" size="sm">
-                        <MoveUpRight className="mr-2 h-4 w-4" />
-                        Equipar
-                    </Button>
-                ) : (
-                    <div className='text-right'>
-                        <p className='font-mono text-sm'>{item.weight.toFixed(2)}kg</p>
-                        <p className='text-xs text-muted-foreground'>Total: {(item.weight * item.quantity).toFixed(2)}kg</p>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    );
-};
-
-
 const InventorySection = ({ equipment, inventory }: { equipment: Character['equipment'], inventory: Character['inventory'] }) => {
     
     const unequippedItems = [
-        ...equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Armadura', equippable: true})),
-        ...equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Arma', equippable: true})),
-        ...equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, type: 'Acessório', equippable: true})),
-        ...equipment.projectiles.map(i => ({...i, type: 'Projétil', equippable: false})),
-        ...inventory.bag.map(i => ({...i, type: 'Item', equippable: false})),
+        ...equipment.armors.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
+        ...equipment.weapons.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
+        ...equipment.accessories.filter(i => !i.equipped).map(i => ({...i, quantity: 1, equippable: true})),
+        ...equipment.projectiles.map(i => ({...i, equippable: false})),
+        ...inventory.bag.map(i => ({...i, equippable: false})),
     ];
     
-    const totalWeight = unequippedItems.reduce((acc, item) => acc + (item.weight * item.quantity), 0);
+    const totalWeight = unequippedItems.reduce((acc, item) => acc + (item.weight * (item.quantity || 1)), 0);
 
     return (
         <Card>
@@ -488,7 +481,7 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                  {unequippedItems.map(item => (
-                    <InventoryItemCard key={item.name} item={item} isEquippable={item.equippable} />
+                    <InventoryItemCard key={item.name} item={item} />
                 ))}
             </CardContent>
         </Card>
