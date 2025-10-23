@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useReducer, useMemo } from 'react';
-import initialCharacterData from '@/lib/character-data.json';
+import initialCharacterData from '@/lib/data/character-data.json';
 import { itemDatabase } from '@/lib/character-data';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemFromDB, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap } from '@/lib/character-data';
@@ -830,3 +830,5 @@ export function CharacterSheet() {
         </div>
     );
 }
+
+    
