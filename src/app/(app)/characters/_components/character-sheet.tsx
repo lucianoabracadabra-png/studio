@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useReducer, useMemo } from 'react';
+import React, { useState, useReducer, useMemo, useEffect } from 'react';
 import initialCharacterData from '@/lib/character-data.json';
 import { itemDatabase } from '@/lib/character-data';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemFromDB, ItemOwnership } from '@/lib/character-data';
@@ -546,6 +546,15 @@ const hydrateCharacterItems = (itemOwnerships: ItemOwnership[]): CharacterItem[]
     }).filter((item): item is CharacterItem => item !== null);
 };
 
+// This component will only be rendered on the client.
+const DndWrapper = ({ children }: { children: React.ReactNode }) => {
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+    return isClient ? <>{children}</> : null;
+};
+
 
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
@@ -823,10 +832,12 @@ export function CharacterSheet() {
                 </CardContent>
             </Card>
              
-            <DragDropContext onDragEnd={handleDragEnd}>
-                <EquippedSection items={equippedItems} />
-                <InventorySection items={inventoryItems} />
-            </DragDropContext>
+            <DndWrapper>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <EquippedSection items={equippedItems} />
+                    <InventorySection items={inventoryItems} />
+                </DragDropContext>
+            </DndWrapper>
         </div>
     );
 }
