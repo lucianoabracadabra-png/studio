@@ -301,7 +301,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
     );
 }
 
-const SoulCracks = ({ value }: { value: number }) => {
+const SoulCracks = ({ value, onToggle }: { value: number; onToggle: (index: number) => void; }) => {
     return (
         <div className="flex items-center gap-2">
             {[...Array(10)].map((_, i) => {
@@ -309,12 +309,13 @@ const SoulCracks = ({ value }: { value: number }) => {
                 return (
                     <TooltipProvider key={i}>
                         <Tooltip>
-                            <TooltipTrigger>
-                                {isCracked ? (
-                                    <HeartCrack className="h-6 w-6 text-red-500" />
-                                ) : (
-                                    <HeartCrack className="h-6 w-6 text-muted-foreground/50" />
-                                )}
+                            <TooltipTrigger asChild>
+                                <button onClick={() => onToggle(i)}>
+                                    <HeartCrack className={cn(
+                                        "h-6 w-6 transition-all",
+                                        isCracked ? "text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]" : "text-muted-foreground/30"
+                                    )} />
+                                </button>
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>Rachadura #{i + 1}</p>
@@ -624,6 +625,20 @@ export function CharacterSheet() {
             return { ...prev, spirit: { ...prev.spirit, alignment: newAlignment } };
         })
     }
+
+    const handleCracksToggle = (index: number) => {
+        setCharacter(prev => {
+            const currentCracks = prev.soul.cracks;
+            const newCracks = (index + 1) === currentCracks ? currentCracks - 1 : index + 1;
+            return {
+                ...prev,
+                soul: {
+                    ...prev.soul,
+                    cracks: Math.max(0, newCracks),
+                },
+            };
+        });
+    };
     
     function findContainer(id: string | number) {
         if (id === 'equipped' || equippedItems.some(i => i.id === id)) {
@@ -644,7 +659,7 @@ export function CharacterSheet() {
         const overContainer = findContainer(over.id);
     
         if (!activeContainer || !overContainer || activeContainer !== overContainer) {
-            return; // This handles reordering within the same container
+            return;
         }
     
         setCharacterItems((items) => {
@@ -758,7 +773,7 @@ export function CharacterSheet() {
                         <div className="space-y-3 pt-2">
                             <h3 className='font-semibold text-center text-muted-foreground'>Rachaduras</h3>
                             <div className="flex justify-center">
-                                <SoulCracks value={character.soul.cracks} />
+                                <SoulCracks value={character.soul.cracks} onToggle={handleCracksToggle} />
                             </div>
                         </div>
                     </CardContent>
@@ -872,14 +887,3 @@ export function CharacterSheet() {
         </div>
     );
 }
-
-// This component will only be rendered on the client.
-const DndWrapper = ({ children }: { children: React.ReactNode }) => {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-    return isClient ? <>{children}</> : null;
-};
-
-    
