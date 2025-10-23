@@ -34,7 +34,6 @@ const prompt = ai.definePrompt({
     name: 'generateItemLootPrompt',
     input: { schema: GenerateItemLootInputSchema },
     output: { schema: GenerateItemLootOutputSchema },
-    model: 'googleai/gemini-1.0-pro',
     prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
 
     Generate a magical item based on the following criteria:

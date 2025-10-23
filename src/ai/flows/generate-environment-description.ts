@@ -30,7 +30,6 @@ const prompt = ai.definePrompt({
   name: 'generateEnvironmentDescriptionPrompt',
   input: { schema: GenerateEnvironmentDescriptionInputSchema },
   output: { schema: GenerateEnvironmentDescriptionOutputSchema },
-  model: 'googleai/gemini-1.0-pro',
   prompt: `You are a master storyteller, painting vivid pictures with words for a tabletop RPG.
 
   Generate a rich, atmospheric description for the following environment:
