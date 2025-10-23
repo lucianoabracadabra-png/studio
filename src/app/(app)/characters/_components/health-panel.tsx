@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Character, BodyPartHealth, HealthState } from '@/lib/character-data';
-import { PersonStanding, Hand, Footprints, Head } from 'lucide-react';
+import { PersonStanding, Hand, Footprints } from 'lucide-react';
 
 const healthStateOrder: HealthState[] = ['clean', 'simple', 'lethal', 'aggravated'];
 
@@ -74,7 +74,7 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
                         <HealthGrid part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" />
                     </BodyPartSection>
                     
-                    <BodyPartSection icon={Head}>
+                    <BodyPartSection icon={PersonStanding}>
                         <HealthGrid part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
                     </BodyPartSection>
                     
