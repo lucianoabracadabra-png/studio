@@ -26,6 +26,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -486,7 +487,7 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
                     </Button>
                 </div>
             </CardHeader>
-            <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+            <SortableContext id="equipped" items={itemIds} strategy={verticalListSortingStrategy}>
                 <CardContent 
                     className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg")}
                 >
@@ -513,7 +514,7 @@ const InventorySection = ({ items }: { items: CharacterItem[] }) => {
                     <p className="font-mono text-muted-foreground flex items-center gap-2 text-sm"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
                 </div>
             </CardHeader>
-             <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+             <SortableContext id="inventory" items={itemIds} strategy={verticalListSortingStrategy}>
                  <CardContent 
                     className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg")}
                 >
@@ -624,48 +625,76 @@ export function CharacterSheet() {
         })
     }
     
+    function findContainer(id: string | number) {
+        if (id === 'equipped' || equippedItems.some(i => i.id === id)) {
+            return 'equipped';
+        }
+        if (id === 'inventory' || inventoryItems.some(i => i.id === id)) {
+            return 'inventory';
+        }
+        return null;
+    }
+
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
     
-        if (over && active.id !== over.id) {
-            const activeItem = characterItems.find(i => i.id === active.id);
-            if (!activeItem) return;
-
-            // Determine the container of the `over` item
-            const overContainer = equippedItems.some(i => i.id === over.id) ? 'equipped' : 'inventory';
-
-            // Find the dragged item and its original container
-            const sourceContainer = activeItem.isEquipped ? 'equipped' : 'inventory';
-            
-            // Check if a non-equippable item is being moved to equipped
-            if (overContainer === 'equipped' && !activeItem.equippable) {
-                return;
-            }
-
-            // Update item's equipped status
-            const newEquippedState = overContainer === 'equipped';
+        if (!over) return;
     
-            setCharacterItems(items => {
-                const oldIndex = items.findIndex(i => i.id === active.id);
-                const newIndex = items.findIndex(i => i.id === over.id);
-                
-                // Update the single item's equipped status
-                items[oldIndex].isEquipped = newEquippedState;
-
-                return arrayMove(items, oldIndex, newIndex);
-            });
-
-             // Update the character's core data (the source of truth)
-            setCharacter(prev => {
-                const newEquipment = prev.equipment.map(ownership => {
-                    if (ownership.itemId === active.id) {
-                        return { ...ownership, equipped: newEquippedState };
-                    }
-                    return ownership;
-                });
-                return { ...prev, equipment: newEquipment };
-            });
+        const activeContainer = findContainer(active.id);
+        const overContainer = findContainer(over.id);
+    
+        if (!activeContainer || !overContainer || activeContainer !== overContainer) {
+            return; // This handles reordering within the same container
         }
+    
+        setCharacterItems((items) => {
+            const oldIndex = items.findIndex((item) => item.id === active.id);
+            const newIndex = items.findIndex((item) => item.id === over.id);
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    }
+
+    function handleDragOver(event: DragOverEvent) {
+        const { active, over } = event;
+        if (!over) return;
+    
+        const activeId = active.id;
+        const overId = over.id;
+    
+        const activeContainer = findContainer(activeId);
+        const overContainer = findContainer(overId);
+    
+        if (!activeContainer || !overContainer || activeContainer === overContainer) {
+            return;
+        }
+    
+        const activeItem = characterItems.find(i => i.id === activeId);
+        if (!activeItem) return;
+    
+        const newEquippedState = overContainer === 'equipped';
+    
+        if (newEquippedState && !activeItem.equippable) {
+            return;
+        }
+    
+        setCharacterItems(prevItems => {
+            const activeIndex = prevItems.findIndex(i => i.id === activeId);
+            if (activeIndex !== -1) {
+                prevItems[activeIndex].isEquipped = newEquippedState;
+                return [...prevItems]; // Return a new array to trigger re-render
+            }
+            return prevItems;
+        });
+
+        setCharacter(prev => {
+            const newEquipment = prev.equipment.map(ownership => {
+                if (ownership.itemId === activeId) {
+                    return { ...ownership, equipped: newEquippedState };
+                }
+                return ownership;
+            });
+            return { ...prev, equipment: newEquipment };
+        });
     }
     
     // Memoized lists for rendering
@@ -835,6 +864,7 @@ export function CharacterSheet() {
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
             >
                 <EquippedSection items={equippedItems} />
                 <InventorySection items={inventoryItems} />
@@ -851,3 +881,5 @@ const DndWrapper = ({ children }: { children: React.ReactNode }) => {
     }, []);
     return isClient ? <>{children}</> : null;
 };
+
+    
