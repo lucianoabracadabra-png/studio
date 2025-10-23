@@ -28,7 +28,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { mainLinks, gmToolsLinks, profileLink } from '@/components/layout/sidebar-nav';
+import navData from '@/lib/data/navigation.json';
+import { profileLink } from '@/components/layout/sidebar-nav';
 import { Circle, Square } from 'lucide-react';
 
 type Combatant = {
@@ -58,11 +59,11 @@ type LogEntry = {
 
 const MAX_AP_ON_TIMELINE = 50;
 
-const allLinks = [...mainLinks, ...gmToolsLinks, profileLink];
-const bookColors = [...new Set(allLinks.filter(l => l.colorHue > 0).map(link => link.colorHue))];
+const allLinks = [...navData.mainLinks, ...navData.gmToolsLinks, profileLink];
+const bookColors = [...new Set(allLinks.filter(l => l.colorHue && typeof l.colorHue === 'string' && l.colorHue.match(/^\d/)).map(link => parseInt(link.colorHue.split(' ')[0], 10)))];
 const hueToNameMap = allLinks.reduce((acc, link) => {
-    if (link.colorHue > 0) {
-        acc[link.colorHue] = link.label;
+    if (link.colorHue && typeof link.colorHue === 'string' && link.colorHue.match(/^\d/)) {
+        acc[parseInt(link.colorHue.split(' ')[0], 10)] = link.label;
     }
     return acc;
 }, {} as Record<number, string>);
