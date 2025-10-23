@@ -9,6 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const GenerateItemLootInputSchema = z.object({
     itemType: z.string(),
@@ -32,6 +33,7 @@ export async function generateItemLoot(input: GenerateItemLootInput): Promise<Ge
 
 const prompt = ai.definePrompt({
     name: 'generateItemLootPrompt',
+    model: googleAI.model('gemini-1.0-pro'),
     input: { schema: GenerateItemLootInputSchema },
     output: { schema: GenerateItemLootOutputSchema },
     prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
@@ -58,5 +60,3 @@ const generateItemLootFlow = ai.defineFlow(
         return output!;
     }
 );
-
-    
