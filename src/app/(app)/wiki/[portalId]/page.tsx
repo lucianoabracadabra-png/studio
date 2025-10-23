@@ -1,9 +1,10 @@
 import { portals } from '@/lib/wiki-data';
 import { notFound } from 'next/navigation';
 import WikiClientLayout from '../_components/wiki-client-layout';
+import wikiData from '@/lib/data/wiki-data.json';
 
 export default function PortalPage({ params }: { params: { portalId: string } }) {
-    const portal = portals.find(p => p.id === params.portalId);
+    const portal = wikiData.portals.find(p => p.id === params.portalId);
 
     if (!portal) {
         notFound();
@@ -13,7 +14,7 @@ export default function PortalPage({ params }: { params: { portalId: string } })
 }
 
 export function generateStaticParams() {
-  return portals.map((portal) => ({
+  return wikiData.portals.map((portal) => ({
     portalId: portal.id,
   }))
 }
