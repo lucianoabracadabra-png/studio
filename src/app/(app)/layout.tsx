@@ -1,8 +1,5 @@
-'use client'
-
 import AppLayout from '@/components/layout/app-layout';
-import { MovableWindowProvider } from '@/context/movable-window-context';
-import { MovableWindowManager } from '@/components/layout/movable-window';
+import ClientProviders from '@/context/client-providers';
 
 export default function AuthenticatedAppLayout({
   children,
@@ -10,13 +7,12 @@ export default function AuthenticatedAppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <MovableWindowProvider>
+    <ClientProviders>
       <AppLayout>
         <div className="flex-grow flex flex-col">
           {children}
         </div>
       </AppLayout>
-      <MovableWindowManager />
-    </MovableWindowProvider>
+    </ClientProviders>
   );
 }
