@@ -5,7 +5,7 @@ import { characterData as initialCharacterData, Character, Armor, Weapon, Access
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -493,7 +493,7 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex justify-center items-center gap-2">
+                        <div className="flex justify-center items-end gap-2">
                            {character.soul.domains.map(d => (
                                 <TooltipProvider key={d.name}>
                                     <Tooltip>
@@ -508,8 +508,8 @@ export function CharacterSheet() {
                                                     isActive={d.level > 0}
                                                 />
                                                 {d.level > 0 && (
-                                                    <div className="absolute top-0 left-0 w-full h-full flex items-start justify-start pointer-events-none">
-                                                        <span className="text-xs font-bold text-white bg-black/50 rounded-full px-1.5 py-0.5 leading-none" style={{transform: 'translate(2px, 2px)'}}>
+                                                    <div className="absolute bottom-1 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                        <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                                                             {d.level}
                                                         </span>
                                                     </div>
@@ -590,5 +590,3 @@ export function CharacterSheet() {
         </div>
     );
 }
-
-    

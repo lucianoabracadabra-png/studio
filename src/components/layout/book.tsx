@@ -19,14 +19,14 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
 
     const bookContent = (
         <motion.div 
-            className="relative w-14 h-14"
+            className="relative w-14 h-14 rounded-md overflow-hidden"
             whileHover={isClickable ? "hover" : "inactive"}
             animate={isActive ? "active" : "inactive"}
             onClick={onClick}
         >
             {/* Glow Effect */}
             <motion.div
-                className="absolute -inset-1 rounded-lg"
+                className="absolute -inset-px rounded-lg"
                 style={{
                     backgroundColor: `hsl(${colorHsl})`,
                     boxShadow: `0 0 15px hsl(${colorHsl})`
