@@ -114,9 +114,6 @@
     .domain-card {
       @apply relative w-16;
     }
-    .domain-bonus {
-      @apply absolute -top-1 -right-1 w-6 h-6 flex items-center justify-center text-xs font-bold text-amber-400 border border-dashed border-amber-400 bg-background rounded-full;
-    }
     .domain-content {
       @apply w-16 h-24 bg-black border-2 border-amber-400 rounded-md flex flex-col items-center justify-around p-1;
     }

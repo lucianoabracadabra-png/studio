@@ -432,9 +432,6 @@ const InventorySection = ({ equipment, inventory }: { equipment: Character['equi
 
 const DomainCard = ({ domain }: { domain: Character['soul']['domains'][0] }) => (
     <div className='domain-card'>
-        <div className='domain-bonus'>
-            +{domain.bonus}
-        </div>
         <div className='domain-content'>
             <p className='domain-name' style={{ color: domain.color }}>{domain.name}</p>
             <p className='domain-value'>{domain.level}</p>
