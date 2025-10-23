@@ -34,7 +34,7 @@ export const MovableWindowProvider = ({ children }: { children: ReactNode }) => 
     isManagerOpen: false,
     isMinimized: false,
     activeItems: [],
-    position: { x: 0, y: 0 }, // Initialize with safe values
+    position: { x: 0, y: 0 },
   });
   
   const lastPosition = useRef({ x: 0, y: 0 });
