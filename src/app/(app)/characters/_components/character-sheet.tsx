@@ -8,7 +8,7 @@ import { getNextAlignmentState, iconMap } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -232,14 +232,17 @@ const SoulCracks = ({ value, onToggle }: { value: number; onToggle: (index: numb
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <button onClick={() => onToggle(i)}>
-                                    <HeartCrack className={cn(
-                                        "h-6 w-6 transition-all",
-                                        isCracked ? "text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]" : "text-muted-foreground/30"
-                                    )} />
+                                    {isCracked ? (
+                                         <Heart className={cn(
+                                            "h-6 w-6 transition-all text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]"
+                                        )} />
+                                    ) : (
+                                        <HeartCrack className="h-6 w-6 text-muted-foreground/30" />
+                                    )}
                                 </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Rachadura #{i + 1}</p>
+                                {isCracked ? <p>Rachadura #{i + 1} (Ativa)</p> : <p>Rachadura #{i + 1}</p>}
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
@@ -568,6 +571,47 @@ const initialFocusState = (character: Character) => ({
     },
 });
 
+function focusReducer(state: ReturnType<typeof initialFocusState>, action: any) {
+    switch (action.type) {
+        case 'SET_SKILL':
+        case 'SET_MODULAR': {
+            const { pilar, payload } = action;
+            const { name, level } = payload;
+            const pilarState = state[pilar as keyof typeof state];
+            const keyToUpdate = action.type === 'SET_SKILL' ? 'skills' : 'modular';
+            
+            return {
+                ...state,
+                [pilar]: {
+                    ...pilarState,
+                    [keyToUpdate]: {
+                        ...pilarState[keyToUpdate as keyof typeof pilarState],
+                        [name]: level
+                    }
+                }
+            };
+        }
+        case 'INCREMENT_SPENT':
+            return {
+                ...state,
+                [action.pilar]: {
+                    ...state[action.pilar as keyof typeof state],
+                    spentPoints: state[action.pilar as keyof typeof state].spentPoints + 1
+                }
+            };
+        case 'DECREMENT_SPENT':
+            return {
+                ...state,
+                [action.pilar]: {
+                    ...state[action.pilar as keyof typeof state],
+                    spentPoints: Math.max(0, state[action.pilar as keyof typeof state].spentPoints - 1)
+                }
+            };
+        default:
+            return state;
+    }
+}
+
 
 export function CharacterSheet() {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
@@ -584,10 +628,10 @@ export function CharacterSheet() {
         hydrateCharacterItems(character.equipment)
     );
     
-    const [focusState, setFocusState] = useState(() => initialFocusState(character));
+    const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(character));
 
     useEffect(() => {
-        setFocusState(initialFocusState(character));
+        focusDispatch({ type: 'RESET_FOCUS', payload: initialFocusState(character) });
     }, [character.focus]);
 
 
@@ -613,11 +657,11 @@ export function CharacterSheet() {
     };
     
     const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        characterDispatch({ type: 'SET_SKILL', payload: { pilar, name, level: newLevel } });
+        focusDispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
     };
 
     const handleModularChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        characterDispatch({ type: 'SET_MODULAR', payload: { pilar, name, level: newLevel } });
+        focusDispatch({ type: 'SET_MODULAR', pilar, payload: { name, level: newLevel } });
     };
     
     function findContainer(id: string | number) {
@@ -682,16 +726,19 @@ export function CharacterSheet() {
             const activeItem = prevItems[activeIndex];
 
             if (newEquippedState && !activeItem.equippable) {
-                return prevItems; // Don't allow non-equippable items to be equipped
+                // Technically this state should not be reachable if drag is disabled
+                // But as a safeguard, we prevent the state update.
+                return prevItems;
             }
             
             // Update item's equipped state
-            prevItems[activeIndex].isEquipped = newEquippedState;
+            const updatedItems = [...prevItems];
+            updatedItems[activeIndex] = { ...activeItem, isEquipped: newEquippedState };
 
             // Update underlying character data
              characterDispatch({
                 type: 'SET_ITEMS',
-                payload: prevItems.map(item => ({
+                payload: updatedItems.map(item => ({
                     itemId: item.id,
                     equipped: item.isEquipped,
                     currentQuantity: item.quantity
@@ -700,9 +747,9 @@ export function CharacterSheet() {
 
             // Re-sort the array visually for immediate feedback
             if (overIndex !== -1) {
-                 return arrayMove(prevItems, activeIndex, overIndex);
+                 return arrayMove(updatedItems, activeIndex, overIndex);
             }
-            return [...prevItems];
+            return updatedItems;
         });
     }
     
@@ -857,13 +904,13 @@ export function CharacterSheet() {
                             <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={characterDispatch} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
-                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={characterDispatch} />
+                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
                         </TabsContent>
                         <TabsContent value="social" className='pt-6'>
-                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={characterDispatch} />
+                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

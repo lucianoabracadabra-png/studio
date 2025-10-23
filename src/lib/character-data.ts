@@ -1,6 +1,6 @@
 
 import type { LucideIcon } from "lucide-react";
-import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf } from 'lucide-react';
+import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf, Heart } from 'lucide-react';
 import allItems from './data/items.json';
 
 // Base Item Type from the new items.json
@@ -151,7 +151,8 @@ export const iconMap: { [key: string]: LucideIcon } = {
     Mountain,
     Shield,
     Anchor,
-    Leaf
+    Leaf,
+    Heart,
 };
 
 export type Character = {
