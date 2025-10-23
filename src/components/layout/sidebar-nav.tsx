@@ -61,7 +61,7 @@ export function SidebarNav() {
                 {navData.mainLinks.map(link => {
                     const Icon = iconMap[link.icon];
                     return (
-                        <Link href={link.href} key={link.href}>
+                        <Link href={link.href} key={link.id}>
                             <Book
                                 label={link.label}
                                 icon={Icon}
@@ -78,7 +78,7 @@ export function SidebarNav() {
                 {navData.gmToolsLinks.map(link => {
                      const Icon = iconMap[link.icon];
                      return (
-                        <Link href={link.href} key={link.href}>
+                        <Link href={link.href} key={link.id}>
                             <Book
                                 label={link.label}
                                 icon={Icon}
