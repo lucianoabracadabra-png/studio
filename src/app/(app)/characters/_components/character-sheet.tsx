@@ -1,7 +1,10 @@
+
 'use client';
 
 import React, { useState, useReducer } from 'react';
-import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState, getNextAlignmentState } from '@/lib/character-data';
+import initialCharacterData from '@/lib/character-data.json';
+import type { Character, Armor, Weapon, Accessory, HealthState } from '@/lib/character-data';
+import { getNextAlignmentState, iconMap } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -366,7 +369,7 @@ const AccessoryCardDetails = ({ accessory }: { accessory: Accessory }) => (
     </div>
 );
 
-const iconMap = {
+const iconMapInventory = {
     'Armadura': <Shield />,
     'Arma': <Swords />,
     'Acessório': <Gem />,
@@ -377,7 +380,7 @@ const iconMap = {
 const InventoryItemCard = ({ item }: { item: any }) => {
     const { openItem, isItemOpen } = useMovableWindow();
 
-    const getItemType = (item: any): keyof typeof iconMap => {
+    const getItemType = (item: any): keyof typeof iconMapInventory => {
         if ('slashing' in item) return 'Armadura';
         if ('swing' in item || 'thrust' in item) return 'Arma';
         if ('typeAndDescription' in item) return 'Acessório';
@@ -407,7 +410,7 @@ const InventoryItemCard = ({ item }: { item: any }) => {
             <CardContent className="p-3 flex items-center justify-between">
                 <div className='flex items-center gap-3'>
                     <span className={cn("text-accent", isOpen && "text-primary")}>
-                         {iconMap[type]}
+                         {iconMapInventory[type]}
                     </span>
                     <div>
                         <p className="font-semibold">{item.name}</p>
@@ -502,10 +505,11 @@ const reduceArrayToState = (arr: {name: string, value: number}[]) => arr.reduce(
 export function CharacterSheet() {
     const [character, setCharacter] = useState<Character>(() => {
         const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
+        const typedData = initialCharacterData as unknown as Character;
         if (charImage) {
-            initialCharacterData.info.imageUrl = charImage.imageUrl;
+            typedData.info.imageUrl = charImage.imageUrl;
         }
-        return initialCharacterData;
+        return typedData;
     });
 
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
@@ -590,13 +594,15 @@ export function CharacterSheet() {
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-2">
-                           {character.soul.domains.map(d => (
+                           {character.soul.domains.map(d => {
+                                const Icon = iconMap[d.icon];
+                                return (
                                 <TooltipProvider key={d.name}>
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <div className="relative">
                                                 <Book
-                                                    icon={d.icon}
+                                                    icon={Icon}
                                                     colorHsl={d.color}
                                                     isClickable={false}
                                                     showLabel={false}
@@ -617,7 +623,7 @@ export function CharacterSheet() {
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
-                           ))}
+                           )})}
                         </div>
                         <Separator/>
                         <div className="space-y-3 pt-2">
@@ -632,34 +638,36 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-6 flex justify-center items-end gap-2">
-                         {spiritBooks.map(p => (
-                            <TooltipProvider key={p.name}>
-                                <Tooltip>
-                                    <TooltipTrigger>
-                                        <div className="relative">
-                                            <Book
-                                                icon={p.icon}
-                                                colorHsl={p.colorHsl}
-                                                isClickable={false}
-                                                showLabel={false}
-                                                label={p.name}
-                                                isActive={p.value > 0}
-                                            />
-                                            {p.value > 0 && (
-                                                <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                    <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                        {p.value}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p className='font-bold'>{p.name}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        ))}
+                         {spiritBooks.map(p => {
+                            const Icon = iconMap[p.icon as keyof typeof iconMap];
+                            return (
+                                <TooltipProvider key={p.name}>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <div className="relative">
+                                                <Book
+                                                    icon={Icon}
+                                                    colorHsl={p.colorHsl}
+                                                    isClickable={false}
+                                                    showLabel={false}
+                                                    label={p.name}
+                                                    isActive={p.value > 0}
+                                                />
+                                                {p.value > 0 && (
+                                                    <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                        <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                            {p.value}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className='font-bold'>{p.name}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )})}
                     </CardContent>
                 </Card>
             </div>

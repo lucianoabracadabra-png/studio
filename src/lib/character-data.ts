@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from "lucide-react";
 import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf } from 'lucide-react';
 
@@ -97,13 +98,13 @@ export type SoulDomain = {
     name: string;
     level: number;
     color: string;
-    icon: LucideIcon;
+    icon: keyof typeof iconMap;
 }
 
 export type PersonalityTrait = { 
     name: string; 
     value: number,
-    icon: LucideIcon;
+    icon: keyof typeof iconMap;
     colorHsl: string;
 };
 
@@ -116,17 +117,27 @@ export type AlignmentAxis = {
 export type Fluxo = {
   name: 'Fluxo';
   value: number;
-  icon: LucideIcon;
+  icon: keyof typeof iconMap;
   colorHsl: string;
 };
 
 export type Patrono = {
   name: 'Patrono';
   value: number;
-  icon: LucideIcon;
+  icon: keyof typeof iconMap;
   colorHsl: string;
 };
 
+export const iconMap: { [key: string]: LucideIcon } = {
+    Droplets,
+    Wind,
+    Star,
+    Flame,
+    Mountain,
+    Shield,
+    Anchor,
+    Leaf
+};
 
 export type Character = {
   name: string;
@@ -199,216 +210,3 @@ export const languages: LanguageFamily[] = [
 export const getNextAlignmentState = (currentState: string, poles: [string, string]): string => {
     return currentState === poles[0] ? poles[1] : poles[0];
 }
-
-
-export const characterData: Character = {
-  name: 'Dahl Maasen',
-  concept: 'Guerreiro tribal das florestas do norte',
-  info: {
-    imageUrl: '', // Will be populated from placeholder-images
-    imageHint: 'male warrior fantasy',
-    altura: '185 cm',
-    peso: '140 kg',
-    cabelo: 'Castanho grisalho, longo',
-    olhos: 'Âmbar',
-    pele: 'Persa, queimada de sol',
-    idade: '29 anos',
-    ideais: 'Família, conhecimento e liberdade',
-    origem: 'Commonare da floresta',
-    idiomas: ['Tantumá', 'Tupaguá', 'Uhzdin', 'Manzhufā'],
-    experiencia: {
-        atual: 0,
-        total: 369
-    }
-  },
-  health: {
-      bodyParts: {
-          head: { name: 'Cabeça', states: Array(8).fill('clean') },
-          torso: { name: 'Tronco', states: Array(20).fill('clean') },
-          leftArm: { name: 'Braço Esquerdo', states: Array(12).fill('clean') },
-          rightArm: { name: 'Braço Direito', states: Array(12).fill('clean') },
-          leftLeg: { name: 'Perna Esquerda', states: Array(16).fill('clean') },
-          rightLeg: { name: 'Perna Direita', states: Array(16).fill('clean') },
-      }
-  },
-  focus: {
-    physical: {
-      vigor: { name: "Vigor" },
-      attributes: [
-        { name: 'Força', value: 3 },
-        { name: 'Destreza', value: 4 },
-        { name: 'Agilidade', value: 3 },
-        { name: 'Constituição', value: 2 },
-      ],
-      skills: [
-        { name: 'Armas Brancas', value: 2 },
-        { name: 'Armas de Fogo', value: 0 },
-        { name: 'Arquearia', value: 3 },
-        { name: 'Arremesso', value: 1 },
-        { name: 'Briga', value: 3 },
-        { name: 'Combate', value: 2 },
-        { name: 'Furtividade', value: 5 },
-        { name: 'Prontidão', value: 4 },
-      ],
-      treinamentos: [
-          { name: 'Corrida', value: 2 },
-          { name: 'Natação', value: 1 },
-          { name: 'Escalada', value: 3 },
-          { name: 'Pilotagem', value: 0 },
-      ]
-    },
-    mental: {
-      focus: { name: "Foco" },
-      attributes: [
-        { name: 'Inteligência', value: 4 },
-        { name: 'Percepção', value: 5 },
-        { name: 'Raciocínio', value: 3 },
-        { name: 'Sabedoria', value: 3 },
-      ],
-      skills: [
-        { name: 'Acadêmicos', value: 2 },
-        { name: 'Armadilhas', value: 3 },
-        { name: 'Intuição', value: 4 },
-        { name: 'Investigação', value: 4 },
-        { name: 'Medicina', value: 2 },
-        { name: 'Ocultismo', value: 1 },
-        { name: 'Segurança', value: 2 },
-        { name: 'Sobrevivência', value: 5 },
-      ],
-      ciencias: [
-        { name: 'Biologia', value: 3 },
-        { name: 'Física', value: 0 },
-        { name: 'Química', value: 1 },
-        { name: 'História', value: 2 },
-      ]
-    },
-    social: {
-      grace: { name: "Graça" },
-      attributes: [
-        { name: 'Empatia', value: 3 },
-        { name: 'Manipulação', value: 2 },
-        { name: 'Expressão', value: 3 },
-        { name: 'Resiliência', value: 4 },
-      ],
-      skills: [
-        { name: 'Barganha', value: 2 },
-        { name: 'Doma', value: 5 },
-        { name: 'Etiqueta', value: 1 },
-        { name: 'Intimidação', value: 2 },
-        { name: 'Lábia', value: 1 },
-        { name: 'Liderança', value: 2 },
-        { name: 'Montaria', value: 3 },
-        { name: 'Sedução', value: 0 },
-      ],
-      artes: [
-          { name: 'Canto', value: 1 },
-          { name: 'Dança', value: 0 },
-          { name: 'Pintura', value: 2 },
-          { name: 'Atuação', value: 1 },
-      ]
-    },
-  },
-  spirit: {
-    personality: [
-        { name: 'Coragem', value: 2, icon: Shield, colorHsl: '180 80% 50%' },
-        { name: 'Convicção', value: 4, icon: Anchor, colorHsl: '170 90% 60%' },
-        { name: 'Serenidade', value: 1, icon: Leaf, colorHsl: '190 70% 55%' },
-    ],
-    alignment: [
-      { name: 'Moral', state: 'Altruísmo', poles: ['Egoísmo', 'Altruísmo'] },
-      { name: 'Ética', state: 'Ordem', poles: ['Rebeldia', 'Ordem'] },
-      { name: 'Identidade', state: 'Individualismo', poles: ['Comunitarismo', 'Individualismo'] },
-      { name: 'Abordagem', state: 'Instinto', poles: ['Lógica', 'Instinto'] },
-      { name: 'Verdade', state: 'Pragmatismo', poles: ['Idealismo', 'Pragmatismo'] },
-      { name: 'Poder', state: 'Contenção', poles: ['Liberdade', 'Contenção'] },
-    ],
-  },
-  soul: {
-    anima: {
-      fluxo: {
-        name: 'Fluxo',
-        value: 5,
-        icon: Wind,
-        colorHsl: '320 90% 70%'
-      },
-      patrono: {
-        name: 'Patrono',
-        value: 10,
-        icon: Star,
-        colorHsl: '300 90% 70%'
-      },
-    },
-    domains: [
-      { name: 'Água', level: 2, color: '198 93% 60%', icon: Droplets },
-      { name: 'Ar', level: 3, color: '45 93% 60%', icon: Wind },
-      { name: 'Anima', level: 5, color: '265 90% 70%', icon: Star },
-      { name: 'Fogo', level: 1, color: '0 90% 70%', icon: Flame },
-      { name: 'Terra', level: 4, color: '120 60% 40%', icon: Mountain },
-    ],
-    cracks: 3,
-  },
-  inventory: {
-    bag: [
-      { name: 'Corda (15m)', quantity: 1, weight: 2, extras: 'Feita de cânhamo' },
-      { name: 'Ração de Viagem', quantity: 5, weight: 1, extras: 'Para 5 dias' },
-      { name: 'Tocha', quantity: 10, weight: 0.5, extras: 'Dura 1 hora cada' },
-      { name: 'Cantil de Água', quantity: 1, weight: 1.5, extras: 'Cheio' },
-    ],
-  },
-  equipment: {
-    armors: [
-      { 
-        name: 'Jaqueta de Couro Batido',
-        slashing: 1,
-        bludgeoning: 2,
-        piercing: 1,
-        coverage: 'Tronco, Braços',
-        resistance: 10,
-        durability: 12,
-        size: 'm',
-        weight: 4,
-        extras: 'Reforçada com placas de metal',
-        equipped: true,
-      },
-    ],
-    weapons: [
-      {
-        name: 'Faca de Caça',
-        thrust: { damage: '1d4', type: 'Perfurante', ap: 3, accuracy: 1 },
-        swing: { damage: '1d4', type: 'Cortante', ap: 4, accuracy: 0 },
-        size: 'p',
-        weight: 0.5,
-        extras: 'Cabo de osso',
-        equipped: true,
-      },
-      {
-        name: 'Arco Curto',
-        size: 'm',
-        weight: 1,
-        extras: 'Feito de teixo',
-        equipped: true,
-      }
-    ],
-    accessories: [
-      {
-        name: 'Amuleto de Dente de Lobo',
-        typeAndDescription: 'Colar com um dente de lobo',
-        equipped: true,
-        weight: 0.1,
-        effect: '+1 em testes de Intimidação',
-      },
-    ],
-    projectiles: [
-        {
-            name: 'Flechas Comuns',
-            type: 'Perfurante',
-            ap: 3,
-            accuracy: 0,
-            quantity: 20,
-            weight: 0.05,
-            size: 'm',
-            extras: 'Ponta de ferro',
-        }
-    ],
-  },
-};
