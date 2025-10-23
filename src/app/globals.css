@@ -126,44 +126,4 @@
     .domain-symbol svg {
       @apply w-6 h-6;
     }
-
-    .fluxo-patrono-card {
-      @apply bg-black border border-amber-400/50 w-32;
-    }
-    .fluxo-patrono-header {
-      @apply flex justify-between items-center px-2 text-amber-400;
-    }
-    .fluxo-patrono-header .title {
-      @apply font-headline font-bold text-lg;
-    }
-    .fluxo-patrono-body {
-      @apply p-2 flex gap-2;
-    }
-    .fluxo-patrono-body .stats {
-      @apply space-y-2 text-center;
-    }
-    .fluxo-patrono-body .stats .label {
-      @apply text-xs text-muted-foreground;
-    }
-    .fluxo-patrono-body .stats .value {
-      @apply text-lg font-bold;
-    }
-    .fluxo-patrono-body .stats .value-mod {
-      @apply text-lg font-bold text-amber-400;
-    }
-    .fluxo-patrono-body .checkboxes .row {
-      @apply flex gap-1 mb-1;
-    }
-    .fluxo-patrono-body .checkboxes .row.first-row {
-        @apply border border-amber-400 p-1;
-    }
-    .fluxo-patrono-body .checkboxes .box {
-        @apply w-3 h-3;
-    }
-    .fluxo-patrono-body .checkboxes .box.checked {
-        @apply text-amber-400;
-    }
-    .fluxo-patrono-footer {
-      @apply flex justify-center items-center py-2 bg-black/50 text-white;
-    }
 }
