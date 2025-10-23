@@ -306,6 +306,7 @@ const iconMapInventory = {
 const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
         id: item.id,
+        disabled: !item.equippable
     });
     const { openItem, isItemOpen } = useMovableWindow();
 
@@ -334,9 +335,12 @@ const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
             <Card 
                 className={cn(
                     "transition-all", 
-                    "cursor-grab hover:shadow-md", 
-                    isOpen && "border-primary shadow-lg",
-                    isDragging && "shadow-xl"
+                    isOpen && "shadow-lg",
+                    isDragging && "shadow-xl",
+                    item.equippable
+                        ? "cursor-grab hover:shadow-md border-foreground/20 hover:border-primary"
+                        : "cursor-default border-border",
+                    isOpen && "border-primary"
                 )}
                 onClick={item.equippable ? handleOpen : undefined}
             >
