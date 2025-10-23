@@ -183,8 +183,8 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                         
                         {modularSkills && (
                             <>
-                                <Separator className='my-4' />
-                                <h4 className="text-sm font-semibold text-muted-foreground mb-2">{modularSkillsTitle}</h4>
+                                
+                                <h4 className="text-sm font-semibold text-muted-foreground mb-2 mt-4">{modularSkillsTitle}</h4>
                                 <div className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
                                     {Object.entries(state.modular).map(([name, value]) => (
                                         <SkillItem 
