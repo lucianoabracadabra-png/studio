@@ -37,14 +37,16 @@ export const MovableWindowProvider = ({ children }: { children: ReactNode }) => 
     position: { x: 0, y: 0 }, // Initialize with safe values
   });
   
-  const lastPosition = useRef(windowState.position);
+  const lastPosition = useRef({ x: 0, y: 0 });
 
   // Set initial position only on the client
   useEffect(() => {
+    const initialPos = { x: window.innerWidth - 420, y: 100 };
     setWindowState(prev => ({
       ...prev,
-      position: { x: window.innerWidth - 420, y: 100 }
+      position: initialPos,
     }));
+    lastPosition.current = initialPos;
   }, []);
 
 
