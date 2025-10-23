@@ -8,7 +8,7 @@ import { getNextAlignmentState, iconMap } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
+import { HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf, Droplets, Wind, Star, Flame, Mountain } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
 
-const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'físico' | 'mental' | 'social' }) => {
+const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'fisico' | 'mental' | 'social' }) => {
     
     const handleDecrement = () => {
         dispatch({ type: 'DECREMENT_SPENT', pilar: pilar });
@@ -73,7 +73,7 @@ const AttributeItem = ({ name, level, colorClass }: { name: string; level: numbe
 };
 
 
-const SkillItem = ({ name, initialValue, pilar, colorClass, onLevelChange }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social', colorClass: string, onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
+const SkillItem = ({ name, initialValue, pilar, colorClass, onLevelChange }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social', colorClass: string, onLevelChange: (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
     
     const handleDotClick = (newLevel: number) => {
         const finalLevel = newLevel === initialValue ? newLevel - 1 : newLevel;
@@ -701,3 +701,5 @@ export function CharacterSheet() {
         </div>
     );
 }
+
+    
