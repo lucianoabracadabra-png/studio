@@ -208,12 +208,12 @@ export const characterData: Character = {
   },
   health: {
       bodyParts: {
-          head: { name: 'Cabeça', states: Array(6).fill('clean') },
-          torso: { name: 'Tronco', states: Array(12).fill('clean') },
-          leftArm: { name: 'Braço Esquerdo', states: Array(9).fill('clean') },
-          rightArm: { name: 'Braço Direito', states: Array(9).fill('clean') },
-          leftLeg: { name: 'Perna Esquerda', states: Array(9).fill('clean') },
-          rightLeg: { name: 'Perna Direita', states: Array(9).fill('clean') },
+          head: { name: 'Cabeça', states: Array(8).fill('clean') },
+          torso: { name: 'Tronco', states: Array(20).fill('clean') },
+          leftArm: { name: 'Braço Esquerdo', states: Array(12).fill('clean') },
+          rightArm: { name: 'Braço Direito', states: Array(12).fill('clean') },
+          leftLeg: { name: 'Perna Esquerda', states: Array(16).fill('clean') },
+          rightLeg: { name: 'Perna Direita', states: Array(16).fill('clean') },
       }
   },
   focus: {

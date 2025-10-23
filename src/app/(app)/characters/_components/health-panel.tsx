@@ -4,6 +4,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Character, BodyPartHealth, HealthState } from '@/lib/character-data';
+import { PersonStanding, Heart, Hand, Footprints } from 'lucide-react';
 
 const healthStateOrder: HealthState[] = ['clean', 'simple', 'lethal', 'aggravated'];
 
@@ -31,11 +32,7 @@ const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, pa
     };
 
     return (
-        <div className={cn("grid gap-1.5", {
-            'grid-cols-3': part.states.length === 6, // Head
-            'grid-cols-4': part.states.length === 12, // Torso
-            'grid-cols-3': part.states.length === 9, // Limbs
-        })}>
+        <div className="grid grid-cols-4 gap-1.5">
             {part.states.map((state, i) => (
                 <button
                     key={i} 
@@ -56,37 +53,60 @@ type HealthPanelProps = {
     onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void;
 };
 
-export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
+const BodyPartSection = ({ icon, children, alignment = 'center' }: { icon: React.ElementType, children: React.ReactNode, alignment?: 'center' | 'start' | 'end' }) => (
+    <div className={cn('flex flex-col gap-2 items-center', {
+        'items-center': alignment === 'center',
+        'items-start': alignment === 'start',
+        'items-end': alignment === 'end',
+    })}>
+        {React.createElement(icon, { className: 'h-6 w-6 text-primary' })}
+        {children}
+    </div>
+);
 
+
+export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
     return (
         <Card>
              <CardHeader>
                 <CardTitle>Vitalidade</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="mx-auto grid max-w-lg grid-cols-[1fr_auto_1fr] grid-rows-3 items-center justify-center gap-x-4 gap-y-2">
-                    {/* Row 1 */}
+                <div className="mx-auto grid max-w-lg grid-cols-[1fr_auto_1fr] grid-rows-3 items-start justify-center gap-x-4 gap-y-4">
+                    {/* Row 1: Head */}
                     <div className='col-start-2 row-start-1 justify-self-center'>
-                         <HealthGrid part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
+                         <BodyPartSection icon={Heart}>
+                             <HealthGrid part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
+                         </BodyPartSection>
                     </div>
                     
-                    {/* Row 2 */}
+                    {/* Row 2: Arms & Torso */}
                     <div className='col-start-1 row-start-2 justify-self-end'>
-                         <HealthGrid part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" />
+                         <BodyPartSection icon={Hand} alignment="end">
+                            <HealthGrid part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" />
+                         </BodyPartSection>
                     </div>
                     <div className='col-start-2 row-start-2 justify-self-center'>
-                        <HealthGrid part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" />
+                        <BodyPartSection icon={PersonStanding}>
+                           <HealthGrid part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" />
+                        </BodyPartSection>
                     </div>
                     <div className='col-start-3 row-start-2 justify-self-start'>
-                        <HealthGrid part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" />
+                        <BodyPartSection icon={Hand} alignment="start">
+                           <HealthGrid part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" />
+                        </BodyPartSection>
                     </div>
 
-                    {/* Row 3 */}
+                    {/* Row 3: Legs */}
                     <div className='col-start-1 row-start-3 justify-self-end'>
-                        <HealthGrid part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" />
+                        <BodyPartSection icon={Footprints} alignment="end">
+                           <HealthGrid part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" />
+                        </BodyPartSection>
                     </div>
                     <div className='col-start-3 row-start-3 justify-self-start'>
-                        <HealthGrid part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" />
+                         <BodyPartSection icon={Footprints} alignment="start">
+                           <HealthGrid part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" />
+                        </BodyPartSection>
                     </div>
                 </div>
             </CardContent>
