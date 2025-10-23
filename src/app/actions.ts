@@ -15,6 +15,11 @@ import {
     type GenerateNpcInput,
     type GenerateNpcOutput,
 } from '@/ai/flows/generate-npc';
+import {
+    generateNarrative,
+    type GenerateNarrativeInput,
+    type GenerateNarrativeOutput,
+} from '@/ai/flows/generate-narrative';
 
 
 export async function generateItemLootAction(
@@ -33,4 +38,10 @@ export async function generateEnvironmentDescriptionAction(
     input: GenerateEnvironmentDescriptionInput
 ): Promise<GenerateEnvironmentDescriptionOutput> {
     return await generateEnvironmentDescription(input);
+}
+
+export async function generateNarrativeAction(
+    input: GenerateNarrativeInput
+): Promise<GenerateNarrativeOutput> {
+    return await generateNarrative(input);
 }

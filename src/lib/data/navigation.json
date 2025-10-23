@@ -6,6 +6,7 @@
         { "id": "nav-wiki", "label": "Wiki", "href": "/wiki", "icon": "BookOpen", "colorHue": "45 90% 60%" }
     ],
     "gmToolsLinks": [
+        { "id": "nav-narrator", "label": "Mestre Narrador", "href": "/gm/narrator", "icon": "ScrollText", "colorHue": "30 90% 60%" },
         { "id": "nav-dice-roller", "label": "Rolador de Dados", "href": "/tools/dice-roller", "icon": "Dices", "colorHue": "210 90% 60%" },
         { "id": "nav-combat-tracker", "label": "Rastreador de Combate", "href": "/gm/combat-tracker", "icon": "Swords", "colorHue": "0 90% 70%" },
         { "id": "nav-generators", "label": "Geradores", "href": "/tools/generator", "icon": "FlaskConical", "colorHue": "120 90% 60%" },
