@@ -1,32 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useReducer } from 'react';
-import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState, AlignmentAxis, getNextAlignmentState, Fluxo, Patrono, languages } from '@/lib/character-data';
+import React, { useState, useReducer } from 'react';
+import { characterData as initialCharacterData, Character, Armor, Weapon, Accessory, HealthState, getNextAlignmentState } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus, MoveUpRight, ThumbsUp, Head } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus, MoveUpRight, Head } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMovableWindow } from '@/context/movable-window-context';
-import { InfoPanel, InfoPanelSummary, LanguagePopover } from './info-panel';
+import { InfoPanel, InfoPanelSummary } from './info-panel';
 import { HealthPanel } from './health-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
 
-const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any> }) => {
-    const pilarKey = title.toLowerCase() as 'físico' | 'mental' | 'social';
+const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'físico' | 'mental' | 'social' }) => {
     
     const handleDecrement = () => {
-        dispatch({ type: 'DECREMENT_SPENT', pilar: pilarKey });
+        dispatch({ type: 'DECREMENT_SPENT', pilar: pilar });
     };
     
     const handleIncrement = () => {
-        dispatch({ type: 'INCREMENT_SPENT', pilar: pilarKey });
+        dispatch({ type: 'INCREMENT_SPENT', pilar: pilar });
+    };
+
+    const pilarColorClass = {
+        físico: 'text-orange-500',
+        mental: 'text-blue-500',
+        social: 'text-green-500',
     };
 
     return (
@@ -34,7 +38,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
             <CardContent className='pt-6 space-y-2'>
                 <div className='flex items-center justify-between'>
                     <h3 className='font-bold text-xl'>{title}</h3>
-                    <span className='text-primary'>{React.createElement(icon)}</span>
+                    <span className={pilarColorClass[pilar]}>{React.createElement(icon)}</span>
                 </div>
                 <Separator />
                 <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
@@ -55,6 +59,16 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
         </Card>
     );
 };
+
+const AttributeItem = ({ name, level }: { name: string; level: number }) => {
+    return (
+        <div className="flex items-center gap-3 py-1">
+            <span className="font-bold text-lg w-4 text-center">{level}</span>
+            <span className="text-foreground">{name}</span>
+        </div>
+    );
+};
+
 
 const SkillItem = ({ name, initialValue, pilar, onLevelChange }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social', onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
     
@@ -105,11 +119,13 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
   switch (action.type) {
     case 'SET_ATTRIBUTE': {
         const { payload } = action;
+        const currentLevel = state[pilar].attributes[payload.name];
+        const newLevel = currentLevel === payload.level ? payload.level -1 : payload.level;
         return {
             ...state,
             [pilar]: {
                 ...state[pilar],
-                attributes: { ...state[pilar].attributes, [payload.name]: payload.level },
+                attributes: { ...state[pilar].attributes, [payload.name]: Math.max(0, newLevel) },
             },
         };
     }
@@ -190,6 +206,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                     max={maxResource}
                     spentPoints={state.spentPoints} 
                     dispatch={dispatch} 
+                    pilar={pilar}
                 />
             </div>
             
@@ -200,12 +217,10 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                     </CardHeader>
                     <CardContent className='space-y-2 divide-y divide-border'>
                         {Object.entries(state.attributes).map(([name, level]) => (
-                             <SkillItem 
+                             <AttributeItem 
                                 key={name} 
                                 name={name} 
-                                initialValue={level} 
-                                pilar={pilar} 
-                                onLevelChange={handleAttributeChange} 
+                                level={level}
                              />
                         ))}
                     </CardContent>
@@ -663,5 +678,3 @@ export function CharacterSheet() {
         </div>
     );
 }
-
-    
