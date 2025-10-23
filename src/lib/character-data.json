@@ -145,68 +145,15 @@
     ],
     "cracks": 3
   },
-  "inventory": {
-    "bag": [
-      { "name": "Corda (15m)", "quantity": 1, "weight": 2, "extras": "Feita de cânhamo" },
-      { "name": "Ração de Viagem", "quantity": 5, "weight": 1, "extras": "Para 5 dias" },
-      { "name": "Tocha", "quantity": 10, "weight": 0.5, "extras": "Dura 1 hora cada" },
-      { "name": "Cantil de Água", "quantity": 1, "weight": 1.5, "extras": "Cheio" }
-    ]
-  },
-  "equipment": {
-    "armors": [
-      { 
-        "name": "Jaqueta de Couro Batido",
-        "slashing": 1,
-        "bludgeoning": 2,
-        "piercing": 1,
-        "coverage": "Tronco, Braços",
-        "resistance": 10,
-        "durability": 12,
-        "size": "m",
-        "weight": 4,
-        "extras": "Reforçada com placas de metal",
-        "equipped": true
-      }
-    ],
-    "weapons": [
-      {
-        "name": "Faca de Caça",
-        "thrust": { "damage": "1d4", "type": "Perfurante", "ap": 3, "accuracy": 1 },
-        "swing": { "damage": "1d4", "type": "Cortante", "ap": 4, "accuracy": 0 },
-        "size": "p",
-        "weight": 0.5,
-        "extras": "Cabo de osso",
-        "equipped": true
-      },
-      {
-        "name": "Arco Curto",
-        "size": "m",
-        "weight": 1,
-        "extras": "Feito de teixo",
-        "equipped": true
-      }
-    ],
-    "accessories": [
-      {
-        "name": "Amuleto de Dente de Lobo",
-        "typeAndDescription": "Colar com um dente de lobo",
-        "equipped": true,
-        "weight": 0.1,
-        "effect": "+1 em testes de Intimidação"
-      }
-    ],
-    "projectiles": [
-        {
-            "name": "Flechas Comuns",
-            "type": "Perfurante",
-            "ap": 3,
-            "accuracy": 0,
-            "quantity": 20,
-            "weight": 0.05,
-            "size": "m",
-            "extras": "Ponta de ferro"
-        }
-    ]
-  }
+  "equipment": [
+    { "itemId": "leather-jacket", "equipped": true },
+    { "itemId": "hunting-knife", "equipped": true },
+    { "itemId": "short-bow", "equipped": true },
+    { "itemId": "wolf-tooth-amulet", "equipped": true },
+    { "itemId": "common-arrows", "equipped": false, "currentQuantity": 20 },
+    { "itemId": "rope-15m", "equipped": false },
+    { "itemId": "travel-ration", "equipped": false, "currentQuantity": 5 },
+    { "itemId": "torch", "equipped": false, "currentQuantity": 10 },
+    { "itemId": "waterskin", "equipped": false }
+  ]
 }

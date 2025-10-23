@@ -1,65 +1,80 @@
 
 import type { LucideIcon } from "lucide-react";
 import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf } from 'lucide-react';
+import allItems from './data/items.json';
 
-
-export type BagItem = {
-  name: string;
-  quantity: number;
-  weight: number;
-  extras: string;
+// Base Item Type from the new items.json
+export type BaseItem = {
+    id: string;
+    name: string;
+    type: 'Armadura' | 'Arma' | 'Acessório' | 'Projétil' | 'Item';
+    equippable: boolean;
+    weight: number;
+    extras: string;
+    quantity?: number;
 };
 
-export type Armor = {
-  name: string;
-  slashing: number;
-  bludgeoning: number;
-  piercing: number;
-  coverage: string;
-  resistance: number;
-  durability: number;
-  size: 'pp' | 'p' | 'm' | 'g' | 'gg';
-  weight: number;
-  extras: string;
-  equipped: boolean;
+// Specific Item Types extending BaseItem
+export type Armor = BaseItem & {
+    type: 'Armadura';
+    slashing: number;
+    bludgeoning: number;
+    piercing: number;
+    coverage: string;
+    resistance: number;
+    durability: number;
+    size: 'pp' | 'p' | 'm' | 'g' | 'gg';
 };
 
 export type WeaponAttack = {
-  damage: string;
-  type: string;
-  ap: number;
-  accuracy: number;
+    damage: string;
+    type: string;
+    ap: number;
+    accuracy: number;
 };
 
-export type Weapon = {
-  name: string;
-  thrust?: WeaponAttack;
-  swing?: WeaponAttack;
-  size: 'pp' | 'p' | 'm' | 'g' | 'gg';
-  weight: number;
-  extras: string;
+export type Weapon = BaseItem & {
+    type: 'Arma';
+    thrust?: WeaponAttack;
+    swing?: WeaponAttack;
+    size: 'pp' | 'p' | 'm' | 'g' | 'gg';
+};
+
+export type Accessory = BaseItem & {
+    type: 'Acessório';
+    typeAndDescription: string;
+    effect: string;
+};
+
+export type Projectile = BaseItem & {
+    type: 'Projétil';
+    damage_type: string;
+    ap: number;
+    accuracy: number;
+    size: 'pp' | 'p' | 'm' | 'g' | 'gg';
+};
+
+export type GeneralItem = BaseItem & {
+    type: 'Item';
+};
+
+// Union type for any item from the database
+export type ItemFromDB = Armor | Weapon | Accessory | Projectile | GeneralItem;
+
+// Type for an item the character owns (hydrated with DB data)
+export type CharacterItem = ItemFromDB & {
+  isEquipped: boolean;
+  currentQuantity?: number;
+};
+
+
+export type ItemOwnership = {
+  itemId: string;
   equipped: boolean;
+  currentQuantity?: number;
 };
 
-export type Accessory = {
-  name: string;
-  typeAndDescription: string;
-  equipped: boolean;
-  weight: number;
-  effect: string;
-};
-
-export type Projectile = {
-  name: string;
-  type: string;
-  ap: number;
-  accuracy: number;
-  quantity: number;
-  weight: number;
-  size: 'pp' | 'p' | 'm' | 'g' | 'gg';
-  extras: string;
-};
-
+// Character Data Structure
 type Stat = { name: string; value: number };
 
 type FocusData = {
@@ -186,15 +201,7 @@ export type Character = {
     domains: SoulDomain[];
     cracks: number;
   };
-  inventory: {
-    bag: BagItem[];
-  };
-  equipment: {
-    armors: Armor[];
-    weapons: Weapon[];
-    accessories: Accessory[];
-    projectiles: Projectile[];
-  };
+  equipment: ItemOwnership[];
 };
 
 export const languages: LanguageFamily[] = [
@@ -210,3 +217,8 @@ export const languages: LanguageFamily[] = [
 export const getNextAlignmentState = (currentState: string, poles: [string, string]): string => {
     return currentState === poles[0] ? poles[1] : poles[0];
 }
+
+// Create a map for quick item lookup
+export const itemDatabase = new Map<string, ItemFromDB>(
+    allItems.items.map(item => [item.id, item as ItemFromDB])
+);

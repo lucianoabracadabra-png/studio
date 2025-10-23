@@ -1,30 +1,97 @@
 {
-    "accessories": [
+    "items": [
+        {
+            "id": "leather-jacket",
+            "name": "Jaqueta de Couro Batido",
+            "type": "Armadura",
+            "equippable": true,
+            "slashing": 1,
+            "bludgeoning": 2,
+            "piercing": 1,
+            "coverage": "Tronco, Braços",
+            "resistance": 10,
+            "durability": 12,
+            "size": "m",
+            "weight": 4,
+            "extras": "Reforçada com placas de metal"
+        },
+        {
+            "id": "hunting-knife",
+            "name": "Faca de Caça",
+            "type": "Arma",
+            "equippable": true,
+            "thrust": { "damage": "1d4", "type": "Perfurante", "ap": 3, "accuracy": 1 },
+            "swing": { "damage": "1d4", "type": "Cortante", "ap": 4, "accuracy": 0 },
+            "size": "p",
+            "weight": 0.5,
+            "extras": "Cabo de osso"
+        },
+        {
+            "id": "short-bow",
+            "name": "Arco Curto",
+            "type": "Arma",
+            "equippable": true,
+            "size": "m",
+            "weight": 1,
+            "extras": "Feito de teixo"
+        },
         {
             "id": "wolf-tooth-amulet",
             "name": "Amuleto de Dente de Lobo",
+            "type": "Acessório",
+            "equippable": true,
             "typeAndDescription": "Colar com um dente de lobo",
             "weight": 0.1,
             "effect": "+1 em testes de Intimidação"
-        }
-    ],
-    "projectiles": [
+        },
         {
             "id": "common-arrows",
             "name": "Flechas Comuns",
-            "type": "Perfurante",
+            "type": "Projétil",
+            "equippable": false,
+            "damage_type": "Perfurante",
             "ap": 3,
             "accuracy": 0,
             "quantity": 20,
             "weight": 0.05,
             "size": "m",
             "extras": "Ponta de ferro"
+        },
+        { 
+            "id": "rope-15m", 
+            "name": "Corda (15m)", 
+            "type": "Item",
+            "equippable": false,
+            "quantity": 1, 
+            "weight": 2, 
+            "extras": "Feita de cânhamo" 
+        },
+        { 
+            "id": "travel-ration", 
+            "name": "Ração de Viagem", 
+            "type": "Item",
+            "equippable": false,
+            "quantity": 5, 
+            "weight": 1, 
+            "extras": "Para 5 dias" 
+        },
+        { 
+            "id": "torch", 
+            "name": "Tocha", 
+            "type": "Item",
+            "equippable": false,
+            "quantity": 10, 
+            "weight": 0.5, 
+            "extras": "Dura 1 hora cada" 
+        },
+        { 
+            "id": "waterskin", 
+            "name": "Cantil de Água", 
+            "type": "Item",
+            "equippable": false,
+            "quantity": 1, 
+            "weight": 1.5, 
+            "extras": "Cheio" 
         }
-    ],
-    "general": [
-        { "id": "rope-15m", "name": "Corda (15m)", "quantity": 1, "weight": 2, "extras": "Feita de cânhamo" },
-        { "id": "travel-ration", "name": "Ração de Viagem", "quantity": 5, "weight": 1, "extras": "Para 5 dias" },
-        { "id": "torch", "name": "Tocha", "quantity": 10, "weight": 0.5, "extras": "Dura 1 hora cada" },
-        { "id": "waterskin", "name": "Cantil de Água", "quantity": 1, "weight": 1.5, "extras": "Cheio" }
     ]
 }
