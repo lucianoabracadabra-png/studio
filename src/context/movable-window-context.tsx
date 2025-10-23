@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useRef } from 'react';
 
 type Item = {
   id: string;
@@ -10,6 +10,7 @@ type Item = {
 
 type MovableWindowState = {
   isManagerOpen: boolean;
+  isMinimized: boolean;
   activeItems: Item[];
   position: { x: number; y: number };
 };
@@ -20,32 +21,43 @@ type MovableWindowContextType = {
   openAllEquipped: (items: Item[]) => void;
   isItemOpen: (itemId: string) => boolean;
   closeManager: () => void;
+  minimizeManager: () => void;
+  restoreManager: () => void;
   setPosition: (position: { x: number; y: number }) => void;
-} & MovableWindowState;
+} & Omit<MovableWindowState, 'isMinimized'> & { isManagerMinimized: boolean };
+
 
 const MovableWindowContext = createContext<MovableWindowContextType | undefined>(undefined);
 
 export const MovableWindowProvider = ({ children }: { children: ReactNode }) => {
   const [windowState, setWindowState] = useState<MovableWindowState>({
     isManagerOpen: false,
+    isMinimized: false,
     activeItems: [],
-    position: { x: 300, y: 100 },
+    position: { x: window.innerWidth - 420, y: 100 }, // Default to top right
   });
+  
+  const lastPosition = useRef(windowState.position);
 
   const setPosition = (position: { x: number; y: number }) => {
-    setWindowState(prev => ({ ...prev, position }));
+    setWindowState(prev => {
+        if (!prev.isMinimized) {
+            lastPosition.current = position;
+        }
+        return { ...prev, position };
+    });
   };
 
   const openItem = (item: Item) => {
     setWindowState(prev => {
       const itemExists = prev.activeItems.some(i => i.id === item.id);
       if (itemExists) {
-        // If item is already open, maybe close it or just bring to front (not implemented)
-        return { ...prev, isManagerOpen: true };
+        return { ...prev, isManagerOpen: true, isMinimized: false };
       }
       return {
         ...prev,
         isManagerOpen: true,
+        isMinimized: false,
         activeItems: [...prev.activeItems, item],
       };
     });
@@ -57,7 +69,8 @@ export const MovableWindowProvider = ({ children }: { children: ReactNode }) => 
       return {
         ...prev,
         activeItems: updatedItems,
-        isManagerOpen: updatedItems.length > 0, // Close manager if no items are left
+        isManagerOpen: updatedItems.length > 0,
+        isMinimized: updatedItems.length > 0 ? prev.isMinimized : false,
       };
     });
   };
@@ -66,12 +79,26 @@ export const MovableWindowProvider = ({ children }: { children: ReactNode }) => 
      setWindowState(prev => ({
         ...prev,
         isManagerOpen: true,
+        isMinimized: false,
         activeItems: items,
      }));
   };
 
   const closeManager = () => {
-    setWindowState(prev => ({...prev, isManagerOpen: false, activeItems: [] }));
+    setWindowState(prev => ({...prev, isManagerOpen: false, isMinimized: false, activeItems: [] }));
+  };
+
+  const minimizeManager = () => {
+    setWindowState(prev => {
+        if (!prev.isMinimized) {
+            lastPosition.current = prev.position;
+        }
+        return {...prev, isMinimized: true }
+    });
+  };
+
+  const restoreManager = () => {
+    setWindowState(prev => ({...prev, isMinimized: false, position: lastPosition.current }));
   };
 
   const isItemOpen = (itemId: string): boolean => {
@@ -81,12 +108,17 @@ export const MovableWindowProvider = ({ children }: { children: ReactNode }) => 
 
   return (
     <MovableWindowContext.Provider value={{ 
-        ...windowState, 
+        isManagerOpen: windowState.isManagerOpen,
+        isManagerMinimized: windowState.isMinimized,
+        activeItems: windowState.activeItems,
+        position: windowState.position,
         openItem, 
         closeItem,
         openAllEquipped,
         isItemOpen,
         closeManager,
+        minimizeManager,
+        restoreManager,
         setPosition 
     }}>
       {children}
