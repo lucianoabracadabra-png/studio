@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useReducer, useMemo } from 'react';
-import initialCharacterData from '@/lib/data/character-data.json';
+import initialCharacterData from '@/lib/character-data.json';
 import { itemDatabase } from '@/lib/character-data';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemFromDB, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap } from '@/lib/character-data';
@@ -122,7 +122,7 @@ type FocusAction =
 
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
   const { pilar } = action;
-  if (!state[pilar]) return state; // Safeguard
+  if (!pilar || !state[pilar]) return state; // Safeguard
 
   switch (action.type) {
     case 'SET_ATTRIBUTE': {
@@ -564,7 +564,7 @@ export function CharacterSheet() {
         hydrateCharacterItems(character.equipment)
     );
 
-    const initialFocusState: FocusState = {
+    const initialFocusState: FocusState = useMemo(() => ({
         fisico: {
             attributes: reduceArrayToState(character.focus.physical.attributes),
             skills: reduceArrayToState(character.focus.physical.skills),
@@ -583,7 +583,7 @@ export function CharacterSheet() {
             modular: reduceArrayToState(character.focus.social.artes),
             spentPoints: 0,
         },
-    };
+    }), [character.focus]);
     const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState);
 
 
@@ -830,5 +830,7 @@ export function CharacterSheet() {
         </div>
     );
 }
+
+    
 
     

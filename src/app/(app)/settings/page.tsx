@@ -1,3 +1,4 @@
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import { JsonViewer } from './_components/json-viewer';
@@ -15,10 +16,21 @@ async function getJsonData(fileName: string) {
     }
 }
 
+async function getCharData() {
+    const filePath = path.join(process.cwd(), 'src/lib', 'character-data.json');
+    try {
+        const fileContent = await fs.readFile(filePath, 'utf8');
+        return JSON.parse(fileContent);
+    } catch (error) {
+        console.error(`Error reading or parsing character-data.json:`, error);
+        return { error: `Could not load character-data.json`};
+    }
+}
+
+
 export default async function SettingsPage() {
     const dataFiles = [
         'items.json',
-        'character-data.json',
         'campaigns.json',
         'navigation.json',
         'wiki-data.json',
@@ -31,6 +43,14 @@ export default async function SettingsPage() {
             data: await getJsonData(file),
         }))
     );
+
+    const characterData = {
+        name: 'Character Data',
+        id: 'character-data',
+        data: await getCharData(),
+    };
+
+    allData.splice(2, 0, characterData);
 
     const defaultTab = allData.length > 0 ? allData[0].id : "";
 
@@ -56,3 +76,5 @@ export default async function SettingsPage() {
     </>
   );
 }
+
+    
