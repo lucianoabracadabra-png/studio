@@ -1,4 +1,26 @@
-import { CharacterSheet } from "./_components/character-sheet";
+
+'use client';
+
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const CharacterSheet = dynamic(
+  () => import('./_components/character-sheet').then(mod => mod.CharacterSheet),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    )
+  }
+);
 
 export default function CharactersPage() {
   return (
