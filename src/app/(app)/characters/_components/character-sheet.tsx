@@ -8,7 +8,7 @@ import { getNextAlignmentState, iconMap } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf, Droplets, Wind, Star, Flame, Mountain } from 'lucide-react';
+import { HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -34,7 +34,6 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 
 const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'fisico' | 'mental' | 'social' }) => {
@@ -113,94 +112,15 @@ const SkillItem = ({ name, initialValue, pilar, colorClass, onLevelChange }: { n
     );
 };
 
-type FocusPilarState = {
-  attributes: { [key: string]: number };
-  skills: { [key: string]: number };
-  modular: { [key: string]: number };
-  spentPoints: number;
-};
-
-type FocusState = {
-    fisico: FocusPilarState;
-    mental: FocusPilarState;
-    social: FocusPilarState;
-};
-
-type FocusAction =
-  | { type: 'SET_ATTRIBUTE'; pilar: keyof FocusState; payload: { name: string; level: number } }
-  | { type: 'SET_SKILL'; pilar: keyof FocusState; payload: { name: string; level: number } }
-  | { type: 'SET_MODULAR'; pilar: keyof FocusState; payload: { name: string; level: number } }
-  | { type: 'INCREMENT_SPENT'; pilar: keyof FocusState }
-  | { type: 'DECREMENT_SPENT'; pilar: keyof FocusState };
-
-
-function focusReducer(state: FocusState, action: FocusAction): FocusState {
-  const { pilar } = action;
-  if (!pilar || !state[pilar]) return state; // Safeguard
-
-  switch (action.type) {
-    case 'SET_ATTRIBUTE': {
-        const { payload } = action;
-        const currentLevel = state[pilar].attributes[payload.name];
-        const newLevel = currentLevel === payload.level ? payload.level -1 : payload.level;
-        return {
-            ...state,
-            [pilar]: {
-                ...state[pilar],
-                attributes: { ...state[pilar].attributes, [payload.name]: Math.max(0, newLevel) },
-            },
-        };
-    }
-    case 'SET_SKILL': {
-        const { payload } = action;
-        return {
-            ...state,
-            [pilar]: {
-                ...state[pilar],
-                skills: { ...state[pilar].skills, [payload.name]: payload.level },
-            },
-        };
-    }
-    case 'SET_MODULAR': {
-        const { payload } = action;
-        return {
-            ...state,
-            [pilar]: {
-                ...state[pilar],
-                modular: { ...state[pilar].modular, [payload.name]: payload.level },
-            },
-        };
-    }
-    case 'INCREMENT_SPENT': {
-      return {
-        ...state,
-        [pilar]: { ...state[pilar], spentPoints: state[pilar].spentPoints + 1 },
-      };
-    }
-    case 'DECREMENT_SPENT': {
-      return {
-        ...state,
-        [pilar]: { ...state[pilar], spentPoints: Math.max(0, state[pilar].spentPoints - 1) },
-      };
-    }
-    default:
-      return state;
-  }
-}
-
 
 const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: { 
     focusData: any, 
     title: string, 
     pilar: 'fisico' | 'mental' | 'social', 
     icon: React.ElementType,
-    state: FocusPilarState,
-    dispatch: React.Dispatch<FocusAction>
+    state: any,
+    dispatch: React.Dispatch<any>
 }) => {
-    const handleAttributeChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        dispatch({ type: 'SET_ATTRIBUTE', pilar, payload: { name, level: newLevel } });
-    };
-    
     const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
         dispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
     };
@@ -248,7 +168,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                              <AttributeItem 
                                 key={name} 
                                 name={name} 
-                                level={level}
+                                level={level as number}
                                 colorClass={pilarColorClasses[pilar].text}
                              />
                         ))}
@@ -266,7 +186,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                             <SkillItem 
                                 key={name} 
                                 name={name} 
-                                initialValue={level} 
+                                initialValue={level as number} 
                                 pilar={pilar} 
                                 colorClass={pilarColorClasses[pilar].bg}
                                 onLevelChange={handleSkillChange} 
@@ -287,7 +207,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                 <SkillItem 
                                     key={name} 
                                     name={name} 
-                                    initialValue={level} 
+                                    initialValue={level as number} 
                                     pilar={pilar} 
                                     colorClass={pilarColorClasses[pilar].bg}
                                     onLevelChange={handleModularChange}
@@ -400,7 +320,6 @@ const iconMapInventory = {
 const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
         id: item.id,
-        disabled: !item.equippable
     });
     const { openItem, isItemOpen } = useMovableWindow();
 
@@ -429,7 +348,7 @@ const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
             <Card 
                 className={cn(
                     "transition-all", 
-                    !item.equippable ? "cursor-default" : "cursor-grab hover:shadow-md", 
+                    "cursor-grab hover:shadow-md", 
                     isOpen && "border-primary shadow-lg",
                     isDragging && "shadow-xl"
                 )}
@@ -528,9 +447,9 @@ const InventorySection = ({ items }: { items: CharacterItem[] }) => {
     );
 }
 
+// Reducer logic
 const reduceArrayToState = (arr: {name: string, value: number}[]) => arr.reduce((acc, item) => ({ ...acc, [item.name]: item.value }), {});
 
-// Helper function to hydrate character items from the database
 const hydrateCharacterItems = (itemOwnerships: ItemOwnership[]): CharacterItem[] => {
     return itemOwnerships.map(ownership => {
         const baseItem = itemDatabase.get(ownership.itemId);
@@ -540,7 +459,7 @@ const hydrateCharacterItems = (itemOwnerships: ItemOwnership[]): CharacterItem[]
         }
         return {
             ...baseItem,
-            id: baseItem.id, // Ensure the final object has the id for the draggable
+            id: baseItem.id, 
             isEquipped: ownership.equipped,
             quantity: ownership.currentQuantity || baseItem.quantity,
             equippable: !!baseItem.equippable
@@ -549,44 +468,127 @@ const hydrateCharacterItems = (itemOwnerships: ItemOwnership[]): CharacterItem[]
 };
 
 
-export function CharacterSheet() {
-    const [character, setCharacter] = useState<Character>(() => {
-        const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
-        const typedData = initialCharacterData as unknown as Character;
-        if (charImage) {
-            typedData.info.imageUrl = charImage.imageUrl;
-        }
-        return typedData;
-    });
+const characterReducer = (state: Character, action: any): Character => {
+    switch (action.type) {
+        case 'SET_HEALTH': {
+            const { partId, boxIndex, newState } = action.payload;
+            const newBodyParts = { ...state.health.bodyParts };
+            const newStates = [...newBodyParts[partId].states];
+            newStates[boxIndex] = newState;
+            newBodyParts[partId] = { ...newBodyParts[partId], states: newStates };
 
+            return {
+                ...state,
+                health: { ...state.health, bodyParts: newBodyParts }
+            };
+        }
+        case 'TOGGLE_ALIGNMENT': {
+            const { axisName } = action.payload;
+            const newAlignment = state.spirit.alignment.map(axis => {
+                if (axis.name === axisName) {
+                    return { ...axis, state: getNextAlignmentState(axis.state, axis.poles) };
+                }
+                return axis;
+            });
+            return { ...state, spirit: { ...state.spirit, alignment: newAlignment } };
+        }
+        case 'TOGGLE_CRACKS': {
+            const { index } = action.payload;
+            const currentCracks = state.soul.cracks;
+            const newCracks = (index + 1) === currentCracks ? currentCracks - 1 : index + 1;
+            return {
+                ...state,
+                soul: { ...state.soul, cracks: Math.max(0, newCracks) }
+            };
+        }
+        case 'SET_SKILL': {
+            const { pilar, name, level } = action.payload;
+            const focusPilar = state.focus[pilar];
+            const newSkills = focusPilar.skills.map(skill => 
+                skill.name === name ? { ...skill, value: level } : skill
+            );
+            return {
+                ...state,
+                focus: {
+                    ...state.focus,
+                    [pilar]: { ...focusPilar, skills: newSkills }
+                }
+            };
+        }
+        case 'SET_MODULAR': {
+            const { pilar, name, level } = action.payload;
+            const pilarKey = pilar === 'fisico' ? 'treinamentos' : pilar === 'mental' ? 'ciencias' : 'artes';
+            const focusPilar = state.focus[pilar];
+            const newModulars = (focusPilar[pilarKey] as any[]).map(mod => 
+                mod.name === name ? { ...mod, value: level } : mod
+            );
+             return {
+                ...state,
+                focus: {
+                    ...state.focus,
+                    [pilar]: { ...focusPilar, [pilarKey]: newModulars }
+                }
+            };
+        }
+        case 'INCREMENT_SPENT': {
+            // Placeholder, not implemented in this reducer for now
+            return state;
+        }
+        case 'DECREMENT_SPENT': {
+             // Placeholder, not implemented in this reducer for now
+            return state;
+        }
+        case 'SET_ITEMS': {
+            return { ...state, equipment: action.payload };
+        }
+        default:
+            return state;
+    }
+};
+
+const initialFocusState = (character: Character) => ({
+    fisico: {
+        attributes: reduceArrayToState(character.focus.physical.attributes),
+        skills: reduceArrayToState(character.focus.physical.skills),
+        modular: reduceArrayToState(character.focus.physical.treinamentos),
+        spentPoints: 0,
+    },
+    mental: {
+        attributes: reduceArrayToState(character.focus.mental.attributes),
+        skills: reduceArrayToState(character.focus.mental.skills),
+        modular: reduceArrayToState(character.focus.mental.ciencias),
+        spentPoints: 0,
+    },
+    social: {
+        attributes: reduceArrayToState(character.focus.social.attributes),
+        skills: reduceArrayToState(character.focus.social.skills),
+        modular: reduceArrayToState(character.focus.social.artes),
+        spentPoints: 0,
+    },
+});
+
+
+export function CharacterSheet() {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     
-    // This state will hold the full item objects for rendering
+    const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData as unknown as Character, (initial) => {
+        const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
+        if (charImage) {
+            initial.info.imageUrl = charImage.imageUrl;
+        }
+        return initial;
+    });
+
     const [characterItems, setCharacterItems] = useState<CharacterItem[]>(() => 
         hydrateCharacterItems(character.equipment)
     );
+    
+    const [focusState, setFocusState] = useState(() => initialFocusState(character));
 
-    const initialFocusState: FocusState = useMemo(() => ({
-        fisico: {
-            attributes: reduceArrayToState(character.focus.physical.attributes),
-            skills: reduceArrayToState(character.focus.physical.skills),
-            modular: reduceArrayToState(character.focus.physical.treinamentos),
-            spentPoints: 0,
-        },
-        mental: {
-            attributes: reduceArrayToState(character.focus.mental.attributes),
-            skills: reduceArrayToState(character.focus.mental.skills),
-            modular: reduceArrayToState(character.focus.mental.ciencias),
-            spentPoints: 0,
-        },
-        social: {
-            attributes: reduceArrayToState(character.focus.social.attributes),
-            skills: reduceArrayToState(character.focus.social.skills),
-            modular: reduceArrayToState(character.focus.social.artes),
-            spentPoints: 0,
-        },
-    }), [character.focus]);
-    const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState);
+    useEffect(() => {
+        setFocusState(initialFocusState(character));
+    }, [character.focus]);
+
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -598,46 +600,23 @@ export function CharacterSheet() {
 
 
     const handleHealthChange = (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => {
-        setCharacter(prev => {
-            const newBodyParts = { ...prev.health.bodyParts };
-            const newStates = [...newBodyParts[partId].states];
-            newStates[boxIndex] = newState;
-            newBodyParts[partId] = { ...newBodyParts[partId], states: newStates };
-
-            return {
-                ...prev,
-                health: {
-                    ...prev.health,
-                    bodyParts: newBodyParts
-                }
-            };
-        });
+        characterDispatch({ type: 'SET_HEALTH', payload: { partId, boxIndex, newState }});
     };
 
     const handleAlignmentToggle = (axisName: string) => {
-        setCharacter(prev => {
-            const newAlignment = prev.spirit.alignment.map(axis => {
-                if (axis.name === axisName) {
-                    return { ...axis, state: getNextAlignmentState(axis.state, axis.poles) };
-                }
-                return axis;
-            });
-            return { ...prev, spirit: { ...prev.spirit, alignment: newAlignment } };
-        })
+        characterDispatch({ type: 'TOGGLE_ALIGNMENT', payload: { axisName }});
     }
 
     const handleCracksToggle = (index: number) => {
-        setCharacter(prev => {
-            const currentCracks = prev.soul.cracks;
-            const newCracks = (index + 1) === currentCracks ? currentCracks - 1 : index + 1;
-            return {
-                ...prev,
-                soul: {
-                    ...prev.soul,
-                    cracks: Math.max(0, newCracks),
-                },
-            };
-        });
+        characterDispatch({ type: 'TOGGLE_CRACKS', payload: { index }});
+    };
+    
+    const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
+        characterDispatch({ type: 'SET_SKILL', payload: { pilar, name, level: newLevel } });
+    };
+
+    const handleModularChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
+        characterDispatch({ type: 'SET_MODULAR', payload: { pilar, name, level: newLevel } });
     };
     
     function findContainer(id: string | number) {
@@ -661,12 +640,13 @@ export function CharacterSheet() {
         if (!activeContainer || !overContainer || activeContainer !== overContainer) {
             return;
         }
-    
-        setCharacterItems((items) => {
-            const oldIndex = items.findIndex((item) => item.id === active.id);
-            const newIndex = items.findIndex((item) => item.id === over.id);
-            return arrayMove(items, oldIndex, newIndex);
-        });
+
+        const activeIndex = characterItems.findIndex((item) => item.id === active.id);
+        const overIndex = characterItems.findIndex((item) => item.id === over.id);
+        
+        if (activeIndex !== overIndex) {
+            setCharacterItems((items) => arrayMove(items, activeIndex, overIndex));
+        }
     }
 
     function handleDragOver(event: DragOverEvent) {
@@ -677,38 +657,51 @@ export function CharacterSheet() {
         const overId = over.id;
     
         const activeContainer = findContainer(activeId);
-        const overContainer = findContainer(overId);
-    
-        if (!activeContainer || !overContainer || activeContainer === overContainer) {
-            return;
+        let overContainer = findContainer(overId);
+        
+        if (!overContainer) {
+             if (overId === 'equipped' || overId === 'inventory') {
+                overContainer = overId as string;
+            } else {
+                return;
+            }
         }
     
-        const activeItem = characterItems.find(i => i.id === activeId);
-        if (!activeItem) return;
-    
-        const newEquippedState = overContainer === 'equipped';
-    
-        if (newEquippedState && !activeItem.equippable) {
+        if (!activeContainer || activeContainer === overContainer) {
             return;
         }
     
         setCharacterItems(prevItems => {
             const activeIndex = prevItems.findIndex(i => i.id === activeId);
-            if (activeIndex !== -1) {
-                prevItems[activeIndex].isEquipped = newEquippedState;
-                return [...prevItems]; // Return a new array to trigger re-render
-            }
-            return prevItems;
-        });
+            const overIndex = prevItems.findIndex(i => i.id === overId);
+            const newEquippedState = overContainer === 'equipped';
 
-        setCharacter(prev => {
-            const newEquipment = prev.equipment.map(ownership => {
-                if (ownership.itemId === activeId) {
-                    return { ...ownership, equipped: newEquippedState };
-                }
-                return ownership;
+            if(activeIndex === -1) return prevItems;
+
+            const activeItem = prevItems[activeIndex];
+
+            if (newEquippedState && !activeItem.equippable) {
+                return prevItems; // Don't allow non-equippable items to be equipped
+            }
+            
+            // Update item's equipped state
+            prevItems[activeIndex].isEquipped = newEquippedState;
+
+            // Update underlying character data
+             characterDispatch({
+                type: 'SET_ITEMS',
+                payload: prevItems.map(item => ({
+                    itemId: item.id,
+                    equipped: item.isEquipped,
+                    currentQuantity: item.quantity
+                }))
             });
-            return { ...prev, equipment: newEquipment };
+
+            // Re-sort the array visually for immediate feedback
+            if (overIndex !== -1) {
+                 return arrayMove(prevItems, activeIndex, overIndex);
+            }
+            return [...prevItems];
         });
     }
     
@@ -743,7 +736,7 @@ export function CharacterSheet() {
                                 return (
                                 <TooltipProvider key={d.name}>
                                     <Tooltip>
-                                        <TooltipTrigger>
+                                        <TooltipTrigger asChild>
                                             <div className="relative">
                                                 <Book
                                                     icon={Icon}
@@ -863,13 +856,13 @@ export function CharacterSheet() {
                             <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={characterDispatch} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
-                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={characterDispatch} />
                         </TabsContent>
                         <TabsContent value="social" className='pt-6'>
-                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={characterDispatch} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

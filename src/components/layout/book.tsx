@@ -39,9 +39,14 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             onClick={onClick}
         >
-            {/* Spine */}
-            <div 
+            {/* Spine with Glow */}
+            <motion.div 
                 className="absolute left-0 top-0 bottom-0 w-[4px] bg-black/30"
+                animate={{
+                    boxShadow: isActive ? `0px 0px 8px hsl(${colorHsl})` : 'none',
+                    backgroundColor: isActive ? `hsl(${colorHsl})` : 'rgba(0,0,0,0.3)'
+                }}
+                transition={{ duration: 0.3 }}
             />
             
             <Icon className={cn(
@@ -75,5 +80,3 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
         </TooltipProvider>
     );
 };
-
-    
