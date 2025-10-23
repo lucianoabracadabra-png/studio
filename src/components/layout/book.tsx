@@ -18,41 +18,39 @@ interface BookProps {
 export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true, showLabel = true, onClick }: BookProps) => {
 
     const bookContent = (
-        <motion.div 
-            className="relative w-12 h-[68px] rounded-md overflow-hidden group/book"
-            whileHover={isClickable ? "hover" : "inactive"}
-            animate={isActive ? "active" : "inactive"}
-            onClick={onClick}
-            variants={{
-                inactive: { scale: 1 },
-                active: { scale: 1.05 },
-                hover: { scale: 1.1 }
+         <motion.div
+            className={cn(
+                "relative w-12 h-16 rounded-md flex items-center justify-center cursor-pointer group/book transition-all",
+                "border-2"
+            )}
+            style={{
+                backgroundColor: `hsl(${colorHsl} / ${isActive ? 0.25 : 0.15})`,
+                borderColor: `hsl(${colorHsl} / ${isActive ? 0.8 : 0.4})`,
             }}
+            whileHover={isClickable ? { 
+                scale: 1.1,
+                borderColor: `hsl(${colorHsl})`,
+                backgroundColor: `hsl(${colorHsl} / 0.35)`
+            } : {}}
+            animate={isActive ? {
+                scale: 1.05,
+                borderColor: `hsl(${colorHsl})`,
+            } : {}}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            onClick={onClick}
         >
-            {/* Main Book Body */}
-            <div 
-                className="absolute inset-0 rounded-md flex items-center justify-center transition-colors"
-                style={{ 
-                    backgroundColor: `hsl(${colorHsl} / ${isActive ? 0.25 : 0.15})`,
-                    borderColor: `hsl(${colorHsl} / ${isActive ? 0.8 : 0.4})`,
-                    borderWidth: '2px'
-                }}
-            >
-                <Icon className={cn(
-                    "h-6 w-6 transition-colors duration-300", 
-                    isActive ? "text-white" : "text-neutral-400",
-                    "group-hover/book:text-white"
-                )} />
-            </div>
-
             {/* Spine */}
             <div 
-                className="absolute left-0 top-0 h-full w-[4px] rounded-l-sm"
-                style={{ backgroundColor: `hsl(${colorHsl})` }}
+                className="absolute left-0 top-0 bottom-0 w-[4px] bg-black/30"
             />
+            
+            <Icon className={cn(
+                "h-6 w-6 transition-colors duration-300", 
+                isActive ? "text-white" : "text-neutral-400",
+                "group-hover/book:text-white"
+            )} />
 
-             {showLabel && (
+            {showLabel && (
                 <div className="absolute -bottom-4 left-0 right-0 text-center text-xs text-muted-foreground">
                     {label}
                 </div>
@@ -68,9 +66,7 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <div className={cn("relative cursor-pointer", isClickable && "group/book")}>
-                        {bookContent}
-                    </div>
+                    {bookContent}
                 </TooltipTrigger>
                 <TooltipContent side="right">
                     <p>{label}</p>
@@ -79,3 +75,5 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
         </TooltipProvider>
     );
 };
+
+    
