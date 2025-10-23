@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle, CardFooter, CardContent } from "@/components/ui/card";
 import wikiData from "@/lib/data/wiki-data.json";
 import { iconMap } from "@/lib/wiki-data";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BookCopy } from "lucide-react";
 
 export default function WikiPage() {
   const { portals } = wikiData;
@@ -15,8 +15,8 @@ export default function WikiPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {portals.map((portal, i) => {
-          const Icon = iconMap[portal.icon];
+        {portals.map((portal) => {
+          const Icon = iconMap[portal.icon as keyof typeof iconMap] || BookCopy;
           const href = portal.href || `/wiki/${portal.id}`;
           return (
             <Link href={href} key={portal.id} className="block group">

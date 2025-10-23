@@ -1,5 +1,5 @@
 'use client';
-import { BookCopy, User, DraftingCompass, ScrollText, Map, type LucideIcon } from "lucide-react";
+import { BookCopy, User, DraftingCompass, ScrollText, Map, type LucideIcon, BookOpen } from "lucide-react";
 import wikiData from '@/lib/data/wiki-data.json';
 
 export type WikiPage = {
@@ -27,7 +27,8 @@ export const iconMap: { [key: string]: LucideIcon } = {
     User,
     DraftingCompass,
     ScrollText,
-    Map
+    Map,
+    BookOpen
 };
 
 export const pointsOfInterest: { id: string; name: string; position: { x: number; y: number; }; portalId: string; }[] = wikiData.pointsOfInterest;
