@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, ReactNode, useRef } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useRef, useEffect } from 'react';
 
 type Item = {
   id: string;
@@ -34,10 +34,19 @@ export const MovableWindowProvider = ({ children }: { children: ReactNode }) => 
     isManagerOpen: false,
     isMinimized: false,
     activeItems: [],
-    position: { x: window.innerWidth - 420, y: 100 }, // Default to top right
+    position: { x: 0, y: 0 }, // Initialize with safe values
   });
   
   const lastPosition = useRef(windowState.position);
+
+  // Set initial position only on the client
+  useEffect(() => {
+    setWindowState(prev => ({
+      ...prev,
+      position: { x: window.innerWidth - 420, y: 100 }
+    }));
+  }, []);
+
 
   const setPosition = (position: { x: number; y: number }) => {
     setWindowState(prev => {
