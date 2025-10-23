@@ -19,7 +19,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 
 const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'fisico' | 'mental' | 'social' }) => {
@@ -381,11 +395,21 @@ const iconMapInventory = {
     'Item': <Info />
 };
 
-const InventoryItemCard = ({ item }: { item: CharacterItem }) => {
+const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ 
+        id: item.id,
+        disabled: !item.equippable
+    });
     const { openItem, isItemOpen } = useMovableWindow();
 
     const type = item.type;
-    const isOpen = isItemOpen(item.name);
+    const isOpen = isItemOpen(item.id);
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 'auto',
+    };
 
     const handleOpen = () => {
         if (!item.equippable) return;
@@ -395,33 +419,40 @@ const InventoryItemCard = ({ item }: { item: CharacterItem }) => {
         else if (type === 'Acessório') content = <AccessoryCardDetails accessory={item as Accessory} />;
         else return;
 
-        openItem({ id: item.name, title: item.name, content });
+        openItem({ id: item.id, title: item.name, content });
     };
     
     return (
-        <Card 
-            className={cn("transition-all", !item.equippable ? "cursor-default" : "cursor-grab hover:shadow-md", isOpen && "border-primary shadow-lg" )}
-            onClick={item.equippable ? handleOpen : undefined}
-        >
-            <CardContent className="p-3 flex items-center justify-between">
-                <div className='flex items-center gap-3'>
-                    <span className={cn("text-accent", isOpen && "text-primary")}>
-                         {iconMapInventory[type]}
-                    </span>
-                    <div>
-                        <p className="font-semibold">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">{type} {item.quantity && item.quantity > 1 && `(x${item.quantity})`}</p>
-                    </div>
-                </div>
-
-                {!item.equippable && (
-                    <div className='text-right'>
-                        <p className='font-mono text-sm'>{item.weight.toFixed(2)}kg</p>
-                        {item.quantity && item.quantity > 1 && <p className='text-xs text-muted-foreground'>Total: {(item.weight * item.quantity).toFixed(2)}kg</p>}
-                    </div>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <Card 
+                className={cn(
+                    "transition-all", 
+                    !item.equippable ? "cursor-default" : "cursor-grab hover:shadow-md", 
+                    isOpen && "border-primary shadow-lg",
+                    isDragging && "shadow-xl"
                 )}
-            </CardContent>
-        </Card>
+                onClick={item.equippable ? handleOpen : undefined}
+            >
+                <CardContent className="p-3 flex items-center justify-between">
+                    <div className='flex items-center gap-3'>
+                        <span className={cn("text-accent", isOpen && "text-primary")}>
+                            {iconMapInventory[type]}
+                        </span>
+                        <div>
+                            <p className="font-semibold">{item.name}</p>
+                            <p className="text-sm text-muted-foreground">{type} {item.quantity && item.quantity > 1 && `(x${item.quantity})`}</p>
+                        </div>
+                    </div>
+
+                    {!item.equippable && (
+                        <div className='text-right'>
+                            <p className='font-mono text-sm'>{item.weight.toFixed(2)}kg</p>
+                            {item.quantity && item.quantity > 1 && <p className='text-xs text-muted-foreground'>Total: {(item.weight * item.quantity).toFixed(2)}kg</p>}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
     );
 };
 
@@ -441,6 +472,8 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
         }).filter(Boolean) as { id: string; title: string; content: React.ReactNode; }[];
         openAllEquipped(allEquippedItems);
     };
+    
+    const itemIds = useMemo(() => items.map(i => i.id), [items]);
 
     return (
         <Card>
@@ -453,40 +486,24 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
                     </Button>
                 </div>
             </CardHeader>
-            <Droppable droppableId="equipped">
-                {(provided, snapshot) => (
-                    <CardContent 
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg", snapshot.isDraggingOver && "bg-primary/10")}
-                    >
-                         {items.length > 0 ? items.map((item, index) => (
-                            <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={false}>
-                                {(provided, snapshot) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={{...provided.draggableProps.style}}
-                                        className={cn(snapshot.isDragging && "shadow-xl")}
-                                    >
-                                        <InventoryItemCard item={item} />
-                                    </div>
-                                )}
-                            </Draggable>
-                         )) : (
-                            !snapshot.isDraggingOver && <p className="text-xs text-center text-muted-foreground col-span-3 py-4">Nenhum item equipado. Arraste itens do inventário para cá.</p>
-                         )}
-                         {provided.placeholder}
-                    </CardContent>
-                )}
-            </Droppable>
+            <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+                <CardContent 
+                    className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg")}
+                >
+                    {items.length > 0 ? items.map(item => (
+                       <SortableInventoryItem key={item.id} item={item} />
+                    )) : (
+                        <p className="text-xs text-center text-muted-foreground col-span-3 py-4">Nenhum item equipado. Arraste itens do inventário para cá.</p>
+                    )}
+                </CardContent>
+            </SortableContext>
         </Card>
     );
 }
 
 const InventorySection = ({ items }: { items: CharacterItem[] }) => {
     const totalWeight = items.reduce((acc, item) => acc + (item.weight * (item.quantity || 1)), 0);
+    const itemIds = useMemo(() => items.map(i => i.id), [items]);
 
     return (
         <Card>
@@ -496,32 +513,15 @@ const InventorySection = ({ items }: { items: CharacterItem[] }) => {
                     <p className="font-mono text-muted-foreground flex items-center gap-2 text-sm"><Info className="h-4 w-4"/> {totalWeight.toFixed(2)}kg</p>
                 </div>
             </CardHeader>
-            <Droppable droppableId="inventory">
-                {(provided, snapshot) => (
-                     <CardContent 
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg", snapshot.isDraggingOver && "bg-primary/10")}
-                    >
-                         {items.map((item, index) => (
-                            <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={!item.equippable}>
-                                {(provided, snapshot) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={{...provided.draggableProps.style}}
-                                        className={cn(snapshot.isDragging && "shadow-xl")}
-                                    >
-                                        <InventoryItemCard item={item} />
-                                    </div>
-                                )}
-                             </Draggable>
-                        ))}
-                        {provided.placeholder}
-                    </CardContent>
-                )}
-            </Droppable>
+             <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+                 <CardContent 
+                    className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg")}
+                >
+                    {items.map(item => (
+                        <SortableInventoryItem key={item.id} item={item} />
+                    ))}
+                </CardContent>
+            </SortableContext>
         </Card>
     );
 }
@@ -544,15 +544,6 @@ const hydrateCharacterItems = (itemOwnerships: ItemOwnership[]): CharacterItem[]
             equippable: !!baseItem.equippable
         };
     }).filter((item): item is CharacterItem => item !== null);
-};
-
-// This component will only be rendered on the client.
-const DndWrapper = ({ children }: { children: React.ReactNode }) => {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-    return isClient ? <>{children}</> : null;
 };
 
 
@@ -595,6 +586,14 @@ export function CharacterSheet() {
     }), [character.focus]);
     const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        })
+    );
+
 
     const handleHealthChange = (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => {
         setCharacter(prev => {
@@ -625,49 +624,49 @@ export function CharacterSheet() {
         })
     }
     
-    const handleDragEnd = (result: DropResult) => {
-        const { source, destination, draggableId } = result;
+    function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+    
+        if (over && active.id !== over.id) {
+            const activeItem = characterItems.find(i => i.id === active.id);
+            if (!activeItem) return;
 
-        // Exit if dropped outside a valid area
-        if (!destination) {
-            return;
-        }
+            // Determine the container of the `over` item
+            const overContainer = equippedItems.some(i => i.id === over.id) ? 'equipped' : 'inventory';
 
-        // Find the dragged item in our state
-        const draggedItem = characterItems.find(item => item.id === draggableId);
-        if (!draggedItem) return;
+            // Find the dragged item and its original container
+            const sourceContainer = activeItem.isEquipped ? 'equipped' : 'inventory';
+            
+            // Check if a non-equippable item is being moved to equipped
+            if (overContainer === 'equipped' && !activeItem.equippable) {
+                return;
+            }
 
-        // If trying to equip a non-equippable item, do nothing
-        if (destination.droppableId === 'equipped' && !draggedItem.equippable) {
-            return;
-        }
+            // Update item's equipped status
+            const newEquippedState = overContainer === 'equipped';
+    
+            setCharacterItems(items => {
+                const oldIndex = items.findIndex(i => i.id === active.id);
+                const newIndex = items.findIndex(i => i.id === over.id);
+                
+                // Update the single item's equipped status
+                items[oldIndex].isEquipped = newEquippedState;
 
-        // If dropped in the same place, do nothing
-        if (source.droppableId === destination.droppableId && source.index === destination.index) {
-            return;
-        }
-        
-        // Update the item's equipped status based on the destination
-        const newEquippedState = destination.droppableId === 'equipped';
-
-        // Update the character's core data (the source of truth)
-        setCharacter(prev => {
-            const newEquipment = prev.equipment.map(ownership => {
-                if (ownership.itemId === draggableId) {
-                    return { ...ownership, equipped: newEquippedState };
-                }
-                return ownership;
+                return arrayMove(items, oldIndex, newIndex);
             });
-            return { ...prev, equipment: newEquipment };
-        });
 
-        // Update the rendered item state
-        setCharacterItems(prevItems => 
-            prevItems.map(item => 
-                item.id === draggableId ? { ...item, isEquipped: newEquippedState } : item
-            )
-        );
-    };
+             // Update the character's core data (the source of truth)
+            setCharacter(prev => {
+                const newEquipment = prev.equipment.map(ownership => {
+                    if (ownership.itemId === active.id) {
+                        return { ...ownership, equipped: newEquippedState };
+                    }
+                    return ownership;
+                });
+                return { ...prev, equipment: newEquipment };
+            });
+        }
+    }
     
     // Memoized lists for rendering
     const equippedItems = useMemo(() => characterItems.filter(item => item.isEquipped), [characterItems]);
@@ -832,12 +831,23 @@ export function CharacterSheet() {
                 </CardContent>
             </Card>
              
-            <DndWrapper>
-                <DragDropContext onDragEnd={handleDragEnd}>
-                    <EquippedSection items={equippedItems} />
-                    <InventorySection items={inventoryItems} />
-                </DragDropContext>
-            </DndWrapper>
+            <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <EquippedSection items={equippedItems} />
+                <InventorySection items={inventoryItems} />
+            </DndContext>
         </div>
     );
 }
+
+// This component will only be rendered on the client.
+const DndWrapper = ({ children }: { children: React.ReactNode }) => {
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+    return isClient ? <>{children}</> : null;
+};
