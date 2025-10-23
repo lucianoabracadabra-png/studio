@@ -90,22 +90,15 @@ const AttributeItem = ({ name, level, colorClass }: { name: string; level: numbe
 };
 
 
-const SkillItem = ({ name, initialValue, pilar, colorClass, onLevelChange }: { name: string; initialValue: number, pilar: 'fisico' | 'mental' | 'social', colorClass: string, onLevelChange: (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
-    
-    const handleDotClick = (newLevel: number) => {
-        const finalLevel = newLevel === initialValue ? newLevel - 1 : newLevel;
-        onLevelChange(pilar, name, Math.max(0, finalLevel));
-    };
-
+const SkillItem = ({ name, value, colorClass }: { name: string; value: number, colorClass: string }) => {
     return (
-         <div className="flex justify-between items-center py-1">
+        <div className="flex justify-between items-center py-1">
             <span className="text-foreground">{name}</span>
             <div className='flex gap-1.5 items-center'>
                 {[...Array(7)].map((_, i) => (
-                    <button
+                    <div
                         key={i}
-                        className={cn('w-3 h-3 bg-muted cursor-pointer transition-all rounded-sm transform rotate-45', { [colorClass]: i < initialValue })}
-                        onClick={() => handleDotClick(i + 1)}
+                        className={cn('w-3 h-3 bg-muted rounded-sm transform rotate-45', { [colorClass]: i < value })}
                     />
                 ))}
             </div>
@@ -122,13 +115,6 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
     state: any,
     dispatch: React.Dispatch<any>
 }) => {
-    const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        dispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
-    };
-
-    const handleModularChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        dispatch({ type: 'SET_MODULAR', pilar, payload: { name, level: newLevel } });
-    };
 
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
     const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
@@ -180,44 +166,40 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             <div className="md:col-span-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle className='text-base'>Perícias</CardTitle>
+                        <CardTitle className='text-base'>Habilidades</CardTitle>
                     </CardHeader>
-                    <CardContent className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
-                        {Object.entries(state.skills).map(([name, level]) => (
-                            <SkillItem 
-                                key={name} 
-                                name={name} 
-                                initialValue={level as number} 
-                                pilar={pilar} 
-                                colorClass={pilarColorClasses[pilar].bg}
-                                onLevelChange={handleSkillChange} 
-                            />
-                        ))}
-                    </CardContent>
-                </Card>
-            </div>
-
-            {modularSkills && (
-                <div className="md:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className='text-base'>{modularSkillsTitle}</CardTitle>
-                        </CardHeader>
-                        <CardContent className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
-                            {Object.entries(state.modular).map(([name, level]) => (
+                    <CardContent>
+                         <h4 className="text-sm font-semibold text-muted-foreground mb-2">Perícias</h4>
+                        <div className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
+                            {Object.entries(state.skills).map(([name, value]) => (
                                 <SkillItem 
                                     key={name} 
                                     name={name} 
-                                    initialValue={level as number} 
-                                    pilar={pilar} 
+                                    value={value as number}
                                     colorClass={pilarColorClasses[pilar].bg}
-                                    onLevelChange={handleModularChange}
                                 />
                             ))}
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
+                        </div>
+                        
+                        {modularSkills && (
+                            <>
+                                <Separator className='my-4' />
+                                <h4 className="text-sm font-semibold text-muted-foreground mb-2">{modularSkillsTitle}</h4>
+                                <div className='md:grid md:grid-cols-2 md:gap-x-4 divide-y divide-border'>
+                                    {Object.entries(state.modular).map(([name, value]) => (
+                                        <SkillItem 
+                                            key={name} 
+                                            name={name} 
+                                            value={value as number}
+                                            colorClass={pilarColorClasses[pilar].bg}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }
@@ -726,8 +708,6 @@ export function CharacterSheet() {
             const activeItem = prevItems[activeIndex];
 
             if (newEquippedState && !activeItem.equippable) {
-                // Technically this state should not be reachable if drag is disabled
-                // But as a safeguard, we prevent the state update.
                 return prevItems;
             }
             
