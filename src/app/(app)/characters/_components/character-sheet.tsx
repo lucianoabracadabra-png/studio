@@ -462,7 +462,7 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
                         className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg", snapshot.isDraggingOver && "bg-primary/10")}
                     >
                          {items.length > 0 ? items.map((item, index) => (
-                            <Draggable key={item.id} draggableId={item.id} index={index}>
+                            <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => (
                                     <div
                                         ref={provided.innerRef}
@@ -834,3 +834,4 @@ export function CharacterSheet() {
     
 
     
+
