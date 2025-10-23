@@ -58,9 +58,9 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
                     borderRight: `2px solid hsl(${colorHsl} / 0.15)`,
                 }}
                 variants={{
-                    inactive: { rotateY: 0 },
-                    active: { rotateY: -30 },
-                    hover: { rotateY: -60 }
+                    inactive: { },
+                    active: { },
+                    hover: { }
                 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >

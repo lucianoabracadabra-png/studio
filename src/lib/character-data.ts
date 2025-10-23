@@ -324,7 +324,7 @@ export const characterData: Character = {
       { name: 'Ar', level: 1, color: '45 93% 60%', icon: Wind },
       { name: 'Anima', level: 1, color: '265 90% 70%', icon: Star },
       { name: 'Fogo', level: 1, color: '0 90% 70%', icon: Flame },
-      { name: 'Terra', level: 1, color: '30 90% 60%', icon: Mountain },
+      { name: 'Terra', level: 1, color: '120 60% 40%', icon: Mountain },
     ],
     cracks: 3,
   },
