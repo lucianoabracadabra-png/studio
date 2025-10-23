@@ -17,12 +17,10 @@ async function getJsonData(fileName: string) {
 
 export default async function SettingsPage() {
     const dataFiles = [
-        'armors.json',
-        'campaigns.json',
-        'character-data.json',
         'items.json',
+        'character-data.json',
+        'campaigns.json',
         'navigation.json',
-        'weapons.json',
         'wiki-data.json',
     ];
 
@@ -44,7 +42,7 @@ export default async function SettingsPage() {
       </p>
 
        <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {allData.map(file => (
                     <TabsTrigger key={file.id} value={file.id}>{file.name}</TabsTrigger>
                 ))}
