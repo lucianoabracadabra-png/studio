@@ -71,6 +71,7 @@ export function SidebarNav() {
                             icon={link.icon}
                             colorHsl={link.colorHue}
                             isActive={pathname.startsWith(link.href)}
+                            showLabel={false}
                         />
                     </Link>
                 ))}
@@ -84,6 +85,7 @@ export function SidebarNav() {
                             icon={link.icon}
                             colorHsl={link.colorHue}
                             isActive={pathname.startsWith(link.href)}
+                            showLabel={false}
                         />
                     </Link>
                 ))}
@@ -93,12 +95,14 @@ export function SidebarNav() {
           <div className='flex-grow'></div>
           <nav className="flex flex-col items-center gap-4">
               <Link href="/settings">
-                <Book label="Configurações" icon={Settings} colorHsl={'240 10% 70%'} isActive={pathname.startsWith('/settings')} />
+                <Book label="Configurações" icon={Settings} colorHsl={'240 10% 70%'} isActive={pathname.startsWith('/settings')} showLabel={false} />
               </Link>
               <Link href={profileLink.href}>
-                <Book label={profileLink.label} icon={profileLink.icon} colorHsl={profileLink.colorHue} isActive={pathname.startsWith(profileLink.href)} />
+                <Book label={profileLink.label} icon={profileLink.icon} colorHsl={profileLink.colorHue} isActive={pathname.startsWith(profileLink.href)} showLabel={false} />
               </Link>
           </nav>
       </div>
   );
 }
+
+    
