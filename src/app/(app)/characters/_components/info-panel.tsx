@@ -15,7 +15,7 @@ type InfoPanelProps = {
     onAlignmentToggle: (axisName: string) => void;
 };
 
-const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
+export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
     <Popover>
         <PopoverTrigger asChild>
              <Button variant="outline" className="text-foreground justify-start text-left h-auto">
