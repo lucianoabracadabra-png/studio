@@ -31,7 +31,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     };
 
     const pilarColorClass = {
-        físico: 'text-orange-500',
+        fisico: 'text-orange-500',
         mental: 'text-blue-500',
         social: 'text-green-500',
     };
@@ -119,6 +119,8 @@ type FocusAction =
 
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
   const { pilar } = action;
+  if (!state[pilar]) return state; // Safeguard
+
   switch (action.type) {
     case 'SET_ATTRIBUTE': {
         const { payload } = action;
@@ -173,25 +175,25 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
 const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: { 
     focusData: any, 
     title: string, 
-    pilar: 'físico' | 'mental' | 'social', 
+    pilar: 'fisico' | 'mental' | 'social', 
     icon: React.ElementType,
     state: FocusPilarState,
     dispatch: React.Dispatch<FocusAction>
 }) => {
-    const handleAttributeChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
+    const handleAttributeChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
         dispatch({ type: 'SET_ATTRIBUTE', pilar, payload: { name, level: newLevel } });
     };
     
-    const handleSkillChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
+    const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
         dispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
     };
 
-    const handleModularChange = (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => {
+    const handleModularChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
         dispatch({ type: 'SET_MODULAR', pilar, payload: { name, level: newLevel } });
     };
 
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
-    const modularSkillsTitle = pilar === 'físico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
+    const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
 
     const resource = focusData.vigor || focusData.focus || focusData.grace;
     
@@ -199,7 +201,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
     const currentResourceValue = maxResource - state.spentPoints;
 
     const pilarColorClasses = {
-        físico: { text: 'text-orange-500', bg: 'bg-orange-500' },
+        fisico: { text: 'text-orange-500', bg: 'bg-orange-500' },
         mental: { text: 'text-blue-500', bg: 'bg-blue-500' },
         social: { text: 'text-green-500', bg: 'bg-green-500' },
     };
@@ -637,37 +639,72 @@ export function CharacterSheet() {
 
                 <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
-                    <CardContent className="space-y-6 flex justify-center items-end gap-2">
-                         {spiritBooks.map(p => {
-                            const Icon = iconMap[p.icon as keyof typeof iconMap];
-                            return (
-                                <TooltipProvider key={p.name}>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <div className="relative">
-                                                <Book
-                                                    icon={Icon}
-                                                    colorHsl={p.colorHsl}
-                                                    isClickable={false}
-                                                    showLabel={false}
-                                                    label={p.name}
-                                                    isActive={p.value > 0}
-                                                />
-                                                {p.value > 0 && (
-                                                    <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                        <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                            {p.value}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p className='font-bold'>{p.name}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            )})}
+                    <CardContent className="space-y-4">
+                        <div className="flex justify-center items-end gap-2 pt-2">
+                            {character.spirit.personality.map(p => {
+                                const Icon = iconMap[p.icon as keyof typeof iconMap];
+                                return (
+                                    <TooltipProvider key={p.name}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <div className="relative">
+                                                    <Book
+                                                        icon={Icon}
+                                                        colorHsl={p.colorHsl}
+                                                        isClickable={false}
+                                                        showLabel={false}
+                                                        label={p.name}
+                                                        isActive={p.value > 0}
+                                                    />
+                                                    {p.value > 0 && (
+                                                        <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                            <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                                {p.value}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p className='font-bold'>{p.name}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                )})}
+                        </div>
+                        <Separator />
+                         <div className="flex justify-center items-end gap-2 pt-2">
+                            {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
+                                const Icon = iconMap[p.icon as keyof typeof iconMap];
+                                return (
+                                    <TooltipProvider key={p.name}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <div className="relative">
+                                                    <Book
+                                                        icon={Icon}
+                                                        colorHsl={p.colorHsl}
+                                                        isClickable={false}
+                                                        showLabel={false}
+                                                        label={p.name}
+                                                        isActive={p.value > 0}
+                                                    />
+                                                    {p.value > 0 && (
+                                                        <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                            <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                                {p.value}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p className='font-bold'>{p.name}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                )})}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -684,7 +721,7 @@ export function CharacterSheet() {
                             <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='físico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
                             <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
