@@ -54,7 +54,7 @@ type HealthPanelProps = {
 };
 
 const BodyPartSection = ({ icon, children, alignment = 'center' }: { icon: React.ElementType, children: React.ReactNode, alignment?: 'center' | 'start' | 'end' }) => (
-    <div className={cn('flex flex-col gap-2 items-center', {
+    <div className={cn('flex flex-col gap-2', {
         'items-center': alignment === 'center',
         'items-start': alignment === 'start',
         'items-end': alignment === 'end',
@@ -72,7 +72,7 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
                 <CardTitle>Vitalidade</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="mx-auto grid max-w-lg grid-cols-[1fr_auto_1fr] grid-rows-3 items-start justify-center gap-x-4 gap-y-4">
+                <div className="mx-auto grid max-w-lg grid-cols-[1fr_auto_1fr] grid-rows-3 items-center justify-center gap-y-4 gap-x-8 py-4">
                     {/* Row 1: Head */}
                     <div className='col-start-2 row-start-1 justify-self-center'>
                          <BodyPartSection icon={Heart}>
