@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'generateNpcPrompt',
   input: { schema: GenerateNpcInputSchema },
   output: { schema: GenerateNpcOutputSchema },
-  model: 'googleai/gemini-pro',
+  model: 'googleai/gemini-1.0-pro',
   prompt: `You are a creative storyteller and world-builder for a tabletop RPG.
 
   Generate a unique Non-Player Character (NPC) based on the following criteria:
