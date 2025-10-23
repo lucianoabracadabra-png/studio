@@ -5,7 +5,7 @@ import { characterData as initialCharacterData, Character, Armor, Weapon, Access
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -18,27 +18,43 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
 
-const FocusHeaderCard = ({ title, icon, resource, spentPoints }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }, spentPoints: number }) => (
-    <Card>
-        <CardContent className='pt-6 space-y-2'>
-            <div className='flex items-center justify-between'>
-                 <h3 className='font-bold text-xl'>{title}</h3>
-                 <span className='text-primary'>{React.createElement(icon)}</span>
-            </div>
-            <Separator />
-            <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
-                <div>
-                    <p className='font-bold'>{resource.name}</p>
-                    <p className='font-mono'>{resource.value} / {resource.max}</p>
+const FocusHeaderCard = ({ title, icon, resource, spentPoints, dispatch }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }, spentPoints: number, dispatch: React.Dispatch<FocusAction> }) => {
+    const handleDecrement = () => {
+        if (spentPoints > 0) {
+            dispatch({ type: 'DECREMENT_SPENT' });
+        }
+    };
+    
+    const handleIncrement = () => {
+        dispatch({ type: 'INCREMENT_SPENT' });
+    };
+
+    return (
+        <Card>
+            <CardContent className='pt-6 space-y-2'>
+                <div className='flex items-center justify-between'>
+                    <h3 className='font-bold text-xl'>{title}</h3>
+                    <span className='text-primary'>{React.createElement(icon)}</span>
                 </div>
-                <div>
-                    <p className='text-muted-foreground'>Gasto:</p>
-                    <p className='font-mono'>{spentPoints}</p>
+                <Separator />
+                <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
+                    <div>
+                        <p className='font-bold'>{resource.name}</p>
+                        <p className='font-mono'>{resource.value} / {resource.max}</p>
+                    </div>
+                    <div>
+                        <p className='text-muted-foreground'>Gasto:</p>
+                        <div className='flex items-center gap-2'>
+                             <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
+                             <span className='font-mono text-lg text-center w-6'>{spentPoints}</span>
+                             <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </CardContent>
-    </Card>
-);
+            </CardContent>
+        </Card>
+    );
+};
 
 type AttributeItemProps = {
     name: string;
@@ -102,7 +118,9 @@ type FocusState = {
 
 type FocusAction = 
     | { type: 'SET_ATTRIBUTE'; payload: { name: string; level: number, baseLevel: number } }
-    | { type: 'RESET' };
+    | { type: 'RESET' }
+    | { type: 'INCREMENT_SPENT' }
+    | { type: 'DECREMENT_SPENT' };
 
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
     switch (action.type) {
@@ -127,8 +145,14 @@ function focusReducer(state: FocusState, action: FocusAction): FocusState {
                 spentPoints: spentPoints,
             };
         }
+        case 'INCREMENT_SPENT':
+            return { ...state, spentPoints: state.spentPoints + 1 };
+        case 'DECREMENT_SPENT':
+            return { ...state, spentPoints: Math.max(0, state.spentPoints - 1) };
         case 'RESET':
-            return { attributes: {}, spentPoints: 0 };
+            const initialAttributes = (Object.values(initialCharacterData.focus) as any[]).flatMap(f => f.attributes)
+                .reduce((acc, attr) => ({...acc, [attr.name]: attr.value}), {});
+            return { attributes: initialAttributes, spentPoints: 0 };
         default:
             return state;
     }
@@ -159,7 +183,7 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
     return (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
             <div className="md:col-span-1">
-                <FocusHeaderCard title={title} icon={icon} resource={resource} spentPoints={state.spentPoints} />
+                <FocusHeaderCard title={title} icon={icon} resource={resource} spentPoints={state.spentPoints} dispatch={dispatch} />
             </div>
             
             <div className="md:col-span-1">
@@ -590,3 +614,5 @@ export function CharacterSheet() {
         </div>
     );
 }
+
+    
