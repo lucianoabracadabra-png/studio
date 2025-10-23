@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Droplets, Wind, Star, Flame, Mountain } from 'lucide-react';
+import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf } from 'lucide-react';
 
 
 export type BagItem = {
@@ -100,6 +100,13 @@ export type SoulDomain = {
     icon: LucideIcon;
 }
 
+export type PersonalityTrait = { 
+    name: string; 
+    value: number,
+    icon: LucideIcon;
+    colorHsl: string;
+};
+
 export type AlignmentAxis = {
   name: string;
   state: string;
@@ -107,11 +114,17 @@ export type AlignmentAxis = {
 };
 
 export type Fluxo = {
-  level: number;
+  name: 'Fluxo';
+  value: number;
+  icon: LucideIcon;
+  colorHsl: string;
 };
 
 export type Patrono = {
-  level: number;
+  name: 'Patrono';
+  value: number;
+  icon: LucideIcon;
+  colorHsl: string;
 };
 
 
@@ -151,7 +164,7 @@ export type Character = {
     social: SocialFocus;
   };
   spirit: {
-    personality: { name: string; value: number }[];
+    personality: PersonalityTrait[];
     alignment: AlignmentAxis[];
   };
   soul: {
@@ -297,9 +310,9 @@ export const characterData: Character = {
   },
   spirit: {
     personality: [
-        { name: 'Coragem', value: 2 },
-        { name: 'Convicção', value: 4 },
-        { name: 'Serenidade', value: 1 },
+        { name: 'Coragem', value: 2, icon: Shield, colorHsl: '180 80% 50%' },
+        { name: 'Convicção', value: 4, icon: Anchor, colorHsl: '170 90% 60%' },
+        { name: 'Serenidade', value: 1, icon: Leaf, colorHsl: '190 70% 55%' },
     ],
     alignment: [
       { name: 'Moral', state: 'Altruísmo', poles: ['Egoísmo', 'Altruísmo'] },
@@ -313,18 +326,24 @@ export const characterData: Character = {
   soul: {
     anima: {
       fluxo: {
-        level: 5,
+        name: 'Fluxo',
+        value: 5,
+        icon: Wind,
+        colorHsl: '320 90% 70%'
       },
       patrono: {
-        level: 10,
+        name: 'Patrono',
+        value: 10,
+        icon: Star,
+        colorHsl: '300 90% 70%'
       },
     },
     domains: [
-      { name: 'Água', level: 1, color: '198 93% 60%', icon: Droplets },
-      { name: 'Ar', level: 1, color: '45 93% 60%', icon: Wind },
-      { name: 'Anima', level: 1, color: '265 90% 70%', icon: Star },
+      { name: 'Água', level: 2, color: '198 93% 60%', icon: Droplets },
+      { name: 'Ar', level: 3, color: '45 93% 60%', icon: Wind },
+      { name: 'Anima', level: 5, color: '265 90% 70%', icon: Star },
       { name: 'Fogo', level: 1, color: '0 90% 70%', icon: Flame },
-      { name: 'Terra', level: 1, color: '120 60% 40%', icon: Mountain },
+      { name: 'Terra', level: 4, color: '120 60% 40%', icon: Mountain },
     ],
     cracks: 3,
   },

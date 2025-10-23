@@ -26,7 +26,7 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
         >
             {/* Glow Effect */}
             <motion.div
-                className="absolute -inset-px rounded-lg"
+                className="absolute inset-0 rounded-lg"
                 style={{
                     backgroundColor: `hsl(${colorHsl})`,
                     boxShadow: `0 0 15px hsl(${colorHsl})`
@@ -34,7 +34,7 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
                 variants={{
                     inactive: { opacity: 0, scale: 0.95 },
                     active: { opacity: 0.7, scale: 1 },
-                    hover: { opacity: 0.6, scale: 1.05 }
+                    hover: { opacity: 0.8, scale: 1.05 }
                 }}
                 transition={{ duration: 0.3 }}
             />

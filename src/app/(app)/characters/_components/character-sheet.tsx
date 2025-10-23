@@ -5,7 +5,7 @@ import { characterData as initialCharacterData, Character, Armor, Weapon, Access
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Hand, Footprints, Plus, Minus, MoveUpRight, Head } from 'lucide-react';
+import { HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -44,7 +44,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
                 <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
                     <div>
                         <p className='font-bold'>{resourceName}</p>
-                        <p className='font-mono'>{current} / {max}</p>
+                        <p className={`font-mono font-bold text-lg ${pilarColorClass[pilar]}`}>{current} / {max}</p>
                     </div>
                     <div>
                         <p className='text-muted-foreground'>Gasto:</p>
@@ -60,17 +60,17 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     );
 };
 
-const AttributeItem = ({ name, level }: { name: string; level: number }) => {
+const AttributeItem = ({ name, level, colorClass }: { name: string; level: number, colorClass: string }) => {
     return (
         <div className="flex items-center gap-3 py-1">
-            <span className="font-bold text-lg w-4 text-center">{level}</span>
+            <span className={cn("font-bold text-lg w-4 text-center", colorClass)}>{level}</span>
             <span className="text-foreground">{name}</span>
         </div>
     );
 };
 
 
-const SkillItem = ({ name, initialValue, pilar, onLevelChange }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social', onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
+const SkillItem = ({ name, initialValue, pilar, colorClass, onLevelChange }: { name: string; initialValue: number, pilar: 'físico' | 'mental' | 'social', colorClass: string, onLevelChange: (pilar: 'físico' | 'mental' | 'social', name: string, newLevel: number) => void }) => {
     
     const handleDotClick = (newLevel: number) => {
         const finalLevel = newLevel === initialValue ? newLevel - 1 : newLevel;
@@ -84,7 +84,7 @@ const SkillItem = ({ name, initialValue, pilar, onLevelChange }: { name: string;
                 {[...Array(7)].map((_, i) => (
                     <button
                         key={i}
-                        className={cn('w-3 h-3 bg-muted cursor-pointer transition-all rounded-sm transform rotate-45', { 'bg-primary': i < initialValue })}
+                        className={cn('w-3 h-3 bg-muted cursor-pointer transition-all rounded-sm transform rotate-45', { [colorClass]: i < initialValue })}
                         onClick={() => handleDotClick(i + 1)}
                     />
                 ))}
@@ -195,6 +195,12 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
     const maxResource = Object.values(state.attributes).reduce((sum: number, level: any) => sum + level, 0);
     const currentResourceValue = maxResource - state.spentPoints;
 
+    const pilarColorClasses = {
+        físico: { text: 'text-orange-500', bg: 'bg-orange-500' },
+        mental: { text: 'text-blue-500', bg: 'bg-blue-500' },
+        social: { text: 'text-green-500', bg: 'bg-green-500' },
+    };
+
     return (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
             <div className="md:col-span-1">
@@ -221,6 +227,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                 key={name} 
                                 name={name} 
                                 level={level}
+                                colorClass={pilarColorClasses[pilar].text}
                              />
                         ))}
                     </CardContent>
@@ -239,6 +246,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                 name={name} 
                                 initialValue={level} 
                                 pilar={pilar} 
+                                colorClass={pilarColorClasses[pilar].bg}
                                 onLevelChange={handleSkillChange} 
                             />
                         ))}
@@ -259,6 +267,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                     name={name} 
                                     initialValue={level} 
                                     pilar={pilar} 
+                                    colorClass={pilarColorClasses[pilar].bg}
                                     onLevelChange={handleModularChange}
                                 />
                             ))}
@@ -282,7 +291,7 @@ const SoulCracks = ({ value }: { value: number }) => {
                                 {isCracked ? (
                                     <HeartCrack className="h-6 w-6 text-red-500" />
                                 ) : (
-                                    <Heart className="h-6 w-6 text-muted-foreground/50" />
+                                    <HeartCrack className="h-6 w-6 text-muted-foreground/50" />
                                 )}
                             </TooltipTrigger>
                             <TooltipContent>
@@ -552,6 +561,12 @@ export function CharacterSheet() {
             return { ...prev, spirit: { ...prev.spirit, alignment: newAlignment } };
         })
     }
+    
+    const spiritBooks = [
+        ...character.spirit.personality,
+        character.soul.anima.fluxo,
+        character.soul.anima.patrono
+    ];
 
     return (
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
@@ -616,28 +631,35 @@ export function CharacterSheet() {
 
                 <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="personality-table-container">
-                            <div className='personality-table-header'>PERSONALIDADE</div>
-                            <div className='personality-table-body'>
-                                {character.spirit.personality.map(p => (
-                                    <div key={p.name} className='personality-table-cell'>
-                                        <div className='value'>{p.value}</div>
-                                        <div className='name'>{p.name}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                         <div className="grid grid-cols-2 gap-4 pt-4">
-                            <div className="text-center">
-                                <p className="font-headline font-bold text-lg text-amber-400">FLUXO</p>
-                                <p className="text-2xl font-bold">{character.soul.anima.fluxo.level}</p>
-                            </div>
-                             <div className="text-center">
-                                <p className="font-headline font-bold text-lg text-amber-400">PATRONO</p>
-                                <p className="text-2xl font-bold">{character.soul.anima.patrono.level}</p>
-                            </div>
-                        </div>
+                    <CardContent className="space-y-6 flex justify-center items-end gap-2">
+                         {spiritBooks.map(p => (
+                            <TooltipProvider key={p.name}>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <div className="relative">
+                                            <Book
+                                                icon={p.icon}
+                                                colorHsl={p.colorHsl}
+                                                isClickable={false}
+                                                showLabel={false}
+                                                label={p.name}
+                                                isActive={p.value > 0}
+                                            />
+                                            {p.value > 0 && (
+                                                <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                    <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                        {p.value}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p className='font-bold'>{p.name}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        ))}
                     </CardContent>
                 </Card>
             </div>
