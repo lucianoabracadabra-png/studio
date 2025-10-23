@@ -32,9 +32,9 @@ const HealthGrid = ({ part, partId, onHealthChange }: { part: BodyPartHealth, pa
 
     return (
         <div className={cn("grid gap-1.5", {
-            'grid-cols-3': part.states.length === 6,
-            'grid-cols-4': part.states.length === 12,
-            'grid-cols-3': part.states.length === 9,
+            'grid-cols-3': part.states.length === 6, // Head
+            'grid-cols-4': part.states.length === 12, // Torso
+            'grid-cols-3': part.states.length === 9, // Limbs
         })}>
             {part.states.map((state, i) => (
                 <button
@@ -65,9 +65,12 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
             </CardHeader>
             <CardContent>
                 <div className="mx-auto grid max-w-lg grid-cols-[1fr_auto_1fr] grid-rows-3 items-center justify-center gap-x-4 gap-y-2">
+                    {/* Row 1 */}
                     <div className='col-start-2 row-start-1 justify-self-center'>
                          <HealthGrid part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
                     </div>
+                    
+                    {/* Row 2 */}
                     <div className='col-start-1 row-start-2 justify-self-end'>
                          <HealthGrid part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" />
                     </div>
@@ -77,6 +80,8 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
                     <div className='col-start-3 row-start-2 justify-self-start'>
                         <HealthGrid part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" />
                     </div>
+
+                    {/* Row 3 */}
                     <div className='col-start-1 row-start-3 justify-self-end'>
                         <HealthGrid part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" />
                     </div>
