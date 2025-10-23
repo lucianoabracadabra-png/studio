@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle, CardFooter, CardContent } from "@/components/ui/card";
-import { portals, iconMap } from "@/lib/wiki-data";
+import wikiData from "@/lib/data/wiki-data.json";
+import { iconMap } from "@/lib/wiki-data";
 import { ArrowRight } from "lucide-react";
 
 export default function WikiPage() {
+  const { portals } = wikiData;
+
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-8">
       <div className="text-center">
