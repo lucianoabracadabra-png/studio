@@ -541,7 +541,8 @@ const hydrateCharacterItems = (itemOwnerships: ItemOwnership[]): CharacterItem[]
             ...baseItem,
             id: baseItem.id, // Ensure the final object has the id for the draggable
             isEquipped: ownership.equipped,
-            quantity: ownership.currentQuantity || baseItem.quantity
+            quantity: ownership.currentQuantity || baseItem.quantity,
+            equippable: !!baseItem.equippable
         };
     }).filter((item): item is CharacterItem => item !== null);
 };
@@ -831,4 +832,5 @@ export function CharacterSheet() {
     );
 }
 
+    
     
