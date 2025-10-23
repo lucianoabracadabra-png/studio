@@ -60,13 +60,13 @@ const AtualizacaoEstadoSchema = z.object({
   nova_sala: NovaSalaSchema.optional(),
 });
 
-export const GenerateNarrativeInputSchema = z.object({
+const GenerateNarrativeInputSchema = z.object({
   comando: z.string(),
   estadoJogo: z.any(),
 });
 export type GenerateNarrativeInput = z.infer<typeof GenerateNarrativeInputSchema>;
 
-export const GenerateNarrativeOutputSchema = z.object({
+const GenerateNarrativeOutputSchema = z.object({
   narrativa: z.string().describe("A descrição do que aconteceu, em português do Brasil."),
   arte_ascii: z.string().describe("Uma arte ASCII detalhada (máximo 70x20 caracteres) representando a cena.").nullable(),
   rolagem_requerida: RolagemRequeridaSchema.nullable(),
