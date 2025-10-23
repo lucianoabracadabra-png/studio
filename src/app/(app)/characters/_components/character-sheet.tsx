@@ -18,7 +18,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
 
-const FocusHeaderCard = ({ title, icon, resource, spentPoints, dispatch }: { title: string, icon: React.ElementType, resource: { name: string, value: number, max: number }, spentPoints: number, dispatch: React.Dispatch<FocusAction> }) => {
+const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<FocusAction> }) => {
     const handleDecrement = () => {
         if (spentPoints > 0) {
             dispatch({ type: 'DECREMENT_SPENT' });
@@ -39,8 +39,8 @@ const FocusHeaderCard = ({ title, icon, resource, spentPoints, dispatch }: { tit
                 <Separator />
                 <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
                     <div>
-                        <p className='font-bold'>{resource.name}</p>
-                        <p className='font-mono'>{resource.value} / {resource.max}</p>
+                        <p className='font-bold'>{resourceName}</p>
+                        <p className='font-mono'>{current} / {max}</p>
                     </div>
                     <div>
                         <p className='text-muted-foreground'>Gasto:</p>
@@ -179,11 +179,22 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
     const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
 
     const resource = focusData.vigor || focusData.focus || focusData.grace;
+    
+    const maxResource = Object.values(state.attributes).reduce((sum: number, level: any) => sum + level, 0);
+    const currentResourceValue = maxResource - state.spentPoints;
 
     return (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
             <div className="md:col-span-1">
-                <FocusHeaderCard title={title} icon={icon} resource={resource} spentPoints={state.spentPoints} dispatch={dispatch} />
+                <FocusHeaderCard 
+                    title={title} 
+                    icon={icon} 
+                    resourceName={resource.name}
+                    current={currentResourceValue}
+                    max={maxResource}
+                    spentPoints={state.spentPoints} 
+                    dispatch={dispatch} 
+                />
             </div>
             
             <div className="md:col-span-1">

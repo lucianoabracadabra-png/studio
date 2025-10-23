@@ -67,17 +67,17 @@ type FocusData = {
 };
 
 type PhysicalFocus = FocusData & {
-  vigor: { name: string; value: number; max: number };
+  vigor: { name: string; };
   treinamentos: Stat[];
 };
 
 type MentalFocus = FocusData & {
-  focus: { name: string; value: number; max: number };
+  focus: { name: string; };
   ciencias: Stat[];
 };
 
 type SocialFocus = FocusData & {
-  grace: { name: string; value: number; max: number };
+  grace: { name: string; };
   artes: Stat[];
 };
 
@@ -220,7 +220,7 @@ export const characterData: Character = {
   },
   focus: {
     physical: {
-      vigor: { name: "Vigor", value: 8, max: 10 },
+      vigor: { name: "Vigor" },
       attributes: [
         { name: 'Força', value: 3 },
         { name: 'Destreza', value: 4 },
@@ -245,7 +245,7 @@ export const characterData: Character = {
       ]
     },
     mental: {
-      focus: { name: "Foco", value: 12, max: 12 },
+      focus: { name: "Foco" },
       attributes: [
         { name: 'Inteligência', value: 4 },
         { name: 'Percepção', value: 5 },
@@ -270,7 +270,7 @@ export const characterData: Character = {
       ]
     },
     social: {
-      grace: { name: "Graça", value: 9, max: 10 },
+      grace: { name: "Graça" },
       attributes: [
         { name: 'Empatia', value: 3 },
         { name: 'Manipulação', value: 2 },
