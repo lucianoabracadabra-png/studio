@@ -56,7 +56,7 @@ export function EnvironmentGenerator() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Descritor de Ambientes</CardTitle>
+        <CardTitle>Descritor de Cenas</CardTitle>
         <CardDescription>Gere descrições ricas e atmosféricas para o seu mundo de jogo.</CardDescription>
       </CardHeader>
       <CardContent>
