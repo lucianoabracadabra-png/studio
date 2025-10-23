@@ -18,15 +18,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
 
-const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<FocusAction> }) => {
+const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any> }) => {
+    const pilar = title.toLowerCase() as 'físico' | 'mental' | 'social';
+    
     const handleDecrement = () => {
-        if (spentPoints > 0) {
-            dispatch({ type: 'DECREMENT_SPENT' });
-        }
+        dispatch({ type: 'DECREMENT_SPENT', pilar });
     };
     
     const handleIncrement = () => {
-        dispatch({ type: 'INCREMENT_SPENT' });
+        dispatch({ type: 'INCREMENT_SPENT', pilar });
     };
 
     return (
@@ -60,7 +60,7 @@ type AttributeItemProps = {
     name: string;
     level: number;
     pilar: 'fisico' | 'mental' | 'social';
-    onLevelChange: (name: string, newLevel: number) => void;
+    onLevelChange: (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => void;
 };
 
 const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps) => {
@@ -77,7 +77,7 @@ const AttributeItem = ({ name, level, pilar, onLevelChange }: AttributeItemProps
                     <button
                         key={i}
                         className={cn('w-2 h-2 rounded-full cursor-pointer transition-all', i < level ? 'bg-primary' : 'bg-muted')}
-                        onClick={() => onLevelChange(name, i + 1)}
+                        onClick={() => onLevelChange(pilar, name, i + 1)}
                     />
                 ))}
             </div>
@@ -111,70 +111,77 @@ const SkillItem = ({ name, initialValue, pilar }: { name: string; initialValue: 
     );
 };
 
-type FocusState = {
-    attributes: { [key: string]: number };
-    spentPoints: number;
+type FocusPilarState = {
+  attributes: { [key: string]: number };
+  spentPoints: number;
 };
 
-type FocusAction = 
-    | { type: 'SET_ATTRIBUTE'; payload: { name: string; level: number, baseLevel: number } }
-    | { type: 'RESET' }
-    | { type: 'INCREMENT_SPENT' }
-    | { type: 'DECREMENT_SPENT' };
+type FocusState = {
+    physical: FocusPilarState;
+    mental: FocusPilarState;
+    social: FocusPilarState;
+};
+
+type FocusAction =
+  | { type: 'SET_ATTRIBUTE'; pilar: keyof FocusState; payload: { name: string; level: number } }
+  | { type: 'INCREMENT_SPENT'; pilar: keyof FocusState }
+  | { type: 'DECREMENT_SPENT'; pilar: keyof FocusState };
+
 
 function focusReducer(state: FocusState, action: FocusAction): FocusState {
-    switch (action.type) {
-        case 'SET_ATTRIBUTE': {
-            const { name, level } = action.payload;
-            const newAttributes = { ...state.attributes, [name]: level };
-
-            const spentPoints = Object.entries(newAttributes).reduce((total, [attrName, currentLevel]) => {
-                const base = initialCharacterData.focus.physical.attributes.find(a => a.name === attrName)?.value || 
-                             initialCharacterData.focus.mental.attributes.find(a => a.name === attrName)?.value ||
-                             initialCharacterData.focus.social.attributes.find(a => a.name === attrName)?.value || 0;
-                
-                if (currentLevel > base) {
-                    total += (currentLevel - base);
-                }
-                return total;
-            }, 0);
-
-            return {
-                ...state,
-                attributes: newAttributes,
-                spentPoints: spentPoints,
-            };
-        }
-        case 'INCREMENT_SPENT':
-            return { ...state, spentPoints: state.spentPoints + 1 };
-        case 'DECREMENT_SPENT':
-            return { ...state, spentPoints: Math.max(0, state.spentPoints - 1) };
-        case 'RESET':
-            const initialAttributes = (Object.values(initialCharacterData.focus) as any[]).flatMap(f => f.attributes)
-                .reduce((acc, attr) => ({...acc, [attr.name]: attr.value}), {});
-            return { attributes: initialAttributes, spentPoints: 0 };
-        default:
-            return state;
+  switch (action.type) {
+    case 'SET_ATTRIBUTE': {
+      const { pilar, payload } = action;
+      return {
+        ...state,
+        [pilar]: {
+          ...state[pilar],
+          attributes: {
+            ...state[pilar].attributes,
+            [payload.name]: payload.level,
+          },
+        },
+      };
     }
+    case 'INCREMENT_SPENT': {
+      const { pilar } = action;
+      return {
+        ...state,
+        [pilar]: {
+          ...state[pilar],
+          spentPoints: state[pilar].spentPoints + 1,
+        },
+      };
+    }
+    case 'DECREMENT_SPENT': {
+      const { pilar } = action;
+      return {
+        ...state,
+        [pilar]: {
+          ...state[pilar],
+          spentPoints: Math.max(0, state[pilar].spentPoints - 1),
+        },
+      };
+    }
+    default:
+      return state;
+  }
 }
 
 
-const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title: string, pilar: 'fisico' | 'mental' | 'social', icon: React.ElementType }) => {
-    const initialAttributeState: FocusState = {
-        attributes: focusData.attributes.reduce((acc: any, attr: any) => {
-            acc[attr.name] = attr.value;
-            return acc;
-        }, {}),
-        spentPoints: 0,
+const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: { 
+    focusData: any, 
+    title: string, 
+    pilar: 'fisico' | 'mental' | 'social', 
+    icon: React.ElementType,
+    state: FocusPilarState,
+    dispatch: React.Dispatch<FocusAction>
+}) => {
+    const handleAttributeChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
+        dispatch({ type: 'SET_ATTRIBUTE', pilar, payload: { name, level: newLevel } });
     };
 
-    const [state, dispatch] = useReducer(focusReducer, initialAttributeState);
-
-    const handleAttributeChange = (name: string, newLevel: number) => {
-        const baseLevel = focusData.attributes.find((a: any) => a.name === name)?.value || 0;
-        dispatch({ type: 'SET_ATTRIBUTE', payload: { name, level: newLevel, baseLevel }});
-    };
-
+    const pilarKey = pilar === 'fisico' ? 'physical' : pilar;
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
     const modularSkillsTitle = pilar === 'fisico' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
 
@@ -209,7 +216,7 @@ const FocusBranch = ({ focusData, title, pilar, icon }: { focusData: any, title:
                                 name={attr.name} 
                                 level={state.attributes[attr.name]} 
                                 pilar={pilar}
-                                onLevelChange={(name, level) => handleAttributeChange(name, level)}
+                                onLevelChange={handleAttributeChange}
                             />
                         ))}
                     </CardContent>
@@ -478,6 +485,23 @@ export function CharacterSheet() {
 
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
 
+    const initialFocusState: FocusState = {
+        physical: {
+            attributes: character.focus.physical.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
+            spentPoints: 0,
+        },
+        mental: {
+            attributes: character.focus.mental.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
+            spentPoints: 0,
+        },
+        social: {
+            attributes: character.focus.social.attributes.reduce((acc: any, attr: any) => ({ ...acc, [attr.name]: attr.value }), {}),
+            spentPoints: 0,
+        },
+    };
+    const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState);
+
+
     const handleHealthChange = (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => {
         setCharacter(prev => {
             const newBodyParts = { ...prev.health.bodyParts };
@@ -608,13 +632,13 @@ export function CharacterSheet() {
                             <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.physical} dispatch={focusDispatch} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
-                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} />
+                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
                         </TabsContent>
                         <TabsContent value="social" className='pt-6'>
-                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} />
+                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
@@ -625,5 +649,7 @@ export function CharacterSheet() {
         </div>
     );
 }
+
+    
 
     
