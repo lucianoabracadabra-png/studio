@@ -44,14 +44,16 @@ export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFa
 );
 
 const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (name: string) => void }) => {
+    const [pole1, pole2] = axis.poles;
     return (
-        <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between'>
-            <span className='text-muted-foreground'>{axis.poles[0]}</span>
-            <span className='font-bold text-foreground'>{axis.state}</span>
-            <span className='text-muted-foreground'>{axis.poles[1]}</span>
+        <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between h-auto py-2 px-3 text-sm'>
+            <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
+            <span className='font-mono text-xs text-muted-foreground'>{axis.name}</span>
+            <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
         </Button>
     )
 }
+
 
 export function InfoPanelSummary({ character, isOpen }: { character: Character, isOpen: boolean }) {
     const { info, name, concept } = character;
@@ -155,7 +157,7 @@ export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
                         <Separator />
                          <div className="space-y-2">
                             <Label className='text-muted-foreground'>Alinhamento</Label>
-                            <div className="grid grid-cols-2 gap-2 pt-1">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
                                 {character.spirit.alignment.map(axis => (
                                     <AlignmentButton key={axis.name} axis={axis} onToggle={onAlignmentToggle} />
                                 ))}
