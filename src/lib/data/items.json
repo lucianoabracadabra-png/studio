@@ -1,0 +1,30 @@
+{
+    "accessories": [
+        {
+            "id": "wolf-tooth-amulet",
+            "name": "Amuleto de Dente de Lobo",
+            "typeAndDescription": "Colar com um dente de lobo",
+            "weight": 0.1,
+            "effect": "+1 em testes de Intimidação"
+        }
+    ],
+    "projectiles": [
+        {
+            "id": "common-arrows",
+            "name": "Flechas Comuns",
+            "type": "Perfurante",
+            "ap": 3,
+            "accuracy": 0,
+            "quantity": 20,
+            "weight": 0.05,
+            "size": "m",
+            "extras": "Ponta de ferro"
+        }
+    ],
+    "general": [
+        { "id": "rope-15m", "name": "Corda (15m)", "quantity": 1, "weight": 2, "extras": "Feita de cânhamo" },
+        { "id": "travel-ration", "name": "Ração de Viagem", "quantity": 5, "weight": 1, "extras": "Para 5 dias" },
+        { "id": "torch", "name": "Tocha", "quantity": 10, "weight": 0.5, "extras": "Dura 1 hora cada" },
+        { "id": "waterskin", "name": "Cantil de Água", "quantity": 1, "weight": 1.5, "extras": "Cheio" }
+    ]
+}

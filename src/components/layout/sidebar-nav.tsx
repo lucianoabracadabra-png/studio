@@ -14,32 +14,26 @@ import {
   Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePathname } from 'next/navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Icons } from '@/components/ui/icons';
 import { Book } from './book';
 import React from 'react';
+import navData from '@/lib/data/navigation.json';
 
-export const mainLinks = [
-  { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, colorHue: '15 90% 60%' },
-  { label: 'Personagens', href: '/characters', icon: Users, colorHue: '265 90% 70%' },
-  { label: 'Mesa Virtual', href: '/vtt', icon: Map, colorHue: '180 90% 60%' },
-  { label: 'Wiki', href: '/wiki', icon: BookOpen, colorHue: '45 90% 60%' },
-];
+const iconMap: { [key: string]: LucideIcon } = {
+  LayoutDashboard,
+  Users,
+  Map,
+  BookOpen,
+  Dices,
+  Swords,
+  FlaskConical,
+  Volume2,
+  Settings,
+};
 
-export const gmToolsLinks = [
-  { label: 'Rolador de Dados', href: '/tools/dice-roller', icon: Dices, colorHue: '210 90% 60%' },
-  { label: 'Rastreador de Combate', href: '/gm/combat-tracker', icon: Swords, colorHue: '0 90% 70%' },
-  { label: 'Geradores', href: '/tools/generator', icon: FlaskConical, colorHue: '120 90% 60%' },
-  { label: 'Mesa de Som', href: '/soundboard', icon: Volume2, colorHue: '300 90% 70%' },
-];
 
 export const profileLink = {
   label: 'Perfil',
@@ -64,31 +58,37 @@ export function SidebarNav() {
           
           <ScrollArea className="w-full px-2">
             <div className="flex flex-col items-center gap-4 py-2">
-                {mainLinks.map(link => (
-                    <Link href={link.href} key={link.href}>
-                        <Book
-                            label={link.label}
-                            icon={link.icon}
-                            colorHsl={link.colorHue}
-                            isActive={pathname.startsWith(link.href)}
-                            showLabel={false}
-                        />
-                    </Link>
-                ))}
+                {navData.mainLinks.map(link => {
+                    const Icon = iconMap[link.icon];
+                    return (
+                        <Link href={link.href} key={link.href}>
+                            <Book
+                                label={link.label}
+                                icon={Icon}
+                                colorHsl={link.colorHue}
+                                isActive={pathname.startsWith(link.href)}
+                                showLabel={false}
+                            />
+                        </Link>
+                    )
+                })}
             
                 <div className='h-4' />
 
-                {gmToolsLinks.map(link => (
-                    <Link href={link.href} key={link.href}>
-                         <Book
-                            label={link.label}
-                            icon={link.icon}
-                            colorHsl={link.colorHue}
-                            isActive={pathname.startsWith(link.href)}
-                            showLabel={false}
-                        />
-                    </Link>
-                ))}
+                {navData.gmToolsLinks.map(link => {
+                     const Icon = iconMap[link.icon];
+                     return (
+                        <Link href={link.href} key={link.href}>
+                            <Book
+                                label={link.label}
+                                icon={Icon}
+                                colorHsl={link.colorHue}
+                                isActive={pathname.startsWith(link.href)}
+                                showLabel={false}
+                            />
+                        </Link>
+                    )
+                })}
             </div>
           </ScrollArea>
           

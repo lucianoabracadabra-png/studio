@@ -1,0 +1,14 @@
+{
+    "mainLinks": [
+        { "label": "Painel", "href": "/dashboard", "icon": "LayoutDashboard", "colorHue": "15 90% 60%" },
+        { "label": "Personagens", "href": "/characters", "icon": "Users", "colorHue": "265 90% 70%" },
+        { "label": "Mesa Virtual", "href": "/vtt", "icon": "Map", "colorHue": "180 90% 60%" },
+        { "label": "Wiki", "href": "/wiki", "icon": "BookOpen", "colorHue": "45 90% 60%" }
+    ],
+    "gmToolsLinks": [
+        { "label": "Rolador de Dados", "href": "/tools/dice-roller", "icon": "Dices", "colorHue": "210 90% 60%" },
+        { "label": "Rastreador de Combate", "href": "/gm/combat-tracker", "icon": "Swords", "colorHue": "0 90% 70%" },
+        { "label": "Geradores", "href": "/tools/generator", "icon": "FlaskConical", "colorHue": "120 90% 60%" },
+        { "label": "Mesa de Som", "href": "/soundboard", "icon": "Volume2", "colorHue": "300 90% 70%" }
+    ]
+}
