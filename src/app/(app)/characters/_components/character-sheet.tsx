@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useReducer } from 'react';
@@ -469,7 +470,7 @@ const EquippedSection = ({ items }: { items: any[] }) => {
                         className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[120px] rounded-b-lg", snapshot.isDraggingOver && "bg-primary/10")}
                     >
                          {items.length > 0 ? items.map((item, index) => (
-                            <Draggable key={item.name} draggableId={item.name} index={index}>
+                            <Draggable key={item.name} draggableId={item.name} index={index} isDragDisabled={false}>
                                 {(provided, snapshot) => (
                                     <div
                                         ref={provided.innerRef}
@@ -815,4 +816,6 @@ export function CharacterSheet() {
 }
 
     
+    
+
     
