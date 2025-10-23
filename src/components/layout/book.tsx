@@ -19,53 +19,38 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
 
     const bookContent = (
         <motion.div 
-            className="relative w-14 h-14 rounded-md overflow-hidden group/book"
+            className="relative w-12 h-[68px] rounded-md overflow-hidden group/book"
             whileHover={isClickable ? "hover" : "inactive"}
             animate={isActive ? "active" : "inactive"}
             onClick={onClick}
+            variants={{
+                inactive: { scale: 1 },
+                active: { scale: 1.05 },
+                hover: { scale: 1.1 }
+            }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         >
-            {/* Glow Effect */}
-            <motion.div
-                className="absolute inset-0 rounded-lg"
-                style={{
-                    backgroundColor: `hsl(${colorHsl})`,
-                    boxShadow: `0 0 15px hsl(${colorHsl})`
-                }}
-                variants={{
-                    inactive: { opacity: 0, scale: 0.95 },
-                    active: { opacity: 0.7, scale: 1 },
-                    hover: { opacity: 0.8, scale: 1.05 }
-                }}
-                transition={{ duration: 0.3 }}
-            />
-
-            {/* Book Spine */}
+            {/* Main Book Body */}
             <div 
-                className="absolute left-0 top-0 h-full w-[18px] bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-l-md transform-gpu"
+                className="absolute inset-0 rounded-md flex items-center justify-center transition-colors"
                 style={{ 
-                    backgroundColor: `hsl(${colorHsl} / 0.3)`,
-                    borderRight: `2px solid hsl(${colorHsl} / 0.15)`,
+                    backgroundColor: `hsl(${colorHsl} / ${isActive ? 0.25 : 0.15})`,
+                    borderColor: `hsl(${colorHsl} / ${isActive ? 0.8 : 0.4})`,
+                    borderWidth: '2px'
                 }}
-            />
-            
-            {/* Book Cover */}
-            <motion.div 
-                className="absolute right-0 top-0 h-full w-[calc(100%-12px)] origin-left flex items-center justify-center rounded-r-md"
-                style={{ 
-                    backgroundColor: `hsl(${colorHsl} / 0.1)`,
-                    borderTop: `2px solid hsl(${colorHsl} / 0.15)`,
-                    borderBottom: `2px solid hsl(${colorHsl} / 0.15)`,
-                    borderRight: `2px solid hsl(${colorHsl} / 0.15)`,
-                }}
-                variants={{
-                    inactive: { },
-                    active: { },
-                    hover: { }
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
-                <Icon className={cn("h-6 w-6 text-neutral-400 transition-colors duration-300 group-hover/book:text-white", isActive && "text-white")} />
-            </motion.div>
+                <Icon className={cn(
+                    "h-6 w-6 transition-colors duration-300", 
+                    isActive ? "text-white" : "text-neutral-400",
+                    "group-hover/book:text-white"
+                )} />
+            </div>
+
+            {/* Spine */}
+            <div 
+                className="absolute left-0 top-0 h-full w-[4px] rounded-l-sm"
+                style={{ backgroundColor: `hsl(${colorHsl})` }}
+            />
 
              {showLabel && (
                 <div className="absolute -bottom-4 left-0 right-0 text-center text-xs text-muted-foreground">
