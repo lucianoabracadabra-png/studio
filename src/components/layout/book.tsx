@@ -56,7 +56,7 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
             )} />
 
             {showLabel && (
-                <div className="absolute -bottom-4 left-0 right-0 text-center text-xs text-muted-foreground whitespace-nowrap">
+                <div className="absolute -bottom-5 left-0 right-0 text-center text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover/book:opacity-100 transition-opacity duration-300">
                     {label}
                 </div>
             )}
