@@ -785,7 +785,6 @@ export function CharacterSheet() {
                                     </div>
                                )})}
                         </div>
-                        <Separator/>
                         <div className="space-y-3 pt-2">
                             <h3 className='font-semibold text-center text-muted-foreground'>Rachaduras</h3>
                             <div className="flex justify-center">
@@ -811,7 +810,7 @@ export function CharacterSheet() {
                                             label={p.name}
                                             isActive={p.value > 0}
                                         />
-                                        {p.value > 0 && !p.name && (
+                                        {p.value > 0 && (
                                             <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
                                                 <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                                                     {p.value}
@@ -821,7 +820,6 @@ export function CharacterSheet() {
                                     </div>
                                 )})}
                         </div>
-                        <Separator />
                          <div className="flex justify-center items-end gap-2 pt-6">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
