@@ -762,37 +762,28 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex justify-center items-end gap-2">
+                        <div className="flex justify-center items-end gap-2 pt-6">
                            {character.soul.domains.map(d => {
                                 const Icon = iconMap[d.icon];
                                 return (
-                                <TooltipProvider key={d.name}>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <div className="relative">
-                                                <Book
-                                                    icon={Icon}
-                                                    colorHsl={d.color}
-                                                    isClickable={false}
-                                                    showLabel={false}
-                                                    label={d.name}
-                                                    isActive={d.level > 0}
-                                                />
-                                                {d.level > 0 && (
-                                                    <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                        <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                            {d.level}
-                                                        </span>
-                                                    </div>
-                                                )}
+                                    <div key={d.name} className="relative">
+                                        <Book
+                                            icon={Icon}
+                                            colorHsl={d.color}
+                                            isClickable={false}
+                                            showLabel={true}
+                                            label={d.name}
+                                            isActive={d.level > 0}
+                                        />
+                                        {d.level > 0 && (
+                                            <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                    {d.level}
+                                                </span>
                                             </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p className='font-bold'>{d.name}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                           )})}
+                                        )}
+                                    </div>
+                               )})}
                         </div>
                         <Separator/>
                         <div className="space-y-3 pt-2">
@@ -807,70 +798,51 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex justify-center items-end gap-2 pt-2">
+                        <div className="flex justify-center items-end gap-2 pt-6">
                             {character.spirit.personality.map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
-                                    <TooltipProvider key={p.name}>
-                                        <Tooltip>
-                                            <TooltipTrigger>
-                                                <div className="relative">
-                                                    <Book
-                                                        icon={Icon}
-                                                        colorHsl={p.colorHsl}
-                                                        isClickable={false}
-                                                        showLabel={false}
-                                                        label={p.name}
-                                                        isActive={p.value > 0}
-                                                        showTitleOnHover={true}
-                                                    />
-                                                    {p.value > 0 && !p.name && (
-                                                        <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                            <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                                {p.value}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p className='font-bold'>{p.name}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <div key={p.name} className="relative">
+                                        <Book
+                                            icon={Icon}
+                                            colorHsl={p.colorHsl}
+                                            isClickable={false}
+                                            showLabel={true}
+                                            label={p.name}
+                                            isActive={p.value > 0}
+                                        />
+                                        {p.value > 0 && !p.name && (
+                                            <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                    {p.value}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 )})}
                         </div>
                         <Separator />
-                         <div className="flex justify-center items-end gap-2 pt-2">
+                         <div className="flex justify-center items-end gap-2 pt-6">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
-                                    <TooltipProvider key={p.name}>
-                                        <Tooltip>
-                                            <TooltipTrigger>
-                                                <div className="relative">
-                                                    <Book
-                                                        icon={Icon}
-                                                        colorHsl={p.colorHsl}
-                                                        isClickable={false}
-                                                        showLabel={false}
-                                                        label={p.name}
-                                                        isActive={p.value > 0}
-                                                    />
-                                                    {p.value > 0 && (
-                                                        <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                            <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                                {p.value}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p className='font-bold'>{p.name}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <div key={p.name} className="relative">
+                                        <Book
+                                            icon={Icon}
+                                            colorHsl={p.colorHsl}
+                                            isClickable={false}
+                                            showLabel={true}
+                                            label={p.name}
+                                            isActive={p.value > 0}
+                                        />
+                                        {p.value > 0 && (
+                                            <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
+                                                <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                                    {p.value}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 )})}
                         </div>
                     </CardContent>

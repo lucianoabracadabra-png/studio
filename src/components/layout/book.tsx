@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import type { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
 
 interface BookProps {
     label: string;
@@ -14,11 +13,9 @@ interface BookProps {
     isClickable?: boolean;
     showLabel?: boolean;
     onClick?: () => void;
-    showTitleOnHover?: boolean;
 }
 
-export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true, showLabel = true, onClick, showTitleOnHover = false }: BookProps) => {
-    const [isHovered, setIsHovered] = useState(false);
+export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true, showLabel = true, onClick }: BookProps) => {
 
     const bookContent = (
          <motion.div
@@ -41,8 +38,6 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
             } : {}}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             onClick={onClick}
-            onMouseEnter={() => showTitleOnHover && setIsHovered(true)}
-            onMouseLeave={() => showTitleOnHover && setIsHovered(false)}
         >
             {/* Spine with Glow */}
             <motion.div 
@@ -54,20 +49,14 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
                 transition={{ duration: 0.3 }}
             />
             
-            {showTitleOnHover && isHovered ? (
-                 <span className="text-xs font-bold text-white text-center leading-tight px-1">
-                    {label}
-                </span>
-            ) : (
-                <Icon className={cn(
-                    "h-6 w-6 transition-colors duration-300", 
-                    isActive ? "text-white" : "text-neutral-400",
-                    "group-hover/book:text-white"
-                )} />
-            )}
+            <Icon className={cn(
+                "h-6 w-6 transition-colors duration-300", 
+                isActive ? "text-white" : "text-neutral-400",
+                "group-hover/book:text-white"
+            )} />
 
             {showLabel && (
-                <div className="absolute -bottom-4 left-0 right-0 text-center text-xs text-muted-foreground">
+                <div className="absolute -bottom-4 left-0 right-0 text-center text-xs text-muted-foreground whitespace-nowrap">
                     {label}
                 </div>
             )}
@@ -75,7 +64,18 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
     );
 
     if (!isClickable) {
-        return bookContent;
+        return (
+             <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        {bookContent}
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                        <p>{label}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        );
     }
 
     return (
