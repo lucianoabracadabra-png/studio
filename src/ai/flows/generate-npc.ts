@@ -9,7 +9,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/google-genai';
 
 const GenerateNpcInputSchema = z.object({
   race: z.string(),
@@ -33,7 +32,6 @@ export async function generateNpc(input: GenerateNpcInput): Promise<GenerateNpcO
 
 const prompt = ai.definePrompt({
   name: 'generateNpcPrompt',
-  model: googleAI.model('gemini-1.0-pro'),
   input: { schema: GenerateNpcInputSchema },
   output: { schema: GenerateNpcOutputSchema },
   prompt: `You are a creative storyteller and world-builder for a tabletop RPG.
