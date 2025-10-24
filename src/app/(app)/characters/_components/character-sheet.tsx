@@ -822,8 +822,9 @@ export function CharacterSheet() {
                                                         showLabel={false}
                                                         label={p.name}
                                                         isActive={p.value > 0}
+                                                        showTitleOnHover={true}
                                                     />
-                                                    {p.value > 0 && (
+                                                    {p.value > 0 && !p.name && (
                                                         <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
                                                             <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                                                                 {p.value}
