@@ -56,9 +56,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                     <>
                         {/* Default content: Icon and Level */}
                         <motion.div
-                            className='absolute inset-0 flex flex-col'
-                            animate={{ opacity: 1 }}
-                            whileHover={{ opacity: 0 }}
+                            className='absolute inset-0 flex flex-col opacity-100 group-hover/book:opacity-0 transition-opacity'
                             transition={{ duration: 0.2 }}
                         >
                             <div className="flex-grow flex items-center justify-center">
@@ -79,9 +77,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                     
                         {/* Hover content for Peon-books */}
                         <motion.div
-                            className='absolute inset-0 flex items-center justify-center text-center p-1'
-                            initial={{ opacity: 0 }}
-                            whileHover={{ opacity: 1 }}
+                            className='absolute inset-0 flex items-center justify-center text-center p-1 opacity-0 group-hover/book:opacity-100 transition-opacity'
                             transition={{ duration: 0.2 }}
                         >
                             <span 
