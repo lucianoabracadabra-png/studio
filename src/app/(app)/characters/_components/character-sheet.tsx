@@ -64,7 +64,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
                 <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
                     <div>
                         <p className='font-bold'>{resourceName}</p>
-                        <p className={`font-mono font-bold text-lg ${pilarColorClass[pilar]}`}>{current} / {max}</p>
+                        <p className={cn('font-mono font-bold text-lg', pilarColorClass[pilar])}>{current} / {max}</p>
                     </div>
                     <div>
                         <p className='text-muted-foreground'>Gasto:</p>
