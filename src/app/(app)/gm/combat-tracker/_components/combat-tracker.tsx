@@ -421,7 +421,7 @@ export function CombatTracker() {
                                 onClick={() => confirmAction(cost)} 
                                 variant="outline" 
                                 size="sm" 
-                                className="font-mono hover:bg-orange-500 hover:text-white"
+                                className="font-mono hover:bg-[var(--page-accent-color)] hover:text-white"
                                 disabled={!combatStarted}
                             >
                                 {cost}
@@ -497,7 +497,7 @@ export function CombatTracker() {
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} className={buttonVariants({ variant: 'default' })}>Remover</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => removeCombatant(c.id)}>Remover</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
