@@ -171,29 +171,31 @@ export function CombatTracker() {
  const startCombat = () => {
     if (combatants.length === 0) return;
 
-    const initiativeLogs: Omit<LogEntry, 'id' | 'timestamp'>[] = [];
-    initiativeLogs.push({ message: "O combate começou! A rolar iniciativa..." });
-
-    const updatedCombatants = combatants.map(c => {
-        const reactionRoll = Math.floor(Math.random() * 10) + 1;
-        const totalReaction = reactionRoll + c.reactionModifier;
-        const startAp = 20 - totalReaction;
-        const finalAp = startAp < 0 ? 0 : startAp;
-        
-        const newCombatant = { ...c, ap: finalAp };
-        
-        initiativeLogs.push({
-            message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
-            colorHue: newCombatant.colorHue,
-            isPlayer: newCombatant.isPlayer,
-        });
-        return newCombatant;
-    });
-
     setLog(prevLog => {
         const timestamp = new Date().toLocaleTimeString();
         let currentLogId = nextLogId;
-        
+
+        const initiativeLogs: Omit<LogEntry, 'id' | 'timestamp'>[] = [];
+        initiativeLogs.push({ message: "O combate começou! A rolar iniciativa..." });
+
+        const updatedCombatants = combatants.map(c => {
+            const reactionRoll = Math.floor(Math.random() * 10) + 1;
+            const totalReaction = reactionRoll + c.reactionModifier;
+            const startAp = 20 - totalReaction;
+            const finalAp = startAp < 0 ? 0 : startAp;
+            
+            const newCombatant = { ...c, ap: finalAp };
+            
+            initiativeLogs.push({
+                message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
+                colorHue: newCombatant.colorHue,
+                isPlayer: newCombatant.isPlayer,
+            });
+            return newCombatant;
+        });
+
+        setCombatants(updatedCombatants);
+
         const newLogEntries: LogEntry[] = initiativeLogs.reverse().map(logInfo => ({
             id: currentLogId++,
             timestamp,
@@ -204,7 +206,6 @@ export function CombatTracker() {
         return [...newLogEntries, ...prevLog];
     });
     
-    setCombatants(updatedCombatants);
     setTurnCount(1);
     setActionTrails([]);
     setCombatStarted(true);
@@ -496,7 +497,7 @@ export function CombatTracker() {
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} variant="destructive">Remover</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} variant="default">Remover</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
