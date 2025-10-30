@@ -185,6 +185,7 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
     setLog([]);
+    setNextLogId(1);
     setTurnCount(0);
     addLogEntry("O combate foi resetado.");
   }
