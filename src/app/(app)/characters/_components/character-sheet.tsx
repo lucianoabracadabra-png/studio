@@ -54,7 +54,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     };
     
     return (
-        <Card className='border-[var(--focus-color-hsl)]/50'>
+        <Card style={{ borderColor: `hsl(var(--focus-color-hsl) / 0.5)` }}>
             <CardContent className='pt-6 space-y-2'>
                 <div className='flex items-center justify-between'>
                     <h3 className='font-bold text-xl'>{title}</h3>
@@ -145,7 +145,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
             
             <div className="md:col-span-1">
-                <Card className='border-[var(--focus-color-hsl)]/50'>
+                <Card style={{ borderColor: `hsl(var(--focus-color-hsl) / 0.5)` }}>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Atributos</CardTitle>
                     </CardHeader>
@@ -163,7 +163,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
 
             <div className="md:col-span-2">
-                <Card className='border-[var(--focus-color-hsl)]/50'>
+                <Card style={{ borderColor: `hsl(var(--focus-color-hsl) / 0.5)` }}>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Habilidades</CardTitle>
                     </CardHeader>
