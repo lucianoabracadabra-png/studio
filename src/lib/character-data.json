@@ -1,10 +1,10 @@
 
 {
-  "name": "Dahl Maasen",
-  "concept": "Guerreiro tribal das florestas do norte",
+  "name": "Bassura Ambasiore",
+  "concept": "Domador de felinos de Kanta",
   "info": {
     "imageUrl": "",
-    "imageHint": "male warrior fantasy",
+    "imageHint": "male cat tamer fantasy",
     "altura": "185 cm",
     "peso": "140 kg",
     "cabelo": "Castanho grisalho, longo",
@@ -12,7 +12,7 @@
     "pele": "Persa, queimada de sol",
     "idade": "29 anos",
     "ideais": "Família, conhecimento e liberdade",
-    "origem": "Commonare da floresta",
+    "origem": "Kanta",
     "idiomas": ["Tantumá", "Tupaguá", "Uhzdin", "Manzhufā"],
     "experiencia": {
         "atual": 0,
@@ -22,11 +22,11 @@
   "health": {
       "bodyParts": {
           "head": { "name": "Cabeça", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
-          "torso": { "name": "Tronco", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
-          "leftArm": { "name": "Braço Esquerdo", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+          "torso": { "name": "Tronco", "states": ["simple", "simple", "lethal", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+          "leftArm": { "name": "Braço Esquerdo", "states": ["simple", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
           "rightArm": { "name": "Braço Direito", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
           "leftLeg": { "name": "Perna Esquerda", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
-          "rightLeg": { "name": "Perna Direita", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] }
+          "rightLeg": { "name": "Perna Direita", "states": ["simple", "lethal", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] }
       }
   },
   "focus": {
@@ -148,12 +148,9 @@
   "equipment": [
     { "itemId": "leather-jacket", "equipped": true },
     { "itemId": "hunting-knife", "equipped": true },
-    { "itemId": "short-bow", "equipped": true },
     { "itemId": "wolf-tooth-amulet", "equipped": true },
-    { "itemId": "common-arrows", "equipped": false, "currentQuantity": 20 },
     { "itemId": "rope-15m", "equipped": false },
-    { "itemId": "travel-ration", "equipped": false, "currentQuantity": 5 },
-    { "itemId": "torch", "equipped": false, "currentQuantity": 10 },
+    { "itemId": "travel-ration", "equipped": false, "currentQuantity": 3 },
     { "itemId": "waterskin", "equipped": false }
   ]
 }
