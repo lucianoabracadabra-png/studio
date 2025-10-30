@@ -20,13 +20,13 @@ export default function WikiPage() {
           const href = portal.href || `/wiki/${portal.id}`;
           return (
             <Link href={href} key={portal.id} className="block group">
-              <Card className="h-full flex flex-col transition-all border-border hover:border-primary border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+              <Card className="h-full flex flex-col transition-all hover:border-[var(--page-accent-color)]">
                 <CardHeader className="flex-row items-center gap-4">
                   <div className="p-3 rounded-md bg-muted">
                     <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl group-hover:text-primary transition-colors">{portal.title}</CardTitle>
+                    <CardTitle className="text-2xl transition-colors text-[var(--page-accent-color)]">{portal.title}</CardTitle>
                     <CardDescription>{portal.subtitle}</CardDescription>
                   </div>
                 </CardHeader>
@@ -34,7 +34,7 @@ export default function WikiPage() {
                   <p className="text-muted-foreground">{portal.description}</p>
                 </CardContent>
                 <CardFooter>
-                    <p className="text-sm font-semibold text-accent flex items-center gap-2">
+                    <p className="text-sm font-semibold flex items-center gap-2 text-[var(--page-accent-color)]">
                         Explorar Portal <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </p>
                 </CardFooter>

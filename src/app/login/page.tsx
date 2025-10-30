@@ -16,7 +16,7 @@ import { ChromeIcon } from "lucide-react";
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center">
-      <Card className="w-full max-w-sm border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]" style={{'--page-accent-color': 'hsl(var(--primary))'}}>
+      <Card className="w-full max-w-sm" style={{'--page-accent-color': 'hsl(var(--primary))'}}>
         <CardHeader className="text-center">
           <div className="mb-4 flex justify-center">
             <Icons.logo className="h-12 w-12 text-primary" />

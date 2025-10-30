@@ -30,7 +30,7 @@ export default function DashboardPage() {
         {campaigns.map((campaign) => {
           const image = PlaceHolderImages.find(p => p.id === campaign.imageId);
           return (
-            <Card key={campaign.name} className="overflow-hidden flex flex-col group border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+            <Card key={campaign.name} className="overflow-hidden flex flex-col group">
               <CardHeader className="p-0">
                   <div className="relative h-48 w-full overflow-hidden">
                       {image && <Image

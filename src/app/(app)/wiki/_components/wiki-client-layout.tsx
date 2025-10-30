@@ -35,7 +35,7 @@ export default function WikiClientLayout({ portal }: { portal: Portal }) {
                 </aside>
 
                 <main className="md:col-span-3">
-                    <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+                    <Card>
                         <CardHeader>
                             <CardTitle className='text-2xl'>{activePage.title}</CardTitle>
                         </CardHeader>

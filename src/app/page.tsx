@@ -49,7 +49,7 @@ export default function LandingPage() {
 
 function FeatureCard({ title, description, icon: Icon }: { title: string; description: string; icon: React.ElementType }) {
   return (
-    <Card className="p-6 border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+    <Card className="p-6">
       <div className="flex justify-center mb-4">
         <Icon className="h-8 w-8 text-accent" />
       </div>

@@ -37,12 +37,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 
-const pilarColorClasses = {
-    fisico: { text: 'text-orange-500', bg: 'bg-orange-500', border: 'border-orange-500', ring: 'ring-orange-500' },
-    mental: { text: 'text-blue-500', bg: 'bg-blue-500', border: 'border-blue-500', ring: 'ring-blue-500' },
-    social: { text: 'text-green-500', bg: 'bg-green-500', border: 'border-green-500', ring: 'ring-green-500' },
-};
-
 const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'fisico' | 'mental' | 'social' }) => {
     
     const handleDecrement = () => {
@@ -80,7 +74,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     );
 };
 
-const AttributeItem = ({ name, level, colorClass }: { name: string; level: number, colorClass: string }) => {
+const AttributeItem = ({ name, level }: { name: string; level: number }) => {
     return (
         <div className="flex items-center gap-3">
              <div className={cn("w-8 h-8 flex items-center justify-center rounded-md font-bold text-lg text-primary-foreground")} style={{ backgroundColor: 'var(--focus-color)' }}>
@@ -92,7 +86,7 @@ const AttributeItem = ({ name, level, colorClass }: { name: string; level: numbe
 };
 
 
-const SkillItem = ({ name, value, colorClass }: { name: string; value: number, colorClass: string }) => {
+const SkillItem = ({ name, value }: { name: string; value: number }) => {
     return (
         <div className="flex justify-between items-center py-2">
             <span className="text-foreground">{name}</span>
@@ -100,7 +94,7 @@ const SkillItem = ({ name, value, colorClass }: { name: string; value: number, c
                 {[...Array(7)].map((_, i) => (
                     <div
                         key={i}
-                        className={cn('w-3 h-3 bg-muted rounded-sm transform rotate-45', { [colorClass]: i < value })}
+                        className={cn('w-3 h-3 bg-muted rounded-sm transform rotate-45', { 'bg-[var(--focus-color)]': i < value })}
                         style={i < value ? { backgroundColor: 'var(--focus-color)' } : {}}
                     />
                 ))}
@@ -126,8 +120,6 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
     
     const maxResource = Object.values(state.attributes).reduce((sum: number, level: any) => sum + level, 0);
     const currentResourceValue = maxResource - state.spentPoints;
-    
-    const colors = pilarColorClasses[pilar];
 
     return (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
@@ -155,7 +147,6 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                 key={name} 
                                 name={name} 
                                 level={level as number}
-                                colorClass={colors.bg}
                              />
                         ))}
                     </CardContent>
@@ -175,7 +166,6 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                     key={name} 
                                     name={name} 
                                     value={value as number}
-                                    colorClass={colors.bg}
                                 />
                             ))}
                         </div>
@@ -190,7 +180,6 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                             key={name} 
                                             name={name} 
                                             value={value as number}
-                                            colorClass={colors.bg}
                                         />
                                     ))}
                                 </div>
@@ -333,7 +322,7 @@ const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
         <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
             <Card 
                 className={cn(
-                    "transition-all", 
+                    "transition-all border", 
                     isOpen && "shadow-lg",
                     isDragging && "shadow-xl",
                     item.equippable
@@ -386,7 +375,7 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
     const itemIds = useMemo(() => items.map(i => i.id), [items]);
 
     return (
-        <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+        <Card>
             <CardHeader>
                 <div className='flex justify-between items-center'>
                     <CardTitle>Equipamento</CardTitle>
@@ -416,7 +405,7 @@ const InventorySection = ({ items }: { items: CharacterItem[] }) => {
     const itemIds = useMemo(() => items.map(i => i.id), [items]);
 
     return (
-        <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+        <Card>
             <CardHeader>
                 <div className="flex justify-between items-baseline">
                     <CardTitle>Inventário</CardTitle>
@@ -770,7 +759,7 @@ export function CharacterSheet() {
             <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+                <Card>
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-4 pt-2">
@@ -798,7 +787,7 @@ export function CharacterSheet() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+                <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-4 pt-2">
@@ -846,9 +835,15 @@ export function CharacterSheet() {
                 <CardContent>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-[var(--focus-color)] data-[state=active]:border-[var(--focus-color)]/50'><PersonStanding />Físico</TabsTrigger>
-                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-[var(--focus-color)] data-[state=active]:border-[var(--focus-color)]/50'><BrainCircuit />Mental</TabsTrigger>
-                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-[var(--focus-color)] data-[state=active]:border-[var(--focus-color)]/50'><Users />Social</TabsTrigger>
+                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--focus-color)' } : {}}>
+                                <PersonStanding />Físico
+                            </TabsTrigger>
+                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'mental' ? { backgroundColor: 'var(--focus-color)' } : {}}>
+                                <BrainCircuit />Mental
+                            </TabsTrigger>
+                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'social' ? { backgroundColor: 'var(--focus-color)' } : {}}>
+                                <Users />Social
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
                             <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
