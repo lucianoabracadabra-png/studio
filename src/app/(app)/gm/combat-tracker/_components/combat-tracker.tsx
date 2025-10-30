@@ -143,8 +143,9 @@ export function CombatTracker() {
     
     let initialAp = 0;
     if (combatStarted) {
-      initialAp = turnCount;
-      addLogEntry(`${name} entrou no combate no turno ${turnCount} com AP ${initialAp}.`);
+      const minAp = combatants.length > 0 ? Math.min(...combatants.map(c => c.ap)) : 0;
+      initialAp = minAp;
+      addLogEntry(`${name} entrou no combate com AP ${initialAp}.`);
     } else {
       addLogEntry(`${name} foi adicionado ao encontro.`);
     }
@@ -167,40 +168,41 @@ export function CombatTracker() {
     
     setTurnCount(1);
     
-    const newEntries: LogEntry[] = [];
     let currentLogId = nextLogId;
-
-    const combatStartEntry: LogEntry = {
+    
+    setLog(prevLog => {
+      const newEntries: LogEntry[] = [];
+      const combatStartEntry: LogEntry = {
         id: currentLogId++,
         message: "O combate começou! A rolar iniciativa...",
         timestamp: new Date().toLocaleTimeString(),
-    };
-    newEntries.push(combatStartEntry);
-
-    const updatedCombatants = combatants.map(c => {
-      const reactionRoll = Math.floor(Math.random() * 10) + 1;
-      const totalReaction = reactionRoll + c.reactionModifier;
-      const startAp = 20 - totalReaction;
-      const finalAp = startAp < 0 ? 0 : startAp;
-      
-      const newCombatant = { ...c, ap: finalAp };
-      
-      const initiativeEntry: LogEntry = {
-        id: currentLogId++,
-        message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
-        timestamp: new Date().toLocaleTimeString(),
-        colorHue: newCombatant.colorHue,
-        isPlayer: newCombatant.isPlayer,
       };
-      newEntries.push(initiativeEntry);
-
-      return newCombatant;
+      newEntries.push(combatStartEntry);
+      
+      const updatedCombatants = combatants.map(c => {
+        const reactionRoll = Math.floor(Math.random() * 10) + 1;
+        const totalReaction = reactionRoll + c.reactionModifier;
+        const startAp = 20 - totalReaction;
+        const finalAp = startAp < 0 ? 0 : startAp;
+        
+        const newCombatant = { ...c, ap: finalAp };
+        
+        const initiativeEntry: LogEntry = {
+          id: currentLogId++,
+          message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
+          timestamp: new Date().toLocaleTimeString(),
+          colorHue: newCombatant.colorHue,
+          isPlayer: newCombatant.isPlayer,
+        };
+        newEntries.push(initiativeEntry);
+        
+        return newCombatant;
+      });
+      setCombatants(updatedCombatants);
+      return [...newEntries.reverse(), ...prevLog];
     });
     
-    setLog(prevLog => [...newEntries.reverse(), ...prevLog]);
     setNextLogId(currentLogId);
-
-    setCombatants(updatedCombatants);
     setActionTrails([]);
     setCombatStarted(true);
   };
@@ -394,8 +396,9 @@ export function CombatTracker() {
             </CardContent>
         </Card>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {combatStarted && activeCombatant ? (
-            <Card>
+            <Card className="lg:col-span-1">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Crown /> Turno Ativo: {activeCombatant.name}</CardTitle>
                     <CardDescription>AP Atual: {activeCombatant.ap}</CardDescription>
@@ -415,71 +418,33 @@ export function CombatTracker() {
             </Card>
         ) : null }
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-1 flex flex-col gap-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><UserPlus /> Adicionar Combatente</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="grid grid-cols-[1fr_auto] gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Nome</Label>
-                            <Input id="name" placeholder="Ex: Goblin, Herói" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="reaction">Mod. Reação</Label>
-                             <div className="flex items-center gap-2">
-                                <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
-                                <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows" disabled={combatStarted}/>
-                                <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
-                            </div>
+        <Card className="flex-grow lg:col-span-2">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><History /> Registro de Combate</CardTitle>
+            </CardHeader>
+            <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
+                {log.length > 0 ? log.map(entry => (
+                    <div key={entry.id} className="text-sm p-2 rounded-md bg-muted relative flex items-center gap-3">
+                        {entry.colorHue !== undefined && (
+                            entry.isPlayer ? (
+                            <Circle className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
+                            ) : (
+                            <Square className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
+                            )
+                        )}
+                        <div>
+                        <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
+                        <span>{entry.message}</span>
                         </div>
                     </div>
-                    <div className="space-y-3">
-                        <Label>Cor</Label>
-                        <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} />
-                    </div>
-                    <div className="flex items-center space-x-2 pt-2">
-                        <Checkbox id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: !!checked })} />
-                        <Label htmlFor="is-player" className='cursor-pointer'>Personagem de Jogador</Label>
-                    </div>
-                    <Button 
-                        onClick={addCombatant} 
-                        className="w-full font-bold" 
-                    >
-                        <PlusCircle className="mr-2 h-4 w-4" /> Adicionar ao Encontro
-                    </Button>
-                </CardContent>
-            </Card>
+                )) : (
+                    <p className="text-center text-muted-foreground py-8">O registro está vazio.</p>
+                )}
+            </CardContent>
+        </Card>
+    </div>
 
-            <Card className="flex-grow">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><History /> Registro de Combate</CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
-                    {log.length > 0 ? log.map(entry => (
-                        <div key={entry.id} className="text-sm p-2 rounded-md bg-muted relative flex items-center gap-3">
-                           {entry.colorHue !== undefined && (
-                             entry.isPlayer ? (
-                               <Circle className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
-                             ) : (
-                                <Square className="h-3 w-3" style={{ color: `hsl(${entry.colorHue}, 90%, 70%)`}} fill={`hsl(${entry.colorHue}, 90%, 70%)`} />
-                             )
-                           )}
-                           <div>
-                            <span className="font-mono text-xs text-muted-foreground mr-2">{entry.timestamp}</span>
-                            <span>{entry.message}</span>
-                           </div>
-                        </div>
-                    )) : (
-                        <p className="text-center text-muted-foreground py-8">O registro está vazio.</p>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
-
-
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <Card className="lg:col-span-2">
             <CardHeader>
                 <CardTitle>Lista do Encontro</CardTitle>
@@ -531,6 +496,42 @@ export function CombatTracker() {
                         ))
                     )}
                 </div>
+            </CardContent>
+        </Card>
+        
+        <Card className="lg:col-span-1">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><UserPlus /> Adicionar Combatente</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="grid grid-cols-[1fr_auto] gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Nome</Label>
+                        <Input id="name" placeholder="Ex: Goblin, Herói" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="reaction">Mod. Reação</Label>
+                            <div className="flex items-center gap-2">
+                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
+                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows" disabled={combatStarted}/>
+                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
+                        </div>
+                    </div>
+                </div>
+                <div className="space-y-3">
+                    <Label>Cor</Label>
+                    <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} />
+                </div>
+                <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: !!checked })} />
+                    <Label htmlFor="is-player" className='cursor-pointer'>Personagem de Jogador</Label>
+                </div>
+                <Button 
+                    onClick={addCombatant} 
+                    className="w-full font-bold" 
+                >
+                    <PlusCircle className="mr-2 h-4 w-4" /> Adicionar ao Encontro
+                </Button>
             </CardContent>
         </Card>
       </div>
