@@ -243,7 +243,7 @@ export function CombatTracker() {
     const newAp = actor.ap + cost;
     
     const newTrail: ActionTrail = {
-        combatantId: activeCombatantId,
+        combatId: activeCombatantId,
         fromAp: actor.ap,
         toAp: newAp,
         colorHue: actor.colorHue,
