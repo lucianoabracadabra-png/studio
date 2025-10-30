@@ -768,24 +768,15 @@ export function CharacterSheet() {
                            {character.soul.domains.map(d => {
                                 const Icon = iconMap[d.icon as keyof typeof iconMap] || Heart;
                                 return (
-                                    <TooltipProvider key={d.name}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <div>
-                                                    <Book
-                                                        label={d.name}
-                                                        icon={Icon}
-                                                        colorHsl={d.color}
-                                                        level={d.level}
-                                                        isActive={d.level > 0}
-                                                        isClickable={false}
-                                                        showLabel={true}
-                                                    />
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top"><p>{d.name}</p></TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <Book
+                                        key={d.name}
+                                        label={d.name}
+                                        icon={Icon}
+                                        colorHsl={d.color}
+                                        level={d.level}
+                                        isActive={d.level > 0}
+                                        isClickable={true}
+                                    />
                                )})}
                         </div>
                         <div className="space-y-3 pt-2">
@@ -804,50 +795,30 @@ export function CharacterSheet() {
                             {character.spirit.personality.map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap] || Shield;
                                 return (
-                                    <TooltipProvider key={p.name}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <div>
-                                                    <Book
-                                                        key={p.name}
-                                                        icon={Icon}
-                                                        colorHsl={p.colorHsl}
-                                                        isClickable={false}
-                                                        showLabel={true}
-                                                        label={p.name}
-                                                        level={p.value}
-                                                        isActive={p.value > 0}
-                                                    />
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top"><p>{p.name}</p></TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                    <Book
+                                        key={p.name}
+                                        label={p.name}
+                                        icon={Icon}
+                                        colorHsl={p.colorHsl}
+                                        isClickable={true}
+                                        level={p.value}
+                                        isActive={p.value > 0}
+                                    />
                                 )})}
                         </div>
                          <div className="flex justify-center items-end gap-4 pt-2">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap] || Heart;
                                 return (
-                                     <TooltipProvider key={p.name}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <div>
-                                                    <Book
-                                                        key={p.name}
-                                                        icon={Icon}
-                                                        colorHsl={p.colorHsl}
-                                                        isClickable={false}
-                                                        showLabel={true}
-                                                        label={p.name}
-                                                        level={p.value}
-                                                        isActive={p.value > 0}
-                                                    />
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top"><p>{p.name}</p></TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
+                                     <Book
+                                        key={p.name}
+                                        label={p.name}
+                                        icon={Icon}
+                                        colorHsl={p.colorHsl}
+                                        isClickable={true}
+                                        level={p.value}
+                                        isActive={p.value > 0}
+                                    />
                                 )})}
                         </div>
                     </CardContent>
