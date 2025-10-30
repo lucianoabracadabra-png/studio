@@ -106,12 +106,12 @@ export function DiceRoller() {
           <div className="rounded-lg border bg-muted/50 p-4 space-y-4 min-h-[300px]">
             <div className="text-center space-y-2">
                 <p className="text-muted-foreground">Resultado</p>
-                <p className="text-7xl font-bold text-primary">
+                <p className="text-7xl font-bold text-[var(--page-accent-color)]">
                     {lastRoll ? lastRoll.total : '...'}
                 </p>
                 {lastRoll && (
                     <div className="text-muted-foreground font-mono">
-                        <span className="font-bold text-accent">{lastRoll.notation}</span>
+                        <span className="font-bold text-[var(--page-accent-color)]">{lastRoll.notation}</span>
                         {lastRoll.rolls.length > 1 && (
                             <span className="text-xs"> = ({lastRoll.rolls.join(' + ')})</span>
                         )}
@@ -127,7 +127,7 @@ export function DiceRoller() {
                 {results.length > 0 ? results.map((r, i) => (
                   <div key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-background/50">
                     <div className='font-mono'>
-                      <span className="font-mono text-accent">{r.notation}</span>
+                      <span className="font-mono text-[var(--page-accent-color)]">{r.notation}</span>
                       {r.rolls.length > 1 && (
                          <span className="text-muted-foreground ml-2 text-xs">
                             ({r.rolls.join(', ')})
