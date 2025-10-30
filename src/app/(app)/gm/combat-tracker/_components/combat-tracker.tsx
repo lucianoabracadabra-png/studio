@@ -486,7 +486,7 @@ export function CombatTracker() {
                                 {combatStarted ? (
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
+                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:bg-[var(--page-accent-color)] hover:text-primary-foreground h-8 w-8"><X className="h-4 w-4"/></Button>
                                         </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
@@ -502,7 +502,7 @@ export function CombatTracker() {
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 ) : (
-                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeCombatant(c.id)}>
+                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:bg-[var(--page-accent-color)] hover:text-primary-foreground h-8 w-8" onClick={() => removeCombatant(c.id)}>
                                         <X className="h-4 w-4"/>
                                     </Button>
                                 )}
@@ -532,9 +532,9 @@ export function CombatTracker() {
                     <div className="space-y-2">
                         <Label htmlFor="reaction">Mod. Reação</Label>
                             <div className="flex items-center gap-2">
-                            <Button size="icon" variant="outline" className="hover:bg-[var(--page-accent-color)]" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))}><ChevronLeft/></Button>
+                            <Button size="icon" variant="outline" className="hover:bg-[var(--page-accent-color)] hover:text-primary-foreground" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))}><ChevronLeft/></Button>
                             <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows focus-visible:ring-[var(--page-accent-color)]"/>
-                            <Button size="icon" variant="outline" className="hover:bg-[var(--page-accent-color)]" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))}><ChevronRight/></Button>
+                            <Button size="icon" variant="outline" className="hover:bg-[var(--page-accent-color)] hover:text-primary-foreground" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))}><ChevronRight/></Button>
                         </div>
                     </div>
                 </div>
