@@ -83,7 +83,7 @@ const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: numbe
                         disabled={disabled}
                         className={cn(
                             'w-8 h-8 rounded-full transition-all flex items-center justify-center border-2',
-                            isSelected ? 'scale-110 border-white' : 'border-transparent hover:scale-105',
+                            isSelected ? 'border-white' : 'border-transparent hover:scale-105',
                             disabled ? 'cursor-not-allowed' : ''
                         )}
                         style={{ backgroundColor: `hsl(${hue}, 90%, 70%)`}}
@@ -156,16 +156,27 @@ export function CombatTracker() {
   const startCombat = () => {
     if (combatants.length === 0) return;
     setTurnCount(1);
+    addLogEntry("O combate começou! A rolar iniciativa...");
+
     const updatedCombatants = combatants.map(c => {
       const reactionRoll = Math.floor(Math.random() * 10) + 1;
-      const startAp = 20 - (reactionRoll + c.reactionModifier);
-      return { ...c, ap: startAp < 0 ? 0 : startAp };
+      const totalReaction = reactionRoll + c.reactionModifier;
+      const startAp = 20 - totalReaction;
+      const finalAp = startAp < 0 ? 0 : startAp;
+      
+      const newCombatant = { ...c, ap: finalAp };
+      
+      addLogEntry(
+        `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
+        newCombatant
+      );
+
+      return newCombatant;
     });
+
     setCombatants(updatedCombatants);
-    
-    setActionTrails([]); // Clear previous trails
+    setActionTrails([]);
     setCombatStarted(true);
-    addLogEntry("O combate começou! Testes de reação rolados.");
   };
 
   const resetCombat = () => {
