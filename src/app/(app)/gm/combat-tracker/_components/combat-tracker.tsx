@@ -141,10 +141,18 @@ export function CombatTracker() {
   const addCombatant = () => {
     const name = newCombatant.name.trim() || hueToNameMap[newCombatant.colorHue] || `Combatente ${nextId}`;
     
+    let initialAp = 0;
+    if (combatStarted) {
+      initialAp = turnCount;
+      addLogEntry(`${name} entrou no combate no turno ${turnCount} com AP ${initialAp}.`);
+    } else {
+      addLogEntry(`${name} foi adicionado ao encontro.`);
+    }
+
     const combatant: Combatant = {
       id: nextId,
       name,
-      ap: 0,
+      ap: initialAp,
       isPlayer: newCombatant.isPlayer,
       reactionModifier: newCombatant.reactionModifier,
       colorHue: newCombatant.colorHue,
@@ -152,7 +160,6 @@ export function CombatTracker() {
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
     setNewCombatant({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
-    addLogEntry(`${combatant.name} foi adicionado ao encontro.`);
   };
   
   const startCombat = () => {
@@ -204,15 +211,12 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
     setTurnCount(0);
-    setLog(prev => {
-        const newEntry = {
-            id: nextLogId,
-            message: "O combate foi resetado.",
-            timestamp: new Date().toLocaleTimeString(),
-        };
-        setNextLogId(p => p + 1);
-        return [newEntry];
-    });
+    setLog([{
+      id: 1,
+      message: "O combate foi resetado.",
+      timestamp: new Date().toLocaleTimeString(),
+    }]);
+    setNextLogId(2);
   }
 
   const removeCombatant = (id: number) => {
@@ -310,7 +314,7 @@ export function CombatTracker() {
         <Card className="w-full">
             <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                    <span>Linha do Tempo de Ação</span>
+                    <span>Linha do Tempo de Ação (Turno: {turnCount})</span>
                      {combatStarted ? (
                         <Button onClick={resetCombat} variant="destructive">
                             <RefreshCw className="mr-2" />
@@ -421,7 +425,7 @@ export function CombatTracker() {
                     <div className="grid grid-cols-[1fr_auto] gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Nome</Label>
-                            <Input id="name" placeholder="Ex: Goblin, Herói" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} disabled={combatStarted}/>
+                            <Input id="name" placeholder="Ex: Goblin, Herói" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="reaction">Mod. Reação</Label>
@@ -434,16 +438,15 @@ export function CombatTracker() {
                     </div>
                     <div className="space-y-3">
                         <Label>Cor</Label>
-                        <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} disabled={combatStarted}/>
+                        <ColorSelector selectedHue={newCombatant.colorHue} onSelect={hue => setNewCombatant({ ...newCombatant, colorHue: hue })} />
                     </div>
                     <div className="flex items-center space-x-2 pt-2">
-                        <Checkbox id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: !!checked })} disabled={combatStarted}/>
+                        <Checkbox id="is-player" checked={newCombatant.isPlayer} onCheckedChange={checked => setNewCombatant({ ...newCombatant, isPlayer: !!checked })} />
                         <Label htmlFor="is-player" className='cursor-pointer'>Personagem de Jogador</Label>
                     </div>
                     <Button 
                         onClick={addCombatant} 
                         className="w-full font-bold" 
-                        disabled={combatStarted}
                     >
                         <PlusCircle className="mr-2 h-4 w-4" /> Adicionar ao Encontro
                     </Button>
@@ -501,23 +504,29 @@ export function CombatTracker() {
                                     <p>AP: {c.ap}</p>
                                     <p>Mod. Reação: {c.reactionModifier}</p>
                                 </div>
+                                {combatStarted ? (
                                     <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-orange-500 h-8 w-8"><X className="h-4 w-4"/></Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Isso removerá permanentemente {c.name} do encontro.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => removeCombatant(c.id)} >Remover</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-orange-500 h-8 w-8"><X className="h-4 w-4"/></Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Isso removerá permanentemente {c.name} do encontro.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} >Remover</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                ) : (
+                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-orange-500 h-8 w-8" onClick={() => removeCombatant(c.id)}>
+                                        <X className="h-4 w-4"/>
+                                    </Button>
+                                )}
                             </div>
                         ))
                     )}
