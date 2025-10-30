@@ -734,6 +734,7 @@ export function CharacterSheet() {
         '--focus-color': focusColors[activeFocusTab].hex,
         '--focus-color-hsl': focusColors[activeFocusTab].hsl,
         boxShadow: `0 0 25px rgba(0,0,0,0.4), 0 0 15px ${focusColors[activeFocusTab].hex}99`,
+        borderColor: focusColors[activeFocusTab].hex,
     } as React.CSSProperties;
 
     return (
