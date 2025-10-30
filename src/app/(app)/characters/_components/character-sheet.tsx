@@ -53,27 +53,25 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
         dispatch({ type: 'INCREMENT_SPENT', pilar: pilar });
     };
     
-    const colors = pilarColorClasses[pilar];
-
     return (
-        <Card>
+        <Card className='border-[var(--focus-color)]/50'>
             <CardContent className='pt-6 space-y-2'>
                 <div className='flex items-center justify-between'>
                     <h3 className='font-bold text-xl'>{title}</h3>
-                    <span className={colors.text}>{React.createElement(icon)}</span>
+                    <span style={{ color: 'var(--focus-color)' }}>{React.createElement(icon)}</span>
                 </div>
                 <Separator />
                 <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
                     <div>
                         <p className='font-bold'>{resourceName}</p>
-                        <p className={cn('font-mono font-bold text-lg', colors.text)}>{current} / {max}</p>
+                        <p className='font-mono font-bold text-lg' style={{ color: 'var(--focus-color)' }}>{current} / {max}</p>
                     </div>
                     <div>
                         <p className='text-muted-foreground'>Gasto:</p>
                         <div className='flex items-center gap-2'>
-                             <Button variant='outline' size='icon' className={cn('h-6 w-6', `hover:bg-${pilar === 'fisico' ? 'orange' : pilar === 'mental' ? 'blue' : 'green'}-500 hover:text-white`)} onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
+                             <Button variant='outline' size='icon' className='h-6 w-6 hover:text-white' style={{ '--button-hover-bg': 'var(--focus-color)' } as React.CSSProperties} onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
                              <span className='font-mono text-lg text-center w-6'>{spentPoints}</span>
-                             <Button variant='outline' size='icon' className={cn('h-6 w-6', `hover:bg-${pilar === 'fisico' ? 'orange' : pilar === 'mental' ? 'blue' : 'green'}-500 hover:text-white`)} onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
+                             <Button variant='outline' size='icon' className='h-6 w-6 hover:text-white' style={{ '--button-hover-bg': 'var(--focus-color)' } as React.CSSProperties} onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
                         </div>
                     </div>
                 </div>
@@ -85,7 +83,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
 const AttributeItem = ({ name, level, colorClass }: { name: string; level: number, colorClass: string }) => {
     return (
         <div className="flex items-center gap-3">
-             <div className={cn("w-8 h-8 flex items-center justify-center rounded-md font-bold text-lg text-primary-foreground", colorClass)}>
+             <div className={cn("w-8 h-8 flex items-center justify-center rounded-md font-bold text-lg text-primary-foreground")} style={{ backgroundColor: 'var(--focus-color)' }}>
                 {level}
             </div>
             <span className="text-foreground font-medium">{name}</span>
@@ -103,6 +101,7 @@ const SkillItem = ({ name, value, colorClass }: { name: string; value: number, c
                     <div
                         key={i}
                         className={cn('w-3 h-3 bg-muted rounded-sm transform rotate-45', { [colorClass]: i < value })}
+                        style={i < value ? { backgroundColor: 'var(--focus-color)' } : {}}
                     />
                 ))}
             </div>
@@ -146,9 +145,9 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
             
             <div className="md:col-span-1">
-                <Card>
+                <Card className='border-[var(--focus-color)]/50'>
                     <CardHeader>
-                        <CardTitle className='text-base'>Atributos</CardTitle>
+                        <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Atributos</CardTitle>
                     </CardHeader>
                     <CardContent className='grid grid-cols-2 gap-x-4 gap-y-3'>
                         {Object.entries(state.attributes).map(([name, level]) => (
@@ -164,9 +163,9 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
 
             <div className="md:col-span-2">
-                <Card>
+                <Card className='border-[var(--focus-color)]/50'>
                     <CardHeader>
-                        <CardTitle className='text-base'>Habilidades</CardTitle>
+                        <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Habilidades</CardTitle>
                     </CardHeader>
                     <CardContent>
                          <h4 className="text-sm font-semibold text-muted-foreground mb-2">Perícias</h4>
@@ -746,8 +745,6 @@ export function CharacterSheet() {
         '--focus-color': activeFocusTab === 'physical' ? 'hsl(24 95% 53%)' :
                          activeFocusTab === 'mental' ? 'hsl(221 83% 53%)' :
                          'hsl(142 71% 45%)',
-        borderColor: 'var(--focus-color)',
-        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px var(--focus-color)`
     } as React.CSSProperties;
 
     return (
@@ -835,7 +832,7 @@ export function CharacterSheet() {
                 </Card>
             </div>
 
-            <Card style={focusCardStyle}>
+            <Card style={focusCardStyle} className='border-[var(--focus-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_var(--focus-color)]'>
                 <CardHeader>
                     <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
                         Focos de Desenvolvimento
