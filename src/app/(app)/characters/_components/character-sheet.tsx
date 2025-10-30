@@ -740,7 +740,7 @@ export function CharacterSheet() {
         '--focus-color': focusColors[activeFocusTab].hex,
         '--focus-color-hsl': focusColors[activeFocusTab].hsl,
         borderColor: 'var(--focus-color)',
-        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px var(--focus-color)`
+        filter: `drop-shadow(0 0 8px var(--focus-color))`
     } as React.CSSProperties;
 
     return (

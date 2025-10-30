@@ -27,11 +27,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
 
   return (
-    <div className="min-h-screen w-full bg-background relative" style={pageStyle}>
+    <div className="min-h-screen w-full bg-background" style={pageStyle}>
         <SidebarNav activeColorHue={activeColorHue} />
         <main 
           className={cn(
-            'ml-20 relative min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col gap-6'
+            'ml-20 min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col gap-6 border-l-4 border-[var(--page-accent-color)] shadow-[-10px_0_20px_-10px_hsl(var(--page-accent-color)/0.5)]'
             )}
           >
           {children}
