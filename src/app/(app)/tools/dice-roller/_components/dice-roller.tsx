@@ -54,7 +54,7 @@ export function DiceRoller() {
   };
 
   return (
-    <Card>
+    <Card className='border-0 shadow-none'>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Dices className="h-6 w-6" />

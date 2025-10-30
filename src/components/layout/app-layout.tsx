@@ -32,7 +32,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <main 
           className={cn(
             'ml-20 relative min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col gap-6',
-            'main-content-area'
+            'rounded-xl border-2 border-[var(--page-accent-color)] shadow-[0_0_25px_hsl(var(--page-accent-color)/0.5)] transition-all duration-500 m-4'
             )}
           >
           {children}
