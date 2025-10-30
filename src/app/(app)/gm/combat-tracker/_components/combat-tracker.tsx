@@ -180,14 +180,18 @@ export function CombatTracker() {
   };
 
   const resetCombat = () => {
+    const resetLogEntry: LogEntry = {
+      id: 1,
+      message: "O combate foi resetado.",
+      timestamp: new Date().toLocaleTimeString(),
+    };
     setCombatStarted(false);
     setActiveCombatantId(null);
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
-    setLog([]);
-    setNextLogId(1);
+    setLog([resetLogEntry]);
+    setNextLogId(2);
     setTurnCount(0);
-    addLogEntry("O combate foi resetado.");
   }
 
   const removeCombatant = (id: number) => {
