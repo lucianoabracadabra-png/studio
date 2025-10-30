@@ -591,7 +591,6 @@ export function CharacterSheet() {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [activeFocusTab, setActiveFocusTab] = useState('physical');
     
-    // Pass the initial data directly, and let an effect handle image override if necessary
     const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData as unknown as Character);
     
     const [characterItems, setCharacterItems] = useState<CharacterItem[]>(() => 
