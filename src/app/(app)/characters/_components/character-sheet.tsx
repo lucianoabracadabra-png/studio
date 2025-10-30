@@ -37,6 +37,12 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 
+const pilarColorClasses = {
+    fisico: { text: 'text-orange-500', bg: 'bg-orange-500', border: 'border-orange-500', ring: 'ring-orange-500' },
+    mental: { text: 'text-blue-500', bg: 'bg-blue-500', border: 'border-blue-500', ring: 'ring-blue-500' },
+    social: { text: 'text-green-500', bg: 'bg-green-500', border: 'border-green-500', ring: 'ring-green-500' },
+};
+
 const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints, dispatch, pilar }: { title: string, icon: React.ElementType, resourceName: string, current: number, max: number, spentPoints: number, dispatch: React.Dispatch<any>, pilar: 'fisico' | 'mental' | 'social' }) => {
     
     const handleDecrement = () => {
@@ -46,32 +52,28 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     const handleIncrement = () => {
         dispatch({ type: 'INCREMENT_SPENT', pilar: pilar });
     };
-
-    const pilarColorClass = {
-        fisico: 'text-orange-500',
-        mental: 'text-blue-500',
-        social: 'text-green-500',
-    };
+    
+    const colors = pilarColorClasses[pilar];
 
     return (
         <Card>
             <CardContent className='pt-6 space-y-2'>
                 <div className='flex items-center justify-between'>
                     <h3 className='font-bold text-xl'>{title}</h3>
-                    <span className={pilarColorClass[pilar]}>{React.createElement(icon)}</span>
+                    <span className={colors.text}>{React.createElement(icon)}</span>
                 </div>
                 <Separator />
                 <div className='grid grid-cols-2 gap-x-4 items-center text-sm'>
                     <div>
                         <p className='font-bold'>{resourceName}</p>
-                        <p className={cn('font-mono font-bold text-lg', pilarColorClass[pilar])}>{current} / {max}</p>
+                        <p className={cn('font-mono font-bold text-lg', colors.text)}>{current} / {max}</p>
                     </div>
                     <div>
                         <p className='text-muted-foreground'>Gasto:</p>
                         <div className='flex items-center gap-2'>
-                             <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
+                             <Button variant='outline' size='icon' className={cn('h-6 w-6', `hover:bg-${pilar === 'fisico' ? 'orange' : pilar === 'mental' ? 'blue' : 'green'}-500 hover:text-white`)} onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
                              <span className='font-mono text-lg text-center w-6'>{spentPoints}</span>
-                             <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
+                             <Button variant='outline' size='icon' className={cn('h-6 w-6', `hover:bg-${pilar === 'fisico' ? 'orange' : pilar === 'mental' ? 'blue' : 'green'}-500 hover:text-white`)} onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
                         </div>
                     </div>
                 </div>
@@ -125,12 +127,8 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
     
     const maxResource = Object.values(state.attributes).reduce((sum: number, level: any) => sum + level, 0);
     const currentResourceValue = maxResource - state.spentPoints;
-
-    const pilarColorClasses = {
-        fisico: { text: 'text-orange-500', bg: 'bg-orange-500' },
-        mental: { text: 'text-blue-500', bg: 'bg-blue-500' },
-        social: { text: 'text-green-500', bg: 'bg-green-500' },
-    };
+    
+    const colors = pilarColorClasses[pilar];
 
     return (
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
@@ -158,7 +156,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                 key={name} 
                                 name={name} 
                                 level={level as number}
-                                colorClass={pilarColorClasses[pilar].bg}
+                                colorClass={colors.bg}
                              />
                         ))}
                     </CardContent>
@@ -178,7 +176,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                     key={name} 
                                     name={name} 
                                     value={value as number}
-                                    colorClass={pilarColorClasses[pilar].bg}
+                                    colorClass={colors.bg}
                                 />
                             ))}
                         </div>
@@ -193,7 +191,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                                             key={name} 
                                             name={name} 
                                             value={value as number}
-                                            colorClass={pilarColorClasses[pilar].bg}
+                                            colorClass={colors.bg}
                                         />
                                     ))}
                                 </div>
@@ -603,6 +601,7 @@ function focusReducer(state: ReturnType<typeof initialFocusState>, action: any) 
 
 export function CharacterSheet() {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
+    const [activeFocusTab, setActiveFocusTab] = useState('physical');
     
     const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData as unknown as Character, (initial) => {
         const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
@@ -743,6 +742,14 @@ export function CharacterSheet() {
     const equippedItems = useMemo(() => characterItems.filter(item => item.isEquipped), [characterItems]);
     const inventoryItems = useMemo(() => characterItems.filter(item => !item.isEquipped), [characterItems]);
 
+    const focusCardStyle = {
+        '--focus-color': activeFocusTab === 'physical' ? 'hsl(24 95% 53%)' :
+                         activeFocusTab === 'mental' ? 'hsl(221 83% 53%)' :
+                         'hsl(142 71% 45%)',
+        borderColor: 'var(--focus-color)',
+        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px var(--focus-color)`
+    } as React.CSSProperties;
+
     return (
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             
@@ -828,12 +835,14 @@ export function CharacterSheet() {
                 </Card>
             </div>
 
-            <Card>
+            <Card style={focusCardStyle}>
                 <CardHeader>
-                    <CardTitle className='text-center'>Focos de Desenvolvimento</CardTitle>
+                    <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
+                        Focos de Desenvolvimento
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Tabs defaultValue="physical" className="w-full">
+                    <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-orange-500 data-[state=active]:border-orange-500/50'><PersonStanding />Físico</TabsTrigger>
                             <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-blue-500 data-[state=active]:border-blue-500/50'><BrainCircuit />Mental</TabsTrigger>
