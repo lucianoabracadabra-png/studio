@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import navData from '@/lib/data/navigation.json';
 import { profileLink } from '@/components/layout/sidebar-nav';
@@ -168,40 +168,38 @@ export function CombatTracker() {
     
     setTurnCount(1);
     
+    const initiativeLogs: LogEntry[] = [];
     let currentLogId = nextLogId;
+
+    const combatStartEntry: LogEntry = {
+      id: currentLogId++,
+      message: "O combate começou! A rolar iniciativa...",
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    initiativeLogs.push(combatStartEntry);
     
-    setLog(prevLog => {
-      const newEntries: LogEntry[] = [];
-      const combatStartEntry: LogEntry = {
-        id: currentLogId++,
-        message: "O combate começou! A rolar iniciativa...",
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      newEntries.push(combatStartEntry);
+    const updatedCombatants = combatants.map(c => {
+      const reactionRoll = Math.floor(Math.random() * 10) + 1;
+      const totalReaction = reactionRoll + c.reactionModifier;
+      const startAp = 20 - totalReaction;
+      const finalAp = startAp < 0 ? 0 : startAp;
       
-      const updatedCombatants = combatants.map(c => {
-        const reactionRoll = Math.floor(Math.random() * 10) + 1;
-        const totalReaction = reactionRoll + c.reactionModifier;
-        const startAp = 20 - totalReaction;
-        const finalAp = startAp < 0 ? 0 : startAp;
-        
-        const newCombatant = { ...c, ap: finalAp };
-        
-        const initiativeEntry: LogEntry = {
-          id: currentLogId++,
-          message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
-          timestamp: new Date().toLocaleTimeString(),
-          colorHue: newCombatant.colorHue,
-          isPlayer: newCombatant.isPlayer,
-        };
-        newEntries.push(initiativeEntry);
-        
-        return newCombatant;
-      });
-      setCombatants(updatedCombatants);
-      return [...newEntries.reverse(), ...prevLog];
+      const newCombatant = { ...c, ap: finalAp };
+      
+      const initiativeEntry: LogEntry = {
+        id: currentLogId++,
+        message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
+        timestamp: new Date().toLocaleTimeString(),
+        colorHue: newCombatant.colorHue,
+        isPlayer: newCombatant.isPlayer,
+      };
+      initiativeLogs.push(initiativeEntry);
+      
+      return newCombatant;
     });
-    
+
+    setCombatants(updatedCombatants);
+    setLog(prevLog => [...initiativeLogs.reverse(), ...prevLog]);
     setNextLogId(currentLogId);
     setActionTrails([]);
     setCombatStarted(true);
@@ -397,26 +395,36 @@ export function CombatTracker() {
         </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {combatStarted && activeCombatant ? (
-            <Card className="lg:col-span-1">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Crown /> Turno Ativo: {activeCombatant.name}</CardTitle>
-                    <CardDescription>AP Atual: {activeCombatant.ap}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4">
-                     <div className="flex-grow space-y-2">
-                       <Label>Custo da Ação (AP)</Label>
-                        <div className='flex flex-wrap gap-2'>
-                            {Array.from({length: 10}, (_, i) => i + 1).map(cost => (
-                                <Button key={cost} onClick={() => confirmAction(cost)} variant="outline" size="sm" className="font-mono">
-                                    {cost}
-                                </Button>
-                            ))}
-                       </div>
-                    </div>
-                </CardContent>
-            </Card>
-        ) : null }
+        <Card className={cn("lg:col-span-1", !combatStarted && "opacity-50 grayscale")}>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Crown /> 
+                    {activeCombatant ? `Turno Ativo: ${activeCombatant.name}` : "Turno Ativo"}
+                </CardTitle>
+                <CardDescription>
+                    {activeCombatant ? `AP Atual: ${activeCombatant.ap}` : "Aguardando início do combate"}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+                 <div className="flex-grow space-y-2">
+                   <Label>Custo da Ação (AP)</Label>
+                    <div className='grid grid-cols-5 gap-2'>
+                        {Array.from({length: 15}, (_, i) => i + 1).map(cost => (
+                            <Button 
+                                key={cost} 
+                                onClick={() => confirmAction(cost)} 
+                                variant="outline" 
+                                size="sm" 
+                                className="font-mono"
+                                disabled={!combatStarted}
+                            >
+                                {cost}
+                            </Button>
+                        ))}
+                   </div>
+                </div>
+            </CardContent>
+        </Card>
 
         <Card className="flex-grow lg:col-span-2">
             <CardHeader>
