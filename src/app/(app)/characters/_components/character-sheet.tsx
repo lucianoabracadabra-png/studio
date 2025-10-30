@@ -128,7 +128,6 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
             style={{ 
                 '--focus-color-hsl': colorHsl, 
                 '--focus-color': `hsl(${colorHsl})`,
-                '--card-border-color': `hsl(${colorHsl})`
             } as React.CSSProperties}
         >
             <div className="md:col-span-1">
@@ -738,9 +737,7 @@ export function CharacterSheet() {
     };
 
     const focusCardStyle = {
-        '--focus-color': focusColors[activeFocusTab].hex,
-        '--focus-color-hsl': focusColors[activeFocusTab].hsl,
-        '--card-border-color': focusColors[activeFocusTab].hex,
+        '--page-accent-color': focusColors[activeFocusTab].hex,
         boxShadow: `0 0 25px rgba(0,0,0,0.4), 0 0 15px ${focusColors[activeFocusTab].hex}99`,
     } as React.CSSProperties;
 
@@ -828,30 +825,30 @@ export function CharacterSheet() {
 
             <Card style={focusCardStyle}>
                 <CardHeader>
-                    <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
+                    <CardTitle className='text-center'>
                         Focos de Desenvolvimento
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--focus-color)' } : {}}>
+                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
                                 <PersonStanding />Físico
                             </TabsTrigger>
-                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'mental' ? { backgroundColor: 'var(--focus-color)' } : {}}>
+                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'mental' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
                                 <BrainCircuit />Mental
                             </TabsTrigger>
-                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'social' ? { backgroundColor: 'var(--focus-color)' } : {}}>
+                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'social' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
                                 <Users />Social
                             </TabsTrigger>
                         </TabsList>
-                        <TabsContent value="physical" className='pt-6'>
+                        <TabsContent value="physical" className='pt-6' style={{ '--page-accent-color': focusColors.physical.hex }}>
                             <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} colorHsl={focusColors.physical.hsl} />
                         </TabsContent>
-                        <TabsContent value="mental" className='pt-6'>
+                        <TabsContent value="mental" className='pt-6' style={{ '--page-accent-color': focusColors.mental.hex }}>
                             <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} colorHsl={focusColors.mental.hsl} />
                         </TabsContent>
-                        <TabsContent value="social" className='pt-6'>
+                        <TabsContent value="social" className='pt-6' style={{ '--page-accent-color': focusColors.social.hex }}>
                             <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} colorHsl={focusColors.social.hsl} />
                         </TabsContent>
                     </Tabs>
