@@ -766,23 +766,16 @@ export function CharacterSheet() {
                            {character.soul.domains.map(d => {
                                 const Icon = iconMap[d.icon];
                                 return (
-                                    <div key={d.name} className="relative">
-                                        <Book
-                                            icon={Icon}
-                                            colorHsl={d.color}
-                                            isClickable={false}
-                                            showLabel={true}
-                                            label={d.name}
-                                            isActive={d.level > 0}
-                                        />
-                                        {d.level > 0 && (
-                                            <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                    {d.level}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <Book
+                                        key={d.name}
+                                        icon={Icon}
+                                        colorHsl={d.color}
+                                        isClickable={false}
+                                        showLabel={true}
+                                        label={d.name}
+                                        level={d.level}
+                                        isActive={d.level > 0}
+                                    />
                                )})}
                         </div>
                         <div className="space-y-3 pt-2">
@@ -801,46 +794,32 @@ export function CharacterSheet() {
                             {character.spirit.personality.map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
-                                    <div key={p.name} className="relative">
-                                        <Book
-                                            icon={Icon}
-                                            colorHsl={p.colorHsl}
-                                            isClickable={false}
-                                            showLabel={true}
-                                            label={p.name}
-                                            isActive={p.value > 0}
-                                        />
-                                        {p.value > 0 && (
-                                            <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                    {p.value}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <Book
+                                        key={p.name}
+                                        icon={Icon}
+                                        colorHsl={p.colorHsl}
+                                        isClickable={false}
+                                        showLabel={true}
+                                        label={p.name}
+                                        level={p.value}
+                                        isActive={p.value > 0}
+                                    />
                                 )})}
                         </div>
                          <div className="flex justify-center items-end gap-4 pt-2">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
-                                    <div key={p.name} className="relative">
-                                        <Book
-                                            icon={Icon}
-                                            colorHsl={p.colorHsl}
-                                            isClickable={false}
-                                            showLabel={true}
-                                            label={p.name}
-                                            isActive={p.value > 0}
-                                        />
-                                        {p.value > 0 && (
-                                            <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center pointer-events-none">
-                                                <span className="text-xs font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                                    {p.value}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <Book
+                                        key={p.name}
+                                        icon={Icon}
+                                        colorHsl={p.colorHsl}
+                                        isClickable={false}
+                                        showLabel={true}
+                                        label={p.name}
+                                        level={p.value}
+                                        isActive={p.value > 0}
+                                    />
                                 )})}
                         </div>
                     </CardContent>

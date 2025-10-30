@@ -9,18 +9,19 @@ interface BookProps {
     label: string;
     icon: LucideIcon | (() => JSX.Element);
     colorHsl: string;
+    level?: number;
     isActive: boolean;
     isClickable?: boolean;
     showLabel?: boolean;
     onClick?: () => void;
 }
 
-export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true, showLabel = true, onClick }: BookProps) => {
+export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, showLabel = true, onClick }: BookProps) => {
 
     const bookContent = (
          <motion.div
             className={cn(
-                "relative w-12 h-16 rounded-md flex items-center justify-center cursor-pointer group/book transition-all",
+                "relative w-12 h-16 rounded-md flex flex-col cursor-pointer group/book transition-all overflow-hidden",
                 "border-2"
             )}
             style={{
@@ -49,11 +50,23 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
                 transition={{ duration: 0.3 }}
             />
             
-            <Icon className={cn(
-                "h-6 w-6 transition-colors duration-300", 
-                isActive ? "text-white" : "text-neutral-400",
-                "group-hover/book:text-white"
-            )} />
+            <div className="h-2/3 w-full flex items-center justify-center">
+                 <Icon className={cn(
+                    "h-6 w-6 transition-colors duration-300", 
+                    isActive ? "text-white" : "text-neutral-400",
+                    "group-hover/book:text-white"
+                )} />
+            </div>
+
+            <div className={cn(
+                "h-1/3 w-full flex items-center justify-center bg-black/20",
+                level && level > 0 ? "opacity-100" : "opacity-0"
+                )}>
+                <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                    {level}
+                </span>
+            </div>
+
 
             {showLabel && (
                 <div 
