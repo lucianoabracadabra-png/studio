@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -71,7 +72,7 @@ export function DiceRoller() {
               <TabsTrigger value="skill">Perícias</TabsTrigger>
             </TabsList>
             <TabsContent value="attribute" className="space-y-4">
-               <Card className='bg-background/50'>
+               <Card>
                 <CardHeader>
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
                   <CardDescription>Clique em um dado para rolar.</CardDescription>
@@ -86,7 +87,7 @@ export function DiceRoller() {
               </Card>
             </TabsContent>
             <TabsContent value="skill" className="space-y-4">
-              <Card className='bg-background/50'>
+              <Card>
                 <CardHeader>
                   <CardTitle className='text-lg'>Teste de Perícia</CardTitle>
                   <CardDescription>Role uma quantidade de d10.</CardDescription>
