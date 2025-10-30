@@ -211,13 +211,16 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
     setTurnCount(0);
-    setLog([{
-      id: 1,
-      message: "O combate foi resetado.",
-      timestamp: new Date().toLocaleTimeString(),
-    }]);
-    setNextLogId(2);
-  }
+    setLog(prevLog => {
+      const newEntry: LogEntry = {
+        id: nextLogId,
+        message: "O combate foi resetado.",
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      setNextLogId(prevId => prevId + 1);
+      return [newEntry];
+    });
+  };
 
   const removeCombatant = (id: number) => {
     const combatant = combatants.find(c => c.id === id);
@@ -426,11 +429,11 @@ export function CombatTracker() {
             </CardContent>
         </Card>
 
-        <Card className="flex-grow lg:col-span-2">
+        <Card className="lg:col-span-2 flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><History /> Registro de Combate</CardTitle>
             </CardHeader>
-            <CardContent className="max-h-96 overflow-y-auto space-y-2 pr-2">
+            <CardContent className="flex-grow max-h-96 overflow-y-auto space-y-2 pr-2">
                 {log.length > 0 ? log.map(entry => (
                     <div key={entry.id} className="text-sm p-2 rounded-md bg-muted relative flex items-center gap-3">
                         {entry.colorHue !== undefined && (
