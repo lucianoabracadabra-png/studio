@@ -31,6 +31,8 @@ import { cn } from '@/lib/utils';
 import navData from '@/lib/data/navigation.json';
 import { profileLink } from '@/components/layout/sidebar-nav';
 import { Circle, Square } from 'lucide-react';
+import combatantNames from '@/lib/data/combatant-names.json';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Combatant = {
   id: number;
@@ -61,13 +63,6 @@ const MAX_AP_ON_TIMELINE = 50;
 
 const allLinks = [...navData.mainLinks, ...navData.gmToolsLinks, profileLink];
 const bookColors = [...new Set(allLinks.filter(l => l.colorHue && typeof l.colorHue === 'string' && l.colorHue.match(/^\d/)).map(link => parseInt(link.colorHue.split(' ')[0], 10)))];
-const hueToNameMap = allLinks.reduce((acc, link) => {
-    if (link.colorHue && typeof link.colorHue === 'string' && link.colorHue.match(/^\d/)) {
-        acc[parseInt(link.colorHue.split(' ')[0], 10)] = link.label;
-    }
-    return acc;
-}, {} as Record<number, string>);
-
 
 const ColorSelector = ({ selectedHue, onSelect, disabled }: { selectedHue: number, onSelect: (hue: number) => void, disabled?: boolean }) => {
     return (
@@ -101,7 +96,7 @@ export function CombatTracker() {
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [nextId, setNextId] = useState(1);
   const [activeCombatantId, setActiveCombatantId] = useState<number | null>(null);
-  const [newCombatant, setNewCombatant] = useState<{name: string, reactionModifier: number, isPlayer: boolean, colorHue: number}>({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[0] });
+  const [newCombatant, setNewCombatant] = useState<{name: string, reactionModifier: number, isPlayer: boolean, colorHue: number}>({ name: combatantNames[0], reactionModifier: 0, isPlayer: false, colorHue: bookColors[0] });
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
@@ -109,14 +104,16 @@ export function CombatTracker() {
   const [turnCount, setTurnCount] = useState(0);
 
  const addLogEntry = (message: string, combatant?: Combatant) => {
-    const newEntry: LogEntry = {
-      id: nextLogId,
-      message,
-      timestamp: new Date().toLocaleTimeString(),
-      colorHue: combatant?.colorHue,
-      isPlayer: combatant?.isPlayer,
-    };
-    setLog(prevLog => [newEntry, ...prevLog]);
+    setLog(prevLog => {
+        const newEntry: LogEntry = {
+          id: nextLogId,
+          message,
+          timestamp: new Date().toLocaleTimeString(),
+          colorHue: combatant?.colorHue,
+          isPlayer: combatant?.isPlayer,
+        };
+        return [newEntry, ...prevLog];
+    });
     setNextLogId(prevId => prevId + 1);
 };
   
@@ -137,7 +134,8 @@ export function CombatTracker() {
   }, [combatStarted, sortedCombatants]);
 
   const addCombatant = () => {
-    const name = newCombatant.name.trim() || hueToNameMap[newCombatant.colorHue] || `Combatente ${nextId}`;
+    const name = newCombatant.name.trim();
+    if (!name) return;
     
     let initialAp = 0;
     if (combatStarted) {
@@ -158,7 +156,8 @@ export function CombatTracker() {
     };
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
-    setNewCombatant({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
+    const nextDefaultName = combatantNames.find(n => !combatants.some(c => c.name === n)) || `Combatente ${nextId + 1}`;
+    setNewCombatant({ name: nextDefaultName, reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
   };
   
  const startCombat = () => {
@@ -207,7 +206,6 @@ export function CombatTracker() {
     setActiveCombatantId(null);
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
-    setTurnCount(0);
     setLog([{
       id: 1,
       message: "O combate foi resetado.",
@@ -394,11 +392,11 @@ export function CombatTracker() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <Card className={cn("lg:col-span-1", !combatStarted && "opacity-50 grayscale")}>
             <CardHeader className="text-center">
-                 <div className="flex items-end justify-center gap-2">
-                    <Crown className="text-2xl text-muted-foreground" />
-                    <p className="text-5xl font-bold text-primary">{activeCombatant ? activeCombatant.ap : '-'}</p>
+                 <div className="flex items-center justify-center gap-2 text-[var(--page-accent-color)]">
+                    <Crown className="text-5xl" />
+                    <p className="text-6xl font-bold">{activeCombatant ? activeCombatant.ap : '-'}</p>
                  </div>
-                 <p className='text-muted-foreground text-sm'>
+                 <p className='text-muted-foreground text-sm mt-2'>
                     Turno Ativo: {activeCombatant ? activeCombatant.name : "N/A"}
                 </p>
             </CardHeader>
@@ -512,7 +510,16 @@ export function CombatTracker() {
                 <div className="grid grid-cols-[1fr_auto] gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="name">Nome</Label>
-                        <Input id="name" placeholder="Ex: Goblin, Herói" value={newCombatant.name} onChange={e => setNewCombatant({ ...newCombatant, name: e.target.value })} />
+                         <Select value={newCombatant.name} onValueChange={(value) => setNewCombatant({ ...newCombatant, name: value })}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecione um nome" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {combatantNames.map(name => (
+                                    <SelectItem key={name} value={name}>{name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="reaction">Mod. Reação</Label>
