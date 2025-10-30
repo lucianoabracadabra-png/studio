@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface BookProps {
     label: string;
@@ -11,14 +12,13 @@ interface BookProps {
     level?: number;
     isActive: boolean;
     isClickable?: boolean;
-    showLabel?: boolean; // This prop might become obsolete, but let's keep it for now.
     onClick?: () => void;
 }
 
 export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, onClick }: BookProps) => {
 
     const hasValue = level !== undefined && level > 0;
-    const isPeonBook = level !== undefined; // Differentiates from sidebar books
+    const isPeonBook = level !== undefined;
 
     const bookContent = (
          <motion.div
@@ -56,46 +56,36 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                 <motion.div
                     className='w-full h-full'
                     animate={{ opacity: isPeonBook ? 1 : 1 }}
-                    whileHover={{ opacity: isPeonBook ? 0 : 1 }}
+                    whileHover={{ opacity: isPeonBook && hasValue ? 0 : 1 }}
                     transition={{ duration: 0.2 }}
                 >
-                    {hasValue ? ( // Peon-book with level
-                        <>
-                            <div className="h-2/3 w-full flex items-center justify-center">
-                                <Icon className={cn(
-                                    "h-6 w-6 transition-colors duration-300", 
-                                    isActive ? "text-white" : "text-neutral-400",
-                                    "group-hover/book:text-white"
-                                )} />
-                            </div>
-                            <div className="h-1/3 w-full flex items-center justify-center">
-                                <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                    {level}
-                                </span>
-                            </div>
-                        </>
-                    ) : ( // Super-book or Peon-book with level 0
-                         <div className="h-full w-full flex items-center justify-center">
-                            <Icon className={cn(
-                                "h-6 w-6 transition-colors duration-300", 
-                                isActive ? "text-white" : "text-neutral-400",
-                                "group-hover/book:text-white"
-                            )} />
+                    <div className="h-full w-full flex items-center justify-center">
+                        <Icon className={cn(
+                            "h-6 w-6 transition-colors duration-300", 
+                            isActive ? "text-white" : "text-neutral-400",
+                            "group-hover/book:text-white"
+                        )} />
+                    </div>
+                    {hasValue && (
+                        <div className="absolute bottom-1 right-1 h-1/3 flex items-center justify-center">
+                            <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                {level}
+                            </span>
                         </div>
                     )}
                 </motion.div>
                 
                  {/* Hover content for Peon-books */}
-                 {isPeonBook && hasValue && (
+                 {isPeonBook && (
                     <motion.div
                         className='absolute inset-0 flex items-center justify-center text-center p-1 pointer-events-none'
                         initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
+                        whileHover={{ opacity: hasValue ? 1 : 0 }}
                         transition={{ duration: 0.2 }}
                     >
                         <span 
                             className="text-white font-bold text-xs leading-tight"
-                            style={{
+                             style={{
                                 textShadow: `0 0 6px hsl(${colorHsl}), 0 0 10px hsl(${colorHsl})`
                             }}
                         >
@@ -106,6 +96,20 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
             </div>
         </motion.div>
     );
+
+    // If it's a super-book, wrap with a tooltip
+    if (!isPeonBook) {
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>{bookContent}</TooltipTrigger>
+                    <TooltipContent side='right'>
+                        <p>{label}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        )
+    }
 
     return bookContent;
 };
