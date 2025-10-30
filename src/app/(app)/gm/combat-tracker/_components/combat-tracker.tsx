@@ -109,17 +109,17 @@ export function CombatTracker() {
   const [turnCount, setTurnCount] = useState(0);
 
   const addLogEntry = (message: string, combatant?: Combatant) => {
-    setLog(prev => {
-        const newEntry: LogEntry = {
-            id: nextLogId,
-            message,
-            timestamp: new Date().toLocaleTimeString(),
-            colorHue: combatant?.colorHue,
-            isPlayer: combatant?.isPlayer,
-        };
-        return [newEntry, ...prev];
+    setLog(prevLog => {
+      const newEntry: LogEntry = {
+        id: nextLogId,
+        message,
+        timestamp: new Date().toLocaleTimeString(),
+        colorHue: combatant?.colorHue,
+        isPlayer: combatant?.isPlayer,
+      };
+      setNextLogId(prevId => prevId + 1);
+      return [newEntry, ...prevLog];
     });
-    setNextLogId(prev => prev + 1);
   };
   
   const sortedCombatants = useMemo(() => {
@@ -157,8 +157,18 @@ export function CombatTracker() {
   
   const startCombat = () => {
     if (combatants.length === 0) return;
+    
     setTurnCount(1);
-    addLogEntry("O combate começou! A rolar iniciativa...");
+    
+    const newEntries: LogEntry[] = [];
+    let currentLogId = nextLogId;
+
+    const combatStartEntry: LogEntry = {
+        id: currentLogId++,
+        message: "O combate começou! A rolar iniciativa...",
+        timestamp: new Date().toLocaleTimeString(),
+    };
+    newEntries.push(combatStartEntry);
 
     const updatedCombatants = combatants.map(c => {
       const reactionRoll = Math.floor(Math.random() * 10) + 1;
@@ -168,13 +178,20 @@ export function CombatTracker() {
       
       const newCombatant = { ...c, ap: finalAp };
       
-      addLogEntry(
-        `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
-        newCombatant
-      );
+      const initiativeEntry: LogEntry = {
+        id: currentLogId++,
+        message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
+        timestamp: new Date().toLocaleTimeString(),
+        colorHue: newCombatant.colorHue,
+        isPlayer: newCombatant.isPlayer,
+      };
+      newEntries.push(initiativeEntry);
 
       return newCombatant;
     });
+    
+    setLog(prevLog => [...newEntries.reverse(), ...prevLog]);
+    setNextLogId(currentLogId);
 
     setCombatants(updatedCombatants);
     setActionTrails([]);
