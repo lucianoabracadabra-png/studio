@@ -524,14 +524,15 @@ export function CombatTracker() {
                             placeholder="Nome do Combatente" 
                             value={newCombatant.name} 
                             onChange={(e) => setNewCombatant({ ...newCombatant, name: e.target.value })}
+                            className="focus-visible:ring-orange-500"
                          />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="reaction">Mod. Reação</Label>
                             <div className="flex items-center gap-2">
-                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))}><ChevronLeft/></Button>
-                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows"/>
-                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))}><ChevronRight/></Button>
+                            <Button size="icon" variant="outline" className="hover:bg-orange-500 focus:bg-orange-500" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))}><ChevronLeft/></Button>
+                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows focus-visible:ring-orange-500"/>
+                            <Button size="icon" variant="outline" className="hover:bg-orange-500 focus:bg-orange-500" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))}><ChevronRight/></Button>
                         </div>
                     </div>
                 </div>

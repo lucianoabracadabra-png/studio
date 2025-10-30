@@ -56,8 +56,13 @@ export function SidebarNav({ activeColorHue }: { activeColorHue: string }) {
         color: `hsl(${activeColorHue})`,
     } as React.CSSProperties;
 
+    const sidebarStyle = {
+        boxShadow: `5px 0 25px -5px hsl(${activeColorHue} / 0.5)`,
+        transition: 'box-shadow 0.5s ease',
+    } as React.CSSProperties;
+
     return (
-      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 bg-card border-r" style={{ perspective: '1000px' }}>
+      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 bg-card border-r" style={{ ...sidebarStyle, perspective: '1000px' }}>
           <Link href="/dashboard" className='px-4'>
             <Icons.logo className="h-8 w-8 transition-colors duration-500" style={logoStyle} />
           </Link>
