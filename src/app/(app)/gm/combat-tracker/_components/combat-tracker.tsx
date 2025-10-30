@@ -171,15 +171,8 @@ export function CombatTracker() {
  const startCombat = () => {
     if (combatants.length === 0) return;
 
-    let initiativeLogs: LogEntry[] = [];
-    let currentLogId = nextLogId;
-
-    const combatStartEntry: LogEntry = {
-        id: currentLogId++,
-        message: "O combate começou! A rolar iniciativa...",
-        timestamp: new Date().toLocaleTimeString(),
-    };
-    initiativeLogs.push(combatStartEntry);
+    let initiativeLogs: { message: string, colorHue?: number, isPlayer?: boolean }[] = [];
+    initiativeLogs.push({ message: "O combate começou! A rolar iniciativa..." });
 
     const updatedCombatants = combatants.map(c => {
         const reactionRoll = Math.floor(Math.random() * 10) + 1;
@@ -189,20 +182,28 @@ export function CombatTracker() {
         
         const newCombatant = { ...c, ap: finalAp };
         
-        const initiativeEntry: LogEntry = {
-            id: currentLogId++,
+        initiativeLogs.push({
             message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
-            timestamp: new Date().toLocaleTimeString(),
             colorHue: newCombatant.colorHue,
             isPlayer: newCombatant.isPlayer,
-        };
-        initiativeLogs.push(initiativeEntry);
+        });
         return newCombatant;
     });
-    
-    setLog(prevLog => [...initiativeLogs.reverse(), ...prevLog]);
-    setNextLogId(currentLogId);
 
+    setLog(prevLog => {
+        const timestamp = new Date().toLocaleTimeString();
+        let currentLogId = prevLog.length > 0 ? Math.max(...prevLog.map(l => l.id)) + 1 : 1;
+        
+        const newLogEntries: LogEntry[] = initiativeLogs.reverse().map(logInfo => ({
+            id: currentLogId++,
+            timestamp,
+            ...logInfo
+        }));
+        
+        setNextLogId(currentLogId);
+        return [...newLogEntries, ...prevLog];
+    });
+    
     setCombatants(updatedCombatants);
     setTurnCount(1);
     setActionTrails([]);
