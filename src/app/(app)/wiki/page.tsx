@@ -26,7 +26,7 @@ export default function WikiPage() {
                     <Icon className="h-8 w-8 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl transition-colors text-[var(--page-accent-color)]">{portal.title}</CardTitle>
+                    <CardTitle className="text-2xl transition-colors">{portal.title}</CardTitle>
                     <CardDescription>{portal.subtitle}</CardDescription>
                   </div>
                 </CardHeader>

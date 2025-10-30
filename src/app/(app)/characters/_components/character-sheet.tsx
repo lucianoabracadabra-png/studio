@@ -322,12 +322,12 @@ const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
         <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
             <Card 
                 className={cn(
-                    "transition-all border", 
+                    "transition-all", 
                     isOpen && "shadow-lg",
                     isDragging && "shadow-xl",
                     item.equippable
                         ? "cursor-grab hover:shadow-md border-foreground/20 hover:border-primary"
-                        : "cursor-default border-border",
+                        : "cursor-default",
                     isOpen && "border-primary"
                 )}
                 onClick={item.equippable ? handleOpen : undefined}
@@ -739,6 +739,8 @@ export function CharacterSheet() {
     const focusCardStyle = {
         '--focus-color': focusColors[activeFocusTab].hex,
         '--focus-color-hsl': focusColors[activeFocusTab].hsl,
+        borderColor: 'var(--focus-color)',
+        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px var(--focus-color)`
     } as React.CSSProperties;
 
     return (
@@ -826,7 +828,7 @@ export function CharacterSheet() {
                 </Card>
             </div>
 
-            <Card style={focusCardStyle} className='border-2 border-[var(--focus-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_var(--focus-color)]'>
+            <Card style={focusCardStyle}>
                 <CardHeader>
                     <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
                         Focos de Desenvolvimento
