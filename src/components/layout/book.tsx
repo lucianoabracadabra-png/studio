@@ -56,7 +56,15 @@ export const Book = ({ label, icon: Icon, colorHsl, isActive, isClickable = true
             )} />
 
             {showLabel && (
-                <div className="absolute -bottom-5 left-0 right-0 text-center text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover/book:opacity-100 transition-opacity duration-300">
+                <div 
+                    className={cn(
+                        "absolute -bottom-5 left-0 right-0 text-center text-xs whitespace-nowrap opacity-0 group-hover/book:opacity-100 transition-opacity duration-300",
+                        isActive ? "text-white" : "text-muted-foreground",
+                    )}
+                    style={{
+                        textShadow: isActive ? `0 0 8px hsl(${colorHsl})` : 'none',
+                    }}
+                >
                     {label}
                 </div>
             )}
