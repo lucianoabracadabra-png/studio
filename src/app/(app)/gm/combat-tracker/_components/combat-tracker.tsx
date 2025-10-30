@@ -109,17 +109,17 @@ export function CombatTracker() {
   const [turnCount, setTurnCount] = useState(0);
 
   const addLogEntry = (message: string, combatant?: Combatant) => {
-    setLog(prevLog => {
-      const newEntry: LogEntry = {
-        id: nextLogId,
-        message,
-        timestamp: new Date().toLocaleTimeString(),
-        colorHue: combatant?.colorHue,
-        isPlayer: combatant?.isPlayer,
-      };
-      setNextLogId(prevId => prevId + 1);
-      return [newEntry, ...prevLog];
-    });
+      setLog(prevLog => {
+        const newEntry: LogEntry = {
+          id: nextLogId,
+          message,
+          timestamp: new Date().toLocaleTimeString(),
+          colorHue: combatant?.colorHue,
+          isPlayer: combatant?.isPlayer,
+        };
+        setNextLogId(prevId => prevId + 1);
+        return [newEntry, ...prevLog];
+      });
   };
   
   const sortedCombatants = useMemo(() => {
@@ -204,12 +204,15 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
     setTurnCount(0);
-    setLog([{
-        id: 1,
-        message: "O combate foi resetado.",
-        timestamp: new Date().toLocaleTimeString(),
-    }]);
-    setNextLogId(2);
+    setLog(prev => {
+        const newEntry = {
+            id: nextLogId,
+            message: "O combate foi resetado.",
+            timestamp: new Date().toLocaleTimeString(),
+        };
+        setNextLogId(p => p + 1);
+        return [newEntry];
+    });
   }
 
   const removeCombatant = (id: number) => {
@@ -500,7 +503,7 @@ export function CombatTracker() {
                                 </div>
                                     <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8" disabled={combatStarted}><X className="h-4 w-4"/></Button>
+                                        <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-orange-500 h-8 w-8"><X className="h-4 w-4"/></Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
@@ -525,5 +528,3 @@ export function CombatTracker() {
     </div>
   );
 }
-
-    
