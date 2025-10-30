@@ -13,9 +13,10 @@ interface BookProps {
     isActive: boolean;
     isClickable?: boolean;
     onClick?: () => void;
+    showLabel?: boolean; // Used by sidebar to disable tooltips
 }
 
-export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, onClick }: BookProps) => {
+export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, onClick, showLabel = true }: BookProps) => {
 
     const hasValue = level !== undefined && level > 0;
     const isPeonBook = level !== undefined;
@@ -52,13 +53,13 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
             />
             
             <div className="flex-1 flex flex-col pl-[4px] relative">
-                {/* Container for both default and hover states */}
                 <div className='relative w-full h-full'>
                     {/* Default content: Icon and Level */}
                     <motion.div
                         className='absolute inset-0 flex flex-col'
-                        animate={{ opacity: 1 }}
-                        whileHover={{ opacity: isPeonBook && hasValue ? 0 : 1 }}
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: (isPeonBook && hasValue) ? 1 : (isPeonBook ? 1 : 1) }} // keep visible by default
+                        whileHover={{ opacity: isPeonBook ? 0 : 1 }}
                         transition={{ duration: 0.2 }}
                     >
                         <div className="flex-grow flex items-center justify-center">
@@ -78,17 +79,18 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                     </motion.div>
                     
                      {/* Hover content for Peon-books */}
-                     {isPeonBook && (
+                     {isPeonBook && hasValue && (
                         <motion.div
                             className='absolute inset-0 flex items-center justify-center text-center p-1 pointer-events-none'
                             initial={{ opacity: 0 }}
-                            whileHover={{ opacity: hasValue ? 1 : 0 }}
+                            animate={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
                             transition={{ duration: 0.2 }}
                         >
                             <span 
                                 className="text-white font-bold text-xs leading-tight"
                                  style={{
-                                    textShadow: `0 0 6px hsl(${colorHsl}), 0 0 10px hsl(${colorHsl})`
+                                    textShadow: `0 0 5px hsl(${colorHsl}), 0 0 10px hsl(${colorHsl})`
                                 }}
                             >
                                 {label}
@@ -101,7 +103,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
     );
 
     // If it's a super-book, wrap with a tooltip
-    if (!isPeonBook) {
+    if (!isPeonBook && showLabel) {
         return (
             <TooltipProvider>
                 <Tooltip>
