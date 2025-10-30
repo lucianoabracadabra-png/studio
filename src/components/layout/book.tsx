@@ -18,7 +18,7 @@ interface BookProps {
 export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, onClick }: BookProps) => {
 
     const hasValue = level !== undefined && level > 0;
-    const canHoverEffect = hasValue && isClickable;
+    const isPeonBook = level !== undefined; // Differentiates from sidebar books
 
     const bookContent = (
          <motion.div
@@ -52,14 +52,14 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
             />
             
             <div className="flex-1 flex flex-col pl-[4px] relative">
+                {/* Default content: Icon and Level */}
                 <motion.div
-                     className='w-full h-full'
-                     initial={{ opacity: 1 }}
-                     animate={{ opacity: canHoverEffect ? 1 : 0 }}
-                     whileHover={{ opacity: canHoverEffect ? 0 : 1 }}
-                     transition={{ duration: 0.2 }}
+                    className='w-full h-full'
+                    animate={{ opacity: isPeonBook ? 1 : 1 }}
+                    whileHover={{ opacity: isPeonBook ? 0 : 1 }}
+                    transition={{ duration: 0.2 }}
                 >
-                    {hasValue ? (
+                    {hasValue ? ( // Peon-book with level
                         <>
                             <div className="h-2/3 w-full flex items-center justify-center">
                                 <Icon className={cn(
@@ -74,7 +74,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                                 </span>
                             </div>
                         </>
-                    ) : (
+                    ) : ( // Super-book or Peon-book with level 0
                          <div className="h-full w-full flex items-center justify-center">
                             <Icon className={cn(
                                 "h-6 w-6 transition-colors duration-300", 
@@ -85,9 +85,10 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                     )}
                 </motion.div>
                 
-                 {canHoverEffect && (
+                 {/* Hover content for Peon-books */}
+                 {isPeonBook && hasValue && (
                     <motion.div
-                        className='absolute inset-0 flex items-center justify-center text-center p-1'
+                        className='absolute inset-0 flex items-center justify-center text-center p-1 pointer-events-none'
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 1 }}
                         transition={{ duration: 0.2 }}
