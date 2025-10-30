@@ -123,7 +123,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
     const currentResourceValue = maxResource - state.spentPoints;
 
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`} style={{ '--focus-color-hsl': colorHsl } as React.CSSProperties}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`} style={{ '--focus-color-hsl': colorHsl, '--focus-color': `hsl(${colorHsl})` } as React.CSSProperties}>
             <div className="md:col-span-1">
                 <FocusHeaderCard 
                     title={title} 
