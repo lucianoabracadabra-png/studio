@@ -496,7 +496,7 @@ export function CombatTracker() {
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} >Remover</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} variant="destructive">Remover</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
