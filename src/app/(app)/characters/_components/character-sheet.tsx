@@ -5,7 +5,6 @@ import initialCharacterData from '@/lib/character-data.json';
 import { itemDatabase } from '@/lib/character-data';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap } from '@/lib/character-data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf } from 'lucide-react';
@@ -19,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
+import { motion } from 'framer-motion';
 import {
   DndContext,
   closestCenter,
@@ -48,7 +48,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     };
     
     return (
-        <Card style={{ borderColor: `hsl(var(--focus-color-hsl) / 0.5)` }}>
+        <Card>
             <CardContent className='pt-6 space-y-2'>
                 <div className='flex items-center justify-between'>
                     <h3 className='font-bold text-xl'>{title}</h3>
@@ -138,7 +138,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
             </div>
             
             <div className="md:col-span-1">
-                <Card style={{ borderColor: `hsl(${colorHsl} / 0.5)` }}>
+                <Card>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Atributos</CardTitle>
                     </CardHeader>
@@ -155,7 +155,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
             </div>
 
             <div className="md:col-span-2">
-                <Card style={{ borderColor: `hsl(${colorHsl} / 0.5)` }}>
+                <Card>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Habilidades</CardTitle>
                     </CardHeader>
@@ -591,14 +591,9 @@ export function CharacterSheet() {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [activeFocusTab, setActiveFocusTab] = useState('physical');
     
-    const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData as unknown as Character, (initial) => {
-        const charImage = PlaceHolderImages.find(p => p.id === 'character-dahl');
-        if (charImage) {
-            initial.info.imageUrl = charImage.imageUrl;
-        }
-        return initial;
-    });
-
+    // Pass the initial data directly, and let an effect handle image override if necessary
+    const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData as unknown as Character);
+    
     const [characterItems, setCharacterItems] = useState<CharacterItem[]>(() => 
         hydrateCharacterItems(character.equipment)
     );
@@ -624,7 +619,7 @@ export function CharacterSheet() {
     };
 
     const handleAlignmentToggle = (axisName: string) => {
-        characterDispatch({ type: 'TOGGLE_ALIGNMENT', payload: { axisName }});
+        // Alignment is now read-only
     }
 
     const handleCracksToggle = (index: number) => {
@@ -739,7 +734,6 @@ export function CharacterSheet() {
     const focusCardStyle = {
         '--focus-color': focusColors[activeFocusTab].hex,
         '--focus-color-hsl': focusColors[activeFocusTab].hsl,
-        borderColor: 'var(--focus-color)',
         boxShadow: `0 0 25px rgba(0,0,0,0.4), 0 0 15px ${focusColors[activeFocusTab].hex}99`,
     } as React.CSSProperties;
 
