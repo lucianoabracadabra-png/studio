@@ -243,7 +243,7 @@ export function CombatTracker() {
     const newAp = actor.ap + cost;
     
     const newTrail: ActionTrail = {
-        combatId: activeCombatantId,
+        combatantId: activeCombatantId,
         fromAp: actor.ap,
         toAp: newAp,
         colorHue: actor.colorHue,
@@ -404,7 +404,7 @@ export function CombatTracker() {
         <Card className={cn("lg:col-span-1", !combatStarted && "opacity-50 grayscale")}>
             <CardHeader className="text-center">
                  <div className="flex items-center justify-center gap-2 text-[var(--page-accent-color)]">
-                    <Crown className="text-6xl" />
+                    <Crown className="h-12 w-12" />
                     <p className="text-6xl font-bold">{activeCombatant ? activeCombatant.ap : '-'}</p>
                  </div>
                  <p className='text-muted-foreground text-sm mt-2'>
@@ -486,11 +486,11 @@ export function CombatTracker() {
                                 {combatStarted ? (
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-orange-500 h-8 w-8"><X className="h-4 w-4"/></Button>
+                                            <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
                                         </AlertDialogTrigger>
-                                        <AlertDialogContent>
+                                        <AlertDialogContent className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
                                             <AlertDialogHeader>
-                                            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                            <AlertDialogTitle className="text-[var(--page-accent-color)]">Você tem certeza?</AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 Isso removerá permanentemente {c.name} do encontro.
                                             </AlertDialogDescription>
@@ -502,7 +502,7 @@ export function CombatTracker() {
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 ) : (
-                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-orange-500 h-8 w-8" onClick={() => removeCombatant(c.id)}>
+                                    <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => removeCombatant(c.id)}>
                                         <X className="h-4 w-4"/>
                                     </Button>
                                 )}
