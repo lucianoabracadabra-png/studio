@@ -54,7 +54,7 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
     };
     
     return (
-        <Card className='border-[var(--focus-color)]/50'>
+        <Card className='border-[var(--focus-color-hsl)]/50'>
             <CardContent className='pt-6 space-y-2'>
                 <div className='flex items-center justify-between'>
                     <h3 className='font-bold text-xl'>{title}</h3>
@@ -145,7 +145,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
             
             <div className="md:col-span-1">
-                <Card className='border-[var(--focus-color)]/50'>
+                <Card className='border-[var(--focus-color-hsl)]/50'>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Atributos</CardTitle>
                     </CardHeader>
@@ -163,7 +163,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
 
             <div className="md:col-span-2">
-                <Card className='border-[var(--focus-color)]/50'>
+                <Card className='border-[var(--focus-color-hsl)]/50'>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Habilidades</CardTitle>
                     </CardHeader>
@@ -741,10 +741,15 @@ export function CharacterSheet() {
     const equippedItems = useMemo(() => characterItems.filter(item => item.isEquipped), [characterItems]);
     const inventoryItems = useMemo(() => characterItems.filter(item => !item.isEquipped), [characterItems]);
 
+    const focusColors: Record<string, { hex: string; hsl: string }> = {
+        physical: { hex: '#ea4335', hsl: '5 81% 56%' },
+        mental: { hex: '#4285f4', hsl: '221 83% 53%' },
+        social: { hex: '#34a853', hsl: '142 71% 45%' },
+    };
+
     const focusCardStyle = {
-        '--focus-color': activeFocusTab === 'physical' ? 'hsl(24 95% 53%)' :
-                         activeFocusTab === 'mental' ? 'hsl(221 83% 53%)' :
-                         'hsl(142 71% 45%)',
+        '--focus-color': focusColors[activeFocusTab].hex,
+        '--focus-color-hsl': focusColors[activeFocusTab].hsl,
     } as React.CSSProperties;
 
     return (
@@ -832,7 +837,7 @@ export function CharacterSheet() {
                 </Card>
             </div>
 
-            <Card style={focusCardStyle} className='border-[var(--focus-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_var(--focus-color)]'>
+            <Card style={focusCardStyle} className='border-2 border-[var(--focus-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_var(--focus-color)]'>
                 <CardHeader>
                     <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
                         Focos de Desenvolvimento
@@ -841,9 +846,9 @@ export function CharacterSheet() {
                 <CardContent>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-orange-500 data-[state=active]:border-orange-500/50'><PersonStanding />Físico</TabsTrigger>
-                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-blue-500 data-[state=active]:border-blue-500/50'><BrainCircuit />Mental</TabsTrigger>
-                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-green-500 data-[state=active]:border-green-500/50'><Users />Social</TabsTrigger>
+                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-[var(--focus-color)] data-[state=active]:border-[var(--focus-color)]/50'><PersonStanding />Físico</TabsTrigger>
+                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-[var(--focus-color)] data-[state=active]:border-[var(--focus-color)]/50'><BrainCircuit />Mental</TabsTrigger>
+                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-[var(--focus-color)] data-[state=active]:border-[var(--focus-color)]/50'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
                             <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
