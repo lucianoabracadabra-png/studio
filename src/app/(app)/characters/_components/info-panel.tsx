@@ -4,11 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import type { Character, LanguageFamily, AlignmentAxis } from '@/lib/character-data';
-import { languages } from '@/lib/character-data';
-import { LanguagesIcon, ChevronDown } from 'lucide-react';
+import { languages, alignmentDescriptions } from '@/lib/character-data';
+import { LanguagesIcon, ChevronDown, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type InfoPanelProps = {
     character: Character;
@@ -18,7 +19,7 @@ type InfoPanelProps = {
 export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
     <Popover>
         <PopoverTrigger asChild>
-             <Button variant="outline" className="text-foreground justify-start text-left h-auto">
+             <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-muted/50">
                 <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
                 <span>{family.root}</span>
             </Button>
@@ -45,12 +46,37 @@ export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFa
 
 const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (name: string) => void }) => {
     const [pole1, pole2] = axis.poles;
+    const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
+
     return (
-        <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between h-auto py-2 px-3 text-sm'>
-            <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
-            <span className='font-mono text-xs text-muted-foreground'>{axis.name}</span>
-            <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
-        </Button>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between h-auto py-2 px-3 text-sm'>
+                        <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
+                        <span className='font-mono text-xs text-[var(--page-accent-color)]'>{axis.name}</span>
+                        <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent className='max-w-xs' side='bottom'>
+                    <div className='p-1'>
+                        <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
+                        <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
+                        <Separator />
+                        <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
+                            <div>
+                                <p className='font-semibold text-foreground'>{pole1}</p>
+                                <p className='text-muted-foreground'>{description.poles[pole1]}</p>
+                            </div>
+                            <div>
+                                <p className='font-semibold text-foreground'>{pole2}</p>
+                                <p className='text-muted-foreground'>{description.poles[pole2]}</p>
+                            </div>
+                        </div>
+                    </div>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     )
 }
 

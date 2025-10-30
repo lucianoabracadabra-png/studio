@@ -94,20 +94,5 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
         </motion.div>
     );
 
-    if (!showLabel) {
-        return (
-             <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        {bookContent}
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                        <p>{label}</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        );
-    }
-
     return bookContent;
 };

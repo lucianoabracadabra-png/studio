@@ -104,13 +104,14 @@ const SkillItem = ({ name, value }: { name: string; value: number }) => {
 };
 
 
-const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: { 
+const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl }: { 
     focusData: any, 
     title: string, 
     pilar: 'fisico' | 'mental' | 'social', 
     icon: React.ElementType,
     state: any,
-    dispatch: React.Dispatch<any>
+    dispatch: React.Dispatch<any>,
+    colorHsl: string
 }) => {
 
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
@@ -137,7 +138,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
             
             <div className="md:col-span-1">
-                <Card style={{ borderColor: `hsl(var(--focus-color-hsl) / 0.5)` }}>
+                <Card style={{ borderColor: `hsl(${colorHsl} / 0.5)` }}>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Atributos</CardTitle>
                     </CardHeader>
@@ -154,7 +155,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
             </div>
 
             <div className="md:col-span-2">
-                <Card style={{ borderColor: `hsl(var(--focus-color-hsl) / 0.5)` }}>
+                <Card style={{ borderColor: `hsl(${colorHsl} / 0.5)` }}>
                     <CardHeader>
                         <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Habilidades</CardTitle>
                     </CardHeader>
@@ -768,16 +769,22 @@ export function CharacterSheet() {
                            {character.soul.domains.map(d => {
                                 const Icon = iconMap[d.icon];
                                 return (
-                                    <Book
-                                        key={d.name}
-                                        icon={Icon}
-                                        colorHsl={d.color}
-                                        isClickable={false}
-                                        showLabel={true}
-                                        label={d.name}
-                                        level={d.level}
-                                        isActive={d.level > 0}
-                                    />
+                                    <TooltipProvider key={d.name}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Book
+                                                    label={d.name}
+                                                    icon={Icon}
+                                                    colorHsl={d.color}
+                                                    level={d.level}
+                                                    isActive={d.level > 0}
+                                                    isClickable={false}
+                                                    showLabel={true}
+                                                />
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top"><p>{d.name}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                )})}
                         </div>
                         <div className="space-y-3 pt-2">
@@ -796,39 +803,53 @@ export function CharacterSheet() {
                             {character.spirit.personality.map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
-                                    <Book
-                                        key={p.name}
-                                        icon={Icon}
-                                        colorHsl={p.colorHsl}
-                                        isClickable={false}
-                                        showLabel={true}
-                                        label={p.name}
-                                        level={p.value}
-                                        isActive={p.value > 0}
-                                    />
+                                    <TooltipProvider key={p.name}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Book
+                                                    key={p.name}
+                                                    icon={Icon}
+                                                    colorHsl={p.colorHsl}
+                                                    isClickable={false}
+                                                    showLabel={true}
+                                                    label={p.name}
+                                                    level={p.value}
+                                                    isActive={p.value > 0}
+                                                />
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top"><p>{p.name}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 )})}
                         </div>
                          <div className="flex justify-center items-end gap-4 pt-2">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
-                                    <Book
-                                        key={p.name}
-                                        icon={Icon}
-                                        colorHsl={p.colorHsl}
-                                        isClickable={false}
-                                        showLabel={true}
-                                        label={p.name}
-                                        level={p.value}
-                                        isActive={p.value > 0}
-                                    />
+                                     <TooltipProvider key={p.name}>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Book
+                                                    key={p.name}
+                                                    icon={Icon}
+                                                    colorHsl={p.colorHsl}
+                                                    isClickable={false}
+                                                    showLabel={true}
+                                                    label={p.name}
+                                                    level={p.value}
+                                                    isActive={p.value > 0}
+                                                />
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top"><p>{p.name}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 )})}
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card style={focusCardStyle} className="border-2">
+            <Card style={focusCardStyle}>
                 <CardHeader>
                     <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
                         Focos de Desenvolvimento
@@ -848,13 +869,13 @@ export function CharacterSheet() {
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} colorHsl={focusColors.physical.hsl} />
                         </TabsContent>
                         <TabsContent value="mental" className='pt-6'>
-                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} colorHsl={focusColors.mental.hsl} />
                         </TabsContent>
                         <TabsContent value="social" className='pt-6'>
-                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} />
+                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} colorHsl={focusColors.social.hsl} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>

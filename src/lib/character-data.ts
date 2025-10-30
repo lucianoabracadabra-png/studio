@@ -1,4 +1,3 @@
-
 import type { LucideIcon } from "lucide-react";
 import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf, Heart } from 'lucide-react';
 import allItems from './data/items.json';
@@ -223,3 +222,54 @@ export const getNextAlignmentState = (currentState: string, poles: [string, stri
 export const itemDatabase = new Map<string, ItemFromDB>(
     allItems.items.map(item => [item.id, item as ItemFromDB])
 );
+
+export const alignmentDescriptions = {
+  'Moral': {
+    title: 'Eixo da Moral: Egoísmo vs. Altruísmo',
+    explanation: 'Este eixo mede a preocupação fundamental do personagem: o eu ou o outro.',
+    poles: {
+      'Egoísmo': 'O personagem prioriza as suas próprias necessidades, segurança e felicidade acima de tudo.',
+      'Altruísmo': 'O personagem prioriza o bem-estar, segurança e felicidade dos outros, mesmo com custo pessoal.'
+    }
+  },
+  'Ética': {
+    title: 'Eixo da Ética: Rebeldia vs. Ordem',
+    explanation: 'Este eixo mede a relação do personagem com leis, tradições e estruturas de poder.',
+    poles: {
+      'Rebeldia': 'O personagem valoriza a liberdade pessoal e a consciência individual acima das regras e convenções sociais.',
+      'Ordem': 'O personagem acredita em regras, hierarquias e códigos estabelecidos como a melhor forma de governar.'
+    }
+  },
+  'Identidade': {
+    title: 'Eixo da Identidade: Comunitarismo vs. Individualismo',
+    explanation: 'Este eixo define onde o personagem encontra o seu sentido de identidade.',
+    poles: {
+      'Comunitarismo': 'A identidade do personagem é definida pelo seu papel no grupo, família, clã ou sociedade.',
+      'Individualismo': 'A identidade do personagem é definida pelas suas próprias conquistas, crenças e qualidades únicas.'
+    }
+  },
+  'Abordagem': {
+    title: 'Eixo da Abordagem: Lógica vs. Instinto',
+    explanation: 'Este eixo descreve o método primário do personagem para tomar decisões e resolver problemas.',
+    poles: {
+      'Lógica': 'O personagem confia na razão, análise e planeamento cuidadoso para navegar o mundo.',
+      'Instinto': 'O personagem confia nos seus sentimentos, intuição e reações viscerais para guiar as suas ações.'
+    }
+  },
+  'Verdade': {
+    title: 'Eixo da Verdade: Idealismo vs. Pragmatismo',
+    explanation: 'Este eixo mede como o personagem percebe e interage com o conceito de verdade.',
+    poles: {
+      'Idealismo': 'O personagem acredita em verdades absolutas e princípios morais que não devem ser comprometidos.',
+      'Pragmatismo': 'O personagem acredita que a verdade é relativa e que o melhor curso de ação é aquele que funciona.'
+    }
+  },
+  'Poder': {
+    title: 'Eixo do Poder: Liberdade vs. Contenção',
+    explanation: 'Este eixo define a atitude do personagem em relação ao uso da força e da influência.',
+    poles: {
+      'Liberdade': 'O personagem acredita que o poder deve ser usado livremente para atingir os seus objetivos, sem restrições.',
+      'Contenção': 'O personagem acredita que o poder deve ser usado com grande cuidado, moderação e responsabilidade.'
+    }
+  }
+};
