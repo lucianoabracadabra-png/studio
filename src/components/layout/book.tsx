@@ -52,47 +52,50 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
             />
             
             <div className="flex-1 flex flex-col pl-[4px] relative">
-                {/* Default content: Icon and Level */}
-                <motion.div
-                    className='w-full h-full'
-                    animate={{ opacity: isPeonBook ? 1 : 1 }}
-                    whileHover={{ opacity: isPeonBook && hasValue ? 0 : 1 }}
-                    transition={{ duration: 0.2 }}
-                >
-                    <div className="h-full w-full flex items-center justify-center">
-                        <Icon className={cn(
-                            "h-6 w-6 transition-colors duration-300", 
-                            isActive ? "text-white" : "text-neutral-400",
-                            "group-hover/book:text-white"
-                        )} />
-                    </div>
-                    {hasValue && (
-                        <div className="absolute bottom-1 right-1 h-1/3 flex items-center justify-center">
-                            <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                                {level}
-                            </span>
-                        </div>
-                    )}
-                </motion.div>
-                
-                 {/* Hover content for Peon-books */}
-                 {isPeonBook && (
+                {/* Container for both default and hover states */}
+                <div className='relative w-full h-full'>
+                    {/* Default content: Icon and Level */}
                     <motion.div
-                        className='absolute inset-0 flex items-center justify-center text-center p-1 pointer-events-none'
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: hasValue ? 1 : 0 }}
+                        className='absolute inset-0 flex flex-col'
+                        animate={{ opacity: 1 }}
+                        whileHover={{ opacity: isPeonBook && hasValue ? 0 : 1 }}
                         transition={{ duration: 0.2 }}
                     >
-                        <span 
-                            className="text-white font-bold text-xs leading-tight"
-                             style={{
-                                textShadow: `0 0 6px hsl(${colorHsl}), 0 0 10px hsl(${colorHsl})`
-                            }}
-                        >
-                            {label}
-                        </span>
+                        <div className="flex-grow flex items-center justify-center">
+                            <Icon className={cn(
+                                "h-6 w-6 transition-colors duration-300", 
+                                isActive ? "text-white" : "text-neutral-400",
+                                "group-hover/book:text-white"
+                            )} />
+                        </div>
+                        {hasValue && (
+                            <div className="h-1/3 flex items-center justify-center">
+                                <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                    {level}
+                                </span>
+                            </div>
+                        )}
                     </motion.div>
-                )}
+                    
+                     {/* Hover content for Peon-books */}
+                     {isPeonBook && (
+                        <motion.div
+                            className='absolute inset-0 flex items-center justify-center text-center p-1 pointer-events-none'
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: hasValue ? 1 : 0 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <span 
+                                className="text-white font-bold text-xs leading-tight"
+                                 style={{
+                                    textShadow: `0 0 6px hsl(${colorHsl}), 0 0 10px hsl(${colorHsl})`
+                                }}
+                            >
+                                {label}
+                            </span>
+                        </motion.div>
+                    )}
+                </div>
             </div>
         </motion.div>
     );
