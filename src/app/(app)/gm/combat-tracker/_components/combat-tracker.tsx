@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import navData from '@/lib/data/navigation.json';
 import { profileLink } from '@/components/layout/sidebar-nav';
@@ -108,19 +108,17 @@ export function CombatTracker() {
   const [actionTrails, setActionTrails] = useState<ActionTrail[]>([]);
   const [turnCount, setTurnCount] = useState(0);
 
-  const addLogEntry = (message: string, combatant?: Combatant) => {
-      setLog(prevLog => {
-        const newEntry: LogEntry = {
-          id: nextLogId,
-          message,
-          timestamp: new Date().toLocaleTimeString(),
-          colorHue: combatant?.colorHue,
-          isPlayer: combatant?.isPlayer,
-        };
-        setNextLogId(prevId => prevId + 1);
-        return [newEntry, ...prevLog];
-      });
-  };
+ const addLogEntry = (message: string, combatant?: Combatant) => {
+    const newEntry: LogEntry = {
+        id: nextLogId,
+        message,
+        timestamp: new Date().toLocaleTimeString(),
+        colorHue: combatant?.colorHue,
+        isPlayer: combatant?.isPlayer,
+    };
+    setLog(prevLog => [newEntry, ...prevLog]);
+    setNextLogId(prevId => prevId + 1);
+};
   
   const sortedCombatants = useMemo(() => {
     return [...combatants].sort((a, b) => a.ap - b.ap);
@@ -211,15 +209,12 @@ export function CombatTracker() {
     setCombatants(combatants.map(c => ({...c, ap: 0})));
     setActionTrails([]);
     setTurnCount(0);
-    setLog(prevLog => {
-      const newEntry: LogEntry = {
-        id: nextLogId,
-        message: "O combate foi resetado.",
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      setNextLogId(prevId => prevId + 1);
-      return [newEntry];
-    });
+    setLog([{
+      id: 1,
+      message: "O combate foi resetado.",
+      timestamp: new Date().toLocaleTimeString()
+    }]);
+    setNextLogId(2);
   };
 
   const removeCombatant = (id: number) => {
@@ -523,9 +518,9 @@ export function CombatTracker() {
                     <div className="space-y-2">
                         <Label htmlFor="reaction">Mod. Reação</Label>
                             <div className="flex items-center gap-2">
-                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))} disabled={combatStarted}><ChevronLeft/></Button>
-                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows" disabled={combatStarted}/>
-                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))} disabled={combatStarted}><ChevronRight/></Button>
+                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier - 1}))}><ChevronLeft/></Button>
+                            <Input id="reaction" type="number" value={newCombatant.reactionModifier} onChange={(e) => setNewCombatant(prev => ({...prev, reactionModifier: parseInt(e.target.value) || 0}))} className="w-16 text-center font-bold text-lg hide-number-arrows"/>
+                            <Button size="icon" variant="outline" onClick={() => setNewCombatant(prev => ({...prev, reactionModifier: prev.reactionModifier + 1}))}><ChevronRight/></Button>
                         </div>
                     </div>
                 </div>
