@@ -32,7 +32,6 @@ import navData from '@/lib/data/navigation.json';
 import { profileLink } from '@/components/layout/sidebar-nav';
 import { Circle, Square } from 'lucide-react';
 import combatantNames from '@/lib/data/combatant-names.json';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Combatant = {
   id: number;
@@ -96,7 +95,7 @@ export function CombatTracker() {
   const [combatants, setCombatants] = useState<Combatant[]>([]);
   const [nextId, setNextId] = useState(1);
   const [activeCombatantId, setActiveCombatantId] = useState<number | null>(null);
-  const [newCombatant, setNewCombatant] = useState<{name: string, reactionModifier: number, isPlayer: boolean, colorHue: number}>({ name: combatantNames[0], reactionModifier: 0, isPlayer: false, colorHue: bookColors[0] });
+  const [newCombatant, setNewCombatant] = useState<{name: string, reactionModifier: number, isPlayer: boolean, colorHue: number}>({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[0] });
   const [combatStarted, setCombatStarted] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [nextLogId, setNextLogId] = useState(1);
@@ -112,9 +111,10 @@ export function CombatTracker() {
           colorHue: combatant?.colorHue,
           isPlayer: combatant?.isPlayer,
         };
+        // Use functional update to ensure we are working with the latest state
+        setNextLogId(prevId => prevId + 1);
         return [newEntry, ...prevLog];
     });
-    setNextLogId(prevId => prevId + 1);
 };
   
   const sortedCombatants = useMemo(() => {
@@ -134,8 +134,17 @@ export function CombatTracker() {
   }, [combatStarted, sortedCombatants]);
 
   const addCombatant = () => {
-    const name = newCombatant.name.trim();
-    if (!name) return;
+    let name = newCombatant.name.trim();
+
+    if (!name) {
+        const usedNames = new Set(combatants.map(c => c.name));
+        const availableNames = combatantNames.filter(n => !usedNames.has(n));
+        if (availableNames.length > 0) {
+            name = availableNames[Math.floor(Math.random() * availableNames.length)];
+        } else {
+            name = `Combatente ${nextId}`; // Fallback if all names are used
+        }
+    }
     
     let initialAp = 0;
     if (combatStarted) {
@@ -156,15 +165,15 @@ export function CombatTracker() {
     };
     setCombatants([...combatants, combatant]);
     setNextId(nextId + 1);
-    const nextDefaultName = combatantNames.find(n => !combatants.some(c => c.name === n)) || `Combatente ${nextId + 1}`;
-    setNewCombatant({ name: nextDefaultName, reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
+    setNewCombatant({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
   };
   
  const startCombat = () => {
     if (combatants.length === 0) return;
 
+    let initiativeLogs: LogEntry[] = [];
     let currentLogId = nextLogId;
-    const initiativeLogs: LogEntry[] = [];
+
     const combatStartEntry: LogEntry = {
         id: currentLogId++,
         message: "O combate começou! A rolar iniciativa...",
@@ -393,7 +402,7 @@ export function CombatTracker() {
         <Card className={cn("lg:col-span-1", !combatStarted && "opacity-50 grayscale")}>
             <CardHeader className="text-center">
                  <div className="flex items-center justify-center gap-2 text-[var(--page-accent-color)]">
-                    <Crown className="text-5xl" />
+                    <Crown className="text-6xl" />
                     <p className="text-6xl font-bold">{activeCombatant ? activeCombatant.ap : '-'}</p>
                  </div>
                  <p className='text-muted-foreground text-sm mt-2'>
@@ -510,16 +519,12 @@ export function CombatTracker() {
                 <div className="grid grid-cols-[1fr_auto] gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="name">Nome</Label>
-                         <Select value={newCombatant.name} onValueChange={(value) => setNewCombatant({ ...newCombatant, name: value })}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecione um nome" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {combatantNames.map(name => (
-                                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                         <Input 
+                            id="name" 
+                            placeholder="Nome do Combatente" 
+                            value={newCombatant.name} 
+                            onChange={(e) => setNewCombatant({ ...newCombatant, name: e.target.value })}
+                         />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="reaction">Mod. Reação</Label>
