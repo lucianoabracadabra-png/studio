@@ -63,10 +63,7 @@ const BodyPartSection = ({ icon, children, alignment = 'center' }: { icon: React
 
 export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
     return (
-        <Card style={{
-            boxShadow: '0 0 15px rgba(0,0,0,0.3), 0 0 10px hsl(var(--page-accent-color)/0.4)',
-            borderColor: 'hsl(var(--page-accent-color))'
-        }}>
+        <Card>
              <CardHeader>
                 <CardTitle>Vitalidade</CardTitle>
             </CardHeader>
