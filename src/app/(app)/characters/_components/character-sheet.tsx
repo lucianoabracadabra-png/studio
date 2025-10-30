@@ -123,7 +123,14 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
     const currentResourceValue = maxResource - state.spentPoints;
 
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`} style={{ '--focus-color-hsl': colorHsl, '--focus-color': `hsl(${colorHsl})` } as React.CSSProperties}>
+        <div 
+            className={`grid grid-cols-1 md:grid-cols-2 gap-4`} 
+            style={{ 
+                '--focus-color-hsl': colorHsl, 
+                '--focus-color': `hsl(${colorHsl})`,
+                '--card-border-color': `hsl(${colorHsl})`
+            } as React.CSSProperties}
+        >
             <div className="md:col-span-1">
                 <FocusHeaderCard 
                     title={title} 
@@ -733,8 +740,8 @@ export function CharacterSheet() {
     const focusCardStyle = {
         '--focus-color': focusColors[activeFocusTab].hex,
         '--focus-color-hsl': focusColors[activeFocusTab].hsl,
+        '--card-border-color': focusColors[activeFocusTab].hex,
         boxShadow: `0 0 25px rgba(0,0,0,0.4), 0 0 15px ${focusColors[activeFocusTab].hex}99`,
-        borderColor: focusColors[activeFocusTab].hex,
     } as React.CSSProperties;
 
     return (
