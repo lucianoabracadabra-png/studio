@@ -166,13 +166,13 @@ export function NarrativeConsole() {
         <div className="grid grid-cols-1 lg:grid-cols-4 lg:grid-rows-2 gap-4 h-full p-4 bg-[#3a2d21] text-[#2a211c]" style={{ fontFamily: "'Lora', serif" }}>
              <style jsx global>{`
                 body { background-color: #3a2d21 !important; }
-                .bento-panel { background-color: rgba(245, 238, 218, 0.92); border: 2px solid #a89877; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+                .bento-panel { background-color: rgba(245, 238, 218, 0.92); border: 2px solid var(--page-accent-color); border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.1), 0 0 15px rgba(0,0,0,0.3), 0 0 10px hsl(var(--page-accent-color)/0.4); display: flex; flex-direction: column; }
                 .font-heading { font-family: 'Cinzel', serif; }
-                .heading-text { color: #8c1c13; text-shadow: 1px 1px 2px rgba(245, 238, 218, 0.5); }
+                .heading-text { color: var(--page-accent-color); text-shadow: 1px 1px 2px rgba(245, 238, 218, 0.5); }
                 #command-input { background-color: #f5eeda; border: 1px solid #c8b897; color: #3a2d21; }
-                #command-input:focus { outline: none; border-color: #8c1c13; box-shadow: 0 0 5px rgba(140, 28, 19, 0.5); }
-                .button-game { background-color: #8c1c13; color: #f5eeda; border: 1px solid #6c160f; transition: background-color 0.3s; }
-                .button-game:hover { background-color: #6c160f; }
+                #command-input:focus { outline: none; border-color: var(--page-accent-color); box-shadow: 0 0 5px hsl(var(--page-accent-color)/0.5); }
+                .button-game { background-color: var(--page-accent-color); color: #f5eeda; border: 1px solid hsl(var(--page-accent-color)/0.7); transition: background-color 0.3s; }
+                .button-game:hover { background-color: hsl(var(--page-accent-color)/0.7); }
                 .prompt-char { color: #5a4d41; background-color: #f5eeda; border: 1px solid #c8b897; border-right: none; }
                 pre.ascii-art { font-family: 'Roboto Mono', monospace; background-color: rgba(0,0,0,0.05); padding: 12px; border-radius: 4px; border: 1px solid #c8b897; color: #5a4d41; white-space: pre-wrap; text-align: left; line-height: 1.1; font-size: 14px; overflow-x: auto; }
                 .jogador-msg { text-align: left; }
@@ -186,7 +186,7 @@ export function NarrativeConsole() {
             `}</style>
 
             <section id="chat-panel" className="bento-panel lg:col-span-2 lg:row-span-2 p-4">
-                <h2 className="text-xl font-bold font-heading heading-text border-b-2 border-amber-800/30 pb-2 mb-4 flex-shrink-0">DIÁRIO DE AVENTURA</h2>
+                <h2 className="text-xl font-bold font-heading heading-text border-b-2 border-[var(--page-accent-color)]/30 pb-2 mb-4 flex-shrink-0">DIÁRIO DE AVENTURA</h2>
                 <div className="flex-grow overflow-hidden pr-2 mb-4 relative">
                     <ChatLog messages={gameState.messages} />
                 </div>

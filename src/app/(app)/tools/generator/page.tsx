@@ -7,7 +7,7 @@ export default function GeneratorPage() {
   return (
     <>
       <h1 className="text-3xl font-bold mb-4">Geradores de IA</h1>
-      <Tabs defaultValue="npc" className="w-full">
+      <Tabs defaultValue="npc" className="w-full border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)] rounded-lg p-4">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="npc">Gerador de NPC</TabsTrigger>
           <TabsTrigger value="item">Gerador de Item</TabsTrigger>

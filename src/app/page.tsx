@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden" style={{'--page-accent-color': 'hsl(var(--primary))'}}>
       <div className="container relative z-10 flex flex-col items-center justify-center text-center px-4">
         <div className="mb-8 flex items-center justify-center gap-4">
           <Icons.logo className="h-16 w-16 text-primary" />
@@ -49,7 +49,7 @@ export default function LandingPage() {
 
 function FeatureCard({ title, description, icon: Icon }: { title: string; description: string; icon: React.ElementType }) {
   return (
-    <Card className="p-6">
+    <Card className="p-6 border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
       <div className="flex justify-center mb-4">
         <Icon className="h-8 w-8 text-accent" />
       </div>

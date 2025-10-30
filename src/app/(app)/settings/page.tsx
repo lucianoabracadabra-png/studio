@@ -61,7 +61,7 @@ export default async function SettingsPage() {
         Inspecione o conteúdo dos ficheiros JSON que servem como base de dados para a sua aplicação.
       </p>
 
-       <Tabs defaultValue={defaultTab} className="w-full">
+       <Tabs defaultValue={defaultTab} className="w-full border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)] rounded-lg p-4">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 {allData.map(file => (
                     <TabsTrigger key={file.id} value={file.id}>{file.name}</TabsTrigger>

@@ -386,7 +386,7 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
     const itemIds = useMemo(() => items.map(i => i.id), [items]);
 
     return (
-        <Card>
+        <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
             <CardHeader>
                 <div className='flex justify-between items-center'>
                     <CardTitle>Equipamento</CardTitle>
@@ -416,7 +416,7 @@ const InventorySection = ({ items }: { items: CharacterItem[] }) => {
     const itemIds = useMemo(() => items.map(i => i.id), [items]);
 
     return (
-        <Card>
+        <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
             <CardHeader>
                 <div className="flex justify-between items-baseline">
                     <CardTitle>Inventário</CardTitle>
@@ -770,7 +770,7 @@ export function CharacterSheet() {
             <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <Card>
+                <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-4 pt-2">
@@ -798,7 +798,7 @@ export function CharacterSheet() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-4 pt-2">

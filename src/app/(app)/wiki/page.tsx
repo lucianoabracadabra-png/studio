@@ -20,7 +20,7 @@ export default function WikiPage() {
           const href = portal.href || `/wiki/${portal.id}`;
           return (
             <Link href={href} key={portal.id} className="block group">
-              <Card className="h-full flex flex-col transition-all border-border hover:border-primary">
+              <Card className="h-full flex flex-col transition-all border-border hover:border-primary border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
                 <CardHeader className="flex-row items-center gap-4">
                   <div className="p-3 rounded-md bg-muted">
                     <Icon className="h-8 w-8 text-primary" />

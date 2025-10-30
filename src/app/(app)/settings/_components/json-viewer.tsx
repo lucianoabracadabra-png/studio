@@ -73,7 +73,7 @@ const JsonArray = ({ data, level }: { data: any[], level: number }) => {
                                      Item {index + 1}
                                  </CollapsibleTrigger>
                                  <CollapsibleContent className='pt-2'>
-                                     <Card className='bg-muted/40'>
+                                     <Card className='bg-muted/40 border-border'>
                                          <CardContent className='p-3'>
                                              <JsonObject data={item} level={level + 1} />
                                          </CardContent>
@@ -92,7 +92,7 @@ const JsonArray = ({ data, level }: { data: any[], level: number }) => {
 
 export function JsonViewer({ data, title }: JsonViewerProps) {
   return (
-    <Card>
+    <Card className='border-border shadow-none'>
       <CardHeader>
         <CardTitle>{title || 'Visualizador de Dados'}</CardTitle>
         <CardDescription>Inspecione a estrutura de dados abaixo.</CardDescription>

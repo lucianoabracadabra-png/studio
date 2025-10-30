@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type { Character, BodyPartHealth, HealthState } from '@/lib/character-data';
+import type { Character, BodyPartHealth, HealthState } from '@/lib-character-data';
 import { PersonStanding, Hand, Footprints } from 'lucide-react';
 
 const healthStateOrder: HealthState[] = ['clean', 'simple', 'lethal', 'aggravated'];
@@ -63,7 +63,7 @@ const BodyPartSection = ({ icon, children, alignment = 'center' }: { icon: React
 
 export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
     return (
-        <Card>
+        <Card className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
              <CardHeader>
                 <CardTitle>Vitalidade</CardTitle>
             </CardHeader>
