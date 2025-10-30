@@ -762,7 +762,7 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Alma</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex justify-center items-end gap-2 pt-6">
+                        <div className="flex justify-center items-end gap-4 pt-2">
                            {character.soul.domains.map(d => {
                                 const Icon = iconMap[d.icon];
                                 return (
@@ -797,7 +797,7 @@ export function CharacterSheet() {
                 <Card>
                     <CardHeader><CardTitle className="text-center">Espírito</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex justify-center items-end gap-2 pt-6">
+                        <div className="flex justify-center items-end gap-4 pt-2">
                             {character.spirit.personality.map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
@@ -820,7 +820,7 @@ export function CharacterSheet() {
                                     </div>
                                 )})}
                         </div>
-                         <div className="flex justify-center items-end gap-2 pt-6">
+                         <div className="flex justify-center items-end gap-4 pt-2">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
                                 const Icon = iconMap[p.icon as keyof typeof iconMap];
                                 return (
