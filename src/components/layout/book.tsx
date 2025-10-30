@@ -18,7 +18,6 @@ interface BookProps {
 
 export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, onClick, showLabel = true }: BookProps) => {
 
-    const hasValue = level !== undefined && level > 0;
     const isPeonBook = level !== undefined;
 
     const bookContent = (
@@ -56,10 +55,10 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                 <div className='relative w-full h-full'>
                     {/* Default content: Icon and Level */}
                     <motion.div
-                        className='absolute inset-0 flex flex-col'
-                        initial={{ opacity: 1 }}
-                        animate={{ opacity: (isPeonBook && hasValue) ? 1 : (isPeonBook ? 1 : 1) }} // keep visible by default
-                        whileHover={{ opacity: isPeonBook ? 0 : 1 }}
+                        className={cn(
+                            'absolute inset-0 flex flex-col',
+                            isPeonBook ? 'group-hover/book:opacity-0' : ''
+                        )}
                         transition={{ duration: 0.2 }}
                     >
                         <div className="flex-grow flex items-center justify-center">
@@ -69,7 +68,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                                 "group-hover/book:text-white"
                             )} />
                         </div>
-                        {hasValue && (
+                        {isPeonBook && level > 0 && (
                             <div className="h-1/3 flex items-center justify-center">
                                 <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                                     {level}
@@ -79,12 +78,9 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                     </motion.div>
                     
                      {/* Hover content for Peon-books */}
-                     {isPeonBook && hasValue && (
+                     {isPeonBook && (
                         <motion.div
-                            className='absolute inset-0 flex items-center justify-center text-center p-1 pointer-events-none'
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 0 }}
-                            whileHover={{ opacity: 1 }}
+                            className='absolute inset-0 flex items-center justify-center text-center p-1 opacity-0 group-hover/book:opacity-100'
                             transition={{ duration: 0.2 }}
                         >
                             <span 
