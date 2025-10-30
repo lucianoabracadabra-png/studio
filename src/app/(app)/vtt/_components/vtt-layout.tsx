@@ -69,7 +69,7 @@ const initialVttState: VttState = {
     dimensions: { width: 2560, height: 1440 }
   },
   tokens: [
-      { id: 1, name: 'Player 1', imageUrl: '/tokens/token-1.png', color: '#3b82f6', position: { x: 600, y: 800 }, shape: 'circle', type: 'hero' },
+      { id: 1, name: 'Bassura Ambasiore', imageUrl: '/characters/bassura-ambasiore.jpg', color: '#3b82f6', position: { x: 600, y: 800 }, shape: 'circle', type: 'hero' },
       { id: 2, name: 'Goblin A', imageUrl: '/tokens/token-2.png', color: '#ef4444', position: { x: 800, y: 750 }, shape: 'square', type: 'enemy' },
       { id: 3, name: 'Orc Leader', imageUrl: '/tokens/token-3.png', color: '#eab308', position: { x: 700, y: 650 }, shape: 'square', type: 'enemy' },
   ],
