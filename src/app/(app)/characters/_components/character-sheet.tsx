@@ -740,7 +740,7 @@ export function CharacterSheet() {
         '--focus-color': focusColors[activeFocusTab].hex,
         '--focus-color-hsl': focusColors[activeFocusTab].hsl,
         borderColor: 'var(--focus-color)',
-        filter: `drop-shadow(0 0 8px var(--focus-color))`
+        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px ${focusColors[activeFocusTab].hex}66`,
     } as React.CSSProperties;
 
     return (
@@ -828,7 +828,7 @@ export function CharacterSheet() {
                 </Card>
             </div>
 
-            <Card style={focusCardStyle}>
+            <Card style={focusCardStyle} className="border-2">
                 <CardHeader>
                     <CardTitle className='text-center' style={{ color: 'var(--focus-color)' }}>
                         Focos de Desenvolvimento
