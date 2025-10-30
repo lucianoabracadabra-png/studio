@@ -18,10 +18,12 @@ interface BookProps {
 
 export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, showLabel = true, onClick }: BookProps) => {
 
+    const hasValue = level !== undefined && level > 0;
+
     const bookContent = (
          <motion.div
             className={cn(
-                "relative w-12 h-16 rounded-md flex flex-col cursor-pointer group/book transition-all overflow-hidden",
+                "relative w-12 h-16 rounded-md flex cursor-pointer group/book transition-all overflow-hidden",
                 "border-2"
             )}
             style={{
@@ -50,23 +52,32 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
                 transition={{ duration: 0.3 }}
             />
             
-            <div className="h-2/3 w-full flex items-center justify-center">
-                 <Icon className={cn(
-                    "h-6 w-6 transition-colors duration-300", 
-                    isActive ? "text-white" : "text-neutral-400",
-                    "group-hover/book:text-white"
-                )} />
+            <div className="flex-1 flex flex-col pl-[4px]">
+                {hasValue ? (
+                    <>
+                        <div className="h-2/3 w-full flex items-center justify-center">
+                            <Icon className={cn(
+                                "h-6 w-6 transition-colors duration-300", 
+                                isActive ? "text-white" : "text-neutral-400",
+                                "group-hover/book:text-white"
+                            )} />
+                        </div>
+                        <div className="h-1/3 w-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                                {level}
+                            </span>
+                        </div>
+                    </>
+                ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                        <Icon className={cn(
+                            "h-6 w-6 transition-colors duration-300", 
+                            isActive ? "text-white" : "text-neutral-400",
+                            "group-hover/book:text-white"
+                        )} />
+                    </div>
+                )}
             </div>
-
-            <div className={cn(
-                "h-1/3 w-full flex items-center justify-center bg-black/20",
-                level && level > 0 ? "opacity-100" : "opacity-0"
-                )}>
-                <span className="text-sm font-bold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                    {level}
-                </span>
-            </div>
-
 
             {showLabel && (
                 <div 
