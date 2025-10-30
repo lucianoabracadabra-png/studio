@@ -109,17 +109,15 @@ export function CombatTracker() {
   const [turnCount, setTurnCount] = useState(0);
 
  const addLogEntry = (message: string, combatant?: Combatant) => {
-    setLog(prevLog => {
-      const newEntry: LogEntry = {
-        id: nextLogId,
-        message,
-        timestamp: new Date().toLocaleTimeString(),
-        colorHue: combatant?.colorHue,
-        isPlayer: combatant?.isPlayer,
-      };
-      setNextLogId(prevId => prevId + 1);
-      return [newEntry, ...prevLog];
-    });
+    const newEntry: LogEntry = {
+      id: nextLogId,
+      message,
+      timestamp: new Date().toLocaleTimeString(),
+      colorHue: combatant?.colorHue,
+      isPlayer: combatant?.isPlayer,
+    };
+    setLog(prevLog => [newEntry, ...prevLog]);
+    setNextLogId(prevId => prevId + 1);
 };
   
   const sortedCombatants = useMemo(() => {
@@ -193,10 +191,11 @@ export function CombatTracker() {
         initiativeLogs.push(initiativeEntry);
         return newCombatant;
     });
-
-    setCombatants(updatedCombatants);
+    
     setLog(prevLog => [...initiativeLogs.reverse(), ...prevLog]);
     setNextLogId(currentLogId);
+
+    setCombatants(updatedCombatants);
     setTurnCount(1);
     setActionTrails([]);
     setCombatStarted(true);
@@ -424,11 +423,11 @@ export function CombatTracker() {
             </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 flex flex-col">
+        <Card className="lg:col-span-2 flex flex-col overflow-hidden">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><History /> Registro de Combate</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow max-h-96 overflow-y-auto space-y-2 pr-2">
+            <CardContent className="overflow-y-auto space-y-2 pr-2 max-h-96">
                 {log.length > 0 ? log.map(entry => (
                     <div key={entry.id} className="text-sm p-2 rounded-md bg-muted relative flex items-center gap-3">
                         {entry.colorHue !== undefined && (
