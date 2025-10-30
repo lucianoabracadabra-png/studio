@@ -109,15 +109,17 @@ export function CombatTracker() {
   const [turnCount, setTurnCount] = useState(0);
 
  const addLogEntry = (message: string, combatant?: Combatant) => {
-    const newEntry: LogEntry = {
+    setLog(prevLog => {
+      const newEntry: LogEntry = {
         id: nextLogId,
         message,
         timestamp: new Date().toLocaleTimeString(),
         colorHue: combatant?.colorHue,
         isPlayer: combatant?.isPlayer,
-    };
-    setLog(prevLog => [newEntry, ...prevLog]);
-    setNextLogId(prevId => prevId + 1);
+      };
+      setNextLogId(prevId => prevId + 1);
+      return [newEntry, ...prevLog];
+    });
 };
   
   const sortedCombatants = useMemo(() => {
@@ -161,47 +163,45 @@ export function CombatTracker() {
     setNewCombatant({ name: '', reactionModifier: 0, isPlayer: false, colorHue: bookColors[Math.floor(Math.random() * bookColors.length)] });
   };
   
-  const startCombat = () => {
+ const startCombat = () => {
     if (combatants.length === 0) return;
-    
-    setTurnCount(1);
-    
-    const initiativeLogs: LogEntry[] = [];
-    let currentLogId = nextLogId;
 
+    let currentLogId = nextLogId;
+    const initiativeLogs: LogEntry[] = [];
     const combatStartEntry: LogEntry = {
-      id: currentLogId++,
-      message: "O combate começou! A rolar iniciativa...",
-      timestamp: new Date().toLocaleTimeString(),
+        id: currentLogId++,
+        message: "O combate começou! A rolar iniciativa...",
+        timestamp: new Date().toLocaleTimeString(),
     };
     initiativeLogs.push(combatStartEntry);
-    
+
     const updatedCombatants = combatants.map(c => {
-      const reactionRoll = Math.floor(Math.random() * 10) + 1;
-      const totalReaction = reactionRoll + c.reactionModifier;
-      const startAp = 20 - totalReaction;
-      const finalAp = startAp < 0 ? 0 : startAp;
-      
-      const newCombatant = { ...c, ap: finalAp };
-      
-      const initiativeEntry: LogEntry = {
-        id: currentLogId++,
-        message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
-        timestamp: new Date().toLocaleTimeString(),
-        colorHue: newCombatant.colorHue,
-        isPlayer: newCombatant.isPlayer,
-      };
-      initiativeLogs.push(initiativeEntry);
-      
-      return newCombatant;
+        const reactionRoll = Math.floor(Math.random() * 10) + 1;
+        const totalReaction = reactionRoll + c.reactionModifier;
+        const startAp = 20 - totalReaction;
+        const finalAp = startAp < 0 ? 0 : startAp;
+        
+        const newCombatant = { ...c, ap: finalAp };
+        
+        const initiativeEntry: LogEntry = {
+            id: currentLogId++,
+            message: `${c.name} rolou ${reactionRoll} + ${c.reactionModifier} (total: ${totalReaction}). Inicia no AP ${finalAp}.`,
+            timestamp: new Date().toLocaleTimeString(),
+            colorHue: newCombatant.colorHue,
+            isPlayer: newCombatant.isPlayer,
+        };
+        initiativeLogs.push(initiativeEntry);
+        return newCombatant;
     });
 
     setCombatants(updatedCombatants);
     setLog(prevLog => [...initiativeLogs.reverse(), ...prevLog]);
     setNextLogId(currentLogId);
+    setTurnCount(1);
     setActionTrails([]);
     setCombatStarted(true);
-  };
+};
+
 
   const resetCombat = () => {
     setCombatStarted(false);
@@ -394,26 +394,26 @@ export function CombatTracker() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <Card className={cn("lg:col-span-1", !combatStarted && "opacity-50 grayscale")}>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Crown /> 
-                    {activeCombatant ? `Turno Ativo: ${activeCombatant.name}` : "Turno Ativo"}
-                </CardTitle>
-                <CardDescription>
-                    {activeCombatant ? `AP Atual: ${activeCombatant.ap}` : "Aguardando início do combate"}
-                </CardDescription>
+            <CardHeader className="text-center">
+                 <div className="flex items-end justify-center gap-2">
+                    <Crown className="text-2xl text-muted-foreground" />
+                    <p className="text-5xl font-bold text-primary">{activeCombatant ? activeCombatant.ap : '-'}</p>
+                 </div>
+                 <p className='text-muted-foreground text-sm'>
+                    Turno Ativo: {activeCombatant ? activeCombatant.name : "N/A"}
+                </p>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
                  <div className="flex-grow space-y-2">
-                   <Label>Custo da Ação (AP)</Label>
-                    <div className='grid grid-cols-5 gap-2'>
+                   <Label className='text-center block'>Custo da Ação (AP)</Label>
+                    <div className='grid grid-cols-5 gap-2 pt-2'>
                         {Array.from({length: 15}, (_, i) => i + 1).map(cost => (
                             <Button 
                                 key={cost} 
                                 onClick={() => confirmAction(cost)} 
                                 variant="outline" 
                                 size="sm" 
-                                className="font-mono"
+                                className="font-mono hover:bg-orange-500 hover:text-white"
                                 disabled={!combatStarted}
                             >
                                 {cost}
