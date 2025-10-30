@@ -23,7 +23,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
     const bookContent = (
          <motion.div
             className={cn(
-                "relative w-12 h-16 rounded-md flex cursor-pointer group/book transition-all overflow-hidden",
+                "relative w-12 h-16 rounded-md flex cursor-pointer group/book transition-all",
                 "border-2"
             )}
             style={{
