@@ -488,16 +488,16 @@ export function CombatTracker() {
                                         <AlertDialogTrigger asChild>
                                             <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive h-8 w-8"><X className="h-4 w-4"/></Button>
                                         </AlertDialogTrigger>
-                                        <AlertDialogContent className="border-2 border-[var(--page-accent-color)] shadow-[0_0_15px_rgba(0,0,0,0.3),0_0_10px_hsl(var(--page-accent-color)/0.4)]">
+                                        <AlertDialogContent>
                                             <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-[var(--page-accent-color)]">Você tem certeza?</AlertDialogTitle>
+                                            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 Isso removerá permanentemente {c.name} do encontro.
                                             </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => removeCombatant(c.id)} variant="default">Remover</AlertDialogAction>
+                                            <AlertDialogAction onClick={() => removeCombatant(c.id)}>Remover</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
