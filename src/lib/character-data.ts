@@ -76,25 +76,32 @@ export type ItemOwnership = {
 // Character Data Structure
 type Stat = { name: string; value: number };
 
-type FocusData = {
-  attributes: Stat[];
-  skills: Stat[];
+type FocusData<T extends string, S extends string> = {
+  attributes: { name: T, value: number }[];
+  skills: { name: S, value: number }[];
 };
 
-type PhysicalFocus = FocusData & {
+type PhysicalFocus = {
   vigor: { name: string; };
-  treinamentos: Stat[];
+  attributes: { name: 'Força' | 'Destreza' | 'Agilidade' | 'Constituição', value: number }[];
+  skills: { name: 'Armas Brancas' | 'Armas de Fogo' | 'Arquearia' | 'Arremesso' | 'Briga' | 'Combate' | 'Furtividade' | 'Prontidão', value: number }[];
+  treinamentos: { name: 'Corrida' | 'Natação' | 'Escalada' | 'Pilotagem', value: number }[];
 };
 
-type MentalFocus = FocusData & {
+type MentalFocus = {
   focus: { name: string; };
-  ciencias: Stat[];
+  attributes: { name: 'Inteligência' | 'Percepção' | 'Raciocínio' | 'Sabedoria', value: number }[];
+  skills: { name: 'Acadêmicos' | 'Armadilhas' | 'Intuição' | 'Investigação' | 'Medicina' | 'Ocultismo' | 'Segurança' | 'Sobrevivência', value: number }[];
+  ciencias: { name: 'Biologia' | 'Física' | 'Química' | 'História', value: number }[];
 };
 
-type SocialFocus = FocusData & {
+type SocialFocus = {
   grace: { name: string; };
-  artes: Stat[];
+  attributes: { name: 'Empatia' | 'Manipulação' | 'Expressão' | 'Resiliência', value: number }[];
+  skills: { name: 'Barganha' | 'Doma' | 'Etiqueta' | 'Intimidação' | 'Lábia' | 'Liderança' | 'Montaria' | 'Sedução', value: number }[];
+  artes: { name: 'Canto' | 'Dança' | 'Pintura' | 'Atuação', value: number }[];
 };
+
 
 export type HealthState = 'clean' | 'simple' | 'lethal' | 'aggravated';
 
@@ -112,13 +119,13 @@ export type SoulDomain = {
     name: string;
     level: number;
     color: string;
-    icon: keyof typeof iconMap;
+    icon: string;
 }
 
 export type PersonalityTrait = { 
     name: string; 
     value: number,
-    icon: keyof typeof iconMap;
+    icon: string;
     colorHsl: string;
 };
 
@@ -131,14 +138,14 @@ export type AlignmentAxis = {
 export type Fluxo = {
   name: 'Fluxo';
   value: number;
-  icon: keyof typeof iconMap;
+  icon: string;
   colorHsl: string;
 };
 
 export type Patrono = {
   name: 'Patrono';
   value: number;
-  icon: keyof typeof iconMap;
+  icon: string;
   colorHsl: string;
 };
 

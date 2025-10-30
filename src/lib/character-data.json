@@ -113,12 +113,12 @@
         { "name": "Serenidade", "value": 1, "icon": "Leaf", "colorHsl": "190 70% 55%" }
     ],
     "alignment": [
-      { "name": "Moral", "state": "Altruísmo", "poles": ["Egoísmo", "Altruísmo"] },
-      { "name": "Ética", "state": "Ordem", "poles": ["Rebeldia", "Ordem"] },
+      { "name": "Moral", "state": "Egoísmo", "poles": ["Egoísmo", "Altruísmo"] },
+      { "name": "Ética", "state": "Rebeldia", "poles": ["Rebeldia", "Ordem"] },
       { "name": "Identidade", "state": "Individualismo", "poles": ["Comunitarismo", "Individualismo"] },
       { "name": "Abordagem", "state": "Instinto", "poles": ["Lógica", "Instinto"] },
       { "name": "Verdade", "state": "Pragmatismo", "poles": ["Idealismo", "Pragmatismo"] },
-      { "name": "Poder", "state": "Contenção", "poles": ["Liberdade", "Contenção"] }
+      { "name": "Poder", "state": "Liberdade", "poles": ["Liberdade", "Contenção"] }
     ]
   },
   "soul": {

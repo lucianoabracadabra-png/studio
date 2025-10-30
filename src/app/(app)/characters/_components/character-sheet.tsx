@@ -3,12 +3,12 @@
 import React, { useState, useReducer, useMemo, useEffect } from 'react';
 import initialCharacterData from '@/lib/character-data.json';
 import { itemDatabase } from '@/lib/character-data';
-import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemFromDB, ItemOwnership } from '@/lib/character-data';
+import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap } from '@/lib/character-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -123,7 +123,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
     const currentResourceValue = maxResource - state.spentPoints;
 
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`} style={{ '--focus-color-hsl': colorHsl } as React.CSSProperties}>
             <div className="md:col-span-1">
                 <FocusHeaderCard 
                     title={title} 
@@ -327,9 +327,8 @@ const SortableInventoryItem = ({ item }: { item: CharacterItem }) => {
                     isOpen && "shadow-lg",
                     isDragging && "shadow-xl",
                     item.equippable
-                        ? "cursor-grab hover:shadow-md border-foreground/20 hover:border-primary"
-                        : "cursor-default",
-                    isOpen && "border-primary"
+                        ? "cursor-grab hover:shadow-md"
+                        : "cursor-default"
                 )}
                 onClick={item.equippable ? handleOpen : undefined}
             >
@@ -482,8 +481,8 @@ const characterReducer = (state: Character, action: any): Character => {
         }
         case 'SET_SKILL': {
             const { pilar, name, level } = action.payload;
-            const focusPilar = state.focus[pilar];
-            const newSkills = focusPilar.skills.map(skill => 
+            const focusPilar = state.focus[pilar as keyof typeof state.focus];
+            const newSkills = (focusPilar as any).skills.map((skill: any) => 
                 skill.name === name ? { ...skill, value: level } : skill
             );
             return {
@@ -497,8 +496,8 @@ const characterReducer = (state: Character, action: any): Character => {
         case 'SET_MODULAR': {
             const { pilar, name, level } = action.payload;
             const pilarKey = pilar === 'fisico' ? 'treinamentos' : pilar === 'mental' ? 'ciencias' : 'artes';
-            const focusPilar = state.focus[pilar];
-            const newModulars = (focusPilar[pilarKey] as any[]).map(mod => 
+            const focusPilar = state.focus[pilar as keyof typeof state.focus];
+            const newModulars = ((focusPilar as any)[pilarKey] as any[]).map(mod => 
                 mod.name === name ? { ...mod, value: level } : mod
             );
              return {
@@ -767,20 +766,22 @@ export function CharacterSheet() {
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-4 pt-2">
                            {character.soul.domains.map(d => {
-                                const Icon = iconMap[d.icon];
+                                const Icon = iconMap[d.icon as keyof typeof iconMap] || Heart;
                                 return (
                                     <TooltipProvider key={d.name}>
                                         <Tooltip>
-                                            <TooltipTrigger>
-                                                <Book
-                                                    label={d.name}
-                                                    icon={Icon}
-                                                    colorHsl={d.color}
-                                                    level={d.level}
-                                                    isActive={d.level > 0}
-                                                    isClickable={false}
-                                                    showLabel={true}
-                                                />
+                                            <TooltipTrigger asChild>
+                                                <div>
+                                                    <Book
+                                                        label={d.name}
+                                                        icon={Icon}
+                                                        colorHsl={d.color}
+                                                        level={d.level}
+                                                        isActive={d.level > 0}
+                                                        isClickable={false}
+                                                        showLabel={true}
+                                                    />
+                                                </div>
                                             </TooltipTrigger>
                                             <TooltipContent side="top"><p>{d.name}</p></TooltipContent>
                                         </Tooltip>
@@ -801,21 +802,23 @@ export function CharacterSheet() {
                     <CardContent className="space-y-4">
                         <div className="flex justify-center items-end gap-4 pt-2">
                             {character.spirit.personality.map(p => {
-                                const Icon = iconMap[p.icon as keyof typeof iconMap];
+                                const Icon = iconMap[p.icon as keyof typeof iconMap] || Shield;
                                 return (
                                     <TooltipProvider key={p.name}>
                                         <Tooltip>
-                                            <TooltipTrigger>
-                                                <Book
-                                                    key={p.name}
-                                                    icon={Icon}
-                                                    colorHsl={p.colorHsl}
-                                                    isClickable={false}
-                                                    showLabel={true}
-                                                    label={p.name}
-                                                    level={p.value}
-                                                    isActive={p.value > 0}
-                                                />
+                                            <TooltipTrigger asChild>
+                                                <div>
+                                                    <Book
+                                                        key={p.name}
+                                                        icon={Icon}
+                                                        colorHsl={p.colorHsl}
+                                                        isClickable={false}
+                                                        showLabel={true}
+                                                        label={p.name}
+                                                        level={p.value}
+                                                        isActive={p.value > 0}
+                                                    />
+                                                </div>
                                             </TooltipTrigger>
                                             <TooltipContent side="top"><p>{p.name}</p></TooltipContent>
                                         </Tooltip>
@@ -824,21 +827,23 @@ export function CharacterSheet() {
                         </div>
                          <div className="flex justify-center items-end gap-4 pt-2">
                             {[character.soul.anima.fluxo, character.soul.anima.patrono].map(p => {
-                                const Icon = iconMap[p.icon as keyof typeof iconMap];
+                                const Icon = iconMap[p.icon as keyof typeof iconMap] || Heart;
                                 return (
                                      <TooltipProvider key={p.name}>
                                         <Tooltip>
-                                            <TooltipTrigger>
-                                                <Book
-                                                    key={p.name}
-                                                    icon={Icon}
-                                                    colorHsl={p.colorHsl}
-                                                    isClickable={false}
-                                                    showLabel={true}
-                                                    label={p.name}
-                                                    level={p.value}
-                                                    isActive={p.value > 0}
-                                                />
+                                            <TooltipTrigger asChild>
+                                                <div>
+                                                    <Book
+                                                        key={p.name}
+                                                        icon={Icon}
+                                                        colorHsl={p.colorHsl}
+                                                        isClickable={false}
+                                                        showLabel={true}
+                                                        label={p.name}
+                                                        level={p.value}
+                                                        isActive={p.value > 0}
+                                                    />
+                                                </div>
                                             </TooltipTrigger>
                                             <TooltipContent side="top"><p>{p.name}</p></TooltipContent>
                                         </Tooltip>

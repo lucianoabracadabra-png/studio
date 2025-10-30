@@ -19,7 +19,7 @@ type InfoPanelProps = {
 export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
     <Popover>
         <PopoverTrigger asChild>
-             <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-muted/50">
+             <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-[var(--page-accent-color)]/20">
                 <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
                 <span>{family.root}</span>
             </Button>
@@ -44,7 +44,7 @@ export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFa
     </Popover>
 );
 
-const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (name: string) => void }) => {
+const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
     const [pole1, pole2] = axis.poles;
     const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
 
@@ -52,13 +52,15 @@ const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (n
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <Button variant="outline" onClick={() => onToggle(axis.name)} className='w-full justify-between h-auto py-2 px-3 text-sm'>
-                        <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
-                        <span className='font-mono text-xs text-[var(--page-accent-color)]'>{axis.name}</span>
-                        <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
-                    </Button>
+                    <div className='w-full'>
+                         <Button variant="outline" className='w-full justify-between h-auto py-2 px-3 text-sm hover:bg-[var(--page-accent-color)]/20 cursor-default'>
+                            <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
+                            <span className='font-mono text-xs text-[var(--page-accent-color)]'>{axis.name}</span>
+                            <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
+                        </Button>
+                    </div>
                 </TooltipTrigger>
-                <TooltipContent className='max-w-xs' side='bottom'>
+                <TooltipContent className='max-w-[var(--radix-tooltip-trigger-width)]' side='bottom'>
                     <div className='p-1'>
                         <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
                         <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
@@ -185,7 +187,7 @@ export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
                             <Label className='text-muted-foreground'>Alinhamento</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
                                 {character.spirit.alignment.map(axis => (
-                                    <AlignmentButton key={axis.name} axis={axis} onToggle={onAlignmentToggle} />
+                                    <AlignmentButton key={axis.name} axis={axis} />
                                 ))}
                             </div>
                         </div>
