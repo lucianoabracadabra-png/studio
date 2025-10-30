@@ -82,9 +82,11 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
 
 const AttributeItem = ({ name, level, colorClass }: { name: string; level: number, colorClass: string }) => {
     return (
-        <div className="flex items-center gap-3 py-1">
-            <span className={cn("font-bold text-lg w-4 text-center", colorClass)}>{level}</span>
-            <span className="text-foreground">{name}</span>
+        <div className="flex items-center gap-3">
+             <div className={cn("w-8 h-8 flex items-center justify-center rounded-md font-bold text-lg text-primary-foreground", colorClass)}>
+                {level}
+            </div>
+            <span className="text-foreground font-medium">{name}</span>
         </div>
     );
 };
@@ -92,7 +94,7 @@ const AttributeItem = ({ name, level, colorClass }: { name: string; level: numbe
 
 const SkillItem = ({ name, value, colorClass }: { name: string; value: number, colorClass: string }) => {
     return (
-        <div className="flex justify-between items-center py-1">
+        <div className="flex justify-between items-center py-2">
             <span className="text-foreground">{name}</span>
             <div className='flex gap-1.5 items-center'>
                 {[...Array(7)].map((_, i) => (
@@ -150,13 +152,13 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: {
                     <CardHeader>
                         <CardTitle className='text-base'>Atributos</CardTitle>
                     </CardHeader>
-                    <CardContent className='space-y-2 divide-y divide-border'>
+                    <CardContent className='grid grid-cols-2 gap-x-4 gap-y-3'>
                         {Object.entries(state.attributes).map(([name, level]) => (
                              <AttributeItem 
                                 key={name} 
                                 name={name} 
                                 level={level as number}
-                                colorClass={pilarColorClasses[pilar].text}
+                                colorClass={pilarColorClasses[pilar].bg}
                              />
                         ))}
                     </CardContent>
@@ -833,9 +835,9 @@ export function CharacterSheet() {
                 <CardContent>
                     <Tabs defaultValue="physical" className="w-full">
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="physical" className='flex items-center gap-2'><PersonStanding />Físico</TabsTrigger>
-                            <TabsTrigger value="mental" className='flex items-center gap-2'><BrainCircuit />Mental</TabsTrigger>
-                            <TabsTrigger value="social" className='flex items-center gap-2'><Users />Social</TabsTrigger>
+                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-orange-500 data-[state=active]:border-orange-500/50'><PersonStanding />Físico</TabsTrigger>
+                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-blue-500 data-[state=active]:border-blue-500/50'><BrainCircuit />Mental</TabsTrigger>
+                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-green-500 data-[state=active]:border-green-500/50'><Users />Social</TabsTrigger>
                         </TabsList>
                         <TabsContent value="physical" className='pt-6'>
                             <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />

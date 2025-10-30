@@ -16,7 +16,7 @@ interface BookProps {
     onClick?: () => void;
 }
 
-export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, showLabel = true, onClick }: BookProps) => {
+export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable = true, showLabel = false, onClick }: BookProps) => {
 
     const hasValue = level !== undefined && level > 0;
 
@@ -42,12 +42,11 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             onClick={onClick}
         >
-            {/* Spine with Glow */}
             <motion.div 
-                className="absolute left-0 top-0 bottom-0 w-[4px] bg-black/30"
+                className="absolute left-0 top-0 bottom-0 w-[4px]"
                 animate={{
                     boxShadow: isActive ? `0px 0px 8px hsl(${colorHsl})` : 'none',
-                    backgroundColor: isActive ? `hsl(${colorHsl})` : 'rgba(0,0,0,0.3)'
+                    backgroundColor: isActive ? `hsl(${colorHsl})` : `hsl(${colorHsl} / 0.5)`
                 }}
                 transition={{ duration: 0.3 }}
             />
@@ -82,7 +81,7 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
             {showLabel && (
                 <div 
                     className={cn(
-                        "absolute -bottom-5 left-0 right-0 text-center text-xs whitespace-nowrap opacity-0 group-hover/book:opacity-100 transition-opacity duration-300",
+                        "absolute -bottom-5 left-0 right-0 text-center text-xs whitespace-nowrap opacity-0 group-hover/book:opacity-100 transition-opacity duration-300 font-bold",
                         isActive ? "text-white" : "text-muted-foreground",
                     )}
                     style={{
@@ -95,14 +94,14 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
         </motion.div>
     );
 
-    if (!isClickable) {
+    if (!showLabel) {
         return (
              <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         {bookContent}
                     </TooltipTrigger>
-                    <TooltipContent side="top">
+                    <TooltipContent side="right">
                         <p>{label}</p>
                     </TooltipContent>
                 </Tooltip>
@@ -110,16 +109,5 @@ export const Book = ({ label, icon: Icon, colorHsl, level, isActive, isClickable
         );
     }
 
-    return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    {bookContent}
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                    <p>{label}</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    );
+    return bookContent;
 };
