@@ -23,6 +23,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const pageStyle = {
     '--page-accent-color': `hsl(${activeColorHue})`,
+    '--card-border-color': `hsl(${activeColorHue})`,
   } as React.CSSProperties;
 
 
