@@ -7,6 +7,7 @@ import { VttToolbar } from './vtt-toolbar';
 import { ToolPanelContainer } from './tool-panel-container';
 import type { PanInfo } from 'framer-motion';
 import type { Shape, DraftShape } from './drawing-layer';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 // Core Types
 export type Point = { x: number, y: number };
@@ -61,6 +62,8 @@ export interface VttState {
   };
 }
 
+const bassuraImage = PlaceHolderImages.find(p => p.id === 'character-bassura');
+
 const initialVttState: VttState = {
   map: {
     url: '/maps/fantasy-map-1.jpg',
@@ -69,7 +72,7 @@ const initialVttState: VttState = {
     dimensions: { width: 2560, height: 1440 }
   },
   tokens: [
-      { id: 1, name: 'Bassura Ambasiore', imageUrl: '/characters/bassura-ambasiore.jpg', color: '#3b82f6', position: { x: 600, y: 800 }, shape: 'circle', type: 'hero' },
+      { id: 1, name: 'Bassura Ambasiore', imageUrl: bassuraImage?.imageUrl || '', color: '#3b82f6', position: { x: 600, y: 800 }, shape: 'circle', type: 'hero' },
       { id: 2, name: 'Goblin A', imageUrl: '/tokens/token-2.png', color: '#ef4444', position: { x: 800, y: 750 }, shape: 'square', type: 'enemy' },
       { id: 3, name: 'Orc Leader', imageUrl: '/tokens/token-3.png', color: '#eab308', position: { x: 700, y: 650 }, shape: 'square', type: 'enemy' },
   ],

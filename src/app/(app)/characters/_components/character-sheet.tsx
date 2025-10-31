@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useReducer, useMemo, useEffect } from 'react';
@@ -616,6 +617,10 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     const handleCracksToggle = (index: number) => {
         characterDispatch({ type: 'TOGGLE_CRACKS', payload: { index }});
     };
+
+    const handleAlignmentToggle = (axisName: string) => {
+        characterDispatch({ type: 'TOGGLE_ALIGNMENT', payload: { axisName } });
+    };
     
     const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
         focusDispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
@@ -722,13 +727,17 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         social: { hex: '#34a853', hsl: '142 71% 45%' },
     };
 
+    const pageStyle = {
+        '--page-accent-color': 'hsl(265, 90%, 70%)',
+    } as React.CSSProperties;
+
     const focusCardStyle = {
         '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`,
         boxShadow: `0 0 25px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.6), 0 0 10px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.5)`
     } as React.CSSProperties;
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-6" style={pageStyle}>
             
             <Collapsible open={isInfoPanelOpen} onOpenChange={setIsInfoPanelOpen}>
                 <CollapsibleTrigger className='w-full'>
@@ -737,6 +746,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 <CollapsibleContent>
                     <InfoPanel 
                         character={character}
+                        onAlignmentToggle={handleAlignmentToggle}
                     />
                 </CollapsibleContent>
             </Collapsible>
@@ -808,7 +818,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 </Card>
             </div>
 
-            <Card style={{ '--page-accent-color': focusColors[activeFocusTab].hex, ...focusCardStyle }}>
+            <Card style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`, ...focusCardStyle }}>
                 <CardHeader>
                     <CardTitle className='text-center'>
                         Focos de Desenvolvimento
@@ -854,5 +864,3 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         </div>
     );
 }
-
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -22,6 +23,7 @@ import { Icons } from '@/components/ui/icons';
 import { Book } from './book';
 import React from 'react';
 import navData from '@/lib/data/navigation.json';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const iconMap: { [key: string]: LucideIcon } = {
   LayoutDashboard,
@@ -36,13 +38,14 @@ const iconMap: { [key: string]: LucideIcon } = {
   ScrollText,
 };
 
+const bassuraImage = PlaceHolderImages.find(p => p.id === 'character-bassura');
 
 export const profileLink = {
   label: 'Perfil',
   href: '/profile',
   icon: () => (
     <Avatar className="h-8 w-8">
-      <AvatarImage src="/characters/bassura-ambasiore.jpg" alt="Bassura Ambasiore" data-ai-hint="female warrior panther" />
+      <AvatarImage src={bassuraImage?.imageUrl} alt="Bassura Ambasiore" data-ai-hint={bassuraImage?.imageHint} />
       <AvatarFallback>BA</AvatarFallback>
     </Avatar>
   ),

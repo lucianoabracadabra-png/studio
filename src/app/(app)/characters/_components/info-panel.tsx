@@ -1,19 +1,17 @@
+
 'use client';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import type { Character, LanguageFamily, AlignmentAxis } from '@/lib/character-data';
-import { languages, alignmentDescriptions } from '@/lib/character-data';
+import { languages, alignmentDescriptions, getNextAlignmentState } from '@/lib/character-data';
 import { LanguagesIcon, ChevronDown, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-
-type InfoPanelProps = {
-    character: Character;
-};
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const HybridPopover = ({ trigger, content, align, contentClass }: { trigger: React.ReactNode, content: React.ReactNode, align?: "center" | "start" | "end", contentClass?: string }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -84,7 +82,7 @@ export const LanguagePopover = ({ family, knownLanguages, align = "center" }: { 
     return <HybridPopover trigger={trigger} content={content} align={align} />;
 };
 
-const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
+const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: () => void }) => {
     const [pole1, pole2] = axis.poles;
     const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
 
@@ -120,13 +118,22 @@ const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
 
 export function InfoPanelSummary({ character, isOpen }: { character: Character, isOpen: boolean }) {
     const { info, name, concept } = character;
+    
+    const imageUrl = useMemo(() => {
+        if (info.imageUrl.startsWith('placeholder:')) {
+            const id = info.imageUrl.split(':')[1];
+            return PlaceHolderImages.find(p => p.id === id)?.imageUrl || '';
+        }
+        return info.imageUrl;
+    }, [info.imageUrl]);
+    
     return (
         <Card className='hover:bg-muted/50 transition-colors cursor-pointer'>
             <CardContent className='p-3'>
                 <div className='flex items-center gap-4'>
                     <div className='relative w-16 h-16 rounded-md overflow-hidden border-2 border-border shadow-md flex-shrink-0'>
                         <Image
-                            src={info.imageUrl}
+                            src={imageUrl}
                             alt={`Portrait of ${name}`}
                             fill
                             className='object-cover'
@@ -150,11 +157,19 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
     )
 }
 
-export function InfoPanel({ character }: InfoPanelProps) {
+export function InfoPanel({ character, onAlignmentToggle }: { character: Character, onAlignmentToggle: (axisName: string) => void }) {
     const { info, name } = character;
     const half = Math.ceil(languages.length / 2);
     const firstHalfLanguages = languages.slice(0, half);
     const secondHalfLanguages = languages.slice(half);
+
+    const imageUrl = useMemo(() => {
+        if (info.imageUrl.startsWith('placeholder:')) {
+            const id = info.imageUrl.split(':')[1];
+            return PlaceHolderImages.find(p => p.id === id)?.imageUrl || '';
+        }
+        return info.imageUrl;
+    }, [info.imageUrl]);
     
     return (
         <Card className='mt-2 animate-in fade-in'>
@@ -163,7 +178,7 @@ export function InfoPanel({ character }: InfoPanelProps) {
                     <div className='md:col-span-1'>
                         <div className='aspect-[3/4] relative rounded-lg overflow-hidden border-2 border-border shadow-lg'>
                              <Image 
-                                src={info.imageUrl}
+                                src={imageUrl}
                                 alt={`Portrait of ${name}`}
                                 fill
                                 className='object-cover'
@@ -233,7 +248,7 @@ export function InfoPanel({ character }: InfoPanelProps) {
                             <Label className='text-muted-foreground'>Alinhamento</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
                                 {character.spirit.alignment.map(axis => (
-                                    <AlignmentButton key={axis.name} axis={axis} />
+                                    <AlignmentButton key={axis.name} axis={axis} onToggle={() => onAlignmentToggle(axis.name)} />
                                 ))}
                             </div>
                         </div>
