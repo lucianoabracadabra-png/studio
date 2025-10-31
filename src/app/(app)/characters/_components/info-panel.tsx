@@ -15,7 +15,7 @@ type InfoPanelProps = {
     onAlignmentToggle: (axisName: string) => void;
 };
 
-export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
+export const LanguagePopover = ({ family, knownLanguages, align = "center" }: { family: LanguageFamily, knownLanguages: string[], align?: "center" | "start" | "end" }) => (
     <Popover>
         <PopoverTrigger asChild>
             <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-[var(--page-accent-color)]/20">
@@ -23,7 +23,7 @@ export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFa
                 <span>{family.root}</span>
             </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80">
+        <PopoverContent className="w-80" align={align}>
             <div className="grid gap-4">
                 <div className="space-y-2">
                     <h4 className="font-medium leading-none text-foreground">{family.root}</h4>
@@ -43,7 +43,7 @@ export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFa
     </Popover>
 );
 
-const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
+const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (axisName: string) => void; }) => {
     const [pole1, pole2] = axis.poles;
     const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
 
@@ -56,10 +56,13 @@ const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
                     <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className='max-w-[var(--radix-popover-trigger-width)]' side='bottom'>
+            <PopoverContent className='w-[var(--radix-popover-trigger-width)]' side='bottom'>
                 <div className='p-1'>
                     <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
                     <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
+                     <Button onClick={() => onToggle(axis.name)} size='sm' className='w-full mb-3'>
+                        Trocar para {axis.state === pole1 ? pole2 : pole1}
+                    </Button>
                     <Separator />
                     <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
                         <div>
@@ -112,6 +115,10 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
 
 export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
     const { info, name } = character;
+    const half = Math.ceil(languages.length / 2);
+    const firstHalfLanguages = languages.slice(0, half);
+    const secondHalfLanguages = languages.slice(half);
+    
     return (
         <Card className='mt-2 animate-in fade-in'>
             <CardContent className='p-4 md:p-6'>
@@ -171,10 +178,17 @@ export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
                         </div>
                          <div className='space-y-2 text-sm'>
                             <Label className='text-muted-foreground'>Idiomas</Label>
-                            <div className="grid grid-cols-2 gap-2 pt-1">
-                                {languages.map(family => (
-                                    <LanguagePopover key={family.root} family={family} knownLanguages={character.info.idiomas} />
-                                ))}
+                             <div className="grid grid-cols-2 gap-2 pt-1">
+                                <div className="flex flex-col gap-2">
+                                    {firstHalfLanguages.map(family => (
+                                        <LanguagePopover key={family.root} family={family} knownLanguages={character.info.idiomas} align="start" />
+                                    ))}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    {secondHalfLanguages.map(family => (
+                                        <LanguagePopover key={family.root} family={family} knownLanguages={character.info.idiomas} align="end" />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <Separator />
@@ -182,7 +196,7 @@ export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
                             <Label className='text-muted-foreground'>Alinhamento</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
                                 {character.spirit.alignment.map(axis => (
-                                    <AlignmentButton key={axis.name} axis={axis} />
+                                    <AlignmentButton key={axis.name} axis={axis} onToggle={onAlignmentToggle} />
                                 ))}
                             </div>
                         </div>
