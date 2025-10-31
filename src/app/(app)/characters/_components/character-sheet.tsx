@@ -714,7 +714,6 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     };
 
     const focusCardStyle = {
-        '--page-accent-color': focusColors[activeFocusTab].hex,
         '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`,
         boxShadow: `0 0 25px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.6), 0 0 10px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.5)`
     } as React.CSSProperties;
@@ -801,7 +800,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 </Card>
             </div>
 
-            <Card style={focusCardStyle}>
+            <Card style={{ '--page-accent-color': focusColors[activeFocusTab].hex, ...focusCardStyle }}>
                 <CardHeader>
                     <CardTitle className='text-center'>
                         Focos de Desenvolvimento
