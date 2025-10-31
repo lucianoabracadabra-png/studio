@@ -57,6 +57,7 @@
 @layer base {
   html {
     @apply bg-background;
+    zoom: 0.8;
   }
   html::-webkit-scrollbar {
     display: none;

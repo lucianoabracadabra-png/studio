@@ -43,7 +43,7 @@ export const LanguagePopover = ({ family, knownLanguages, align = "center" }: { 
     </Popover>
 );
 
-const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (axisName: string) => void; }) => {
+const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
     const [pole1, pole2] = axis.poles;
     const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
 
@@ -60,9 +60,6 @@ const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: (a
                 <div className='p-1'>
                     <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
                     <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
-                     <Button onClick={() => onToggle(axis.name)} size='sm' className='w-full mb-3'>
-                        Trocar para {axis.state === pole1 ? pole2 : pole1}
-                    </Button>
                     <Separator />
                     <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
                         <div>
@@ -196,7 +193,7 @@ export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
                             <Label className='text-muted-foreground'>Alinhamento</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
                                 {character.spirit.alignment.map(axis => (
-                                    <AlignmentButton key={axis.name} axis={axis} onToggle={onAlignmentToggle} />
+                                    <AlignmentButton key={axis.name} axis={axis} />
                                 ))}
                             </div>
                         </div>
