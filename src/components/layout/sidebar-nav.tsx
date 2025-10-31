@@ -58,7 +58,7 @@ export function SidebarNav({ activeColorHue }: { activeColorHue: string }) {
 
     const sidebarStyle = {
         borderColor: `hsl(${activeColorHue})`,
-        boxShadow: `-5px 0 25px -5px hsl(${activeColorHue} / 0.5)`,
+        boxShadow: `5px 0 25px -5px hsl(${activeColorHue} / 0.7)`,
         transition: 'box-shadow 0.5s ease, border-color 0.5s ease',
     } as React.CSSProperties;
 
