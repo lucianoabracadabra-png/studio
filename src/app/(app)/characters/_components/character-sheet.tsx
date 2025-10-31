@@ -61,9 +61,9 @@ const FocusHeaderCard = ({ title, icon, resourceName, current, max, spentPoints,
                     <div>
                         <p className='text-muted-foreground'>Gasto:</p>
                         <div className='flex items-center gap-2'>
-                             <Button variant='outline' size='icon' className='h-6 w-6 hover:text-white' style={{ '--button-hover-bg': 'var(--focus-color)' } as React.CSSProperties} onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
+                             <Button variant='outline' size='icon' className='h-6 w-6 hover:text-white bg-transparent border-transparent hover:bg-[var(--focus-color)]' onClick={handleDecrement}><Minus className='h-4 w-4'/></Button>
                              <span className='font-mono text-lg text-center w-6'>{spentPoints}</span>
-                             <Button variant='outline' size='icon' className='h-6 w-6 hover:text-white' style={{ '--button-hover-bg': 'var(--focus-color)' } as React.CSSProperties} onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
+                             <Button variant='outline' size='icon' className='h-6 w-6 hover:text-white bg-transparent border-transparent hover:bg-[var(--focus-color)]' onClick={handleIncrement}><Plus className='h-4 w-4'/></Button>
                         </div>
                     </div>
                 </div>

@@ -50,7 +50,7 @@ const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis; onToggle: (a
     return (
         <Popover>
             <PopoverTrigger asChild>
-                 <Button variant="outline" className='w-full justify-between h-auto py-2 px-3 text-sm hover:bg-[var(--page-accent-color)]/20' onClick={() => onToggle(axis.name)}>
+                 <Button variant="outline" className='w-full justify-between h-auto py-2 px-3 text-sm hover:bg-[var(--page-accent-color)]/20'>
                     <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
                     <span className='font-mono text-xs text-[var(--page-accent-color)]'>{axis.name}</span>
                     <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
