@@ -36,13 +36,13 @@ const HealthGrid = ({ states, onBoxClick }: { states: HealthState[], onBoxClick:
     };
 
     return (
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-4 gap-1.5">
             {states.map((state, i) => (
                 <button
                     key={i} 
                     onClick={() => onBoxClick(i)}
                     className={cn(
-                        "w-5 h-5 rounded-sm border cursor-pointer transition-transform hover:scale-110",
+                        "w-6 h-6 rounded-sm border cursor-pointer transition-transform hover:scale-110",
                         stateStyles[state]
                     )}
                     aria-label={`Health box ${i+1}, state: ${state}`}
@@ -52,7 +52,7 @@ const HealthGrid = ({ states, onBoxClick }: { states: HealthState[], onBoxClick:
     );
 };
 
-const BodyPartManager = ({ part, partId, onHealthChange }: { part: BodyPartHealth, partId: keyof Character['health']['bodyParts'], onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void }) => {
+const BodyPartManager = ({ part, partId, onHealthChange, icon: Icon }: { part: BodyPartHealth, partId: keyof Character['health']['bodyParts'], onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void, icon: React.ElementType }) => {
     
     const handleDamage = () => {
         const firstCleanIndex = part.states.findIndex(s => s === 'clean');
@@ -102,12 +102,13 @@ const BodyPartManager = ({ part, partId, onHealthChange }: { part: BodyPartHealt
 
     return (
         <div className='flex flex-col items-center gap-3'>
-            <HealthGrid states={part.states} onBoxClick={handleBoxClick} />
             <div className='flex gap-2 items-center'>
-                <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleHeal}><Minus className='h-4 w-4'/></Button>
-                <span className='font-semibold text-muted-foreground w-20 text-center'>{part.name}</span>
-                <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleDamage}><Plus className='h-4 w-4'/></Button>
+                <Button variant='outline' size='icon' className='h-8 w-8' onClick={handleHeal}><Minus className='h-5 w-5'/></Button>
+                 <Icon className="h-8 w-8 text-primary" />
+                <Button variant='outline' size='icon' className='h-8 w-8' onClick={handleDamage}><Plus className='h-5 w-5'/></Button>
             </div>
+            <HealthGrid states={part.states} onBoxClick={handleBoxClick} />
+            <span className='font-semibold text-muted-foreground w-20 text-center'>{part.name}</span>
         </div>
     )
 }
@@ -116,13 +117,6 @@ type HealthPanelProps = {
     healthData: Character['health'];
     onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void;
 };
-
-const BodyPartSection = ({ icon, children }: { icon: React.ElementType, children: React.ReactNode }) => (
-    <div className={cn('flex flex-col items-center gap-3')}>
-        {React.createElement(icon, { className: 'h-8 w-8 text-primary' })}
-        {children}
-    </div>
-);
 
 
 export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
@@ -134,30 +128,14 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
             <CardContent>
                 <div className="mx-auto grid max-w-3xl grid-rows-2 grid-cols-3 items-start justify-items-center gap-y-8 py-4">
                     {/* Row 1 */}
-                    <BodyPartSection icon={Hand}>
-                        <BodyPartManager part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" />
-                    </BodyPartSection>
-                    
-                    <BodyPartSection icon={PersonStanding}>
-                        <BodyPartManager part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" />
-                    </BodyPartSection>
-                    
-                    <BodyPartSection icon={Hand}>
-                        <BodyPartManager part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" />
-                    </BodyPartSection>
+                    <BodyPartManager part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" icon={Hand} />
+                    <BodyPartManager part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" icon={PersonStanding} />
+                    <BodyPartManager part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" icon={Hand} />
 
                     {/* Row 2 */}
-                    <BodyPartSection icon={Footprints}>
-                       <BodyPartManager part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" />
-                    </BodyPartSection>
-                    
-                    <BodyPartSection icon={PersonStanding}>
-                       <BodyPartManager part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" />
-                    </BodyPartSection>
-
-                    <BodyPartSection icon={Footprints}>
-                       <BodyPartManager part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" />
-                    </BodyPartSection>
+                    <BodyPartManager part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" icon={Footprints} />
+                    <BodyPartManager part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" icon={PersonStanding} />
+                    <BodyPartManager part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" icon={Footprints} />
                 </div>
             </CardContent>
         </Card>
