@@ -198,9 +198,7 @@ const SoulCracks = ({ value, onToggle }: { value: number; onToggle: (index: numb
                 return (
                     <button key={i} onClick={() => onToggle(i)}>
                         {isCracked ? (
-                                <Heart className={cn(
-                                "h-6 w-6 transition-all text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]"
-                            )} />
+                            <Heart className={cn("h-6 w-6 transition-all text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]")} />
                         ) : (
                             <HeartCrack className="h-6 w-6 text-muted-foreground/30" />
                         )}
