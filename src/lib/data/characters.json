@@ -1,0 +1,299 @@
+{
+  "characters": [
+    {
+      "id": "char-bassura-ambasiore",
+      "name": "Bassura Ambasiore",
+      "concept": "Domador de felinos de Kanta",
+      "info": {
+        "imageUrl": "placeholder:character-bassura",
+        "imageHint": "female warrior panther",
+        "altura": "185 cm",
+        "peso": "140 kg",
+        "cabelo": "Castanho grisalho, longo",
+        "olhos": "Âmbar",
+        "pele": "Persa, queimada de sol",
+        "idade": "29 anos",
+        "ideais": "Família, conhecimento e liberdade",
+        "origem": "Kanta",
+        "idiomas": ["Tantumá", "Tupaguá", "Uhzdin", "Manzhufā"],
+        "experiencia": {
+            "atual": 0,
+            "total": 369
+        }
+      },
+      "health": {
+          "bodyParts": {
+              "head": { "name": "Cabeça", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "torso": { "name": "Tronco", "states": ["simple", "simple", "lethal", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "leftArm": { "name": "Braço Esquerdo", "states": ["simple", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "rightArm": { "name": "Braço Direito", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "leftLeg": { "name": "Perna Esquerda", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "rightLeg": { "name": "Perna Direita", "states": ["simple", "lethal", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] }
+          }
+      },
+      "focus": {
+        "physical": {
+          "vigor": { "name": "Vigor" },
+          "attributes": [
+            { "name": "Força", "value": 3 },
+            { "name": "Destreza", "value": 4 },
+            { "name": "Agilidade", "value": 3 },
+            { "name": "Constituição", "value": 2 }
+          ],
+          "skills": [
+            { "name": "Armas Brancas", "value": 2 },
+            { "name": "Armas de Fogo", "value": 0 },
+            { "name": "Arquearia", "value": 3 },
+            { "name": "Arremesso", "value": 1 },
+            { "name": "Briga", "value": 3 },
+            { "name": "Combate", "value": 2 },
+            { "name": "Furtividade", "value": 5 },
+            { "name": "Prontidão", "value": 4 }
+          ],
+          "treinamentos": [
+              { "name": "Corrida", "value": 2 },
+              { "name": "Natação", "value": 1 },
+              { "name": "Escalada", "value": 3 },
+              { "name": "Pilotagem", "value": 0 }
+          ]
+        },
+        "mental": {
+          "focus": { "name": "Foco" },
+          "attributes": [
+            { "name": "Inteligência", "value": 4 },
+            { "name": "Percepção", "value": 5 },
+            { "name": "Raciocínio", "value": 3 },
+            { "name": "Sabedoria", "value": 3 }
+          ],
+          "skills": [
+            { "name": "Acadêmicos", "value": 2 },
+            { "name": "Armadilhas", "value": 3 },
+            { "name": "Intuição", "value": 4 },
+            { "name": "Investigação", "value": 4 },
+            { "name": "Medicina", "value": 2 },
+            { "name": "Ocultismo", "value": 1 },
+            { "name": "Segurança", "value": 2 },
+            { "name": "Sobrevivência", "value": 5 }
+          ],
+          "ciencias": [
+            { "name": "Biologia", "value": 3 },
+            { "name": "Física", "value": 0 },
+            { "name": "Química", "value": 1 },
+            { "name": "História", "value": 2 }
+          ]
+        },
+        "social": {
+          "grace": { "name": "Graça" },
+          "attributes": [
+            { "name": "Empatia", "value": 3 },
+            { "name": "Manipulação", "value": 2 },
+            { "name": "Expressão", "value": 3 },
+            { "name": "Resiliência", "value": 4 }
+          ],
+          "skills": [
+            { "name": "Barganha", "value": 2 },
+            { "name": "Doma", "value": 5 },
+            { "name": "Etiqueta", "value": 1 },
+            { "name": "Intimidação", "value": 2 },
+            { "name": "Lábia", "value": 1 },
+            { "name": "Liderança", "value": 2 },
+            { "name": "Montaria", "value": 3 },
+            { "name": "Sedução", "value": 0 }
+          ],
+          "artes": [
+              { "name": "Canto", "value": 1 },
+              { "name": "Dança", "value": 0 },
+              { "name": "Pintura", "value": 2 },
+              { "name": "Atuação", "value": 1 }
+          ]
+        }
+      },
+      "spirit": {
+        "personality": [
+            { "name": "Coragem", "value": 2, "icon": "Shield", "colorHsl": "180 80% 50%" },
+            { "name": "Convicção", "value": 4, "icon": "Anchor", "colorHsl": "170 90% 60%" },
+            { "name": "Serenidade", "value": 1, "icon": "Leaf", "colorHsl": "190 70% 55%" }
+        ],
+        "alignment": [
+          { "name": "Moral", "state": "Egoísmo", "poles": ["Egoísmo", "Altruísmo"] },
+          { "name": "Ética", "state": "Rebeldia", "poles": ["Rebeldia", "Ordem"] },
+          { "name": "Identidade", "state": "Individualismo", "poles": ["Comunitarismo", "Individualismo"] },
+          { "name": "Abordagem", "state": "Instinto", "poles": ["Lógica", "Instinto"] },
+          { "name": "Verdade", "state": "Pragmatismo", "poles": ["Idealismo", "Pragmatismo"] },
+          { "name": "Poder", "state": "Liberdade", "poles": ["Liberdade", "Contenção"] }
+        ]
+      },
+      "soul": {
+        "anima": {
+          "fluxo": {
+            "name": "Fluxo",
+            "value": 5,
+            "icon": "Wind",
+            "colorHsl": "320 90% 70%"
+          },
+          "patrono": {
+            "name": "Patrono",
+            "value": 10,
+            "icon": "Star",
+            "colorHsl": "300 90% 70%"
+          }
+        },
+        "domains": [
+          { "name": "Água", "level": 2, "color": "198 93% 60%", "icon": "Droplets" },
+          { "name": "Ar", "level": 3, "color": "45 93% 60%", "icon": "Wind" },
+          { "name": "Anima", "level": 5, "color": "265 90% 70%", "icon": "Star" },
+          { "name": "Fogo", "level": 1, "color": "0 90% 70%", "icon": "Flame" },
+          { "name": "Terra", "level": 4, "color": "120 60% 40%", "icon": "Mountain" }
+        ],
+        "cracks": 3
+      },
+      "equipment": [
+        { "itemId": "leather-jacket", "equipped": true },
+        { "itemId": "hunting-knife", "equipped": true },
+        { "itemId": "wolf-tooth-amulet", "equipped": true },
+        { "itemId": "rope-15m", "equipped": false },
+        { "itemId": "travel-ration", "equipped": false, "currentQuantity": 3 },
+        { "itemId": "waterskin", "equipped": false }
+      ]
+    },
+    {
+      "id": "char-kaelen-starlight",
+      "name": "Kaelen Starlight",
+      "concept": "Erudito Arcano de Silverwood",
+      "info": {
+        "imageUrl": "placeholder:character-dahl",
+        "imageHint": "male elf wizard",
+        "altura": "190 cm",
+        "peso": "80 kg",
+        "cabelo": "Prateado, curto",
+        "olhos": "Violeta",
+        "pele": "Pálida",
+        "idade": "120 anos",
+        "ideais": "Conhecimento, magia e ordem",
+        "origem": "Silverwood",
+        "idiomas": ["Eilen", "Tantumá"],
+        "experiencia": {
+            "atual": 150,
+            "total": 500
+        }
+      },
+      "health": {
+          "bodyParts": {
+              "head": { "name": "Cabeça", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "torso": { "name": "Tronco", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "leftArm": { "name": "Braço Esquerdo", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "rightArm": { "name": "Braço Direito", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "leftLeg": { "name": "Perna Esquerda", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] },
+              "rightLeg": { "name": "Perna Direita", "states": ["clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean", "clean"] }
+          }
+      },
+      "focus": {
+        "physical": {
+          "vigor": { "name": "Vigor" },
+          "attributes": [
+            { "name": "Força", "value": 1 },
+            { "name": "Destreza", "value": 2 },
+            { "name": "Agilidade", "value": 3 },
+            { "name": "Constituição", "value": 2 }
+          ],
+          "skills": [
+            { "name": "Armas Brancas", "value": 1 },
+            { "name": "Armas de Fogo", "value": 0 },
+            { "name": "Arquearia", "value": 1 },
+            { "name": "Arremesso", "value": 0 },
+            { "name": "Briga", "value": 0 },
+            { "name": "Combate", "value": 1 },
+            { "name": "Furtividade", "value": 2 },
+            { "name": "Prontidão", "value": 3 }
+          ],
+          "treinamentos": [
+              { "name": "Corrida", "value": 1 },
+              { "name": "Natação", "value": 1 },
+              { "name": "Escalada", "value": 1 },
+              { "name": "Pilotagem", "value": 0 }
+          ]
+        },
+        "mental": {
+          "focus": { "name": "Foco" },
+          "attributes": [
+            { "name": "Inteligência", "value": 5 },
+            { "name": "Percepção", "value": 4 },
+            { "name": "Raciocínio", "value": 4 },
+            { "name": "Sabedoria", "value": 3 }
+          ],
+          "skills": [
+            { "name": "Acadêmicos", "value": 5 },
+            { "name": "Armadilhas", "value": 1 },
+            { "name": "Intuição", "value": 3 },
+            { "name": "Investigação", "value": 4 },
+            { "name": "Medicina", "value": 3 },
+            { "name": "Ocultismo", "value": 5 },
+            { "name": "Segurança", "value": 2 },
+            { "name": "Sobrevivência", "value": 1 }
+          ],
+          "ciencias": [
+            { "name": "Biologia", "value": 2 },
+            { "name": "Física", "value": 4 },
+            { "name": "Química", "value": 3 },
+            { "name": "História", "value": 5 }
+          ]
+        },
+        "social": {
+          "grace": { "name": "Graça" },
+          "attributes": [
+            { "name": "Empatia", "value": 2 },
+            { "name": "Manipulação", "value": 3 },
+            { "name": "Expressão", "value": 3 },
+            { "name": "Resiliência", "value": 2 }
+          ],
+          "skills": [
+            { "name": "Barganha", "value": 2 },
+            { "name": "Doma", "value": 0 },
+            { "name": "Etiqueta", "value": 4 },
+            { "name": "Intimidação", "value": 1 },
+            { "name": "Lábia", "value": 3 },
+            { "name": "Liderança", "value": 2 },
+            { "name": "Montaria", "value": 0 },
+            { "name": "Sedução", "value": 1 }
+          ],
+          "artes": [
+              { "name": "Canto", "value": 2 },
+              { "name": "Dança", "value": 1 },
+              { "name": "Pintura", "value": 3 },
+              { "name": "Atuação", "value": 1 }
+          ]
+        }
+      },
+      "spirit": {
+        "personality": [
+            { "name": "Coragem", "value": 1, "icon": "Shield", "colorHsl": "180 80% 50%" },
+            { "name": "Convicção", "value": 3, "icon": "Anchor", "colorHsl": "170 90% 60%" },
+            { "name": "Serenidade", "value": 5, "icon": "Leaf", "colorHsl": "190 70% 55%" }
+        ],
+        "alignment": [
+          { "name": "Moral", "state": "Altruísmo", "poles": ["Egoísmo", "Altruísmo"] },
+          { "name": "Ética", "state": "Ordem", "poles": ["Rebeldia", "Ordem"] },
+          { "name": "Identidade", "state": "Individualismo", "poles": ["Comunitarismo", "Individualismo"] },
+          { "name": "Abordagem", "state": "Lógica", "poles": ["Lógica", "Instinto"] },
+          { "name": "Verdade", "state": "Idealismo", "poles": ["Idealismo", "Pragmatismo"] },
+          { "name": "Poder", "state": "Contenção", "poles": ["Liberdade", "Contenção"] }
+        ]
+      },
+      "soul": {
+        "anima": {
+          "fluxo": { "name": "Fluxo", "value": 8, "icon": "Wind", "colorHsl": "320 90% 70%" },
+          "patrono": { "name": "Patrono", "value": 12, "icon": "Star", "colorHsl": "300 90% 70%" }
+        },
+        "domains": [
+          { "name": "Água", "level": 4, "color": "198 93% 60%", "icon": "Droplets" },
+          { "name": "Ar", "level": 5, "color": "45 93% 60%", "icon": "Wind" },
+          { "name": "Anima", "level": 3, "color": "265 90% 70%", "icon": "Star" },
+          { "name": "Fogo", "level": 2, "color": "0 90% 70%", "icon": "Flame" },
+          { "name": "Terra", "level": 1, "color": "120 60% 40%", "icon": "Mountain" }
+        ],
+        "cracks": 0
+      },
+      "equipment": []
+    }
+  ]
+}
