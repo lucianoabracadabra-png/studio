@@ -25,6 +25,8 @@ import {
   useSensors,
   DragEndEvent,
   DragOverEvent,
+  TouchSensor,
+  MouseSensor,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -591,11 +593,19 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(initialCharacterData));
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 8,
-            },
-        })
+      useSensor(MouseSensor, {
+        // Require the mouse to move by 10 pixels before activating
+        activationConstraint: {
+          distance: 10,
+        },
+      }),
+      useSensor(TouchSensor, {
+        // Press and hold for 250ms for the drag to start
+        activationConstraint: {
+          delay: 250,
+          tolerance: 5,
+        },
+      })
     );
 
 
@@ -844,3 +854,5 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         </div>
     );
 }
+
+    
