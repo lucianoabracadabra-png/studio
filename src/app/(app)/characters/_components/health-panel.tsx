@@ -103,9 +103,9 @@ const BodyPartManager = ({ part, partId, onHealthChange, icon: Icon }: { part: B
     return (
         <div className='flex flex-col items-center gap-3'>
             <div className='flex gap-2 items-center'>
-                <Button variant='ghost' size='icon' className='h-8 w-8' onClick={handleHeal}><Minus className='h-5 w-5'/></Button>
+                <Button variant='ghost' size='icon' className='h-8 w-8' onClick={handleHeal} style={{ '--button-hover-bg': 'var(--page-accent-color)' } as React.CSSProperties}><Minus className='h-5 w-5'/></Button>
                  <Icon className="h-8 w-8 text-primary" />
-                <Button variant='ghost' size='icon' className='h-8 w-8' onClick={handleDamage}><Plus className='h-5 w-5'/></Button>
+                <Button variant='ghost' size='icon' className='h-8 w-8' onClick={handleDamage} style={{ '--button-hover-bg': 'var(--page-accent-color)' } as React.CSSProperties}><Plus className='h-5 w-5'/></Button>
             </div>
             <HealthGrid states={part.states} onBoxClick={handleBoxClick} />
             <span className='font-semibold text-muted-foreground w-20 text-center'>{part.name}</span>

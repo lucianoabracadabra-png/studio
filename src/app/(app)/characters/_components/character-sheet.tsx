@@ -374,7 +374,7 @@ const EquippedSection = ({ items }: { items: CharacterItem[] }) => {
             <CardHeader>
                 <div className='flex justify-between items-center'>
                     <CardTitle>Equipamento</CardTitle>
-                    <Button variant="outline" size="sm" onClick={handleOpenAll}>
+                    <Button variant="outline" size="sm" onClick={handleOpenAll} style={{ '--button-hover-bg': 'var(--page-accent-color)' } as React.CSSProperties}>
                         <BookOpen className="mr-2 h-4 w-4" />
                         Abrir Todos
                     </Button>
@@ -592,7 +592,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         hydrateCharacterItems(initialCharacterData.equipment)
     );
     
-    const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(character));
+    const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(initialCharacterData));
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -723,6 +723,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     const focusCardStyle = {
         '--page-accent-color': focusColors[activeFocusTab].hex,
         '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`,
+        boxShadow: `0 0 25px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.6), 0 0 10px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.5)`
     } as React.CSSProperties;
 
     return (
@@ -813,7 +814,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                         Focos de Desenvolvimento
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})` } as React.CSSProperties}>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
