@@ -820,7 +820,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
 
             <Card style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`, ...focusCardStyle }}>
                 <CardHeader>
-                    <CardTitle className='text-center'>
+                    <CardTitle className='text-center' style={{ color: focusColors[activeFocusTab].hex }}>
                         Focos de Desenvolvimento
                     </CardTitle>
                 </CardHeader>
@@ -864,3 +864,5 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         </div>
     );
 }
+
+    
