@@ -82,7 +82,7 @@ export const LanguagePopover = ({ family, knownLanguages, align = "center" }: { 
     return <HybridPopover trigger={trigger} content={content} align={align} />;
 };
 
-const AlignmentButton = ({ axis, onToggle }: { axis: AlignmentAxis, onToggle: () => void }) => {
+const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
     const [pole1, pole2] = axis.poles;
     const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
 
@@ -248,7 +248,7 @@ export function InfoPanel({ character, onAlignmentToggle }: { character: Charact
                             <Label className='text-muted-foreground'>Alinhamento</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
                                 {character.spirit.alignment.map(axis => (
-                                    <AlignmentButton key={axis.name} axis={axis} onToggle={() => onAlignmentToggle(axis.name)} />
+                                    <AlignmentButton key={axis.name} axis={axis} />
                                 ))}
                             </div>
                         </div>

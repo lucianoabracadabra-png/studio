@@ -827,13 +827,13 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 <CardContent style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})` } as React.CSSProperties}>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
+                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: focusColors.physical.hex } : {}}>
                                 <PersonStanding />Físico
                             </TabsTrigger>
-                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'mental' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
+                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'mental' ? { backgroundColor: focusColors.mental.hex } : {}}>
                                 <BrainCircuit />Mental
                             </TabsTrigger>
-                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'social' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
+                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'social' ? { backgroundColor: focusColors.social.hex } : {}}>
                                 <Users />Social
                             </TabsTrigger>
                         </TabsList>
