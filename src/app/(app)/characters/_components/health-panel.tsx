@@ -12,7 +12,7 @@ const healthStateOrder: HealthState[] = ['clean', 'simple', 'lethal', 'aggravate
 const getNextHealthState = (currentState: HealthState): HealthState => {
     const currentIndex = healthStateOrder.indexOf(currentState);
     if (currentIndex === -1 || currentIndex === healthStateOrder.length - 1) {
-        return currentState;
+        return healthStateOrder[0]; // Cycle back to clean from aggravated
     }
     return healthStateOrder[currentIndex + 1];
 };
