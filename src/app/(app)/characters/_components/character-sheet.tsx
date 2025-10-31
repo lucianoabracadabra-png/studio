@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState, useReducer, useMemo, useEffect } from 'react';
-import characterData from '@/lib/character-data.json';
-import { itemDatabase } from '@/lib/character-data';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
-import { getNextAlignmentState, iconMap } from '@/lib/character-data';
+import { getNextAlignmentState, iconMap, itemDatabase } from '@/lib/character-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf } from 'lucide-react';
@@ -731,6 +729,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
 
     const focusCardStyle = {
         '--page-accent-color': focusColors[activeFocusTab].hex,
+        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px ${focusColors[activeFocusTab].hex}`,
     } as React.CSSProperties;
 
     return (
@@ -815,13 +814,13 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 </Card>
             </div>
 
-            <Card style={focusCardStyle}>
+            <Card style={{ '--page-accent-color': focusColors[activeFocusTab].hex }}>
                 <CardHeader>
                     <CardTitle className='text-center'>
                         Focos de Desenvolvimento
                     </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent style={{'--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`} as React.CSSProperties}>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
