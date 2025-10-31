@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -12,69 +13,108 @@ import { Separator } from '@/components/ui/separator';
 
 type InfoPanelProps = {
     character: Character;
-    onAlignmentToggle: (axisName: string) => void;
 };
 
-export const LanguagePopover = ({ family, knownLanguages, align = "center" }: { family: LanguageFamily, knownLanguages: string[], align?: "center" | "start" | "end" }) => (
-    <Popover>
-        <PopoverTrigger asChild>
-            <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-[var(--page-accent-color)]/20">
-                <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
-                <span>{family.root}</span>
-            </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80" align={align}>
-            <div className="grid gap-4">
-                <div className="space-y-2">
-                    <h4 className="font-medium leading-none text-foreground">{family.root}</h4>
-                    <p className="text-sm text-muted-foreground">
-                        Dialetos conhecidos da família {family.root}.
-                    </p>
-                </div>
-                <div className='pl-4 border-l-2 border-border ml-1 space-y-1'>
-                    {family.dialects.map(dialect => (
-                        <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground font-semibold" : "text-muted-foreground/50")}>
-                            {dialect}
-                        </p>
-                    ))}
-                </div>
+const HybridPopover = ({ trigger, content, align, contentClass }: { trigger: React.ReactNode, content: React.ReactNode, align?: "center" | "start" | "end", contentClass?: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isPinned, setIsPinned] = useState(false);
+
+    const handleClick = () => {
+        if (!isPinned) {
+            setIsOpen(true);
+            setIsPinned(true);
+        } else {
+            setIsOpen(false);
+            setIsPinned(false);
+        }
+    };
+
+    const handleMouseEnter = () => {
+        if (!isPinned) {
+            setIsOpen(true);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (!isPinned) {
+            setIsOpen(false);
+        }
+    };
+
+    return (
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                {trigger}
+            </PopoverTrigger>
+            <PopoverContent align={align} className={cn("w-80", contentClass)}>
+                {content}
+            </PopoverContent>
+        </Popover>
+    );
+};
+
+
+export const LanguagePopover = ({ family, knownLanguages, align = "center" }: { family: LanguageFamily, knownLanguages: string[], align?: "center" | "start" | "end" }) => {
+    
+    const trigger = (
+        <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-[var(--page-accent-color)]/20">
+            <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
+            <span>{family.root}</span>
+        </Button>
+    );
+
+    const content = (
+         <div className="grid gap-4">
+            <div className="space-y-2">
+                <h4 className="font-medium leading-none text-foreground">{family.root}</h4>
+                <p className="text-sm text-muted-foreground">
+                    Dialetos conhecidos da família {family.root}.
+                </p>
             </div>
-        </PopoverContent>
-    </Popover>
-);
+            <div className='pl-4 border-l-2 border-border ml-1 space-y-1'>
+                {family.dialects.map(dialect => (
+                    <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground font-semibold" : "text-muted-foreground/50")}>
+                        {dialect}
+                    </p>
+                ))}
+            </div>
+        </div>
+    );
+
+    return <HybridPopover trigger={trigger} content={content} align={align} />;
+};
 
 const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {
     const [pole1, pole2] = axis.poles;
     const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
 
-    return (
-        <Popover>
-            <PopoverTrigger asChild>
-                 <Button variant="outline" className='w-full justify-between h-auto py-2 px-3 text-sm hover:bg-[var(--page-accent-color)]/20'>
-                    <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
-                    <span className='font-mono text-xs text-[var(--page-accent-color)]'>{axis.name}</span>
-                    <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-[var(--radix-popover-trigger-width)]' side='bottom'>
-                <div className='p-1'>
-                    <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
-                    <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
-                    <Separator />
-                    <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
-                        <div>
-                            <p className='font-semibold text-foreground'>{pole1}</p>
-                            <p className='text-muted-foreground'>{description.poles[pole1]}</p>
-                        </div>
-                        <div>
-                            <p className='font-semibold text-foreground'>{pole2}</p>
-                            <p className='text-muted-foreground'>{description.poles[pole2]}</p>
-                        </div>
-                    </div>
+    const trigger = (
+         <Button variant="outline" className='w-full justify-between h-auto py-2 px-3 text-sm hover:bg-[var(--page-accent-color)]/20'>
+            <span className={cn(axis.state === pole1 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole1}</span>
+            <span className='font-mono text-xs text-[var(--page-accent-color)]'>{axis.name}</span>
+            <span className={cn(axis.state === pole2 ? 'font-bold text-foreground' : 'text-muted-foreground')}>{pole2}</span>
+        </Button>
+    );
+
+    const content = (
+         <div className='p-1'>
+            <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
+            <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
+            <Separator />
+            <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
+                <div>
+                    <p className='font-semibold text-foreground'>{pole1}</p>
+                    <p className='text-muted-foreground'>{description.poles[pole1]}</p>
                 </div>
-            </PopoverContent>
-        </Popover>
-    )
+                <div>
+                    <p className='font-semibold text-foreground'>{pole2}</p>
+                    <p className='text-muted-foreground'>{description.poles[pole2]}</p>
+                </div>
+            </div>
+        </div>
+    );
+
+    return <HybridPopover trigger={trigger} content={content} contentClass='w-[var(--radix-popover-trigger-width)]' />;
 }
 
 
@@ -110,7 +150,7 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
     )
 }
 
-export function InfoPanel({ character, onAlignmentToggle }: InfoPanelProps) {
+export function InfoPanel({ character }: InfoPanelProps) {
     const { info, name } = character;
     const half = Math.ceil(languages.length / 2);
     const firstHalfLanguages = languages.slice(0, half);

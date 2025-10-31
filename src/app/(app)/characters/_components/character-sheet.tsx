@@ -598,10 +598,6 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         characterDispatch({ type: 'SET_HEALTH', payload: { partId, boxIndex, newState }});
     };
 
-    const handleAlignmentToggle = (axisName: string) => {
-        characterDispatch({ type: 'TOGGLE_ALIGNMENT', payload: { axisName }});
-    }
-
     const handleCracksToggle = (index: number) => {
         characterDispatch({ type: 'TOGGLE_CRACKS', payload: { index }});
     };
@@ -726,7 +722,6 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 <CollapsibleContent>
                     <InfoPanel 
                         character={character}
-                        onAlignmentToggle={handleAlignmentToggle}
                     />
                 </CollapsibleContent>
             </Collapsible>
