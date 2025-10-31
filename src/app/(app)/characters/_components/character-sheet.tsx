@@ -196,24 +196,22 @@ const SoulCracks = ({ value, onToggle }: { value: number; onToggle: (index: numb
             {[...Array(10)].map((_, i) => {
                 const isCracked = i < value;
                 return (
-                    <PopoverProvider key={i}>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <button onClick={() => onToggle(i)}>
-                                    {isCracked ? (
-                                         <Heart className={cn(
-                                            "h-6 w-6 transition-all text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]"
-                                        )} />
-                                    ) : (
-                                        <HeartCrack className="h-6 w-6 text-muted-foreground/30" />
-                                    )}
-                                </button>
-                            </PopoverTrigger>
-                            <PopoverContent>
-                                {isCracked ? <p>Rachadura #{i + 1} (Ativa)</p> : <p>Rachadura #{i + 1}</p>}
-                            </PopoverContent>
-                        </Popover>
-                    </PopoverProvider>
+                    <Popover key={i}>
+                        <PopoverTrigger asChild>
+                            <button onClick={() => onToggle(i)}>
+                                {isCracked ? (
+                                        <Heart className={cn(
+                                        "h-6 w-6 transition-all text-red-500 drop-shadow-[0_0_3px_hsl(var(--destructive))]"
+                                    )} />
+                                ) : (
+                                    <HeartCrack className="h-6 w-6 text-muted-foreground/30" />
+                                )}
+                            </button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                            {isCracked ? <p>Rachadura #{i + 1} (Ativa)</p> : <p>Rachadura #{i + 1}</p>}
+                        </PopoverContent>
+                    </Popover>
                 );
             })}
         </div>
