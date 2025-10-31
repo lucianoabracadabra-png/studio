@@ -4,7 +4,7 @@ import React, { useState, useReducer, useMemo, useEffect } from 'react';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap, itemDatabase } from '@/lib/character-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -196,9 +196,9 @@ const SoulCracks = ({ value, onToggle }: { value: number; onToggle: (index: numb
             {[...Array(10)].map((_, i) => {
                 const isCracked = i < value;
                 return (
-                    <TooltipProvider key={i}>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
+                    <PopoverProvider key={i}>
+                        <Popover>
+                            <PopoverTrigger asChild>
                                 <button onClick={() => onToggle(i)}>
                                     {isCracked ? (
                                          <Heart className={cn(
@@ -208,12 +208,12 @@ const SoulCracks = ({ value, onToggle }: { value: number; onToggle: (index: numb
                                         <HeartCrack className="h-6 w-6 text-muted-foreground/30" />
                                     )}
                                 </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
+                            </PopoverTrigger>
+                            <PopoverContent>
                                 {isCracked ? <p>Rachadura #{i + 1} (Ativa)</p> : <p>Rachadura #{i + 1}</p>}
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                            </PopoverContent>
+                        </Popover>
+                    </PopoverProvider>
                 );
             })}
         </div>
@@ -596,11 +596,6 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     
     const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(character));
 
-    useEffect(() => {
-        focusDispatch({ type: 'RESET_FOCUS', payload: initialFocusState(character) });
-    }, [character.focus]);
-
-
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -615,7 +610,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     };
 
     const handleAlignmentToggle = (axisName: string) => {
-        // Alignment is now read-only
+        characterDispatch({ type: 'TOGGLE_ALIGNMENT', payload: { axisName }});
     }
 
     const handleCracksToggle = (index: number) => {
@@ -729,7 +724,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
 
     const focusCardStyle = {
         '--page-accent-color': focusColors[activeFocusTab].hex,
-        boxShadow: `0 0 15px rgba(0,0,0,0.3), 0 0 10px ${focusColors[activeFocusTab].hex}`,
+        '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`,
     } as React.CSSProperties;
 
     return (
@@ -814,7 +809,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 </Card>
             </div>
 
-            <Card style={{ '--page-accent-color': focusColors[activeFocusTab].hex, '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})` } as React.CSSProperties}>
+            <Card style={focusCardStyle}>
                 <CardHeader>
                     <CardTitle className='text-center'>
                         Focos de Desenvolvimento
