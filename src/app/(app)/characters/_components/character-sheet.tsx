@@ -574,6 +574,11 @@ function focusReducer(state: ReturnType<typeof initialFocusState>, action: any) 
 
 
 export function CharacterSheet({ initialCharacterData }: { initialCharacterData: Character }) {
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [activeFocusTab, setActiveFocusTab] = useState('physical');
     
@@ -824,16 +829,18 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                     </Tabs>
                 </CardContent>
             </Card>
-             
-            <DndContext 
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-            >
-                <EquippedSection items={equippedItems} />
-                <InventorySection items={inventoryItems} />
-            </DndContext>
+            
+            {isClient && (
+                <DndContext 
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                >
+                    <EquippedSection items={equippedItems} />
+                    <InventorySection items={inventoryItems} />
+                </DndContext>
+            )}
         </div>
     );
 }
