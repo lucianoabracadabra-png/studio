@@ -17,31 +17,33 @@ type InfoPanelProps = {
 };
 
 export const LanguagePopover = ({ family, knownLanguages }: { family: LanguageFamily, knownLanguages: string[] }) => (
-    <Popover>
-        <PopoverTrigger asChild>
-             <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-[var(--page-accent-color)]/20">
-                <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
-                <span>{family.root}</span>
-            </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80">
-            <div className="grid gap-4">
-                <div className="space-y-2">
-                    <h4 className="font-medium leading-none text-foreground">{family.root}</h4>
-                    <p className="text-sm text-muted-foreground">
-                        Dialetos conhecidos da família {family.root}.
-                    </p>
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button variant="outline" className="text-foreground justify-start text-left h-auto hover:bg-[var(--page-accent-color)]/20">
+                    <LanguagesIcon className="mr-2 h-4 w-4 text-primary" />
+                    <span>{family.root}</span>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent className="w-80">
+                <div className="grid gap-4">
+                    <div className="space-y-2">
+                        <h4 className="font-medium leading-none text-foreground">{family.root}</h4>
+                        <p className="text-sm text-muted-foreground">
+                            Dialetos conhecidos da família {family.root}.
+                        </p>
+                    </div>
+                    <div className='pl-4 border-l-2 border-border ml-1 space-y-1'>
+                        {family.dialects.map(dialect => (
+                            <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground font-semibold" : "text-muted-foreground/50")}>
+                                {dialect}
+                            </p>
+                        ))}
+                    </div>
                 </div>
-                 <div className='pl-4 border-l-2 border-border ml-1 space-y-1'>
-                    {family.dialects.map(dialect => (
-                         <p key={dialect} className={cn(knownLanguages.includes(dialect) ? "text-foreground font-semibold" : "text-muted-foreground/50")}>
-                            {dialect}
-                         </p>
-                    ))}
-                </div>
-            </div>
-        </PopoverContent>
-    </Popover>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
 );
 
 const AlignmentButton = ({ axis }: { axis: AlignmentAxis }) => {

@@ -26,7 +26,7 @@ const getPreviousHealthState = (currentState: HealthState): HealthState => {
 };
 
 
-const HealthGrid = ({ states }: { states: HealthState[] }) => {
+const HealthGrid = ({ states, onBoxClick }: { states: HealthState[], onBoxClick: (index: number) => void }) => {
     
     const stateStyles = {
         clean: 'bg-green-500/80 border-green-500',
@@ -38,10 +38,11 @@ const HealthGrid = ({ states }: { states: HealthState[] }) => {
     return (
         <div className="grid grid-cols-5 gap-1.5">
             {states.map((state, i) => (
-                <div
+                <button
                     key={i} 
+                    onClick={() => onBoxClick(i)}
                     className={cn(
-                        "w-4 h-4 rounded-sm border",
+                        "w-5 h-5 rounded-sm border cursor-pointer transition-transform hover:scale-110",
                         stateStyles[state]
                     )}
                     aria-label={`Health box ${i+1}, state: ${state}`}
@@ -92,14 +93,20 @@ const BodyPartManager = ({ part, partId, onHealthChange }: { part: BodyPartHealt
             return;
         }
     };
+    
+    const handleBoxClick = (index: number) => {
+        const currentState = part.states[index];
+        const nextState = getNextHealthState(currentState);
+        onHealthChange(partId, index, nextState);
+    };
 
     return (
-        <div className='flex flex-col items-center gap-2'>
-            <HealthGrid states={part.states} />
+        <div className='flex flex-col items-center gap-3'>
+            <HealthGrid states={part.states} onBoxClick={handleBoxClick} />
             <div className='flex gap-2 items-center'>
-                <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleHeal}><Minus/></Button>
-                <span className='font-semibold text-muted-foreground w-16 text-center'>{part.name}</span>
-                <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleDamage}><Plus/></Button>
+                <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleHeal}><Minus className='h-4 w-4'/></Button>
+                <span className='font-semibold text-muted-foreground w-20 text-center'>{part.name}</span>
+                <Button variant='outline' size='icon' className='h-6 w-6' onClick={handleDamage}><Plus className='h-4 w-4'/></Button>
             </div>
         </div>
     )

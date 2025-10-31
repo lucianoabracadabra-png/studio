@@ -591,7 +591,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData);
     
     const [characterItems, setCharacterItems] = useState<CharacterItem[]>(() => 
-        hydrateCharacterItems(character.equipment)
+        hydrateCharacterItems(initialCharacterData.equipment)
     );
     
     const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(character));
@@ -814,13 +814,13 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
                 </Card>
             </div>
 
-            <Card style={{ '--page-accent-color': focusColors[activeFocusTab].hex }}>
+            <Card style={{ '--page-accent-color': focusColors[activeFocusTab].hex, '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})` } as React.CSSProperties}>
                 <CardHeader>
                     <CardTitle className='text-center'>
                         Focos de Desenvolvimento
                     </CardTitle>
                 </CardHeader>
-                <CardContent style={{'--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`} as React.CSSProperties}>
+                <CardContent>
                     <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: 'var(--page-accent-color)' } : {}}>
