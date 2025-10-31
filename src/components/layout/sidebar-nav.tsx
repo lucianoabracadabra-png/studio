@@ -42,8 +42,8 @@ export const profileLink = {
   href: '/profile',
   icon: () => (
     <Avatar className="h-8 w-8">
-      <AvatarImage src="https://picsum.photos/seed/avatar/40/40" alt="@shadcn" data-ai-hint="fantasy wizard" />
-      <AvatarFallback>GM</AvatarFallback>
+      <AvatarImage src="/characters/bassura-ambasiore.jpg" alt="Bassura Ambasiore" data-ai-hint="female warrior panther" />
+      <AvatarFallback>BA</AvatarFallback>
     </Avatar>
   ),
   colorHue: '0 0% 0%'
@@ -57,12 +57,13 @@ export function SidebarNav({ activeColorHue }: { activeColorHue: string }) {
     } as React.CSSProperties;
 
     const sidebarStyle = {
+        borderColor: `hsl(${activeColorHue})`,
         boxShadow: `5px 0 25px -5px hsl(${activeColorHue} / 0.5)`,
-        transition: 'box-shadow 0.5s ease',
+        transition: 'box-shadow 0.5s ease, border-color 0.5s ease',
     } as React.CSSProperties;
 
     return (
-      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4" style={{ ...sidebarStyle, perspective: '1000px' }}>
+      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 border-t-4" style={{ ...sidebarStyle, perspective: '1000px' }}>
           <Link href="/dashboard" className='px-4'>
             <Icons.logo className="h-8 w-8 transition-colors duration-500" style={logoStyle} />
           </Link>

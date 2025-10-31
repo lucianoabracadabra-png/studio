@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useReducer, useMemo, useEffect } from 'react';
-import initialCharacterData from '@/lib/character-data.json';
+import characterData from '@/lib/character-data.json';
 import { itemDatabase } from '@/lib/character-data';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap } from '@/lib/character-data';
@@ -104,14 +104,13 @@ const SkillItem = ({ name, value }: { name: string; value: number }) => {
 };
 
 
-const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl }: { 
+const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch }: { 
     focusData: any, 
     title: string, 
     pilar: 'fisico' | 'mental' | 'social', 
     icon: React.ElementType,
     state: any,
-    dispatch: React.Dispatch<any>,
-    colorHsl: string
+    dispatch: React.Dispatch<any>
 }) => {
 
     const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
@@ -123,13 +122,7 @@ const FocusBranch = ({ focusData, title, pilar, icon, state, dispatch, colorHsl 
     const currentResourceValue = maxResource - state.spentPoints;
 
     return (
-        <div 
-            className={`grid grid-cols-1 md:grid-cols-2 gap-4`} 
-            style={{ 
-                '--focus-color-hsl': colorHsl, 
-                '--focus-color': `hsl(${colorHsl})`,
-            } as React.CSSProperties}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-1">
                 <FocusHeaderCard 
                     title={title} 
@@ -593,11 +586,11 @@ function focusReducer(state: ReturnType<typeof initialFocusState>, action: any) 
 }
 
 
-export function CharacterSheet() {
+export function CharacterSheet({ initialCharacterData }: { initialCharacterData: Character }) {
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [activeFocusTab, setActiveFocusTab] = useState('physical');
     
-    const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData as unknown as Character);
+    const [character, characterDispatch] = useReducer(characterReducer, initialCharacterData);
     
     const [characterItems, setCharacterItems] = useState<CharacterItem[]>(() => 
         hydrateCharacterItems(character.equipment)
@@ -738,7 +731,6 @@ export function CharacterSheet() {
 
     const focusCardStyle = {
         '--page-accent-color': focusColors[activeFocusTab].hex,
-        boxShadow: `0 0 25px rgba(0,0,0,0.4), 0 0 15px ${focusColors[activeFocusTab].hex}99`,
     } as React.CSSProperties;
 
     return (
@@ -842,14 +834,14 @@ export function CharacterSheet() {
                                 <Users />Social
                             </TabsTrigger>
                         </TabsList>
-                        <TabsContent value="physical" className='pt-6' style={{ '--page-accent-color': focusColors.physical.hex }}>
-                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} colorHsl={focusColors.physical.hsl} />
+                        <TabsContent value="physical" className='pt-6' style={{ '--focus-color': focusColors.physical.hex, '--focus-color-hsl': focusColors.physical.hsl } as React.CSSProperties}>
+                            <FocusBranch focusData={character.focus.physical} title='Físico' pilar='fisico' icon={PersonStanding} state={focusState.fisico} dispatch={focusDispatch} />
                         </TabsContent>
-                        <TabsContent value="mental" className='pt-6' style={{ '--page-accent-color': focusColors.mental.hex }}>
-                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} colorHsl={focusColors.mental.hsl} />
+                        <TabsContent value="mental" className='pt-6' style={{ '--focus-color': focusColors.mental.hex, '--focus-color-hsl': focusColors.mental.hsl } as React.CSSProperties}>
+                            <FocusBranch focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} state={focusState.mental} dispatch={focusDispatch} />
                         </TabsContent>
-                        <TabsContent value="social" className='pt-6' style={{ '--page-accent-color': focusColors.social.hex }}>
-                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} colorHsl={focusColors.social.hsl} />
+                        <TabsContent value="social" className='pt-6' style={{ '--focus-color': focusColors.social.hex, '--focus-color-hsl': focusColors.social.hsl } as React.CSSProperties}>
+                            <FocusBranch focusData={character.focus.social} title='Social' pilar='social' icon={Users} state={focusState.social} dispatch={focusDispatch} />
                         </TabsContent>
                     </Tabs>
                 </CardContent>
