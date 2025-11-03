@@ -1,23 +1,20 @@
 'use client';
 
 import React, { useState, useReducer, useMemo, useEffect } from 'react';
-import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
-import { getNextAlignmentState, iconMap, itemDatabase } from '@/lib/character-data';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf, Wind, Star, Flame, Mountain, Droplets } from 'lucide-react';
+import type { Character, HealthState, LanguageFamily, AlignmentAxis } from '@/lib/character-data';
+import { languages as allLanguageFamilies } from '@/lib/character-data';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PersonStanding, BrainCircuit, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { HealthPanel } from '../../characters/_components/health-panel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
-import { Book } from '@/components/layout/book';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import type { LucideIcon } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // This is a simplified reducer for the editable sheet. 
 // A more robust solution might use a library like Immer.
@@ -26,6 +23,14 @@ const characterEditReducer = (state: Character, action: { type: string, payload:
 
     if (type.startsWith('info.')) {
         const field = type.split('.')[1];
+        if (field === 'idiomas') {
+             const { language, checked } = payload;
+             const currentLanguages = state.info.idiomas;
+             const newLanguages = checked
+                ? [...currentLanguages, language]
+                : currentLanguages.filter(lang => lang !== language);
+            return { ...state, info: { ...state.info, idiomas: newLanguages }};
+        }
         return { ...state, info: { ...state.info, [field]: payload }};
     }
     
@@ -33,17 +38,12 @@ const characterEditReducer = (state: Character, action: { type: string, payload:
         case 'name':
         case 'concept':
             return { ...state, [type]: payload };
-        case 'SET_HEALTH': {
-            const { partId, boxIndex, newState } = payload;
-            const newBodyParts = { ...state.health.bodyParts };
-            const newStates = [...newBodyParts[partId].states];
-            newStates[boxIndex] = newState;
-            newBodyParts[partId] = { ...newBodyParts[partId], states: newStates };
-
-            return {
-                ...state,
-                health: { ...state.health, bodyParts: newBodyParts }
-            };
+        case 'SET_ALIGNMENT': {
+            const { axisName, newState } = payload;
+            const newAlignment = state.spirit.alignment.map(axis => 
+                axis.name === axisName ? { ...axis, state: newState } : axis
+            );
+            return { ...state, spirit: { ...state.spirit, alignment: newAlignment } };
         }
         case 'SET_FOCUS_ATTRIBUTE': {
             const { pilar, name, value } = payload;
@@ -171,10 +171,6 @@ const FocusBranchEditor = ({ focusData, title, pilar, icon, dispatch }: {
     );
 }
 
-const iconMapEditable: { [key: string]: LucideIcon } = {
-    Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf, Heart,
-};
-
 export function EditableCharacterSheet({ character, setCharacter }: { character: Character, setCharacter: React.Dispatch<any> }) {
     const dispatch = (action: { type: string; payload: any; }) => setCharacter(characterEditReducer(character, action));
     const [activeFocusTab, setActiveFocusTab] = useState('physical');
@@ -245,6 +241,56 @@ export function EditableCharacterSheet({ character, setCharacter }: { character:
                                 <EditableField label="Origem" value={info.origem} onValueChange={v => dispatch({type: 'info.origem', payload: v})} />
                             </div>
                             <Separator />
+                            <div className='space-y-2'>
+                                <Label className='text-muted-foreground'>Idiomas</Label>
+                                <div className='space-y-3'>
+                                    {allLanguageFamilies.map(family => (
+                                        <div key={family.root}>
+                                            <p className='font-semibold text-sm mb-2'>{family.root}</p>
+                                            <div className='grid grid-cols-2 gap-2 pl-2'>
+                                                {family.dialects.map(dialect => (
+                                                    <div key={dialect} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`lang-${dialect}`}
+                                                            checked={character.info.idiomas.includes(dialect)}
+                                                            onCheckedChange={(checked) => {
+                                                                dispatch({ type: 'info.idiomas', payload: { language: dialect, checked: !!checked } });
+                                                            }}
+                                                        />
+                                                        <Label htmlFor={`lang-${dialect}`} className="text-sm font-normal text-foreground">
+                                                            {dialect}
+                                                        </Label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <Separator />
+                            <div className="space-y-2">
+                                <Label className='text-muted-foreground'>Alinhamento</Label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                                    {character.spirit.alignment.map(axis => (
+                                        <div key={axis.name} className='space-y-1'>
+                                            <Label className='text-muted-foreground text-xs'>{axis.name}</Label>
+                                            <Select
+                                                value={axis.state}
+                                                onValueChange={(newState) => dispatch({ type: 'SET_ALIGNMENT', payload: { axisName: axis.name, newState }})}
+                                            >
+                                                <SelectTrigger className="w-full text-xs">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value={axis.poles[0]}>{axis.poles[0]}</SelectItem>
+                                                    <SelectItem value={axis.poles[1]}>{axis.poles[1]}</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                             <Separator />
                              <div className='space-y-1 text-sm'>
                                 <Label className='text-muted-foreground'>Experiência</Label>
                                 <div className='flex items-center gap-2'>
@@ -257,8 +303,6 @@ export function EditableCharacterSheet({ character, setCharacter }: { character:
                     </div>
                 </CardContent>
             </Card>
-
-            <HealthPanel healthData={character.health} onHealthChange={handleHealthChange} />
             
              <Card style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`, ...focusCardStyle }}>
                 <CardHeader>
