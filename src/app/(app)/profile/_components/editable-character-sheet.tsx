@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // This is a simplified reducer for the editable sheet. 
 // A more robust solution might use a library like Immer.

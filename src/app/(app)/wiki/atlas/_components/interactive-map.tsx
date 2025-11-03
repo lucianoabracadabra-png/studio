@@ -171,8 +171,8 @@ export function InteractiveMap() {
         let lastPosX: number, lastPosY: number;
     
         const onPanMouseDown = (opt: FabricType.IEvent) => {
-            const e = opt.e;
             if (opt.target && 'poiData' in opt.target) return;
+            const e = opt.e as MouseEvent;
             isPanning = true;
             canvas.setCursor('grabbing');
             lastPosX = e.clientX;
@@ -181,7 +181,7 @@ export function InteractiveMap() {
 
         const onPanMouseMove = (opt: FabricType.IEvent) => {
             if (isPanning) {
-                const e = opt.e;
+                const e = opt.e as MouseEvent;
                 const vpt = canvas.viewportTransform;
                 if (vpt) {
                     vpt[4] += e.clientX - lastPosX;
@@ -247,14 +247,16 @@ export function InteractiveMap() {
 
         } else if (activeTool === 'draw') {
             canvas.isDrawingMode = true;
-            canvas.freeDrawingBrush.color = '#ef4444';
-            canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
+            if (canvas.freeDrawingBrush) {
+                canvas.freeDrawingBrush.color = '#ef4444';
+                canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
+            }
             
             canvas.defaultCursor = 'crosshair';
             canvas.selection = false;
             canvas.forEachObject(o => o.set('evented', false));
 
-            canvas.on('mouse:down', onDrawMouseDown);
+            canvas.on('mouse:down:before', onDrawMouseDown);
             canvas.on('mouse:move', onDrawMouseMove);
             canvas.on('mouse:up', onDrawMouseUp);
         }
