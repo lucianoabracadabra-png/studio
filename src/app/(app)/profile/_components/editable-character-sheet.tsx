@@ -14,7 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { LucideIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { cn } from '@/lib/utils';
 
 // This is a simplified reducer for the editable sheet. 
 // A more robust solution might use a library like Immer.
@@ -40,6 +41,7 @@ const characterEditReducer = (state: Character, action: { type: string, payload:
             return { ...state, [type]: payload };
         case 'SET_ALIGNMENT': {
             const { axisName, newState } = payload;
+            if (!newState) return state; // Do not update if the new state is empty (when un-toggling)
             const newAlignment = state.spirit.alignment.map(axis => 
                 axis.name === axisName ? { ...axis, state: newState } : axis
             );
@@ -184,10 +186,6 @@ export function EditableCharacterSheet({ character, setCharacter }: { character:
         }
         return info.imageUrl;
     }, [info.imageUrl]);
-    
-    const handleHealthChange = (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => {
-        dispatch({ type: 'SET_HEALTH', payload: { partId, boxIndex, newState }});
-    };
 
     const focusColors: Record<string, { hex: string; hsl: string }> = {
         physical: { hex: '#ea4335', hsl: '5 81% 56%' },
@@ -274,18 +272,19 @@ export function EditableCharacterSheet({ character, setCharacter }: { character:
                                     {character.spirit.alignment.map(axis => (
                                         <div key={axis.name} className='space-y-1'>
                                             <Label className='text-muted-foreground text-xs'>{axis.name}</Label>
-                                            <Select
+                                            <ToggleGroup 
+                                                type="single" 
                                                 value={axis.state}
                                                 onValueChange={(newState) => dispatch({ type: 'SET_ALIGNMENT', payload: { axisName: axis.name, newState }})}
+                                                className='grid grid-cols-2 gap-1 w-full border rounded-md p-1 h-auto'
                                             >
-                                                <SelectTrigger className="w-full text-xs">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value={axis.poles[0]}>{axis.poles[0]}</SelectItem>
-                                                    <SelectItem value={axis.poles[1]}>{axis.poles[1]}</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                                <ToggleGroupItem value={axis.poles[0]} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
+                                                    {axis.poles[0]}
+                                                </ToggleGroupItem>
+                                                 <ToggleGroupItem value={axis.poles[1]} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
+                                                    {axis.poles[1]}
+                                                </ToggleGroupItem>
+                                            </ToggleGroup>
                                         </div>
                                     ))}
                                 </div>
