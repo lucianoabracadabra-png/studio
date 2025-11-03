@@ -14,7 +14,7 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map');
 
 type AtlasTool = 'pan' | 'draw';
 
-const PIXELS_PER_KM = 2;
+const PIXELS_PER_KM = 2; // Ajustado para 1 pixel = 2 km
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void; distance: number }) => {
     return (
@@ -112,34 +112,34 @@ export function InteractiveMap() {
             }
 
             try {
-                const img = await fabric.Image.fromURL(mapImage.imageUrl, undefined, { crossOrigin: 'anonymous' });
-                
-                if (img) {
-                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-                        originX: 'left',
-                        originY: 'top',
-                    });
-                    centerAndReset();
-
-                    pointsOfInterest.forEach(poi => {
-                        const pin = new fabric.Circle({
-                            radius: 10,
-                            fill: 'hsl(var(--primary))',
-                            stroke: 'white',
-                            strokeWidth: 2,
-                            left: (img.width || 2000) * (poi.position.x / 100),
-                            top: (img.height || 1500) * (poi.position.y / 100),
-                            originX: 'center',
-                            originY: 'center',
-                            hasControls: false,
-                            hasBorders: false,
-                            selectable: false,
-                            // @ts-ignore - Custom property to identify POIs
-                            poiData: poi,
+                fabric.Image.fromURL(mapImage.imageUrl, (img) => {
+                     if (img) {
+                        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                            originX: 'left',
+                            originY: 'top',
                         });
-                        canvas?.add(pin);
-                    });
-                }
+                        centerAndReset();
+
+                        pointsOfInterest.forEach(poi => {
+                            const pin = new fabric.Circle({
+                                radius: 10,
+                                fill: 'hsl(var(--primary))',
+                                stroke: 'white',
+                                strokeWidth: 2,
+                                left: (img.width || 2000) * (poi.position.x / 100),
+                                top: (img.height || 1500) * (poi.position.y / 100),
+                                originX: 'center',
+                                originY: 'center',
+                                hasControls: false,
+                                hasBorders: false,
+                                selectable: false,
+                                // @ts-ignore - Custom property to identify POIs
+                                poiData: poi,
+                            });
+                            canvas?.add(pin);
+                        });
+                    }
+                }, { crossOrigin: 'anonymous' });
 
             } catch (error) {
                 console.error("Error loading map image:", error);
@@ -327,5 +327,3 @@ export function InteractiveMap() {
         </div>
     );
 }
-
-    
