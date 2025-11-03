@@ -14,7 +14,7 @@ const mapImage = PlaceHolderImages.find(p => p.id === 'world-map');
 
 type AtlasTool = 'pan' | 'draw';
 
-const PIXELS_PER_KM = 2; // Ajustado para 1 pixel = 2 km
+const PIXELS_PER_KM = 2;
 
 const DrawingToolbar = ({ onClear, distance }: { onClear: () => void; distance: number }) => {
     return (
@@ -52,6 +52,7 @@ export function InteractiveMap() {
     const isDrawingRef = useRef(false);
     const totalDistanceRef = useRef(0);
     const lastPointRef = useRef<{ x: number, y: number } | null>(null);
+    const predefinedRoutesRef = useRef<FabricType.Polyline[]>([]);
 
     const clearDrawing = () => {
         const canvas = fabricRef.current;
@@ -59,7 +60,7 @@ export function InteractiveMap() {
              const objects = canvas.getObjects();
             for (let i = objects.length - 1; i >= 0; i--) {
                 const obj = objects[i];
-                if (obj.isType('path')) {
+                if (obj.name === 'drawn-route-segment') {
                     canvas.remove(obj);
                 }
             }
@@ -89,6 +90,30 @@ export function InteractiveMap() {
         }
         canvas.absolutePan({ x: 0, y: 0 });
     };
+    
+    const drawPredefinedRoutes = (canvas: FabricType.Canvas) => {
+        const { predefinedRoutes } = require('@/lib/wiki-data');
+        
+        predefinedRoutesRef.current.forEach(route => canvas.remove(route));
+        predefinedRoutesRef.current = [];
+
+        predefinedRoutes.forEach((routeData: any) => {
+            const polyline = new fabricRef.current!.fabric.Polyline(routeData.points, {
+                stroke: routeData.color,
+                strokeWidth: routeData.width,
+                fill: undefined,
+                selectable: false,
+                evented: true,
+                objectCaching: false,
+                name: 'predefined-route',
+                // @ts-ignore
+                routeInfo: routeData,
+            });
+            canvas.add(polyline);
+            predefinedRoutesRef.current.push(polyline);
+        });
+        canvas.sendToBack(...predefinedRoutesRef.current);
+    }
 
     useEffect(() => {
         let resizeObserver: ResizeObserver | null = null;
@@ -119,6 +144,7 @@ export function InteractiveMap() {
                             originY: 'top',
                         });
                         centerAndReset();
+                        drawPredefinedRoutes(canvas);
 
                         pointsOfInterest.forEach(poi => {
                             const pin = new fabric.Circle({
@@ -133,6 +159,7 @@ export function InteractiveMap() {
                                 hasControls: false,
                                 hasBorders: false,
                                 selectable: false,
+                                name: 'poi-pin',
                                 // @ts-ignore - Custom property to identify POIs
                                 poiData: poi,
                             });
@@ -171,7 +198,7 @@ export function InteractiveMap() {
         let lastPosX: number, lastPosY: number;
     
         const onPanMouseDown = (opt: FabricType.IEvent) => {
-            if (opt.target && 'poiData' in opt.target) return;
+             if (opt.target && (opt.target.name === 'poi-pin' || opt.target.name === 'predefined-route')) return;
             const e = opt.e as MouseEvent;
             isPanning = true;
             canvas.setCursor('grabbing');
@@ -199,37 +226,75 @@ export function InteractiveMap() {
         };
 
         const onPinClick = (opt: FabricType.IEvent) => {
-            if (opt.target && 'poiData' in opt.target) {
+            if (opt.target && opt.target.name === 'poi-pin') {
+                 // @ts-ignore
                 setActivePoi(opt.target.poiData as (typeof pointsOfInterest)[0]);
             } else if (!isDrawingRef.current) {
                 setActivePoi(null);
             }
         };
+        
+        const onRouteHover = (opt: FabricType.IEvent) => {
+            const target = opt.target;
+            if (target && target.name === 'predefined-route') {
+                 // @ts-ignore
+                const routeInfo = target.routeInfo;
+                if (routeInfo) {
+                    const pointer = canvas.getPointer(opt.e);
+                    // showTooltip(`Rota: ${routeInfo.name}. ${routeInfo.tooltip}`, pointer.x, pointer.y);
+                }
+            } else {
+                // hideTooltip();
+            }
+        };
+
 
         const onDrawMouseDown = (opt: FabricType.IEvent<MouseEvent>) => {
             isDrawingRef.current = true;
             const pointer = canvas.getPointer(opt.e);
             lastPointRef.current = { x: pointer.x, y: pointer.y };
             setActivePoi(null);
+            
+            const path = new fabricRef.current!.fabric.Path(`M ${pointer.x} ${pointer.y}`, {
+                stroke: '#ef4444',
+                strokeWidth: 5 / canvas.getZoom(),
+                strokeDashArray: [10, 10],
+                fill: undefined,
+                selectable: false,
+                evented: false,
+                objectCaching: false,
+                name: 'drawn-route-segment',
+            });
+            canvas.add(path);
+             // @ts-ignore
+            canvas.currentPath = path;
         };
 
         const onDrawMouseMove = (opt: FabricType.IEvent<MouseEvent>) => {
             if (!isDrawingRef.current || !lastPointRef.current) return;
             const pointer = canvas.getPointer(opt.e);
-            
-            const dx = pointer.x - lastPointRef.current.x;
-            const dy = pointer.y - lastPointRef.current.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
+             // @ts-ignore
+            const currentPath = canvas.currentPath as FabricType.Path;
+            if (currentPath) {
+                const newPathPart = ` L ${pointer.x} ${pointer.y}`;
+                // @ts-ignore
+                currentPath.path.push(newPathPart.split(' '));
+                 const dx = pointer.x - lastPointRef.current.x;
+                const dy = pointer.y - lastPointRef.current.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-            totalDistanceRef.current += distance / canvas.getZoom() / PIXELS_PER_KM;
-            setDisplayDistance(totalDistanceRef.current);
-
+                totalDistanceRef.current += distance / canvas.getZoom() / PIXELS_PER_KM;
+                setDisplayDistance(totalDistanceRef.current);
+            }
             lastPointRef.current = { x: pointer.x, y: pointer.y };
+            canvas.renderAll();
         };
         
         const onDrawMouseUp = () => {
             isDrawingRef.current = false;
             lastPointRef.current = null;
+             // @ts-ignore
+            canvas.currentPath = null;
         };
 
         canvas.off();
@@ -243,13 +308,14 @@ export function InteractiveMap() {
             canvas.on('mouse:down', onPanMouseDown);
             canvas.on('mouse:move', onPanMouseMove);
             canvas.on('mouse:up', onPanMouseUp);
-            canvas.on('mouse:down', onPinClick);
+            canvas.on('mouse:down:before', onPinClick);
 
         } else if (activeTool === 'draw') {
             canvas.isDrawingMode = true;
             if (canvas.freeDrawingBrush) {
                 canvas.freeDrawingBrush.color = '#ef4444';
                 canvas.freeDrawingBrush.width = 5 / canvas.getZoom();
+                canvas.freeDrawingBrush.strokeDashArray = [10, 10];
             }
             
             canvas.defaultCursor = 'crosshair';
