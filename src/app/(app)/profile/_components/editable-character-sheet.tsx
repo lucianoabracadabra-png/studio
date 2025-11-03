@@ -2,9 +2,9 @@
 
 import React, { useState, useReducer, useMemo, useEffect } from 'react';
 import type { Character, HealthState, LanguageFamily, AlignmentAxis } from '@/lib/character-data';
-import { languages as allLanguageFamilies } from '@/lib/character-data';
+import { languages as allLanguageFamilies, alignmentDescriptions } from '@/lib/character-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PersonStanding, BrainCircuit, Users } from 'lucide-react';
+import { PersonStanding, BrainCircuit, Users, Info } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // This is a simplified reducer for the editable sheet. 
@@ -32,6 +33,9 @@ const characterEditReducer = (state: Character, action: { type: string, payload:
                 ? [...currentLanguages, language]
                 : currentLanguages.filter(lang => lang !== language);
             return { ...state, info: { ...state.info, idiomas: newLanguages }};
+        }
+        if (field === 'experiencia') {
+            return { ...state, info: { ...state.info, experiencia: payload }};
         }
         return { ...state, info: { ...state.info, [field]: payload }};
     }
@@ -87,6 +91,89 @@ const EditableField = ({ label, value, onValueChange, placeholder, isTextarea = 
         )}
     </div>
 );
+
+const HybridPopover = ({ trigger, content, align, contentClass }: { trigger: React.ReactNode, content: React.ReactNode, align?: "center" | "start" | "end", contentClass?: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isPinned, setIsPinned] = useState(false);
+
+    const handleClick = () => {
+        if (!isPinned) {
+            setIsOpen(true);
+            setIsPinned(true);
+        } else {
+            setIsOpen(false);
+            setIsPinned(false);
+        }
+    };
+
+    const handleMouseEnter = () => {
+        if (!isPinned) {
+            setIsOpen(true);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (!isPinned) {
+            setIsOpen(false);
+        }
+    };
+
+    return (
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                {trigger}
+            </PopoverTrigger>
+            <PopoverContent align={align} className={cn("w-80", contentClass)}>
+                {content}
+            </PopoverContent>
+        </Popover>
+    );
+};
+
+const EditableAlignmentButton = ({ axis, onValueChange }: { axis: AlignmentAxis, onValueChange: (newState: string) => void }) => {
+    const [pole1, pole2] = axis.poles;
+    const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
+
+    const content = (
+         <div className='p-1'>
+            <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
+            <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
+            <Separator />
+            <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
+                <div>
+                    <p className='font-semibold text-foreground'>{pole1}</p>
+                    <p className='text-muted-foreground'>{description.poles[pole1]}</p>
+                </div>
+                <div>
+                    <p className='font-semibold text-foreground'>{pole2}</p>
+                    <p className='text-muted-foreground'>{description.poles[pole2]}</p>
+                </div>
+            </div>
+        </div>
+    );
+    
+    const trigger = (
+        <div className='space-y-1'>
+            <Label className='text-muted-foreground text-xs'>{axis.name}</Label>
+            <ToggleGroup 
+                type="single" 
+                value={axis.state}
+                onValueChange={onValueChange}
+                className='grid grid-cols-2 gap-1 w-full border rounded-md p-1 h-auto'
+            >
+                <ToggleGroupItem value={pole1} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
+                    {pole1}
+                </ToggleGroupItem>
+                <ToggleGroupItem value={pole2} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
+                    {pole2}
+                </ToggleGroupItem>
+            </ToggleGroup>
+        </div>
+    );
+
+    return <HybridPopover trigger={trigger} content={content} contentClass='w-[var(--radix-popover-trigger-width)]' />;
+}
+
 
 const FocusBranchEditor = ({ focusData, title, pilar, icon, dispatch }: { 
     focusData: any, 
@@ -271,22 +358,11 @@ export function EditableCharacterSheet({ character, setCharacter }: { character:
                                 <Label className='text-muted-foreground'>Alinhamento</Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                                     {character.spirit.alignment.map(axis => (
-                                        <div key={axis.name} className='space-y-1'>
-                                            <Label className='text-muted-foreground text-xs'>{axis.name}</Label>
-                                            <ToggleGroup 
-                                                type="single" 
-                                                value={axis.state}
-                                                onValueChange={(newState) => dispatch({ type: 'SET_ALIGNMENT', payload: { axisName: axis.name, newState }})}
-                                                className='grid grid-cols-2 gap-1 w-full border rounded-md p-1 h-auto'
-                                            >
-                                                <ToggleGroupItem value={axis.poles[0]} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
-                                                    {axis.poles[0]}
-                                                </ToggleGroupItem>
-                                                 <ToggleGroupItem value={axis.poles[1]} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
-                                                    {axis.poles[1]}
-                                                </ToggleGroupItem>
-                                            </ToggleGroup>
-                                        </div>
+                                        <EditableAlignmentButton 
+                                            key={axis.name} 
+                                            axis={axis} 
+                                            onValueChange={(newState) => dispatch({ type: 'SET_ALIGNMENT', payload: { axisName: axis.name, newState }})}
+                                        />
                                     ))}
                                 </div>
                             </div>
