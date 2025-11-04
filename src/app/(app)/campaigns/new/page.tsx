@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -13,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { WandSparkles, Loader2, Upload } from 'lucide-react';
 import { processSessionAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
+import { Label } from '@/components/ui/label';
 
 const createCampaignSchema = z.object({
   transcript: z.string().min(100, { message: "A transcrição deve ter pelo menos 100 caracteres." }),
