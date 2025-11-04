@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const GenerateItemLootInputSchema = z.object({
@@ -34,6 +35,7 @@ const prompt = ai.definePrompt({
     name: 'generateItemLootPrompt',
     input: { schema: GenerateItemLootInputSchema },
     output: { schema: GenerateItemLootOutputSchema },
+    model: googleAI.model('gemini-1.5-flash'),
     prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
 
     Generate a magical item based on the following criteria:

@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const GenerateNpcInputSchema = z.object({
@@ -34,6 +35,7 @@ const prompt = ai.definePrompt({
   name: 'generateNpcPrompt',
   input: { schema: GenerateNpcInputSchema },
   output: { schema: GenerateNpcOutputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are a creative storyteller and world-builder for a tabletop RPG.
 
   Generate a unique Non-Player Character (NPC) based on the following criteria:

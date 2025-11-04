@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const RolagemRequeridaSchema = z.object({
@@ -83,6 +84,7 @@ const prompt = ai.definePrompt({
   name: 'narrativeGeneratorPrompt',
   input: { schema: GenerateNarrativeInputSchema },
   output: { schema: GenerateNarrativeOutputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `Você é um Mestre de Jogo de um RPG de fantasia medieval sombria (século 15).
     REGRAS CRÍTICAS:
     1.  **SISTEMA DE ROLAGEM:** A rolagem usa um sistema de sucessos. O jogador rola d10s (igual à 'pericia'). Cada dado soma o 'atributo'. Um '1' no d10 é uma falha crítica (-1 sucesso). Um '10' é um crítico (valor 15) e adiciona outra rolagem de d10 para este teste. Cada resultado >= 'dificuldade' é 1 sucesso.

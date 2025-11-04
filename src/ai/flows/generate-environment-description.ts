@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const GenerateEnvironmentDescriptionInputSchema = z.object({
@@ -30,6 +31,7 @@ const prompt = ai.definePrompt({
   name: 'generateEnvironmentDescriptionPrompt',
   input: { schema: GenerateEnvironmentDescriptionInputSchema },
   output: { schema: GenerateEnvironmentDescriptionOutputSchema },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are a master storyteller, painting vivid pictures with words for a tabletop RPG.
 
   Generate a rich, atmospheric description for the following environment:
