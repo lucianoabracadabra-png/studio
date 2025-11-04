@@ -10,7 +10,6 @@ export default {
   theme: {
     fontFamily: {
       sans: ['"Roboto"', 'sans-serif'],
-      serif: ['"Metamorphous"', 'serif'],
       headline: ['"Metamorphous"', 'serif'],
       body: ['"Roboto"', 'sans-serif'],
       mono: ['"Roboto Mono"', 'monospace'],
