@@ -8,12 +8,14 @@ export default {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    fontFamily: {
+      sans: ['"Roboto"', 'sans-serif'],
+      serif: ['"Metamorphous"', 'serif'],
+      headline: ['"Metamorphous"', 'serif'],
+      body: ['"Roboto"', 'sans-serif'],
+      mono: ['"Roboto Mono"', 'monospace'],
+    },
     extend: {
-      fontFamily: {
-        body: ['"Roboto"', 'sans-serif'],
-        headline: ['"Metamorphous"', 'serif'],
-        mono: ['"Roboto Mono"', 'monospace'],
-      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
