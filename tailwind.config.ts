@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Roboto"', 'sans-serif'],
-        headline: ['"Metamorphous"', 'serif'],
+        body: ['"Lora"', 'serif'],
+        headline: ['"Cinzel"', 'serif'],
         mono: ['"Roboto Mono"', 'monospace'],
       },
       colors: {

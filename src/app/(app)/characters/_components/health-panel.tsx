@@ -126,15 +126,17 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
                 <CardTitle>Vitalidade</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="mx-auto grid max-w-3xl grid-rows-2 grid-cols-3 items-start justify-items-center gap-y-8 py-4">
-                    {/* Row 1 */}
+                <div className="mx-auto grid max-w-2xl grid-cols-2 items-start justify-items-center gap-y-8 py-4">
+                    {/* Upper Body */}
                     <BodyPartManager part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" icon={Hand} />
-                    <BodyPartManager part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" icon={PersonStanding} />
                     <BodyPartManager part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" icon={Hand} />
-
-                    {/* Row 2 */}
-                    <BodyPartManager part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" icon={Footprints} />
+                    
+                    {/* Core Body */}
+                    <BodyPartManager part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" icon={PersonStanding} />
                     <BodyPartManager part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" icon={PersonStanding} />
+
+                    {/* Lower Body */}
+                    <BodyPartManager part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" icon={Footprints} />
                     <BodyPartManager part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" icon={Footprints} />
                 </div>
             </CardContent>

@@ -20,13 +20,13 @@ export default function DashboardPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Painel de Controle</h1>
-        <Button>
+        <Button className="mt-4 sm:mt-0">
           <PlusCircle className="mr-2 h-4 w-4" />
           Criar Campanha
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {campaigns.map((campaign) => {
           const image = PlaceHolderImages.find(p => p.id === campaign.imageId);
           return (
