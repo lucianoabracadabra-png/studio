@@ -55,6 +55,7 @@ const ProcessSessionInputSchema = z.object({
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
+// Final output of the orchestrator
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -97,25 +98,24 @@ const SynthesisOutputSchema = ProcessSessionOutputSchema.omit({ coverImageUrl: t
 // #################################################################
 
 /**
- * Splits text into a specified number of chunks, respecting word boundaries.
+ * Splits text into chunks, respecting word boundaries.
  */
-function splitTranscriptIntoChunks(transcript: string, numChunks: number): string[] {
+function splitTranscriptIntoChunks(transcript: string, chunkSize: number = 20000): string[] {
     const chunks: string[] = [];
-    const totalLength = transcript.length;
-    const idealChunkSize = Math.ceil(totalLength / numChunks);
+    if (!transcript) return chunks;
 
     let currentStart = 0;
-    for (let i = 0; i < numChunks; i++) {
-        if (currentStart >= totalLength) break;
-        
-        let currentEnd = Math.min(currentStart + idealChunkSize, totalLength);
+    while (currentStart < transcript.length) {
+        let currentEnd = currentStart + chunkSize;
+        if (currentEnd >= transcript.length) {
+            chunks.push(transcript.substring(currentStart));
+            break;
+        }
 
-        // If not the last chunk, find the next sentence-ending punctuation to avoid splitting mid-sentence
-        if (i < numChunks - 1 && currentEnd < totalLength) {
-            const punctuationIndex = transcript.substring(currentEnd).search(/[.!?]\s/);
-            if (punctuationIndex !== -1) {
-                currentEnd += punctuationIndex + 1;
-            }
+        // Find the next sentence-ending punctuation to avoid splitting mid-sentence
+        const punctuationIndex = transcript.substring(currentEnd).search(/[.!?]\s/);
+        if (punctuationIndex !== -1) {
+            currentEnd += punctuationIndex + 1;
         }
         
         chunks.push(transcript.substring(currentStart, currentEnd));
@@ -161,8 +161,8 @@ function preProcessData(allChunksData: RawChunkData[]): z.infer<typeof Synthesis
 
 const extractInsightsPrompt = ai.definePrompt({
     name: 'extractInsightsPrompt',
-    input: { schema: z.object({ content: z.string(), previous_context: z.string().optional() }) },
-    output: { schema: RawChunkDataSchema },
+    inputSchema: z.object({ content: z.string(), previous_context: z.string().optional() }),
+    outputSchema: RawChunkDataSchema,
     prompt: `
         You are an expert RPG session analyst. Your task is to extract key information from a segment of a game transcript.
         Do not make up information. If a category is not present, return an empty array for it.
@@ -189,8 +189,8 @@ const extractInsightsPrompt = ai.definePrompt({
 
 const synthesizeInsightsPrompt = ai.definePrompt({
     name: 'synthesizeInsightsPrompt',
-    input: { schema: SynthesisInputSchema },
-    output: { schema: SynthesisOutputSchema },
+    inputSchema: SynthesisInputSchema,
+    outputSchema: SynthesisOutputSchema,
     prompt: `
         You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and consolidated lists of highlights, NPCs, items, and locations from an entire game session.
         Your job is to synthesize this information into a single, coherent, and polished summary.
@@ -286,19 +286,25 @@ const generateCoverImageFlow = ai.defineFlow(
 // #################################################################
 
 export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput> {
-    // Step 1: Divide the transcript into a manageable number of chunks (e.g., 5).
-    const chunks = splitTranscriptIntoChunks(input.transcript, 5);
+    // Step 1: Divide the transcript into a manageable number of chunks.
+    const chunks = splitTranscriptIntoChunks(input.transcript, 20000);
     
     // Step 2: Process chunks SEQUENTIALLY to build context.
     const extractedData: RawChunkData[] = [];
     let previousContext: string | undefined = undefined;
 
     for (const chunk of chunks) {
-        const result = await extractInsightsFlow({ content: chunk, previous_context: previousContext });
-        if (result) {
-            extractedData.push(result);
-            // The context for the next chunk is a summary of the highlights of the current one.
-            previousContext = result.highlights?.map(h => h.title).join(', ') || undefined;
+        try {
+            const result = await extractInsightsFlow({ content: chunk, previous_context: previousContext });
+            if (result) {
+                extractedData.push(result);
+                // The context for the next chunk is a summary of the highlights of the current one.
+                previousContext = result.highlights?.map(h => h.title).join(', ') || undefined;
+            }
+        } catch (error) {
+            console.error("Error processing a chunk, continuing...", error);
+            // Push an empty result to maintain array length if a chunk fails
+            extractedData.push({ highlights: [], npcs: [], player_characters: [], items: [], locations: [] });
         }
     }
     
