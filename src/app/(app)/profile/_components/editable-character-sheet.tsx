@@ -1,417 +1,327 @@
-'use client';
+'use server';
+/**
+ * @fileOverview Processes a game session transcript to generate a structured summary, including a title, subtitle, cover image, and detailed lists of highlights, NPCs, items, and locations.
+ * This file implements a sequential chunking orchestration pattern to handle large transcripts without exceeding API limits.
+ *
+ * - processSession - The main orchestrator function.
+ * - ProcessSessionInput - The input type for the processSession function.
+ * - ProcessSessionOutput - The return type for the processSession function.
+ */
 
-import React, { useState, useReducer, useMemo, useEffect } from 'react';
-import type { Character, HealthState, LanguageFamily, AlignmentAxis } from '@/lib/character-data';
-import { languages as allLanguageFamilies, alignmentDescriptions } from '@/lib/character-data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PersonStanding, BrainCircuit, Users, Info } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import type { LucideIcon } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
+import { googleAI } from '@genkit-ai/google-genai';
 
-// This is a simplified reducer for the editable sheet. 
-// A more robust solution might use a library like Immer.
-const characterEditReducer = (state: Character, action: { type: string, payload: any }): Character => {
-    const { type, payload } = action;
+// #################################################################
+// # 1. Schemas                                                    #
+// #################################################################
 
-    if (type.startsWith('info.')) {
-        const field = type.split('.')[1];
-        if (field === 'idiomas') {
-             const { language, checked } = payload;
-             const currentLanguages = state.info.idiomas;
-             const newLanguages = checked
-                ? [...currentLanguages, language]
-                : currentLanguages.filter(lang => lang !== language);
-            return { ...state, info: { ...state.info, idiomas: newLanguages }};
+const HighlightSchema = z.object({
+  title: z.string().describe("Um título curto e impactante para o evento."),
+  scene_description: z.string().describe("Uma breve descrição da cena ou do momento."),
+  transcript_excerpt: z.string().describe("Um trecho relevante da transcrição que captura o momento.")
+});
+type Highlight = z.infer<typeof HighlightSchema>;
+
+const NpcSchema = z.object({
+  name: z.string().describe("O nome do NPC."),
+  description: z.string().describe("Uma breve descrição visual e da interação com o NPC.")
+});
+type Npc = z.infer<typeof NpcSchema>;
+
+
+const ItemSchema = z.object({
+  name: z.string().describe("O nome do item importante."),
+  transcript_excerpt: z.string().describe("A transcrição da cena onde o item apareceu ou foi significativo.")
+});
+type Item = z.infer<typeof ItemSchema>;
+
+const LocationSchema = z.object({
+  name: z.string().describe("O nome do lugar importante."),
+  description: z.string().describe("Uma breve descrição do lugar.")
+});
+type Location = z.infer<typeof LocationSchema>;
+
+const PlayerCharacterSchema = z.object({
+  name: z.string().describe("O nome do personagem do jogador."),
+  appearance_description: z.string().describe("Uma breve descrição da aparição ou de uma ação marcante do personagem na sessão.")
+});
+type PlayerCharacter = z.infer<typeof PlayerCharacterSchema>;
+
+// Input for the main orchestrator
+const ProcessSessionInputSchema = z.object({
+  transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
+});
+export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
+
+
+// Schema for the output from the synthesis prompt (without image URL)
+const SynthesisOutputSchema = z.object({
+    title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
+    subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
+    image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
+    highlights: z.array(HighlightSchema).max(10).describe("Uma lista de até 10 dos momentos mais importantes da sessão."),
+    npcs: z.array(NpcSchema).describe("Uma lista de NPCs que apareceram na sessão."),
+    player_characters: z.array(PlayerCharacterSchema).describe("Uma lista dos personagens dos jogadores que apareceram e suas ações marcantes."),
+    items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
+    locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
+});
+
+
+// Final output of the orchestrator
+const ProcessSessionOutputSchema = SynthesisOutputSchema.extend({
+  coverImageUrl: z.string().url().describe("A URL da imagem de capa gerada."),
+});
+export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
+
+
+// Schema for the raw, unprocessed data from each chunk
+const RawChunkDataSchema = z.object({
+  highlights: z.array(HighlightSchema).optional(),
+  npcs: z.array(NpcSchema).optional(),
+  player_characters: z.array(PlayerCharacterSchema).optional(),
+  items: z.array(ItemSchema).optional(),
+  locations: z.array(LocationSchema).optional(),
+});
+type RawChunkData = z.infer<typeof RawChunkDataSchema>;
+
+// Schema for the refined data sent to the synthesis prompt
+const SynthesisInputSchema = z.object({
+  all_highlights: z.array(HighlightSchema),
+  all_npcs: z.array(NpcSchema),
+  all_player_characters: z.array(PlayerCharacterSchema),
+  all_items: z.array(ItemSchema),
+  all_locations: z.array(LocationSchema),
+});
+
+
+// #################################################################
+// # 2. Helper Functions                                           #
+// #################################################################
+
+/**
+ * Splits text into chunks, respecting word boundaries.
+ */
+function splitTranscriptIntoChunks(transcript: string, chunkSize: number = 20000): string[] {
+    const chunks: string[] = [];
+    if (!transcript) return chunks;
+
+    let currentStart = 0;
+    while (currentStart < transcript.length) {
+        let currentEnd = currentStart + chunkSize;
+        if (currentEnd >= transcript.length) {
+            chunks.push(transcript.substring(currentStart));
+            break;
         }
-        if (field === 'experiencia') {
-            return { ...state, info: { ...state.info, experiencia: payload }};
+
+        // Find the next sentence-ending punctuation to avoid splitting mid-sentence
+        const punctuationIndex = transcript.substring(currentEnd).search(/[.!?]\s/);
+        if (punctuationIndex !== -1) {
+            currentEnd += punctuationIndex + 1;
         }
-        return { ...state, info: { ...state.info, [field]: payload }};
+        
+        chunks.push(transcript.substring(currentStart, currentEnd));
+        currentStart = currentEnd;
+    }
+    return chunks;
+}
+
+
+/**
+ * Pre-processes and deduplicates data from all chunks.
+ */
+function preProcessData(allChunksData: RawChunkData[]): z.infer<typeof SynthesisInputSchema> {
+    const consolidated = {
+        highlights: [] as Highlight[],
+        npcs: new Map<string, Npc>(),
+        player_characters: new Map<string, PlayerCharacter>(),
+        items: new Map<string, Item>(),
+        locations: new Map<string, Location>(),
+    };
+
+    for (const chunk of allChunksData) {
+        if (chunk.highlights) consolidated.highlights.push(...chunk.highlights);
+        chunk.npcs?.forEach(npc => !consolidated.npcs.has(npc.name.toLowerCase()) && consolidated.npcs.set(npc.name.toLowerCase(), npc));
+        chunk.player_characters?.forEach(pc => !consolidated.player_characters.has(pc.name.toLowerCase()) && consolidated.player_characters.set(pc.name.toLowerCase(), pc));
+        chunk.items?.forEach(item => !consolidated.items.has(item.name.toLowerCase()) && consolidated.items.set(item.name.toLowerCase(), item));
+        chunk.locations?.forEach(loc => !consolidated.locations.has(loc.name.toLowerCase()) && consolidated.locations.set(loc.name.toLowerCase(), loc));
     }
     
-    switch (type) {
-        case 'name':
-        case 'concept':
-            return { ...state, [type]: payload };
-        case 'SET_ALIGNMENT': {
-            const { axisName, newState } = payload;
-            if (!newState) return state; // Do not update if the new state is empty (when un-toggling)
-            const newAlignment = state.spirit.alignment.map(axis => 
-                axis.name === axisName ? { ...axis, state: newState } : axis
-            );
-            return { ...state, spirit: { ...state.spirit, alignment: newAlignment } };
-        }
-        case 'SET_FOCUS_ATTRIBUTE': {
-            const { pilar, name, value } = payload;
-            const focusPilar = state.focus[pilar as keyof typeof state.focus] as any;
-            const newAttributes = focusPilar.attributes.map((attr: any) => 
-                attr.name === name ? { ...attr, value: parseInt(value, 10) || 0 } : attr
-            );
-            return { ...state, focus: { ...state.focus, [pilar]: { ...focusPilar, attributes: newAttributes } } };
-        }
-        case 'SET_FOCUS_SKILL': {
-            const { pilar, name, value } = payload;
-            const focusPilar = state.focus[pilar as keyof typeof state.focus] as any;
-            const newSkills = focusPilar.skills.map((skill: any) => 
-                skill.name === name ? { ...skill, value: parseInt(value, 10) || 0 } : skill
-            );
-            return { ...state, focus: { ...state.focus, [pilar]: { ...focusPilar, skills: newSkills } } };
-        }
-        case 'SET_FOCUS_MODULAR': {
-            const { pilar, modularKey, name, value } = payload;
-            const focusPilar = state.focus[pilar as keyof typeof state.focus] as any;
-            const newModulars = focusPilar[modularKey].map((mod: any) =>
-                mod.name === name ? { ...mod, value: parseInt(value, 10) || 0 } : mod
-            );
-            return { ...state, focus: { ...state.focus, [pilar]: { ...focusPilar, [modularKey]: newModulars } } };
-        }
-        default:
-            return state;
-    }
-};
+    return {
+        all_highlights: consolidated.highlights,
+        all_npcs: Array.from(consolidated.npcs.values()),
+        all_player_characters: Array.from(consolidated.player_characters.values()),
+        all_items: Array.from(consolidated.items.values()),
+        all_locations: Array.from(consolidated.locations.values()),
+    };
+}
 
-const EditableField = ({ label, value, onValueChange, placeholder, isTextarea = false }: { label: string, value: string | number, onValueChange: (value: string) => void, placeholder?: string, isTextarea?: boolean }) => (
-    <div className='space-y-1'>
-        <Label className='text-muted-foreground text-xs'>{label}</Label>
-        {isTextarea ? (
-             <Textarea value={value} onChange={(e) => onValueChange(e.target.value)} placeholder={placeholder} className='text-sm h-20' />
-        ) : (
-            <Input type={typeof value === 'number' ? 'number' : 'text'} value={value} onChange={(e) => onValueChange(e.target.value)} placeholder={placeholder} className='text-sm' />
-        )}
-    </div>
+
+// #################################################################
+// # 3. AI Prompts                                                 #
+// #################################################################
+
+const extractInsightsPrompt = ai.definePrompt({
+    name: 'extractInsightsPrompt',
+    inputSchema: z.object({ content: z.string(), previous_context: z.string().optional() }),
+    outputSchema: RawChunkDataSchema,
+    model: googleAI.model('gemini-1.5-flash'),
+    config: { temperature: 0.2 },
+    prompt: `
+        You are an expert RPG session analyst. Your task is to extract key information from a segment of a game transcript.
+        Do not make up information. If a category is not present, return an empty array for it.
+        
+        {{#if previous_context}}
+        PREVIOUS CONTEXT: The summary of the previous part of the session was: "{{{previous_context}}}". Use this to understand the ongoing narrative, but focus on extracting ONLY the NEW information present in the current segment.
+        {{/if}}
+
+        Focus ONLY on the content within this segment:
+        ---
+        {{{content}}}
+        ---
+
+        Extract the following, if present:
+        - Highlights: Key moments, decisions, or surprising events.
+        - NPCs: Any non-player characters mentioned or interacted with for the first time in this segment.
+        - Player Characters: Any player characters mentioned and their significant actions in this segment.
+        - Items: Any relevant items that were found, used, ou mentioned.
+        - Locations: Any new places visited or described.
+    `,
+});
+
+const synthesizeInsightsPrompt = ai.definePrompt({
+    name: 'synthesizeInsightsPrompt',
+    inputSchema: SynthesisInputSchema,
+    outputSchema: SynthesisOutputSchema,
+    model: googleAI.model('gemini-1.5-flash'),
+    config: { temperature: 0.7 },
+    prompt: `
+        You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and consolidated lists of highlights, NPCs, items, and locations from an entire game session.
+        Your job is to synthesize this information into a single, coherent, and polished summary.
+
+        - Title & Subtitle: Based on all the information, create a creative and engaging title and subtitle for the entire session.
+        - Refine Highlights: From the provided list of all highlights, select the BEST and MOST IMPACTFUL 10 highlights. Rephrase them for clarity and impact.
+        - Refine Lists: The provided lists of NPCs, characters, items, and locations have been pre-processed to remove duplicates. Simply return them as they are, but you can correct minor typos or formatting if needed.
+        - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
+
+        Here is the pre-processed data:
+        ---
+        All Highlights:
+        {{{json all_highlights}}}
+
+        All NPCs:
+        {{{json all_npcs}}}
+
+        All Player Characters:
+        {{{json all_player_characters}}}
+
+        All Items:
+        {{{json all_items}}}
+        
+        All Locations:
+        {{{json all_locations}}}
+        ---
+
+        Produce a final, clean, and well-structured JSON output with the refined information.
+    `,
+});
+
+
+// #################################################################
+// # 4. Flows                                                      #
+// #################################################################
+
+/**
+ * Flow to extract insights from a single chunk of text, with optional context from the previous chunk.
+ */
+const extractInsightsFlow = ai.defineFlow(
+    {
+        name: 'extractInsightsFlow',
+        inputSchema: z.object({ content: z.string(), previous_context: z.string().optional() }),
+        outputSchema: RawChunkDataSchema,
+    },
+    async (input) => {
+        const { output } = await extractInsightsPrompt(input);
+        return output!;
+    }
 );
 
-const HybridPopover = ({ trigger, content, align, contentClass }: { trigger: React.ReactNode, content: React.ReactNode, align?: "center" | "start" | "end", contentClass?: string }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [isPinned, setIsPinned] = useState(false);
+/**
+ * Flow to synthesize and refine data from all chunks.
+ */
+const synthesizeInsightsFlow = ai.defineFlow(
+    {
+        name: 'synthesizeInsightsFlow',
+        inputSchema: SynthesisInputSchema,
+        outputSchema: SynthesisOutputSchema,
+    },
+    async (input) => {
+        const { output } = await synthesizeInsightsPrompt(input);
+        return output!;
+    }
+);
 
-    const handleClick = () => {
-        if (!isPinned) {
-            setIsOpen(true);
-            setIsPinned(true);
-        } else {
-            setIsOpen(false);
-            setIsPinned(false);
-        }
-    };
+/**
+ * Flow to generate the cover image.
+ */
+const generateCoverImageFlow = ai.defineFlow(
+    {
+        name: 'generateCoverImageFlow',
+        inputSchema: z.object({ prompt: z.string() }),
+        outputSchema: z.string().url(),
+    },
+    async ({ prompt }) => {
+        const { media } = await ai.generate({
+            model: 'googleai/imagen-4.0-fast-generate-001',
+            prompt: `fantasy art, epic, cinematic, high detail, ${prompt}`,
+            config: {
+                aspectRatio: '16:9',
+            }
+        });
+        return media.url!;
+    }
+);
 
-    const handleMouseEnter = () => {
-        if (!isPinned) {
-            setIsOpen(true);
-        }
-    };
 
-    const handleMouseLeave = () => {
-        if (!isPinned) {
-            setIsOpen(false);
-        }
-    };
+// #################################################################
+// # 5. ORCHESTRATOR FLOW                                          #
+// #################################################################
 
-    return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                {trigger}
-            </PopoverTrigger>
-            <PopoverContent align={align} className={cn("w-80", contentClass)}>
-                {content}
-            </PopoverContent>
-        </Popover>
-    );
-};
-
-const EditableAlignmentButton = ({ axis, onValueChange }: { axis: AlignmentAxis, onValueChange: (newState: string) => void }) => {
-    const [pole1, pole2] = axis.poles;
-    const description = alignmentDescriptions[axis.name as keyof typeof alignmentDescriptions];
-
-    const content = (
-         <div className='p-1'>
-            <h4 className='font-bold text-primary mb-2'>{description.title}</h4>
-            <p className='text-xs text-muted-foreground mb-3'>{description.explanation}</p>
-            <Separator />
-            <div className='grid grid-cols-2 gap-x-4 pt-3 text-xs'>
-                <div>
-                    <p className='font-semibold text-foreground'>{pole1}</p>
-                    <p className='text-muted-foreground'>{description.poles[pole1]}</p>
-                </div>
-                <div>
-                    <p className='font-semibold text-foreground'>{pole2}</p>
-                    <p className='text-muted-foreground'>{description.poles[pole2]}</p>
-                </div>
-            </div>
-        </div>
-    );
+export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput> {
+    // Step 1: Divide the transcript into a manageable number of chunks.
+    const chunks = splitTranscriptIntoChunks(input.transcript, 20000);
     
-    const trigger = (
-        <div className='space-y-1'>
-            <Label className='text-muted-foreground text-xs'>{axis.name}</Label>
-            <ToggleGroup 
-                type="single" 
-                value={axis.state}
-                onValueChange={onValueChange}
-                className='grid grid-cols-2 gap-1 w-full border rounded-md p-1 h-auto'
-            >
-                <ToggleGroupItem value={pole1} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
-                    {pole1}
-                </ToggleGroupItem>
-                <ToggleGroupItem value={pole2} className={cn('text-xs h-auto py-1 data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm')}>
-                    {pole2}
-                </ToggleGroupItem>
-            </ToggleGroup>
-        </div>
-    );
+    // Step 2: Process chunks SEQUENTIALLY to build context.
+    const extractedData: RawChunkData[] = [];
+    let previousContext: string | undefined = undefined;
 
-    return <HybridPopover trigger={trigger} content={content} contentClass='w-[var(--radix-popover-trigger-width)]' />;
-}
-
-
-const FocusBranchEditor = ({ focusData, title, pilar, icon, dispatch }: { 
-    focusData: any, 
-    title: string, 
-    pilar: 'physical' | 'mental' | 'social', 
-    icon: React.ElementType,
-    dispatch: React.Dispatch<any>
-}) => {
-    
-    const modularSkills = focusData.treinamentos || focusData.ciencias || focusData.artes;
-    const modularSkillsTitle = pilar === 'physical' ? 'Treinamentos' : pilar === 'mental' ? 'Ciências' : 'Artes';
-    const modularSkillsKey = pilar === 'physical' ? 'treinamentos' : pilar === 'mental' ? 'ciencias' : 'artes';
-
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Atributos</CardTitle>
-                    </CardHeader>
-                    <CardContent className='grid grid-cols-2 gap-x-6 gap-y-4'>
-                        {focusData.attributes.map((attr: {name: string, value: number}) => (
-                            <div key={attr.name} className="flex items-center gap-3">
-                               <Input 
-                                    type="number" 
-                                    value={attr.value}
-                                    onChange={e => dispatch({ type: 'SET_FOCUS_ATTRIBUTE', payload: { pilar, name: attr.name, value: e.target.value }})}
-                                    className="w-16 h-8 text-center font-bold text-lg text-primary-foreground" 
-                                    style={{ backgroundColor: 'var(--focus-color)' }}
-                                />
-                                <span className="text-foreground font-medium">{attr.name}</span>
-                           </div>
-                        ))}
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="md:col-span-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className='text-base' style={{ color: 'var(--focus-color)' }}>Habilidades</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                         <h4 className="text-sm font-semibold text-muted-foreground mb-2">Perícias</h4>
-                        <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
-                             {focusData.skills.map((skill: {name: string, value: number}) => (
-                                <div key={skill.name} className="flex justify-between items-center py-1">
-                                    <Label className="text-foreground text-sm">{skill.name}</Label>
-                                    <Input 
-                                        type="number" 
-                                        value={skill.value} 
-                                        onChange={e => dispatch({ type: 'SET_FOCUS_SKILL', payload: { pilar, name: skill.name, value: e.target.value }})}
-                                        className="w-16 h-8 text-center font-bold text-sm"
-                                        min={0}
-                                        max={7}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                        
-                        {modularSkills && (
-                            <>
-                                <h4 className="text-sm font-semibold text-muted-foreground mb-2 mt-6">{modularSkillsTitle}</h4>
-                                <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
-                                    {modularSkills.map((skill: {name: string, value: number}) => (
-                                        <div key={skill.name} className="flex justify-between items-center py-1">
-                                            <Label className="text-foreground text-sm">{skill.name}</Label>
-                                            <Input 
-                                                type="number" 
-                                                value={skill.value} 
-                                                onChange={e => dispatch({ type: 'SET_FOCUS_MODULAR', payload: { pilar, modularKey: modularSkillsKey, name: skill.name, value: e.target.value }})}
-                                                className="w-16 h-8 text-center font-bold text-sm"
-                                                min={0}
-                                                max={7}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-    );
-}
-
-export function EditableCharacterSheet({ character, setCharacter }: { character: Character, setCharacter: React.Dispatch<any> }) {
-    const dispatch = (action: { type: string; payload: any; }) => setCharacter(characterEditReducer(character, action));
-    const [activeFocusTab, setActiveFocusTab] = useState('physical');
-    
-    const { info, name, concept } = character;
-    
-    const imageUrl = useMemo(() => {
-        if (info.imageUrl.startsWith('placeholder:')) {
-            const id = info.imageUrl.split(':')[1];
-            return PlaceHolderImages.find(p => p.id === id)?.imageUrl || '';
+    for (const chunk of chunks) {
+        try {
+            const result = await extractInsightsFlow({ content: chunk, previous_context: previousContext });
+            if (result) {
+                extractedData.push(result);
+                // The context for the next chunk is a summary of the highlights of the current one.
+                previousContext = result.highlights?.map(h => h.title).join(', ') || undefined;
+            }
+        } catch (error) {
+            console.error("Error processing a chunk, continuing...", error);
+            // Push an empty result to maintain array length if a chunk fails
+            extractedData.push({ highlights: [], npcs: [], player_characters: [], items: [], locations: [] });
         }
-        return info.imageUrl;
-    }, [info.imageUrl]);
+    }
+    
+    // Step 3: Pre-process the raw data to deduplicate and consolidate.
+    const preProcessedData = preProcessData(extractedData);
 
-    const focusColors: Record<string, { hex: string; hsl: string }> = {
-        physical: { hex: '#ea4335', hsl: '5 81% 56%' },
-        mental: { hex: '#4285f4', hsl: '221 83% 53%' },
-        social: { hex: '#34a853', hsl: '142 71% 45%' },
+    // Step 4: Synthesize the consolidated data into a final summary and generate the image prompt.
+    const synthesizedData = await synthesizeInsightsFlow(preProcessedData);
+
+    // Step 5: Generate the cover image in parallel using the prompt from the previous step.
+    const imageUrl = await generateCoverImageFlow({ prompt: synthesizedData.image_prompt });
+
+    // Final Step: Combine and return the results
+    return {
+        ...synthesizedData,
+        coverImageUrl: imageUrl,
     };
-
-    const pageStyle = {
-        '--page-accent-color': 'hsl(265, 90%, 70%)',
-    } as React.CSSProperties;
-
-     const focusCardStyle = {
-        '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`,
-        boxShadow: `0 0 25px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.6), 0 0 10px -5px hsl(${focusColors[activeFocusTab].hsl} / 0.5)`
-    } as React.CSSProperties;
-
-    return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-6" style={pageStyle}>
-             <Card>
-                <CardContent className='p-4 md:p-6'>
-                    <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                        <div className='md:col-span-1 space-y-4'>
-                            <div className='aspect-[3/4] relative rounded-lg overflow-hidden border-2 border-border shadow-lg'>
-                                <Image 
-                                    src={imageUrl}
-                                    alt={`Portrait of ${name}`}
-                                    fill
-                                    className='object-cover'
-                                    data-ai-hint={info.imageHint}
-                                />
-                            </div>
-                            <EditableField label="URL da Imagem" value={info.imageUrl} onValueChange={v => dispatch({type: 'info.imageUrl', payload: v})} />
-                            <EditableField label="Dica de IA para Imagem" value={info.imageHint} onValueChange={v => dispatch({type: 'info.imageHint', payload: v})} />
-                        </div>
-                        <div className='md:col-span-2 space-y-4'>
-                            <div className='border-b pb-4 space-y-4'>
-                               <EditableField label="Nome do Personagem" value={name} onValueChange={v => dispatch({type: 'name', payload: v})} placeholder="Nome do Personagem" />
-                               <EditableField label="Conceito" value={concept} onValueChange={v => dispatch({type: 'concept', payload: v})} placeholder="Ex: Caçador de recompensas" />
-                            </div>
-                            <div className='grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm pt-4'>
-                                <EditableField label="Altura" value={info.altura} onValueChange={v => dispatch({type: 'info.altura', payload: v})} />
-                                <EditableField label="Peso" value={info.peso} onValueChange={v => dispatch({type: 'info.peso', payload: v})} />
-                                <EditableField label="Cabelo" value={info.cabelo} onValueChange={v => dispatch({type: 'info.cabelo', payload: v})} />
-                                <EditableField label="Olhos" value={info.olhos} onValueChange={v => dispatch({type: 'info.olhos', payload: v})} />
-                                <EditableField label="Pele" value={info.pele} onValueChange={v => dispatch({type: 'info.pele', payload: v})} />
-                                <EditableField label="Idade" value={info.idade} onValueChange={v => dispatch({type: 'info.idade', payload: v})} />
-                            </div>
-                            <Separator />
-                             <div className='grid grid-cols-1 gap-4 text-sm'>
-                                <EditableField label="Ideais" value={info.ideais} onValueChange={v => dispatch({type: 'info.ideais', payload: v})} isTextarea />
-                                <EditableField label="Origem" value={info.origem} onValueChange={v => dispatch({type: 'info.origem', payload: v})} />
-                            </div>
-                            <Separator />
-                            <div className='space-y-2'>
-                                <Label className='text-muted-foreground'>Idiomas</Label>
-                                <div className='space-y-3'>
-                                    {allLanguageFamilies.map(family => (
-                                        <div key={family.root}>
-                                            <p className='font-semibold text-sm mb-2'>{family.root}</p>
-                                            <div className='grid grid-cols-2 gap-2 pl-2'>
-                                                {family.dialects.map(dialect => (
-                                                    <div key={dialect} className="flex items-center space-x-2">
-                                                        <Checkbox
-                                                            id={`lang-${dialect}`}
-                                                            checked={character.info.idiomas.includes(dialect)}
-                                                            onCheckedChange={(checked) => {
-                                                                dispatch({ type: 'info.idiomas', payload: { language: dialect, checked: !!checked } });
-                                                            }}
-                                                        />
-                                                        <Label htmlFor={`lang-${dialect}`} className="text-sm font-normal text-foreground">
-                                                            {dialect}
-                                                        </Label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <Separator />
-                            <div className="space-y-2">
-                                <Label className='text-muted-foreground'>Alinhamento</Label>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                                    {character.spirit.alignment.map(axis => (
-                                        <EditableAlignmentButton 
-                                            key={axis.name} 
-                                            axis={axis} 
-                                            onValueChange={(newState) => dispatch({ type: 'SET_ALIGNMENT', payload: { axisName: axis.name, newState }})}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                             <Separator />
-                             <div className='space-y-1 text-sm'>
-                                <Label className='text-muted-foreground'>Experiência</Label>
-                                <div className='flex items-center gap-2'>
-                                    <Input type="number" value={info.experiencia.atual} onChange={e => dispatch({type: 'info.experiencia', payload: { ...info.experiencia, atual: parseInt(e.target.value) || 0 }})} />
-                                    <span className='text-muted-foreground'>/</span>
-                                     <Input type="number" value={info.experiencia.total} onChange={e => dispatch({type: 'info.experiencia', payload: { ...info.experiencia, total: parseInt(e.target.value) || 0 }})} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-            
-             <Card style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})`, ...focusCardStyle }}>
-                <CardHeader>
-                    <CardTitle className='text-center' style={{ color: focusColors[activeFocusTab].hex }}>
-                        Focos de Desenvolvimento
-                    </CardTitle>
-                </CardHeader>
-                <CardContent style={{ '--card-border-color': `hsl(${focusColors[activeFocusTab].hsl})` } as React.CSSProperties}>
-                    <Tabs defaultValue="physical" className="w-full" onValueChange={value => setActiveFocusTab(value)}>
-                        <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="physical" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'physical' ? { backgroundColor: focusColors.physical.hex } : {}}>
-                                <PersonStanding />Físico
-                            </TabsTrigger>
-                            <TabsTrigger value="mental" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'mental' ? { backgroundColor: focusColors.mental.hex } : {}}>
-                                <BrainCircuit />Mental
-                            </TabsTrigger>
-                            <TabsTrigger value="social" className='flex items-center gap-2 data-[state=active]:text-white data-[state=active]:border-transparent' style={activeFocusTab === 'social' ? { backgroundColor: focusColors.social.hex } : {}}>
-                                <Users />Social
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="physical" className='pt-6' style={{ '--focus-color': focusColors.physical.hex, '--focus-color-hsl': focusColors.physical.hsl } as React.CSSProperties}>
-                            <FocusBranchEditor focusData={character.focus.physical} title='Físico' pilar='physical' icon={PersonStanding} dispatch={dispatch} />
-                        </TabsContent>
-                        <TabsContent value="mental" className='pt-6' style={{ '--focus-color': focusColors.mental.hex, '--focus-color-hsl': focusColors.mental.hsl } as React.CSSProperties}>
-                           <FocusBranchEditor focusData={character.focus.mental} title='Mental' pilar='mental' icon={BrainCircuit} dispatch={dispatch} />
-                        </TabsContent>
-                        <TabsContent value="social" className='pt-6' style={{ '--focus-color': focusColors.social.hex, '--focus-color-hsl': focusColors.social.hsl } as React.CSSProperties}>
-                             <FocusBranchEditor focusData={character.focus.social} title='Social' pilar='social' icon={Users} dispatch={dispatch} />
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
-            </Card>
-
-        </div>
-    );
 }
