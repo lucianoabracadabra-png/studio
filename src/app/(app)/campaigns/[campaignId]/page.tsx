@@ -56,6 +56,7 @@ export default function CampaignDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // This check ensures localStorage is accessed only on the client side.
     if (typeof window !== 'undefined' && campaignId) {
       const storedSessions: SessionData[] = JSON.parse(localStorage.getItem('generatedSessions') || '[]');
       const foundSession = storedSessions.find(s => s.id === campaignId);
@@ -84,8 +85,9 @@ export default function CampaignDetailPage() {
   }
 
   if (!session) {
-    // Apenas para o caso de não encontrar a sessão no localStorage
-    notFound();
+    // This will be shown if the session is not found in localStorage
+    // or if the component is rendered on the server without the data.
+    return notFound();
   }
 
   return (

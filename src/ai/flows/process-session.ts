@@ -1,8 +1,7 @@
-
 'use server';
 /**
  * @fileOverview Processes a game session transcript to generate a structured summary, including a title, subtitle, cover image, and detailed lists of highlights, NPCs, items, and locations.
- * This file implements a 10-step orchestration pattern.
+ * This file implements a sequential chunking orchestration pattern to handle large transcripts without exceeding API limits.
  *
  * - processSession - The main orchestrator function.
  * - ProcessSessionInput - The input type for the processSession function.
@@ -49,13 +48,13 @@ const PlayerCharacterSchema = z.object({
 });
 type PlayerCharacter = z.infer<typeof PlayerCharacterSchema>;
 
-
 // Input for the main orchestrator
 const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
+// Final output of the orchestrator, including the cover image URL
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -66,7 +65,6 @@ const ProcessSessionOutputSchema = z.object({
   items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
   locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
 });
-// Final output of the orchestrator, including the cover image URL
 export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
 // Schema for the raw, unprocessed data from each chunk
@@ -81,11 +79,11 @@ type RawChunkData = z.infer<typeof RawChunkDataSchema>;
 
 // Schema for the refined data sent to the synthesis prompt
 const SynthesisInputSchema = z.object({
-  highlights: z.array(HighlightSchema),
-  npcs: z.array(NpcSchema),
-  player_characters: z.array(PlayerCharacterSchema),
-  items: z.array(ItemSchema),
-  locations: z.array(LocationSchema),
+  all_highlights: z.array(HighlightSchema),
+  all_npcs: z.array(NpcSchema),
+  all_player_characters: z.array(PlayerCharacterSchema),
+  all_items: z.array(ItemSchema),
+  all_locations: z.array(LocationSchema),
 });
 
 // Schema for the output from the synthesis prompt (without image URL)
@@ -99,17 +97,29 @@ const SynthesisOutputSchema = ProcessSessionOutputSchema.omit({ coverImageUrl: t
 // #################################################################
 
 /**
- * Splits text into a specified number of chunks.
+ * Splits text into a specified number of chunks, respecting word boundaries.
  */
 function splitTranscriptIntoChunks(transcript: string, numChunks: number): string[] {
     const chunks: string[] = [];
     const totalLength = transcript.length;
-    const chunkSize = Math.ceil(totalLength / numChunks);
+    const idealChunkSize = Math.ceil(totalLength / numChunks);
 
+    let currentStart = 0;
     for (let i = 0; i < numChunks; i++) {
-        const start = i * chunkSize;
-        const end = start + chunkSize;
-        chunks.push(transcript.substring(start, end));
+        if (currentStart >= totalLength) break;
+        
+        let currentEnd = Math.min(currentStart + idealChunkSize, totalLength);
+
+        // If not the last chunk, find the next sentence-ending punctuation to avoid splitting mid-sentence
+        if (i < numChunks - 1 && currentEnd < totalLength) {
+            const punctuationIndex = transcript.substring(currentEnd).search(/[.!?]\s/);
+            if (punctuationIndex !== -1) {
+                currentEnd += punctuationIndex + 1;
+            }
+        }
+        
+        chunks.push(transcript.substring(currentStart, currentEnd));
+        currentStart = currentEnd;
     }
     return chunks;
 }
@@ -136,11 +146,11 @@ function preProcessData(allChunksData: RawChunkData[]): z.infer<typeof Synthesis
     }
     
     return {
-        highlights: consolidated.highlights,
-        npcs: Array.from(consolidated.npcs.values()),
-        player_characters: Array.from(consolidated.player_characters.values()),
-        items: Array.from(consolidated.items.values()),
-        locations: Array.from(consolidated.locations.values()),
+        all_highlights: consolidated.highlights,
+        all_npcs: Array.from(consolidated.npcs.values()),
+        all_player_characters: Array.from(consolidated.player_characters.values()),
+        all_items: Array.from(consolidated.items.values()),
+        all_locations: Array.from(consolidated.locations.values()),
     };
 }
 
@@ -151,11 +161,15 @@ function preProcessData(allChunksData: RawChunkData[]): z.infer<typeof Synthesis
 
 const extractInsightsPrompt = ai.definePrompt({
     name: 'extractInsightsPrompt',
-    input: { schema: z.object({ content: z.string() }) },
+    input: { schema: z.object({ content: z.string(), previous_context: z.string().optional() }) },
     output: { schema: RawChunkDataSchema },
     prompt: `
-        You are an expert RPG session analyst. Your task is to extract key information from a small segment of a game transcript.
+        You are an expert RPG session analyst. Your task is to extract key information from a segment of a game transcript.
         Do not make up information. If a category is not present, return an empty array for it.
+        
+        {{#if previous_context}}
+        PREVIOUS CONTEXT: The summary of the previous part of the session was: "{{{previous_context}}}". Use this to understand the ongoing narrative, but focus on extracting ONLY the NEW information present in the current segment.
+        {{/if}}
 
         Focus ONLY on the content within this segment:
         ---
@@ -164,8 +178,8 @@ const extractInsightsPrompt = ai.definePrompt({
 
         Extract the following, if present:
         - Highlights: Key moments, decisions, or surprising events.
-        - NPCs: Any non-player characters mentioned or interacted with.
-        - Player Characters: Any player characters mentioned and their significant actions.
+        - NPCs: Any non-player characters mentioned or interacted with for the first time in this segment.
+        - Player Characters: Any player characters mentioned and their significant actions in this segment.
         - Items: Any relevant items that were found, used, or mentioned.
         - Locations: Any new places visited or described.
     `,
@@ -178,30 +192,30 @@ const synthesizeInsightsPrompt = ai.definePrompt({
     input: { schema: SynthesisInputSchema },
     output: { schema: SynthesisOutputSchema },
     prompt: `
-        You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and deduplicated lists of highlights, NPCs, items, and locations from a game session.
+        You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and consolidated lists of highlights, NPCs, items, and locations from an entire game session.
         Your job is to synthesize this information into a single, coherent, and polished summary.
 
         - Title & Subtitle: Based on all the information, create a creative and engaging title and subtitle for the entire session.
-        - Refine Highlights: From the provided list of all highlights, select the best and most impactful 10 highlights. Ensure they are well-written and capture the essence of the session.
-        - Refine Lists: Review the provided lists of NPCs, characters, items, and locations. You can slightly rephrase descriptions for clarity and consistency, but do not add or remove items from the lists.
+        - Refine Highlights: From the provided list of all highlights, select the BEST and MOST IMPACTFUL 10 highlights. Rephrase them for clarity and impact.
+        - Refine Lists: The provided lists of NPCs, characters, items, and locations have been pre-processed to remove duplicates. Simply return them as they are, but you can correct minor typos or formatting if needed.
         - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
 
         Here is the pre-processed data:
         ---
-        Highlights:
-        {{{json highlights}}}
+        All Highlights:
+        {{{json all_highlights}}}
 
-        NPCs:
-        {{{json npcs}}}
+        All NPCs:
+        {{{json all_npcs}}}
 
-        Player Characters:
-        {{{json player_characters}}}
+        All Player Characters:
+        {{{json all_player_characters}}}
 
-        Items:
-        {{{json items}}}
+        All Items:
+        {{{json all_items}}}
         
-        Locations:
-        {{{json locations}}}
+        All Locations:
+        {{{json all_locations}}}
         ---
 
         Produce a final, clean, and well-structured JSON output with the refined information.
@@ -216,12 +230,12 @@ const synthesizeInsightsPrompt = ai.definePrompt({
 // #################################################################
 
 /**
- * Flow to extract insights from a single chunk of text.
+ * Flow to extract insights from a single chunk of text, with optional context from the previous chunk.
  */
 const extractInsightsFlow = ai.defineFlow(
     {
         name: 'extractInsightsFlow',
-        inputSchema: z.object({ content: z.string() }),
+        inputSchema: z.object({ content: z.string(), previous_context: z.string().optional() }),
         outputSchema: RawChunkDataSchema,
     },
     async (input) => {
@@ -272,20 +286,30 @@ const generateCoverImageFlow = ai.defineFlow(
 // #################################################################
 
 export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput> {
-    // Step 1: Divide the transcript into 10 chunks
-    const chunks = splitTranscriptIntoChunks(input.transcript, 10);
-
-    // Step 2-11: Process all 10 chunks in parallel to extract raw insights
-    const extractionPromises = chunks.map(chunk => extractInsightsFlow({ content: chunk }));
-    const extractedData = await Promise.all(extractionPromises);
+    // Step 1: Divide the transcript into a manageable number of chunks (e.g., 5).
+    const chunks = splitTranscriptIntoChunks(input.transcript, 5);
     
-    // Step 12: Pre-process the raw data to deduplicate and consolidate.
+    // Step 2: Process chunks SEQUENTIALLY to build context.
+    const extractedData: RawChunkData[] = [];
+    let previousContext: string | undefined = undefined;
+
+    for (const chunk of chunks) {
+        const result = await extractInsightsFlow({ content: chunk, previous_context: previousContext });
+        if (result) {
+            extractedData.push(result);
+            // The context for the next chunk is a summary of the highlights of the current one.
+            previousContext = result.highlights?.map(h => h.title).join(', ') || undefined;
+        }
+    }
+    
+    // Step 3: Pre-process the raw data to deduplicate and consolidate.
     const preProcessedData = preProcessData(extractedData);
 
-    // Step 13: Synthesize the pre-processed data into a coherent summary.
+    // Step 4: Synthesize the consolidated data into a final summary.
+    // This call is now much smaller and should not cause a 414 error.
     const synthesizedData = await synthesizeInsightsFlow(preProcessedData);
 
-    // Step 14: Generate the cover image based on the synthesized prompt.
+    // Step 5: Generate the cover image in parallel.
     const imageUrl = await generateCoverImageFlow({ prompt: synthesizedData.image_prompt });
 
     // Final Step: Combine and return the results
