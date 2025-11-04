@@ -55,18 +55,24 @@ const ProcessSessionInputSchema = z.object({
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
+// Schema for the output from the synthesis prompt (without image URL)
+const SynthesisOutputSchema = z.object({
+    title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
+    subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
+    image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
+    highlights: z.array(HighlightSchema).max(10).describe("Uma lista de até 10 dos momentos mais importantes da sessão."),
+    npcs: z.array(NpcSchema).describe("Uma lista de NPCs que apareceram na sessão."),
+    player_characters: z.array(PlayerCharacterSchema).describe("Uma lista dos personagens dos jogadores que apareceram e suas ações marcantes."),
+    items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
+    locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
+});
+
 // Final output of the orchestrator
-const ProcessSessionOutputSchema = z.object({
-  title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
-  subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
+const ProcessSessionOutputSchema = SynthesisOutputSchema.extend({
   coverImageUrl: z.string().url().describe("A URL da imagem de capa gerada."),
-  highlights: z.array(HighlightSchema).max(10).describe("Uma lista de até 10 dos momentos mais importantes da sessão."),
-  npcs: z.array(NpcSchema).describe("Uma lista de NPCs que apareceram na sessão."),
-  player_characters: z.array(PlayerCharacterSchema).describe("Uma lista dos personagens dos jogadores que apareceram e suas ações marcantes."),
-  items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
-  locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
 });
 export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
+
 
 // Schema for the raw, unprocessed data from each chunk
 const RawChunkDataSchema = z.object({
@@ -85,11 +91,6 @@ const SynthesisInputSchema = z.object({
   all_player_characters: z.array(PlayerCharacterSchema),
   all_items: z.array(ItemSchema),
   all_locations: z.array(LocationSchema),
-});
-
-// Schema for the output from the synthesis prompt (without image URL)
-const SynthesisOutputSchema = ProcessSessionOutputSchema.omit({ coverImageUrl: true }).extend({
-    image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
 });
 
 
@@ -163,6 +164,8 @@ const extractInsightsPrompt = ai.definePrompt({
     name: 'extractInsightsPrompt',
     inputSchema: z.object({ content: z.string(), previous_context: z.string().optional() }),
     outputSchema: RawChunkDataSchema,
+    model: googleAI.model('gemini-1.5-flash'),
+    config: { temperature: 0.2 },
     prompt: `
         You are an expert RPG session analyst. Your task is to extract key information from a segment of a game transcript.
         Do not make up information. If a category is not present, return an empty array for it.
@@ -180,17 +183,17 @@ const extractInsightsPrompt = ai.definePrompt({
         - Highlights: Key moments, decisions, or surprising events.
         - NPCs: Any non-player characters mentioned or interacted with for the first time in this segment.
         - Player Characters: Any player characters mentioned and their significant actions in this segment.
-        - Items: Any relevant items that were found, used, or mentioned.
+        - Items: Any relevant items that were found, used, ou mentioned.
         - Locations: Any new places visited or described.
     `,
-    model: googleAI.model('gemini-1.5-flash'),
-    config: { temperature: 0.2 },
 });
 
 const synthesizeInsightsPrompt = ai.definePrompt({
     name: 'synthesizeInsightsPrompt',
     inputSchema: SynthesisInputSchema,
     outputSchema: SynthesisOutputSchema,
+    model: googleAI.model('gemini-1.5-flash'),
+    config: { temperature: 0.7 },
     prompt: `
         You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and consolidated lists of highlights, NPCs, items, and locations from an entire game session.
         Your job is to synthesize this information into a single, coherent, and polished summary.
@@ -220,8 +223,6 @@ const synthesizeInsightsPrompt = ai.definePrompt({
 
         Produce a final, clean, and well-structured JSON output with the refined information.
     `,
-    model: googleAI.model('gemini-1.5-flash'),
-    config: { temperature: 0.7 },
 });
 
 
@@ -311,11 +312,10 @@ export async function processSession(input: ProcessSessionInput): Promise<Proces
     // Step 3: Pre-process the raw data to deduplicate and consolidate.
     const preProcessedData = preProcessData(extractedData);
 
-    // Step 4: Synthesize the consolidated data into a final summary.
-    // This call is now much smaller and should not cause a 414 error.
+    // Step 4: Synthesize the consolidated data into a final summary and generate the image prompt.
     const synthesizedData = await synthesizeInsightsFlow(preProcessedData);
 
-    // Step 5: Generate the cover image in parallel.
+    // Step 5: Generate the cover image in parallel using the prompt from the previous step.
     const imageUrl = await generateCoverImageFlow({ prompt: synthesizedData.image_prompt });
 
     // Final Step: Combine and return the results
@@ -324,3 +324,5 @@ export async function processSession(input: ProcessSessionInput): Promise<Proces
         coverImageUrl: imageUrl,
     };
 }
+
+      
