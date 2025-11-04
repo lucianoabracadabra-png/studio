@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Lora"', 'serif'],
+        body: ['"Roboto Mono"', 'monospace'],
         headline: ['"Cinzel"', 'serif'],
         mono: ['"Roboto Mono"', 'monospace'],
       },

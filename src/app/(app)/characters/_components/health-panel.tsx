@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -52,7 +53,7 @@ const HealthGrid = ({ states, onBoxClick }: { states: HealthState[], onBoxClick:
     );
 };
 
-const BodyPartManager = ({ part, partId, onHealthChange, icon: Icon }: { part: BodyPartHealth, partId: keyof Character['health']['bodyParts'], onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void, icon: React.ElementType }) => {
+const BodyPartManager = ({ part, partId, onHealthChange, icon: Icon, className }: { part: BodyPartHealth, partId: keyof Character['health']['bodyParts'], onHealthChange: (partId: keyof Character['health']['bodyParts'], boxIndex: number, newState: HealthState) => void, icon: React.ElementType, className?: string }) => {
     
     const handleDamage = () => {
         const firstCleanIndex = part.states.findIndex(s => s === 'clean');
@@ -101,7 +102,7 @@ const BodyPartManager = ({ part, partId, onHealthChange, icon: Icon }: { part: B
     };
 
     return (
-        <div className='flex flex-col items-center gap-3'>
+        <div className={cn('flex flex-col items-center gap-3', className)}>
             <div className='flex gap-2 items-center'>
                 <Button variant='ghost' size='icon' className='h-8 w-8 hover:bg-[var(--page-accent-color)]' onClick={handleHeal}><Minus className='h-5 w-5'/></Button>
                  <Icon className="h-8 w-8 text-primary" />
@@ -126,18 +127,14 @@ export function HealthPanel({ healthData, onHealthChange }: HealthPanelProps) {
                 <CardTitle>Vitalidade</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="mx-auto grid max-w-2xl grid-cols-2 items-start justify-items-center gap-y-8 py-4">
-                    {/* Upper Body */}
-                    <BodyPartManager part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" icon={Hand} />
-                    <BodyPartManager part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" icon={Hand} />
+                <div className="mx-auto grid max-w-3xl grid-cols-2 md:grid-cols-3 items-start justify-items-center gap-y-8 py-4">
+                    <BodyPartManager part={healthData.bodyParts.leftArm} onHealthChange={onHealthChange} partId="leftArm" icon={Hand} className="md:order-1" />
+                    <BodyPartManager part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" icon={PersonStanding} className="md:order-2" />
+                    <BodyPartManager part={healthData.bodyParts.rightArm} onHealthChange={onHealthChange} partId="rightArm" icon={Hand} className="md:order-3" />
                     
-                    {/* Core Body */}
-                    <BodyPartManager part={healthData.bodyParts.head} onHealthChange={onHealthChange} partId="head" icon={PersonStanding} />
-                    <BodyPartManager part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" icon={PersonStanding} />
-
-                    {/* Lower Body */}
-                    <BodyPartManager part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" icon={Footprints} />
-                    <BodyPartManager part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" icon={Footprints} />
+                    <BodyPartManager part={healthData.bodyParts.leftLeg} onHealthChange={onHealthChange} partId="leftLeg" icon={Footprints} className="md:order-4" />
+                    <BodyPartManager part={healthData.bodyParts.torso} onHealthChange={onHealthChange} partId="torso" icon={PersonStanding} className="md:order-5" />
+                    <BodyPartManager part={healthData.bodyParts.rightLeg} onHealthChange={onHealthChange} partId="rightLeg" icon={Footprints} className="md:order-6" />
                 </div>
             </CardContent>
         </Card>
