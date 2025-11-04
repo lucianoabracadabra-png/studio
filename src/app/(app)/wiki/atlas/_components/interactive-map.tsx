@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import wikiData from '@/lib/data/wiki-data.json';
 
 const mapImage = PlaceHolderImages.find(p => p.id === 'world-map');
 
@@ -92,7 +93,7 @@ export function InteractiveMap() {
     };
     
     const drawPredefinedRoutes = (canvas: FabricType.Canvas) => {
-        const { predefinedRoutes } = require('@/lib/wiki-data');
+        const { predefinedRoutes } = wikiData;
         
         predefinedRoutesRef.current.forEach(route => canvas.remove(route));
         predefinedRoutesRef.current = [];
@@ -395,3 +396,5 @@ export function InteractiveMap() {
         </div>
     );
 }
+
+    
