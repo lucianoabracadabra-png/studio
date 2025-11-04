@@ -41,12 +41,13 @@ const PlayerCharacterSchema = z.object({
 });
 
 // Input for the main orchestrator
+export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
-export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
 // Final output of the orchestrator
+export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -57,10 +58,10 @@ const ProcessSessionOutputSchema = z.object({
   locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
   image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
 });
-export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
 
 // Schema for the raw, unprocessed data from each chunk
+type RawChunkData = z.infer<typeof RawChunkDataSchema>;
 const RawChunkDataSchema = z.object({
   highlights: z.array(HighlightSchema).optional(),
   npcs: z.array(NpcSchema).optional(),
@@ -68,7 +69,6 @@ const RawChunkDataSchema = z.object({
   items: z.array(ItemSchema).optional(),
   locations: z.array(LocationSchema).optional(),
 });
-type RawChunkData = z.infer<typeof RawChunkDataSchema>;
 
 /**
  * Splits text into a specified number of chunks.
@@ -138,7 +138,7 @@ const extractInsightsPrompt = ai.definePrompt({
         - Items: Any relevant items that were found, used, or mentioned.
         - Locations: Any new places visited or described.
     `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
+    model: googleAI.model('gemini-pro'),
     config: { temperature: 0.2 },
 });
 
@@ -178,7 +178,7 @@ const synthesizeInsightsPrompt = ai.definePrompt({
 
         Produce a final, clean, and well-structured JSON output.
     `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
+    model: googleAI.model('gemini-pro'),
     config: { temperature: 0.7 },
 });
 
@@ -218,5 +218,3 @@ const generateCoverImageFlow = ai.defineFlow(
         return media.url!;
     }
 );
-
-    
