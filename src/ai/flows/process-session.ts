@@ -148,7 +148,7 @@ const extractInsightsFlow = ai.defineFlow(
 
         const { output } = await ai.generate({
             prompt,
-            model: googleAI.model('gemini-1.5-flash'),
+            model: googleAI.model('gemini-1.5-flash-latest'),
             output: { schema: RawChunkDataSchema },
             config: { temperature: 0.2 }
         });
@@ -185,7 +185,7 @@ const synthesizeInsightsFlow = ai.defineFlow(
         
         const { output } = await ai.generate({
             prompt,
-            model: googleAI.model('gemini-1.5-flash'),
+            model: googleAI.model('gemini-1.5-flash-latest'),
             output: { schema: ProcessSessionOutputSchema },
             config: { temperature: 0.7 }
         });
@@ -213,4 +213,5 @@ const generateCoverImageFlow = ai.defineFlow(
         return media.url!;
     }
 );
+
 
