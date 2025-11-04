@@ -72,7 +72,6 @@ export function SidebarNav({ activeColorHue }: { activeColorHue: string }) {
           </Link>
           
           <ScrollArea className="w-full px-2 flex-grow">
-            <div className="flex flex-col justify-between h-full">
               <div className="flex flex-col items-center gap-4 py-2">
                   {navData.mainLinks.map(link => {
                       const Icon = iconMap[link.icon];
@@ -107,15 +106,14 @@ export function SidebarNav({ activeColorHue }: { activeColorHue: string }) {
                   })}
               </div>
               
-              <nav className="flex flex-col items-center gap-4 py-2 sticky bottom-0">
+              <div className="sticky bottom-0 bg-card/50 backdrop-blur-sm py-2 flex flex-col items-center gap-4">
                   <Link href="/settings">
                     <Book label="Configurações" icon={Settings} colorHsl={'240 10% 70%'} isActive={pathname.startsWith('/settings')} showLabel={false} />
                   </Link>
                   <Link href={profileLink.href}>
                     <Book label={profileLink.label} icon={profileLink.icon} colorHsl={profileLink.colorHue} isActive={pathname.startsWith(profileLink.href)} showLabel={false} />
                   </Link>
-              </nav>
-            </div>
+              </div>
           </ScrollArea>
       </div>
   );
