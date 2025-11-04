@@ -41,12 +41,13 @@ const PlayerCharacterSchema = z.object({
 });
 
 // Input for the main orchestrator
+export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
-export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
 // Final output of the orchestrator
+export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -57,7 +58,6 @@ const ProcessSessionOutputSchema = z.object({
   locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
   image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
 });
-export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
 
 // Schema for the raw, unprocessed data from each chunk
@@ -213,5 +213,6 @@ const generateCoverImageFlow = ai.defineFlow(
         return media.url!;
     }
 );
+
 
 
