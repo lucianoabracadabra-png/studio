@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['"Roboto Mono"', 'monospace'],
-        headline: ['"Cinzel"', 'serif'],
+        headline: ['"Metamorphous"', 'serif'],
         mono: ['"Roboto Mono"', 'monospace'],
       },
       colors: {
