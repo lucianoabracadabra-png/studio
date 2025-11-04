@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { fabric as FabricType } from 'fabric';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { pointsOfInterest } from '@/lib/wiki-data';
 import { ZoomIn, ZoomOut, Maximize, MousePointer, Pen, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -46,7 +45,7 @@ export function InteractiveMap() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricRef = useRef<FabricType.Canvas | null>(null);
 
-    const [activePoi, setActivePoi] = useState<(typeof pointsOfInterest)[0] | null>(null);
+    const [activePoi, setActivePoi] = useState<(typeof wikiData.pointsOfInterest)[0] | null>(null);
     const [activeTool, setActiveTool] = useState<AtlasTool>('pan');
     const [displayDistance, setDisplayDistance] = useState(0);
     
@@ -147,7 +146,7 @@ export function InteractiveMap() {
                         centerAndReset();
                         drawPredefinedRoutes(canvas);
 
-                        pointsOfInterest.forEach(poi => {
+                        wikiData.pointsOfInterest.forEach(poi => {
                             const pin = new fabric.Circle({
                                 radius: 10,
                                 fill: 'hsl(var(--primary))',
@@ -229,7 +228,7 @@ export function InteractiveMap() {
         const onPinClick = (opt: FabricType.IEvent) => {
             if (opt.target && opt.target.name === 'poi-pin') {
                  // @ts-ignore
-                setActivePoi(opt.target.poiData as (typeof pointsOfInterest)[0]);
+                setActivePoi(opt.target.poiData as (typeof wikiData.pointsOfInterest)[0]);
             } else if (!isDrawingRef.current) {
                 setActivePoi(null);
             }
@@ -396,5 +395,3 @@ export function InteractiveMap() {
         </div>
     );
 }
-
-    
