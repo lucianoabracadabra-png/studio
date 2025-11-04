@@ -182,7 +182,7 @@ const extractInsightsPrompt = ai.definePrompt({
         - Items: Any relevant items that were found, used, or mentioned.
         - Locations: Any new places visited or described.
     `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
+    model: googleAI.model('gemini-1.5-flash'),
     config: { temperature: 0.2 },
 });
 
@@ -219,7 +219,7 @@ const synthesizeInsightsPrompt = ai.definePrompt({
 
         Produce a final, clean, and well-structured JSON output with the refined information.
     `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
+    model: googleAI.model('gemini-1.5-flash'),
     config: { temperature: 0.7 },
 });
 
