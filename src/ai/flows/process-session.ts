@@ -1,16 +1,18 @@
 'use server';
 /**
  * @fileOverview Processes a game session transcript to generate a structured summary, including a title, subtitle, cover image, and detailed lists of highlights, NPCs, items, and locations.
+ * This file implements a 10-step orchestration pattern.
  *
- * - processSession - A function that handles the session processing.
+ * - processSession - The main orchestrator function.
  * - ProcessSessionInput - The input type for the processSession function.
  * - ProcessSessionOutput - The return type for the processSession function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import {googleAI} from '@genkit-ai/google-genai';
+import { googleAI } from '@genkit-ai/google-genai';
 
+// Schemas for individual insights extracted from chunks
 const HighlightSchema = z.object({
   title: z.string().describe("Um título curto e impactante para o evento."),
   scene_description: z.string().describe("Uma breve descrição da cena ou do momento."),
@@ -37,12 +39,14 @@ const PlayerCharacterSchema = z.object({
   appearance_description: z.string().describe("Uma breve descrição da aparição ou de uma ação marcante do personagem na sessão.")
 });
 
-const ProcessSessionInputSchema = z.object({
+// Input for the main orchestrator
+export const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
-const ProcessSessionOutputSchema = z.object({
+// Final output of the orchestrator
+export const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
   highlights: z.array(HighlightSchema).max(10).describe("Uma lista de até 10 dos momentos mais importantes da sessão."),
@@ -54,63 +58,143 @@ const ProcessSessionOutputSchema = z.object({
 });
 export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
-// This is the main function that will be called from the server action.
-export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput & { coverImageUrl: string }> {
-  // First, generate the structured text data from the transcript.
-  const structuredData = await processSessionTextFlow(input);
 
-  // Then, generate the cover image based on the image prompt from the text data.
-  const imageUrl = await generateCoverImageFlow({ prompt: structuredData.image_prompt });
+// Schema for the raw, unprocessed data from each chunk
+const RawChunkDataSchema = z.object({
+  highlights: z.array(HighlightSchema).optional(),
+  npcs: z.array(NpcSchema).optional(),
+  player_characters: z.array(PlayerCharacterSchema).optional(),
+  items: z.array(ItemSchema).optional(),
+  locations: z.array(LocationSchema).optional(),
+});
+type RawChunkData = z.infer<typeof RawChunkDataSchema>;
 
-  // Return the combined result.
-  return {
-    ...structuredData,
-    coverImageUrl: imageUrl,
-  };
+/**
+ * Splits text into a specified number of chunks.
+ */
+function splitTranscriptIntoChunks(transcript: string, numChunks: number): string[] {
+    const chunks: string[] = [];
+    const totalLength = transcript.length;
+    const chunkSize = Math.ceil(totalLength / numChunks);
+
+    for (let i = 0; i < numChunks; i++) {
+        const start = i * chunkSize;
+        const end = start + chunkSize;
+        chunks.push(transcript.substring(start, end));
+    }
+    return chunks;
 }
 
-const processSessionTextFlow = ai.defineFlow(
-  {
-    name: 'processSessionTextFlow',
-    inputSchema: ProcessSessionInputSchema,
-    outputSchema: ProcessSessionOutputSchema,
-  },
-  async (input) => {
-    const prompt = `
-      Você é um mestre de jogo experiente e um editor de conteúdo para um site de RPG de mesa. Sua tarefa é analisar a transcrição de uma sessão de jogo e extrair informações estruturadas de forma concisa e atraente para um resumo pós-sessão.
 
-      Analise a seguinte transcrição:
-      ---
-      {{{transcript}}}
-      ---
+// #################################################################
+// # 1. ORCHESTRATOR FLOW                                          #
+// #################################################################
 
-      Com base no texto, gere o seguinte conteúdo:
-      1.  **Título e Subtítulo:** Crie um título e um subtítulo no estilo de um episódio de série, que capture a essência da sessão.
-      2.  **Destaques (Highlights):** Identifique até 10 momentos-chave. Para cada um, forneça um título, uma breve descrição da cena e um pequeno trecho da transcrição que ilustre esse momento.
-      3.  **NPCs:** Liste todos os NPCs que apareceram, com uma breve descrição de sua aparência e da interação que tiveram.
-      4.  **Personagens dos Jogadores:** Liste os personagens dos jogadores que participaram e descreva uma ação ou momento marcante de cada um.
-      5.  **Itens:** Liste os itens que foram importantes ou introduzidos na sessão, com um trecho da transcrição onde eles foram relevantes.
-      6.  **Lugares:** Liste os lugares importantes por onde os personagens passaram ou que foram mencionados, com uma breve descrição.
-      7.  **Prompt de Imagem:** Crie um prompt em INGLÊS, detalhado e cinematográfico, para um modelo de IA de geração de imagem. Este prompt deve descrever uma cena épica e visualmente rica que sirva como a imagem de capa para esta sessão.
-      
-      Formate a saída estritamente como o JSON solicitado.
-    `;
+export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput & { coverImageUrl: string }> {
+    // Step 1: Divide the transcript into 10 chunks
+    const chunks = splitTranscriptIntoChunks(input.transcript, 10);
+
+    // Step 2-11: Process all 10 chunks in parallel to extract raw insights
+    const extractionPromises = chunks.map(chunk => extractInsightsFlow({ content: chunk }));
+    const extractedData = await Promise.all(extractionPromises);
     
-    const { output } = await ai.generate({
-      prompt: prompt,
-      model: googleAI.model('gemini-1.5-pro'),
-      output: {
-        schema: ProcessSessionOutputSchema,
-      },
-      config: {
-        temperature: 0.5,
-      }
-    });
+    // Step 12: Synthesize the raw data from all chunks into a coherent summary
+    const synthesizedData = await synthesizeInsightsFlow({ allChunksData: extractedData });
 
-    return output!;
-  }
+    // Step 13: Generate the cover image based on the synthesized prompt
+    const imageUrl = await generateCoverImageFlow({ prompt: synthesizedData.image_prompt });
+
+    // Final Step: Combine and return the results
+    return {
+        ...synthesizedData,
+        coverImageUrl: imageUrl,
+    };
+}
+
+
+// #################################################################
+// # 2. SPECIALIZED FLOWS (Called by the Orchestrator)             #
+// #################################################################
+
+/**
+ * Flow to extract insights from a single chunk of text.
+ */
+const extractInsightsFlow = ai.defineFlow(
+    {
+        name: 'extractInsightsFlow',
+        inputSchema: z.object({ content: z.string() }),
+        outputSchema: RawChunkDataSchema,
+    },
+    async ({ content }) => {
+        const prompt = `
+            You are an expert RPG session analyst. Your task is to extract key information from a small segment of a game transcript.
+            Do not make up information. If a category is not present, return an empty array for it.
+
+            Focus ONLY on the content within this segment:
+            ---
+            {{{content}}}
+            ---
+
+            Extract the following, if present:
+            - Highlights: Key moments, decisions, or surprising events.
+            - NPCs: Any non-player characters mentioned or interacted with.
+            - Player Characters: Any player characters mentioned and their significant actions.
+            - Items: Any relevant items that were found, used, or mentioned.
+            - Locations: Any new places visited or described.
+            
+            Format the output strictly as the requested JSON.
+        `;
+
+        const { output } = await ai.generate({
+            prompt,
+            model: googleAI.model('gemini-1.5-pro'),
+            output: { schema: RawChunkDataSchema },
+            config: { temperature: 0.2 }
+        });
+        return output!;
+    }
 );
 
+/**
+ * Flow to synthesize and refine data from all chunks.
+ */
+const synthesizeInsightsFlow = ai.defineFlow(
+    {
+        name: 'synthesizeInsightsFlow',
+        inputSchema: z.object({ allChunksData: z.array(RawChunkDataSchema) }),
+        outputSchema: ProcessSessionOutputSchema,
+    },
+    async ({ allChunksData }) => {
+        const prompt = `
+            You are a master editor and storyteller for a tabletop RPG group. You have received raw, sometimes duplicated, data extracted from 10 sequential chunks of a game session.
+            Your job is to synthesize this information into a single, coherent, and polished summary.
+
+            - Title & Subtitle: Create a creative and engaging title and subtitle for the entire session.
+            - Deduplicate & Refine: Consolidate the lists of highlights, NPCs, items, and locations. Remove duplicates and merge similar entries. Select the best 10 highlights.
+            - Summarize Characters: Provide a brief, impactful summary for each player character based on all their mentioned actions.
+            - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
+
+            Here is the raw data from all chunks:
+            ---
+            {{{json allChunksData}}}
+            ---
+
+            Produce a final, clean, and well-structured JSON output.
+        `;
+        
+        const { output } = await ai.generate({
+            prompt,
+            model: googleAI.model('gemini-1.5-pro'),
+            output: { schema: ProcessSessionOutputSchema },
+            config: { temperature: 0.7 }
+        });
+        return output!;
+    }
+);
+
+/**
+ * Flow to generate the cover image.
+ */
 const generateCoverImageFlow = ai.defineFlow(
     {
         name: 'generateCoverImageFlow',
