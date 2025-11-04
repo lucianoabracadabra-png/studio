@@ -11,7 +11,6 @@ export default {
     fontFamily: {
       sans: ['"Roboto"', 'sans-serif'],
       headline: ['"Metamorphous"', 'serif'],
-      body: ['"Roboto"', 'sans-serif'],
       mono: ['"Roboto Mono"', 'monospace'],
     },
     extend: {
