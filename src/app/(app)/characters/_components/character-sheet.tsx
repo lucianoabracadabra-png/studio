@@ -5,8 +5,7 @@ import React, { useState, useReducer, useMemo, useEffect } from 'react';
 import type { Character, Armor, Weapon, Accessory, HealthState, CharacterItem, ItemOwnership } from '@/lib/character-data';
 import { getNextAlignmentState, iconMap, itemDatabase } from '@/lib/character-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight, Anchor, Leaf } from 'lucide-react';
+import { Heart, HeartCrack, Info, Shield, Swords, Gem, BookOpen, PersonStanding, BrainCircuit, Users, ChevronDown, Plus, Minus, MoveUpRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Book } from '@/components/layout/book';
-import { motion } from 'framer-motion';
 import {
   DndContext,
   closestCenter,
@@ -237,10 +235,10 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             <div>
                 <h4 className='font-semibold text-accent mb-2'>Thrust</h4>
                 <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                    <div><Label className='text-muted-foreground'>Dano</Label><p className='text-foreground'>{weapon.thrust.damage}</p></div>
+                    <div><Label className='text-muted-foreground'>Dano</Label><p className='font-mono text-foreground'>{weapon.thrust.damage}</p></div>
                     <div><Label className='text-muted-foreground'>Tipo</Label><p className='text-foreground'>{weapon.thrust.type}</p></div>
-                    <div><Label className='text-muted-foreground'>AP</Label><p className='text-foreground'>{weapon.thrust.ap}</p></div>
-                    <div><Label className='text-muted-foreground'>Precisão</Label><p className='text-foreground'>{weapon.thrust.accuracy}</p></div>
+                    <div><Label className='text-muted-foreground'>AP</Label><p className='font-mono text-foreground'>{weapon.thrust.ap}</p></div>
+                    <div><Label className='text-muted-foreground'>Precisão</Label><p className='font-mono text-foreground'>{weapon.thrust.accuracy}</p></div>
                 </div>
             </div>
         )}
@@ -248,10 +246,10 @@ const WeaponCardDetails = ({ weapon }: { weapon: Weapon }) => (
             <div>
                 <h4 className='font-semibold text-accent mb-2'>Swing</h4>
                 <div className='grid grid-cols-4 gap-2 text-center text-sm'>
-                    <div><Label className='text-muted-foreground'>Dano</Label><p className='text-foreground'>{weapon.swing.damage}</p></div>
+                    <div><Label className='text-muted-foreground'>Dano</Label><p className='font-mono text-foreground'>{weapon.swing.damage}</p></div>
                     <div><Label className='text-muted-foreground'>Tipo</Label><p className='text-foreground'>{weapon.swing.type}</p></div>
-                    <div><Label className='text-muted-foreground'>AP</Label><p className='text-foreground'>{weapon.swing.ap}</p></div>
-                    <div><Label className='text-muted-foreground'>Precisão</Label><p className='text-foreground'>{weapon.swing.accuracy}</p></div>
+                    <div><Label className='text-muted-foreground'>AP</Label><p className='font-mono text-foreground'>{weapon.swing.ap}</p></div>
+                    <div><Label className='text-muted-foreground'>Precisão</Label><p className='font-mono text-foreground'>{weapon.swing.accuracy}</p></div>
                 </div>
             </div>
         )}
@@ -593,6 +591,15 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
     
     const [focusState, focusDispatch] = useReducer(focusReducer, initialFocusState(initialCharacterData));
 
+    useEffect(() => {
+        // When initialCharacterData changes (i.e., a new character is selected),
+        // we need to reset all our local states.
+        characterDispatch({ type: 'RESET', payload: initialCharacterData });
+        focusDispatch({ type: 'RESET', payload: initialFocusState(initialCharacterData) });
+        setCharacterItems(hydrateCharacterItems(initialCharacterData.equipment));
+    }, [initialCharacterData]);
+
+
     const sensors = useSensors(
       useSensor(MouseSensor, {
         // Require the mouse to move by 10 pixels before activating
@@ -620,14 +627,6 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
 
     const handleAlignmentToggle = (axisName: string) => {
         characterDispatch({ type: 'TOGGLE_ALIGNMENT', payload: { axisName } });
-    };
-    
-    const handleSkillChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        focusDispatch({ type: 'SET_SKILL', pilar, payload: { name, level: newLevel } });
-    };
-
-    const handleModularChange = (pilar: 'fisico' | 'mental' | 'social', name: string, newLevel: number) => {
-        focusDispatch({ type: 'SET_MODULAR', pilar, payload: { name, level: newLevel } });
     };
     
     function findContainer(id: string | number) {
@@ -864,5 +863,7 @@ export function CharacterSheet({ initialCharacterData }: { initialCharacterData:
         </div>
     );
 }
+
+    
 
     

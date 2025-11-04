@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { EditableCharacterSheet } from './_components/editable-character-sheet';
+import { CharacterSheet } from './_components/character-sheet';
 import charactersData from '@/lib/data/characters.json';
 import type { Character } from '@/lib/character-data';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Save, Trash } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export default function ProfilePage() {
+export default function CharactersPage() {
   const [allCharacters] = useState<Character[]>(charactersData.characters as Character[]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>(allCharacters[0].id);
   
@@ -71,7 +71,7 @@ export default function ProfilePage() {
           </Button>
         </div>
       </div>
-      <EditableCharacterSheet character={character} setCharacter={setCharacter} />
+      <CharacterSheet initialCharacterData={character} />
     </div>
   );
 }
