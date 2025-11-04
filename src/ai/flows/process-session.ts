@@ -55,6 +55,7 @@ const ProcessSessionInputSchema = z.object({
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
+
 // Schema for the output from the synthesis prompt (without image URL)
 const SynthesisOutputSchema = z.object({
     title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
@@ -66,6 +67,7 @@ const SynthesisOutputSchema = z.object({
     items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
     locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
 });
+
 
 // Final output of the orchestrator
 const ProcessSessionOutputSchema = SynthesisOutputSchema.extend({
@@ -324,5 +326,3 @@ export async function processSession(input: ProcessSessionInput): Promise<Proces
         coverImageUrl: imageUrl,
     };
 }
-
-      
