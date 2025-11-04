@@ -98,7 +98,7 @@ const processSessionTextFlow = ai.defineFlow(
     
     const { output } = await ai.generate({
       prompt: prompt,
-      model: googleAI.model('gemini-1.5-pro-latest'),
+      model: googleAI.model('gemini-1.5-pro'),
       output: {
         schema: ProcessSessionOutputSchema,
       },
