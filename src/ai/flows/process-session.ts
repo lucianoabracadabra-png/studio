@@ -41,13 +41,12 @@ const PlayerCharacterSchema = z.object({
 });
 
 // Input for the main orchestrator
-export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
+export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
 // Final output of the orchestrator
-export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -58,6 +57,7 @@ const ProcessSessionOutputSchema = z.object({
   locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
   image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
 });
+export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
 
 // Schema for the raw, unprocessed data from each chunk
@@ -91,7 +91,7 @@ function splitTranscriptIntoChunks(transcript: string, numChunks: number): strin
 // # 1. ORCHESTRATOR FLOW                                          #
 // #################################################################
 
-export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput & { coverImageUrl: string }> {
+export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput> {
     // Step 1: Divide the transcript into 10 chunks
     const chunks = splitTranscriptIntoChunks(input.transcript, 10);
 
@@ -108,6 +108,7 @@ export async function processSession(input: ProcessSessionInput): Promise<Proces
     // Final Step: Combine and return the results
     return {
         ...synthesizedData,
+        // @ts-ignore
         coverImageUrl: imageUrl,
     };
 }
@@ -116,6 +117,31 @@ export async function processSession(input: ProcessSessionInput): Promise<Proces
 // #################################################################
 // # 2. SPECIALIZED FLOWS (Called by the Orchestrator)             #
 // #################################################################
+
+const extractInsightsPrompt = ai.definePrompt({
+    name: 'extractInsightsPrompt',
+    input: { schema: z.object({ content: z.string() }) },
+    output: { schema: RawChunkDataSchema },
+    prompt: `
+        You are an expert RPG session analyst. Your task is to extract key information from a small segment of a game transcript.
+        Do not make up information. If a category is not present, return an empty array for it.
+
+        Focus ONLY on the content within this segment:
+        ---
+        {{{content}}}
+        ---
+
+        Extract the following, if present:
+        - Highlights: Key moments, decisions, or surprising events.
+        - NPCs: Any non-player characters mentioned or interacted with.
+        - Player Characters: Any player characters mentioned and their significant actions.
+        - Items: Any relevant items that were found, used, or mentioned.
+        - Locations: Any new places visited or described.
+    `,
+    model: googleAI.model('gemini-1.5-flash-latest'),
+    config: { temperature: 0.2 },
+});
+
 
 /**
  * Flow to extract insights from a single chunk of text.
@@ -126,35 +152,36 @@ const extractInsightsFlow = ai.defineFlow(
         inputSchema: z.object({ content: z.string() }),
         outputSchema: RawChunkDataSchema,
     },
-    async ({ content }) => {
-        const prompt = `
-            You are an expert RPG session analyst. Your task is to extract key information from a small segment of a game transcript.
-            Do not make up information. If a category is not present, return an empty array for it.
-
-            Focus ONLY on the content within this segment:
-            ---
-            {{{content}}}
-            ---
-
-            Extract the following, if present:
-            - Highlights: Key moments, decisions, or surprising events.
-            - NPCs: Any non-player characters mentioned or interacted with.
-            - Player Characters: Any player characters mentioned and their significant actions.
-            - Items: Any relevant items that were found, used, or mentioned.
-            - Locations: Any new places visited or described.
-            
-            Format the output strictly as the requested JSON.
-        `;
-
-        const { output } = await ai.generate({
-            prompt,
-            model: googleAI.model('gemini-1.5-flash-latest'),
-            output: { schema: RawChunkDataSchema },
-            config: { temperature: 0.2 }
-        });
+    async (input) => {
+        const { output } = await extractInsightsPrompt(input);
         return output!;
     }
 );
+
+const synthesizeInsightsPrompt = ai.definePrompt({
+    name: 'synthesizeInsightsPrompt',
+    input: { schema: z.object({ allChunksData: z.array(RawChunkDataSchema) }) },
+    output: { schema: ProcessSessionOutputSchema },
+    prompt: `
+        You are a master editor and storyteller for a tabletop RPG group. You have received raw, sometimes duplicated, data extracted from 10 sequential chunks of a game session.
+        Your job is to synthesize this information into a single, coherent, and polished summary.
+
+        - Title & Subtitle: Create a creative and engaging title and subtitle for the entire session.
+        - Deduplicate & Refine: Consolidate the lists of highlights, NPCs, items, and locations. Remove duplicates and merge similar entries. Select the best 10 highlights.
+        - Summarize Characters: Provide a brief, impactful summary for each player character based on all their mentioned actions.
+        - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
+
+        Here is the raw data from all chunks:
+        ---
+        {{{json allChunksData}}}
+        ---
+
+        Produce a final, clean, and well-structured JSON output.
+    `,
+    model: googleAI.model('gemini-1.5-flash-latest'),
+    config: { temperature: 0.7 },
+});
+
 
 /**
  * Flow to synthesize and refine data from all chunks.
@@ -165,30 +192,8 @@ const synthesizeInsightsFlow = ai.defineFlow(
         inputSchema: z.object({ allChunksData: z.array(RawChunkDataSchema) }),
         outputSchema: ProcessSessionOutputSchema,
     },
-    async ({ allChunksData }) => {
-        const prompt = `
-            You are a master editor and storyteller for a tabletop RPG group. You have received raw, sometimes duplicated, data extracted from 10 sequential chunks of a game session.
-            Your job is to synthesize this information into a single, coherent, and polished summary.
-
-            - Title & Subtitle: Create a creative and engaging title and subtitle for the entire session.
-            - Deduplicate & Refine: Consolidate the lists of highlights, NPCs, items, and locations. Remove duplicates and merge similar entries. Select the best 10 highlights.
-            - Summarize Characters: Provide a brief, impactful summary for each player character based on all their mentioned actions.
-            - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
-
-            Here is the raw data from all chunks:
-            ---
-            {{{json allChunksData}}}
-            ---
-
-            Produce a final, clean, and well-structured JSON output.
-        `;
-        
-        const { output } = await ai.generate({
-            prompt,
-            model: googleAI.model('gemini-1.5-flash-latest'),
-            output: { schema: ProcessSessionOutputSchema },
-            config: { temperature: 0.7 }
-        });
+    async (input) => {
+        const { output } = await synthesizeInsightsPrompt(input);
         return output!;
     }
 );
