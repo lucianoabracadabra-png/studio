@@ -13,7 +13,10 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/google-genai';
 
-// Schemas for individual insights extracted from chunks
+// #################################################################
+// # 1. Schemas                                                    #
+// #################################################################
+
 const HighlightSchema = z.object({
   title: z.string().describe("Um título curto e impactante para o evento."),
   scene_description: z.string().describe("Uma breve descrição da cena ou do momento."),
@@ -41,27 +44,26 @@ const PlayerCharacterSchema = z.object({
 });
 
 // Input for the main orchestrator
-export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
+export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
-// Final output of the orchestrator
-export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
+
+// Final output of the orchestrator, including the cover image URL
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
+  coverImageUrl: z.string().url().describe("A URL da imagem de capa gerada."),
   highlights: z.array(HighlightSchema).max(10).describe("Uma lista de até 10 dos momentos mais importantes da sessão."),
   npcs: z.array(NpcSchema).describe("Uma lista de NPCs que apareceram na sessão."),
   player_characters: z.array(PlayerCharacterSchema).describe("Uma lista dos personagens dos jogadores que apareceram e suas ações marcantes."),
   items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
   locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
-  image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
 });
-
+export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
 // Schema for the raw, unprocessed data from each chunk
-type RawChunkData = z.infer<typeof RawChunkDataSchema>;
 const RawChunkDataSchema = z.object({
   highlights: z.array(HighlightSchema).optional(),
   npcs: z.array(NpcSchema).optional(),
@@ -69,6 +71,26 @@ const RawChunkDataSchema = z.object({
   items: z.array(ItemSchema).optional(),
   locations: z.array(LocationSchema).optional(),
 });
+type RawChunkData = z.infer<typeof RawChunkDataSchema>;
+
+// Schema for the refined data sent to the synthesis prompt
+const SynthesisInputSchema = z.object({
+  highlights: z.array(HighlightSchema),
+  npcs: z.array(NpcSchema),
+  player_characters: z.array(PlayerCharacterSchema),
+  items: z.array(ItemSchema),
+  locations: z.array(LocationSchema),
+});
+
+// Schema for the output from the synthesis prompt (without image URL)
+const SynthesisOutputSchema = ProcessSessionOutputSchema.omit({ coverImageUrl: true }).extend({
+    image_prompt: z.string().describe("Um prompt detalhado em inglês para um modelo de geração de imagem, descrevendo uma cena épica e representativa da sessão para ser usada como arte de capa. O prompt deve ser cinematográfico e visualmente rico."),
+});
+
+
+// #################################################################
+// # 2. Helper Functions                                           #
+// #################################################################
 
 /**
  * Splits text into a specified number of chunks.
@@ -87,35 +109,38 @@ function splitTranscriptIntoChunks(transcript: string, numChunks: number): strin
 }
 
 
-// #################################################################
-// # 1. ORCHESTRATOR FLOW                                          #
-// #################################################################
+/**
+ * Pre-processes and deduplicates data from all chunks.
+ */
+function preProcessData(allChunksData: RawChunkData[]): z.infer<typeof SynthesisInputSchema> {
+    const consolidated = {
+        highlights: [] as Highlight[],
+        npcs: new Map<string, Npc>(),
+        player_characters: new Map<string, PlayerCharacter>(),
+        items: new Map<string, Item>(),
+        locations: new Map<string, Location>(),
+    };
 
-export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput> {
-    // Step 1: Divide the transcript into 10 chunks
-    const chunks = splitTranscriptIntoChunks(input.transcript, 10);
-
-    // Step 2-11: Process all 10 chunks in parallel to extract raw insights
-    const extractionPromises = chunks.map(chunk => extractInsightsFlow({ content: chunk }));
-    const extractedData = await Promise.all(extractionPromises);
+    for (const chunk of allChunksData) {
+        if (chunk.highlights) consolidated.highlights.push(...chunk.highlights);
+        chunk.npcs?.forEach(npc => !consolidated.npcs.has(npc.name.toLowerCase()) && consolidated.npcs.set(npc.name.toLowerCase(), npc));
+        chunk.player_characters?.forEach(pc => !consolidated.player_characters.has(pc.name.toLowerCase()) && consolidated.player_characters.set(pc.name.toLowerCase(), pc));
+        chunk.items?.forEach(item => !consolidated.items.has(item.name.toLowerCase()) && consolidated.items.set(item.name.toLowerCase(), item));
+        chunk.locations?.forEach(loc => !consolidated.locations.has(loc.name.toLowerCase()) && consolidated.locations.set(loc.name.toLowerCase(), loc));
+    }
     
-    // Step 12: Synthesize the raw data from all chunks into a coherent summary
-    const synthesizedData = await synthesizeInsightsFlow({ allChunksData: extractedData });
-
-    // Step 13: Generate the cover image based on the synthesized prompt
-    const imageUrl = await generateCoverImageFlow({ prompt: synthesizedData.image_prompt });
-
-    // Final Step: Combine and return the results
     return {
-        ...synthesizedData,
-        // @ts-ignore
-        coverImageUrl: imageUrl,
+        highlights: consolidated.highlights,
+        npcs: Array.from(consolidated.npcs.values()),
+        player_characters: Array.from(consolidated.player_characters.values()),
+        items: Array.from(consolidated.items.values()),
+        locations: Array.from(consolidated.locations.values()),
     };
 }
 
 
 // #################################################################
-// # 2. SPECIALIZED FLOWS (Called by the Orchestrator)             #
+// # 3. AI Prompts                                                 #
 // #################################################################
 
 const extractInsightsPrompt = ai.definePrompt({
@@ -142,6 +167,47 @@ const extractInsightsPrompt = ai.definePrompt({
     config: { temperature: 0.2 },
 });
 
+const synthesizeInsightsPrompt = ai.definePrompt({
+    name: 'synthesizeInsightsPrompt',
+    input: { schema: SynthesisInputSchema },
+    output: { schema: SynthesisOutputSchema },
+    prompt: `
+        You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and deduplicated lists of highlights, NPCs, items, and locations from a game session.
+        Your job is to synthesize this information into a single, coherent, and polished summary.
+
+        - Title & Subtitle: Based on all the information, create a creative and engaging title and subtitle for the entire session.
+        - Refine Highlights: From the provided list of all highlights, select the best and most impactful 10 highlights. Ensure they are well-written and capture the essence of the session.
+        - Refine Lists: Review the provided lists of NPCs, characters, items, and locations. You can slightly rephrase descriptions for clarity and consistency, but do not add or remove items from the lists.
+        - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
+
+        Here is the pre-processed data:
+        ---
+        Highlights:
+        {{{json highlights}}}
+
+        NPCs:
+        {{{json npcs}}}
+
+        Player Characters:
+        {{{json player_characters}}}
+
+        Items:
+        {{{json items}}}
+        
+        Locations:
+        {{{json locations}}}
+        ---
+
+        Produce a final, clean, and well-structured JSON output with the refined information.
+    `,
+    model: googleAI.model('gemini-pro'),
+    config: { temperature: 0.7 },
+});
+
+
+// #################################################################
+// # 4. Flows                                                      #
+// #################################################################
 
 /**
  * Flow to extract insights from a single chunk of text.
@@ -158,39 +224,14 @@ const extractInsightsFlow = ai.defineFlow(
     }
 );
 
-const synthesizeInsightsPrompt = ai.definePrompt({
-    name: 'synthesizeInsightsPrompt',
-    input: { schema: z.object({ allChunksData: z.array(RawChunkDataSchema) }) },
-    output: { schema: ProcessSessionOutputSchema },
-    prompt: `
-        You are a master editor and storyteller for a tabletop RPG group. You have received raw, sometimes duplicated, data extracted from 10 sequential chunks of a game session.
-        Your job is to synthesize this information into a single, coherent, and polished summary.
-
-        - Title & Subtitle: Create a creative and engaging title and subtitle for the entire session.
-        - Deduplicate & Refine: Consolidate the lists of highlights, NPCs, items, and locations. Remove duplicates and merge similar entries. Select the best 10 highlights.
-        - Summarize Characters: Provide a brief, impactful summary for each player character based on all their mentioned actions.
-        - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
-
-        Here is the raw data from all chunks:
-        ---
-        {{{json allChunksData}}}
-        ---
-
-        Produce a final, clean, and well-structured JSON output.
-    `,
-    model: googleAI.model('gemini-pro'),
-    config: { temperature: 0.7 },
-});
-
-
 /**
  * Flow to synthesize and refine data from all chunks.
  */
 const synthesizeInsightsFlow = ai.defineFlow(
     {
         name: 'synthesizeInsightsFlow',
-        inputSchema: z.object({ allChunksData: z.array(RawChunkDataSchema) }),
-        outputSchema: ProcessSessionOutputSchema,
+        inputSchema: SynthesisInputSchema,
+        outputSchema: SynthesisOutputSchema,
     },
     async (input) => {
         const { output } = await synthesizeInsightsPrompt(input);
@@ -205,11 +246,11 @@ const generateCoverImageFlow = ai.defineFlow(
     {
         name: 'generateCoverImageFlow',
         inputSchema: z.object({ prompt: z.string() }),
-        outputSchema: z.string(),
+        outputSchema: z.string().url(),
     },
     async ({ prompt }) => {
         const { media } = await ai.generate({
-            model: googleAI.model('imagen-4.0-fast-generate-001'),
+            model: 'googleai/imagen-4.0-fast-generate-001',
             prompt: `fantasy art, epic, cinematic, high detail, ${prompt}`,
             config: {
                 aspectRatio: '16:9',
@@ -218,3 +259,32 @@ const generateCoverImageFlow = ai.defineFlow(
         return media.url!;
     }
 );
+
+
+// #################################################################
+// # 5. ORCHESTRATOR FLOW                                          #
+// #################################################################
+
+export async function processSession(input: ProcessSessionInput): Promise<ProcessSessionOutput> {
+    // Step 1: Divide the transcript into 10 chunks
+    const chunks = splitTranscriptIntoChunks(input.transcript, 10);
+
+    // Step 2-11: Process all 10 chunks in parallel to extract raw insights
+    const extractionPromises = chunks.map(chunk => extractInsightsFlow({ content: chunk }));
+    const extractedData = await Promise.all(extractionPromises);
+    
+    // Step 12: Pre-process the raw data to deduplicate and consolidate.
+    const preProcessedData = preProcessData(extractedData);
+
+    // Step 13: Synthesize the pre-processed data into a coherent summary.
+    const synthesizedData = await synthesizeInsightsFlow(preProcessedData);
+
+    // Step 14: Generate the cover image based on the synthesized prompt.
+    const imageUrl = await generateCoverImageFlow({ prompt: synthesizedData.image_prompt });
+
+    // Final Step: Combine and return the results
+    return {
+        ...synthesizedData,
+        coverImageUrl: imageUrl,
+    };
+}
