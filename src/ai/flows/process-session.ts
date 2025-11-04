@@ -22,26 +22,33 @@ const HighlightSchema = z.object({
   scene_description: z.string().describe("Uma breve descrição da cena ou do momento."),
   transcript_excerpt: z.string().describe("Um trecho relevante da transcrição que captura o momento.")
 });
+type Highlight = z.infer<typeof HighlightSchema>;
 
 const NpcSchema = z.object({
   name: z.string().describe("O nome do NPC."),
   description: z.string().describe("Uma breve descrição visual e da interação com o NPC.")
 });
+type Npc = z.infer<typeof NpcSchema>;
+
 
 const ItemSchema = z.object({
   name: z.string().describe("O nome do item importante."),
   transcript_excerpt: z.string().describe("A transcrição da cena onde o item apareceu ou foi significativo.")
 });
+type Item = z.infer<typeof ItemSchema>;
 
 const LocationSchema = z.object({
   name: z.string().describe("O nome do lugar importante."),
   description: z.string().describe("Uma breve descrição do lugar.")
 });
+type Location = z.infer<typeof LocationSchema>;
 
 const PlayerCharacterSchema = z.object({
   name: z.string().describe("O nome do personagem do jogador."),
   appearance_description: z.string().describe("Uma breve descrição da aparição ou de uma ação marcante do personagem na sessão.")
 });
+type PlayerCharacter = z.infer<typeof PlayerCharacterSchema>;
+
 
 // Input for the main orchestrator
 const ProcessSessionInputSchema = z.object({
@@ -49,8 +56,6 @@ const ProcessSessionInputSchema = z.object({
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
-
-// Final output of the orchestrator, including the cover image URL
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -61,6 +66,7 @@ const ProcessSessionOutputSchema = z.object({
   items: z.array(ItemSchema).describe("Uma lista de itens importantes que surgiram na sessão."),
   locations: z.array(LocationSchema).describe("Uma lista de lugares importantes visitados ou mencionados."),
 });
+// Final output of the orchestrator, including the cover image URL
 export type ProcessSessionOutput = z.infer<typeof ProcessSessionOutputSchema>;
 
 // Schema for the raw, unprocessed data from each chunk
