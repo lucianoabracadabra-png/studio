@@ -66,56 +66,57 @@ export function SidebarNav({ activeColorHue }: { activeColorHue: string }) {
     } as React.CSSProperties;
 
     return (
-      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center gap-4 z-50 py-4 border-r-4" style={{ ...sidebarStyle, perspective: '1000px' }}>
-          <Link href="/dashboard" className='px-4'>
+      <div className="fixed top-0 left-0 h-full w-20 flex flex-col items-center z-50 py-4 border-r-4" style={{ ...sidebarStyle, perspective: '1000px' }}>
+          <Link href="/dashboard" className='px-4 pb-4 flex-shrink-0'>
             <Icons.logo className="h-8 w-8 transition-colors duration-500" style={logoStyle} />
           </Link>
           
-          <ScrollArea className="w-full px-2">
-            <div className="flex flex-col items-center gap-4 py-2">
-                {navData.mainLinks.map(link => {
-                    const Icon = iconMap[link.icon];
-                    return (
-                        <Link href={link.href} key={link.id}>
-                            <Book
-                                label={link.label}
-                                icon={Icon}
-                                colorHsl={link.colorHue}
-                                isActive={pathname.startsWith(link.href)}
-                                showLabel={false}
-                            />
-                        </Link>
-                    )
-                })}
-            
-                <div className='h-4' />
+          <ScrollArea className="w-full px-2 flex-grow">
+            <div className="flex flex-col justify-between h-full">
+              <div className="flex flex-col items-center gap-4 py-2">
+                  {navData.mainLinks.map(link => {
+                      const Icon = iconMap[link.icon];
+                      return (
+                          <Link href={link.href} key={link.id}>
+                              <Book
+                                  label={link.label}
+                                  icon={Icon}
+                                  colorHsl={link.colorHue}
+                                  isActive={pathname.startsWith(link.href)}
+                                  showLabel={false}
+                              />
+                          </Link>
+                      )
+                  })}
+              
+                  <div className='h-4' />
 
-                {navData.gmToolsLinks.map(link => {
-                     const Icon = iconMap[link.icon];
-                     return (
-                        <Link href={link.href} key={link.id}>
-                            <Book
-                                label={link.label}
-                                icon={Icon}
-                                colorHsl={link.colorHue}
-                                isActive={pathname.startsWith(link.href)}
-                                showLabel={false}
-                            />
-                        </Link>
-                    )
-                })}
+                  {navData.gmToolsLinks.map(link => {
+                       const Icon = iconMap[link.icon];
+                       return (
+                          <Link href={link.href} key={link.id}>
+                              <Book
+                                  label={link.label}
+                                  icon={Icon}
+                                  colorHsl={link.colorHue}
+                                  isActive={pathname.startsWith(link.href)}
+                                  showLabel={false}
+                              />
+                          </Link>
+                      )
+                  })}
+              </div>
+              
+              <nav className="flex flex-col items-center gap-4 py-2 sticky bottom-0">
+                  <Link href="/settings">
+                    <Book label="Configurações" icon={Settings} colorHsl={'240 10% 70%'} isActive={pathname.startsWith('/settings')} showLabel={false} />
+                  </Link>
+                  <Link href={profileLink.href}>
+                    <Book label={profileLink.label} icon={profileLink.icon} colorHsl={profileLink.colorHue} isActive={pathname.startsWith(profileLink.href)} showLabel={false} />
+                  </Link>
+              </nav>
             </div>
           </ScrollArea>
-          
-          <div className='flex-grow'></div>
-          <nav className="flex flex-col items-center gap-4">
-              <Link href="/settings">
-                <Book label="Configurações" icon={Settings} colorHsl={'240 10% 70%'} isActive={pathname.startsWith('/settings')} showLabel={false} />
-              </Link>
-              <Link href={profileLink.href}>
-                <Book label={profileLink.label} icon={profileLink.icon} colorHsl={profileLink.colorHue} isActive={pathname.startsWith(profileLink.href)} showLabel={false} />
-              </Link>
-          </nav>
       </div>
   );
 }
