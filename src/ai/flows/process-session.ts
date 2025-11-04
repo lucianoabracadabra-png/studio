@@ -213,6 +213,3 @@ const generateCoverImageFlow = ai.defineFlow(
         return media.url!;
     }
 );
-
-
-
