@@ -20,9 +20,11 @@ export default function DashboardPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Painel de Controle</h1>
-        <Button className="mt-4 sm:mt-0">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Criar Campanha
+        <Button asChild className="mt-4 sm:mt-0">
+           <Link href="/campaigns/new">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Criar Campanha
+            </Link>
         </Button>
       </div>
 
@@ -48,7 +50,7 @@ export default function DashboardPage() {
               </CardContent>
               <CardFooter className="p-4">
                 <Button asChild className="w-full font-bold">
-                  <Link href="#">Entrar na Campanha</Link>
+                  <Link href={`/campaigns/${campaign.id}`}>Entrar na Campanha</Link>
                 </Button>
               </CardFooter>
             </Card>
