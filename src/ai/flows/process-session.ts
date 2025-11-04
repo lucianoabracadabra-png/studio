@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Processes a game session transcript to generate a structured summary, including a title, subtitle, cover image, and detailed lists of highlights, NPCs, items, and locations.
