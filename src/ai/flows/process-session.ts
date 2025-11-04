@@ -54,7 +54,6 @@ const ProcessSessionInputSchema = z.object({
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
-// Final output of the orchestrator, including the cover image URL
 const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
@@ -183,7 +182,7 @@ const extractInsightsPrompt = ai.definePrompt({
         - Items: Any relevant items that were found, used, or mentioned.
         - Locations: Any new places visited or described.
     `,
-    model: googleAI.model('gemini-pro'),
+    model: googleAI.model('gemini-1.5-flash-latest'),
     config: { temperature: 0.2 },
 });
 
@@ -220,7 +219,7 @@ const synthesizeInsightsPrompt = ai.definePrompt({
 
         Produce a final, clean, and well-structured JSON output with the refined information.
     `,
-    model: googleAI.model('gemini-pro'),
+    model: googleAI.model('gemini-1.5-flash-latest'),
     config: { temperature: 0.7 },
 });
 
