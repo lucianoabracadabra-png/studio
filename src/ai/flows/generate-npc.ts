@@ -22,7 +22,7 @@ export type GenerateNpcInput = z.infer<typeof GenerateNpcInputSchema>;
 const GenerateNpcOutputSchema = z.object({
   name: z.string().describe("The generated NPC's full name."),
   description: z.string().describe("A detailed physical and personality description for the NPC."),
-  backstory: z.string().describe("A compelling backstory for the NPC, including motivations and secrets."),
+  backstory: z.string().describe("A compelling backstory for the NPC, including motivations and potential plot hooks."),
 });
 export type GenerateNpcOutput = z.infer<typeof GenerateNpcOutputSchema>;
 
