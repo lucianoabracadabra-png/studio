@@ -40,13 +40,13 @@ const PlayerCharacterSchema = z.object({
 });
 
 // Input for the main orchestrator
-export const ProcessSessionInputSchema = z.object({
+const ProcessSessionInputSchema = z.object({
   transcript: z.string().describe("A transcrição completa da sessão de jogo em formato de texto."),
 });
 export type ProcessSessionInput = z.infer<typeof ProcessSessionInputSchema>;
 
 // Final output of the orchestrator
-export const ProcessSessionOutputSchema = z.object({
+const ProcessSessionOutputSchema = z.object({
   title: z.string().describe("Um título criativo e curto para a sessão, como o de um episódio."),
   subtitle: z.string().describe("Um subtítulo que complementa o título, dando mais contexto."),
   highlights: z.array(HighlightSchema).max(10).describe("Uma lista de até 10 dos momentos mais importantes da sessão."),
