@@ -141,7 +141,7 @@ export function InfoPanelSummary({ character, isOpen }: { character: Character, 
                         />
                     </div>
                     <div className='flex-grow'>
-                        <p className='font-bold text-xl text-foreground'>{name}</p>
+                        <p className='font-headline text-xl text-foreground'>{name}</p>
                         <p className='text-sm text-muted-foreground'>{concept}</p>
                     </div>
                     <div className='text-right'>
@@ -188,7 +188,7 @@ export function InfoPanel({ character, onAlignmentToggle }: { character: Charact
                     </div>
                     <div className='md:col-span-2 space-y-4'>
                         <div className='border-b pb-2'>
-                            <p className='text-3xl font-bold text-foreground'>{name}</p>
+                            <p className='font-headline text-3xl font-bold text-foreground'>{name}</p>
                             <p className='text-muted-foreground'>{character.concept}</p>
                         </div>
                          <div className='grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4 text-sm'>
@@ -263,3 +263,6 @@ export function InfoPanel({ character, onAlignmentToggle }: { character: Charact
         </Card>
     );
 }
+
+
+    

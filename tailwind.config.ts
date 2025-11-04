@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Roboto Mono"', 'monospace'],
+        body: ['"Roboto"', 'sans-serif'],
         headline: ['"Metamorphous"', 'serif'],
         mono: ['"Roboto Mono"', 'monospace'],
       },
@@ -118,3 +118,5 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    
