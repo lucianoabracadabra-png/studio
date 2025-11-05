@@ -82,7 +82,7 @@ export async function generateNarrative(input: GenerateNarrativeInput): Promise<
 
 const prompt = ai.definePrompt({
   name: 'generateNarrativePrompt',
-  model: googleAI.model('gemini-1.5-flash'),
+  model: googleAI.model('gemini-pro'),
   input: { schema: GenerateNarrativeInputSchema },
   output: { schema: GenerateNarrativeOutputSchema },
   prompt: `Você é um Mestre de Jogo de um RPG de fantasia medieval sombria (século 15).
