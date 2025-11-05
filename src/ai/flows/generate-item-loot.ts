@@ -31,6 +31,23 @@ export async function generateItemLoot(input: GenerateItemLootInput): Promise<Ge
     return generateItemLootFlow(input);
 }
 
+const prompt = ai.definePrompt({
+    name: 'generateItemLootPrompt',
+    model: googleAI.model('gemini-1.5-flash'),
+    input: { schema: GenerateItemLootInputSchema },
+    output: { schema: GenerateItemLootOutputSchema },
+    prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
+
+    Generate a magical item based on the following criteria:
+    - Item Type: {{{itemType}}}
+    - Rarity: {{{rarity}}}
+    - Game Setting: {{{setting}}}
+    {{#if additionalDetails}}- Additional Details: {{{additionalDetails}}}{{/if}}
+
+    Provide a creative name, a plausible value in gold pieces, and a rich description including its appearance, history, and magical properties.
+    The response should be in Brazilian Portuguese.
+    `,
+});
 
 const generateItemLootFlow = ai.defineFlow(
     {
@@ -39,24 +56,7 @@ const generateItemLootFlow = ai.defineFlow(
         outputSchema: GenerateItemLootOutputSchema,
     },
     async (input) => {
-        const { output } = await ai.prompt({
-            model: googleAI.model('gemini-1.5-flash'),
-            prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
-
-            Generate a magical item based on the following criteria:
-            - Item Type: {{{itemType}}}
-            - Rarity: {{{rarity}}}
-            - Game Setting: {{{setting}}}
-            {{#if additionalDetails}}- Additional Details: {{{additionalDetails}}}{{/if}}
-        
-            Provide a creative name, a plausible value in gold pieces, and a rich description including its appearance, history, and magical properties.
-            The response should be in Brazilian Portuguese.
-            `,
-            output: {
-                schema: GenerateItemLootOutputSchema,
-            },
-            input: input,
-        });
-        return output;
+        const { output } = await prompt(input);
+        return output!;
     }
 );
