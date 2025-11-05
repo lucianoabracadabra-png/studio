@@ -20,11 +20,6 @@ import {
     type GenerateNarrativeInput,
     type GenerateNarrativeOutput,
 } from '@/ai/flows/generate-narrative';
-import {
-    processSession,
-    type ProcessSessionInput,
-    type ProcessSessionOutput,
-} from '@/ai/flows/process-session';
 
 
 export async function generateItemLootAction(
@@ -49,10 +44,4 @@ export async function generateNarrativeAction(
     input: GenerateNarrativeInput
 ): Promise<GenerateNarrativeOutput> {
     return await generateNarrative(input);
-}
-
-export async function processSessionAction(
-    input: ProcessSessionInput
-): Promise<ProcessSessionOutput> {
-    return await processSession(input);
 }
