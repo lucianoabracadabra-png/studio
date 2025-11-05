@@ -31,31 +31,6 @@ export async function generateItemLoot(input: GenerateItemLootInput): Promise<Ge
     return generateItemLootFlow(input);
 }
 
-const prompt = ai.definePrompt({
-    name: 'generateItemLootPrompt',
-    input: { schema: GenerateItemLootInputSchema },
-    model: googleAI.model('gemini-1.5-flash'),
-    prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
-
-    Generate a magical item based on the following criteria:
-    - Item Type: {{{itemType}}}
-    - Rarity: {{{rarity}}}
-    - Game Setting: {{{setting}}}
-    {{#if additionalDetails}}- Additional Details: {{{additionalDetails}}}{{/if}}
-
-    Provide a creative name, a plausible value in gold pieces, and a rich description including its appearance, history, and magical properties.
-    The response should be in Brazilian Portuguese.
-    
-    You MUST return ONLY a valid JSON object matching this Zod schema:
-    '''json
-    {
-      "itemName": "The name of the generated item.",
-      "itemValue": "The value of the item in gold pieces.",
-      "itemDescription": "A detailed description of the item's appearance, history, and abilities."
-    }
-    '''
-    `,
-});
 
 const generateItemLootFlow = ai.defineFlow(
     {
@@ -64,7 +39,24 @@ const generateItemLootFlow = ai.defineFlow(
         outputSchema: GenerateItemLootOutputSchema,
     },
     async (input) => {
-        const response = await prompt(input);
-        return JSON.parse(response.text);
+        const { output } = await ai.prompt({
+            model: googleAI.model('gemini-1.5-flash'),
+            prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
+
+            Generate a magical item based on the following criteria:
+            - Item Type: {{{itemType}}}
+            - Rarity: {{{rarity}}}
+            - Game Setting: {{{setting}}}
+            {{#if additionalDetails}}- Additional Details: {{{additionalDetails}}}{{/if}}
+        
+            Provide a creative name, a plausible value in gold pieces, and a rich description including its appearance, history, and magical properties.
+            The response should be in Brazilian Portuguese.
+            `,
+            output: {
+                schema: GenerateItemLootOutputSchema,
+            },
+            input: input,
+        });
+        return output;
     }
 );

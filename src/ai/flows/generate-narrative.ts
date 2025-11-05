@@ -80,28 +80,6 @@ export async function generateNarrative(input: GenerateNarrativeInput): Promise<
   return generateNarrativeFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'narrativeGeneratorPrompt',
-  input: { schema: GenerateNarrativeInputSchema },
-  output: { schema: GenerateNarrativeOutputSchema },
-  model: googleAI.model('gemini-1.5-flash'),
-  prompt: `Você é um Mestre de Jogo de um RPG de fantasia medieval sombria (século 15).
-    REGRAS CRÍTICAS:
-    1.  **SISTEMA DE ROLAGEM:** A rolagem usa um sistema de sucessos. O jogador rola d10s (igual à 'pericia'). Cada dado soma o 'atributo'. Um '1' no d10 é uma falha crítica (-1 sucesso). Um '10' é um crítico (valor 15) e adiciona outra rolagem de d10 para este teste. Cada resultado >= 'dificuldade' é 1 sucesso.
-    2.  **FLUXO DE AÇÃO:** Se o comando começar com "[SISTEMA]", é o resultado de uma rolagem. Narre a consequência direta com base no NÚMERO DE SUCESSOS e continue o jogo. NÃO peça outra ação.
-        - < 0 sucessos: Falha Crítica com consequências negativas.
-        - 0 sucessos: Falha total. A ação não é realizada.
-        - 1 sucesso: Sucesso com um custo narrativo. A ação principal funciona, mas algo corre mal.
-        - 2-3 sucessos: Sucesso completo.
-        - 4-5 sucessos: Sucesso impressionante.
-        - 6+ sucessos: Sucesso lendário com efeitos inesperados.
-    3.  **PEDIR ROLAGEM:** Se uma ação for incerta, peça uma rolagem usando 'rolagem_requerida', especificando 'pericia', 'atributo' e 'dificuldade'. Se for cabível, sugira uma 'alternativa' com perícia e atributo diferentes.
-    4.  **REGRAS GERAIS:** Dificuldade: Fácil (até 7), Médio (8-12), Difícil (13-15), Épico (16+). Dano é baseado em 'Força' e SÓ é aplicado após um sucesso. Vida 0 = morte. Crie novas salas na exploração. Use aspas simples (') na narrativa. A resposta DEVE estar em português do Brasil.
-
-    ESTADO ATUAL: {{{json estadoJogo}}}
-    COMANDO DO JOGADOR ou EVENTO DO SISTEMA: "{{{comando}}}"
-  `,
-});
 
 const generateNarrativeFlow = ai.defineFlow(
   {
@@ -110,7 +88,29 @@ const generateNarrativeFlow = ai.defineFlow(
     outputSchema: GenerateNarrativeOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    const { output } = await ai.prompt({
+        model: googleAI.model('gemini-1.5-flash'),
+        prompt: `Você é um Mestre de Jogo de um RPG de fantasia medieval sombria (século 15).
+        REGRAS CRÍTICAS:
+        1.  **SISTEMA DE ROLAGEM:** A rolagem usa um sistema de sucessos. O jogador rola d10s (igual à 'pericia'). Cada dado soma o 'atributo'. Um '1' no d10 é uma falha crítica (-1 sucesso). Um '10' é um crítico (valor 15) e adiciona outra rolagem de d10 para este teste. Cada resultado >= 'dificuldade' é 1 sucesso.
+        2.  **FLUXO DE AÇÃO:** Se o comando começar com "[SISTEMA]", é o resultado de uma rolagem. Narre a consequência direta com base no NÚMERO DE SUCESSOS e continue o jogo. NÃO peça outra ação.
+            - < 0 sucessos: Falha Crítica com consequências negativas.
+            - 0 sucessos: Falha total. A ação não é realizada.
+            - 1 sucesso: Sucesso com um custo narrativo. A ação principal funciona, mas algo corre mal.
+            - 2-3 sucessos: Sucesso completo.
+            - 4-5 sucessos: Sucesso impressionante.
+            - 6+ sucessos: Sucesso lendário com efeitos inesperados.
+        3.  **PEDIR ROLAGEM:** Se uma ação for incerta, peça uma rolagem usando 'rolagem_requerida', especificando 'pericia', 'atributo' e 'dificuldade'. Se for cabível, sugira uma 'alternativa' com perícia e atributo diferentes.
+        4.  **REGRAS GERAIS:** Dificuldade: Fácil (até 7), Médio (8-12), Difícil (13-15), Épico (16+). Dano é baseado em 'Força' e SÓ é aplicado após um sucesso. Vida 0 = morte. Crie novas salas na exploração. Use aspas simples (') na narrativa. A resposta DEVE estar em português do Brasil.
+    
+        ESTADO ATUAL: {{{json estadoJogo}}}
+        COMANDO DO JOGADOR ou EVENTO DO SISTEMA: "{{{comando}}}"
+        `,
+        output: {
+            schema: GenerateNarrativeOutputSchema
+        },
+        input: input,
+    });
+    return output;
   }
 );

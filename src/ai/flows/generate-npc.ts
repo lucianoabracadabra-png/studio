@@ -31,31 +31,6 @@ export async function generateNpc(input: GenerateNpcInput): Promise<GenerateNpcO
   return generateNpcFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'generateNpcPrompt',
-  input: { schema: GenerateNpcInputSchema },
-  model: googleAI.model('gemini-1.5-flash'),
-  prompt: `You are a creative storyteller and world-builder for a tabletop RPG.
-
-  Generate a unique Non-Player Character (NPC) based on the following criteria:
-  - Race: {{{race}}}
-  - Occupation: {{{occupation}}}
-  - Setting: {{{setting}}}
-  {{#if additionalDetails}}- Additional Details: {{{additionalDetails}}}{{/if}}
-
-  Provide a memorable name, a rich description of their appearance and personality, and a compelling backstory with motivations and potential plot hooks.
-  The response should be in Brazilian Portuguese.
-  
-  You MUST return ONLY a valid JSON object matching this Zod schema:
-  '''json
-  {
-    "name": "The generated NPC's full name.",
-    "description": "A detailed physical and personality description for the NPC.",
-    "backstory": "A compelling backstory for the NPC, including motivations and secrets."
-  }
-  '''
-  `,
-});
 
 const generateNpcFlow = ai.defineFlow(
   {
@@ -64,7 +39,24 @@ const generateNpcFlow = ai.defineFlow(
     outputSchema: GenerateNpcOutputSchema,
   },
   async (input) => {
-    const response = await prompt(input);
-    return JSON.parse(response.text);
+    const { output } = await ai.prompt({
+        model: googleAI.model('gemini-1.5-flash'),
+        prompt: `You are a creative storyteller and world-builder for a tabletop RPG.
+
+        Generate a unique Non-Player Character (NPC) based on the following criteria:
+        - Race: {{{race}}}
+        - Occupation: {{{occupation}}}
+        - Setting: {{{setting}}}
+        {{#if additionalDetails}}- Additional Details: {{{additionalDetails}}}{{/if}}
+      
+        Provide a memorable name, a rich description of their appearance and personality, and a compelling backstory with motivations and potential plot hooks.
+        The response should be in Brazilian Portuguese.
+        `,
+        output: {
+            schema: GenerateNpcOutputSchema,
+        },
+        input: input,
+    });
+    return output;
   }
 );

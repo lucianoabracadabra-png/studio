@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Processes a game session transcript to generate a structured summary, including a title, subtitle, cover image, and detailed lists of highlights, NPCs, items, and locations.
@@ -157,79 +156,8 @@ function preProcessData(allChunksData: RawChunkData[]): z.infer<typeof Synthesis
     };
 }
 
-
 // #################################################################
-// # 3. AI Prompts                                                 #
-// #################################################################
-
-const extractInsightsPrompt = ai.definePrompt({
-    name: 'extractInsightsPrompt',
-    inputSchema: z.object({ content: z.string(), previous_context: z.string().optional() }),
-    outputSchema: RawChunkDataSchema,
-    model: googleAI.model('gemini-1.5-flash'),
-    config: { temperature: 0.2 },
-    prompt: `
-        You are an expert RPG session analyst. Your task is to extract key information from a segment of a game transcript.
-        Do not make up information. If a category is not present, return an empty array for it.
-        
-        {{#if previous_context}}
-        PREVIOUS CONTEXT: The summary of the previous part of the session was: "{{{previous_context}}}". Use this to understand the ongoing narrative, but focus on extracting ONLY the NEW information present in the current segment.
-        {{/if}}
-
-        Focus ONLY on the content within this segment:
-        ---
-        {{{content}}}
-        ---
-
-        Extract the following, if present:
-        - Highlights: Key moments, decisions, or surprising events.
-        - NPCs: Any non-player characters mentioned or interacted with for the first time in this segment.
-        - Player Characters: Any player characters mentioned and their significant actions in this segment.
-        - Items: Any relevant items that were found, used, ou mentioned.
-        - Locations: Any new places visited or described.
-    `,
-});
-
-const synthesizeInsightsPrompt = ai.definePrompt({
-    name: 'synthesizeInsightsPrompt',
-    inputSchema: SynthesisInputSchema,
-    outputSchema: SynthesisOutputSchema,
-    model: googleAI.model('gemini-1.5-flash'),
-    config: { temperature: 0.7 },
-    prompt: `
-        You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and consolidated lists of highlights, NPCs, items, and locations from an entire game session.
-        Your job is to synthesize this information into a single, coherent, and polished summary.
-
-        - Title & Subtitle: Based on all the information, create a creative and engaging title and subtitle for the entire session.
-        - Refine Highlights: From the provided list of all highlights, select the BEST and MOST IMPACTFUL 10 highlights. Rephrase them for clarity and impact.
-        - Refine Lists: The provided lists of NPCs, characters, items, and locations have been pre-processed to remove duplicates. Simply return them as they are, but you can correct minor typos or formatting if needed.
-        - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
-
-        Here is the pre-processed data:
-        ---
-        All Highlights:
-        {{{json all_highlights}}}
-
-        All NPCs:
-        {{{json all_npcs}}}
-
-        All Player Characters:
-        {{{json all_player_characters}}}
-
-        All Items:
-        {{{json all_items}}}
-        
-        All Locations:
-        {{{json all_locations}}}
-        ---
-
-        Produce a final, clean, and well-structured JSON output with the refined information.
-    `,
-});
-
-
-// #################################################################
-// # 4. Flows                                                      #
+// # 3. Flows                                                      #
 // #################################################################
 
 /**
@@ -242,8 +170,35 @@ const extractInsightsFlow = ai.defineFlow(
         outputSchema: RawChunkDataSchema,
     },
     async (input) => {
-        const { output } = await extractInsightsPrompt(input);
-        return output!;
+        const { output } = await ai.prompt({
+            model: googleAI.model('gemini-1.5-flash'),
+            prompt: `
+                You are an expert RPG session analyst. Your task is to extract key information from a segment of a game transcript.
+                Do not make up information. If a category is not present, return an empty array for it.
+                
+                {{#if previous_context}}
+                PREVIOUS CONTEXT: The summary of the previous part of the session was: "{{{previous_context}}}". Use this to understand the ongoing narrative, but focus on extracting ONLY the NEW information present in the current segment.
+                {{/if}}
+
+                Focus ONLY on the content within this segment:
+                ---
+                {{{content}}}
+                ---
+
+                Extract the following, if present:
+                - Highlights: Key moments, decisions, or surprising events.
+                - NPCs: Any non-player characters mentioned or interacted with for the first time in this segment.
+                - Player Characters: Any player characters mentioned and their significant actions in this segment.
+                - Items: Any relevant items that were found, used, ou mentioned.
+                - Locations: Any new places visited or described.
+            `,
+            output: {
+                schema: RawChunkDataSchema,
+            },
+            config: { temperature: 0.2 },
+            input: input,
+        });
+        return output;
     }
 );
 
@@ -257,8 +212,44 @@ const synthesizeInsightsFlow = ai.defineFlow(
         outputSchema: SynthesisOutputSchema,
     },
     async (input) => {
-        const { output } = await synthesizeInsightsPrompt(input);
-        return output!;
+        const { output } = await ai.prompt({
+            model: googleAI.model('gemini-1.5-flash'),
+            prompt: `
+                You are a master editor and storyteller for a tabletop RPG group. You have received pre-processed and consolidated lists of highlights, NPCs, items, and locations from an entire game session.
+                Your job is to synthesize this information into a single, coherent, and polished summary.
+
+                - Title & Subtitle: Based on all the information, create a creative and engaging title and subtitle for the entire session.
+                - Refine Highlights: From the provided list of all highlights, select the BEST and MOST IMPACTFUL 10 highlights. Rephrase them for clarity and impact.
+                - Refine Lists: The provided lists of NPCs, characters, items, and locations have been pre-processed to remove duplicates. Simply return them as they are, but you can correct minor typos or formatting if needed.
+                - Image Prompt: Based on the MOST epic moment from the highlights, create a detailed, cinematic, and visually rich prompt IN ENGLISH for an AI image generator to create cover art.
+
+                Here is the pre-processed data:
+                ---
+                All Highlights:
+                {{{json all_highlights}}}
+
+                All NPCs:
+                {{{json all_npcs}}}
+
+                All Player Characters:
+                {{{json all_player_characters}}}
+
+                All Items:
+                {{{json all_items}}}
+                
+                All Locations:
+                {{{json all_locations}}}
+                ---
+
+                Produce a final, clean, and well-structured JSON output with the refined information.
+            `,
+            output: {
+                schema: SynthesisOutputSchema,
+            },
+            config: { temperature: 0.7 },
+            input: input,
+        });
+        return output;
     }
 );
 
