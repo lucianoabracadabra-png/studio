@@ -33,7 +33,7 @@ export async function generateNpc(input: GenerateNpcInput): Promise<GenerateNpcO
 
 const prompt = ai.definePrompt({
   name: 'generateNpcPrompt',
-  model: googleAI.model('gemini-pro'),
+  model: googleAI.model('gemini-1.5-flash'),
   input: { schema: GenerateNpcInputSchema },
   output: { schema: GenerateNpcOutputSchema },
   prompt: `You are a creative storyteller and world-builder for a tabletop RPG.

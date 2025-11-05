@@ -29,7 +29,7 @@ export async function generateEnvironmentDescription(input: GenerateEnvironmentD
 
 const prompt = ai.definePrompt({
   name: 'generateEnvironmentDescriptionPrompt',
-  model: googleAI.model('gemini-pro'),
+  model: googleAI.model('gemini-1.5-flash'),
   input: { schema: GenerateEnvironmentDescriptionInputSchema },
   output: { schema: GenerateEnvironmentDescriptionOutputSchema },
   prompt: `You are a master storyteller, painting vivid pictures with words for a tabletop RPG.

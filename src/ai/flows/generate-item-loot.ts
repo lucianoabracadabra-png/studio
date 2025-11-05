@@ -33,7 +33,7 @@ export async function generateItemLoot(input: GenerateItemLootInput): Promise<Ge
 
 const prompt = ai.definePrompt({
     name: 'generateItemLootPrompt',
-    model: googleAI.model('gemini-pro'),
+    model: googleAI.model('gemini-1.5-flash'),
     input: { schema: GenerateItemLootInputSchema },
     output: { schema: GenerateItemLootOutputSchema },
     prompt: `You are a master Dungeon Master creating a unique magical item for a tabletop RPG.
