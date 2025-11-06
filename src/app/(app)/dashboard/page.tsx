@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -7,24 +7,51 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from \"@/components/ui/card\";
+import { Button } from '@/components/ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ChevronDown, Edit } from 'lucide-react';
 import Link from 'next/link';
 import campaignsData from '@/lib/data/campaigns.json';
+import { cn } from '@/lib/utils';
 
-const { campaigns } = campaignsData;
+
+// Assume this shape for campaign data, potentially extended with sessions
+interface Campaign {
+  id: string;
+  name: string;
+  description: string;
+  imageId: string;
+  sessions?: {
+    id: string;
+    name: string;
+    date: string;
+  }[];
+}
+
+// Mock data with sessions added
+const campaigns: Campaign[] = campaignsData.campaigns.map(campaign => {
+  // Add mock sessions to each campaign for demonstration
+  return {
+    ...campaign,
+    sessions: [
+      { id: `${campaign.id}-s1`, name: "A Chegada à Aldeia", date: "2023-10-26" },
+      { id: `${campaign.id}-s2`, name: "As Criptas Esquecidas", date: "2023-11-02" },
+    ]
+  };
+});
 
 export default function DashboardPage() {
   return (
     <>
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Painel de Controle</h1>
+ <div className="flex items-center justify-between mb-6">
+ <h1 className="text-3xl font-bold">Minhas Campanhas</h1>
         <Button asChild className="mt-4 sm:mt-0">
            <Link href="/tools/generator">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Criar com IA
-            </Link>
+ Gerar com IA
         </Button>
       </div>
 
