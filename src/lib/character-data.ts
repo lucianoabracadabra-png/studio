@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from "lucide-react";
 import { Droplets, Wind, Star, Flame, Mountain, Shield, Anchor, Leaf, Heart } from 'lucide-react';
 import allItems from './data/items.json';
@@ -74,7 +75,7 @@ export type ItemOwnership = {
 };
 
 // Character Data Structure
-type Stat = { name: string; value: number };
+export type Stat = { name: string; value: number };
 
 type FocusData<T extends string, S extends string> = {
   attributes: { name: T, value: number }[];
@@ -162,6 +163,7 @@ export const iconMap: { [key: string]: LucideIcon } = {
 };
 
 export type Character = {
+  id: string;
   name: string;
   concept: string;
   info: {
