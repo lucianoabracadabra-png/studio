@@ -1,11 +1,14 @@
 'use client';
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useState } from 'react';
 import { setupGame, gameReducer } from './game-logic';
 import { generateNarrativeAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit } from 'lucide-react';
+import campaignsData from '@/lib/data/campaigns.json';
 
 const ChatLog = ({ messages }: { messages: any[] }) => {
     return (
@@ -89,6 +92,7 @@ const CharacterSheet = ({ player }: { player: any }) => {
 export function NarrativeConsole() {
     const [gameState, dispatch] = useReducer(gameReducer, null);
     const { toast } = useToast();
+    const [selectedCampaign, setSelectedCampaign] = useState(campaignsData.campaigns[0].id);
 
     useEffect(() => {
         dispatch({ type: 'INIT_GAME', payload: setupGame() });
@@ -185,31 +189,42 @@ export function NarrativeConsole() {
                 .health-bar-fill { background-color: #8c1c13; transition: width 0.5s ease-in-out; }
             `}</style>
 
-            <section id="chat-panel" className="bento-panel lg:col-span-2 lg:row-span-2 p-4">
-                <h2 className="text-xl font-bold font-heading heading-text border-b-2 border-[var(--page-accent-color)]/30 pb-2 mb-4 flex-shrink-0">DIÁRIO DE AVENTURA</h2>
-                <div className="flex-grow overflow-hidden pr-2 mb-4 relative">
-                    <ChatLog messages={gameState.messages} />
-                </div>
-                <div id="action-container" className="mt-auto flex-shrink-0">
-                    {gameState.rolagem_pendente ? (
-                        <div>
-                            <div className="text-center mb-2" dangerouslySetInnerHTML={{ __html: gameState.rolagemPendenteTexto || '' }}></div>
-                            <div className="flex gap-2 justify-center">
-                                <Button onClick={() => processRoll(false)} className="font-bold p-2 button-game rounded-md w-full md:w-auto flex-grow">Rolar Dados</Button>
-                                {gameState.rolagem_pendente.alternativa && (
-                                    <Button onClick={() => processRoll(true)} className="flex-shrink font-bold p-2 button-game rounded-md text-xs">Usar {gameState.rolagem_pendente.alternativa.pericia}</Button>
-                                )}
+            <section id="sessions-panel" className="bento-panel lg:col-span-1 lg:row-span-1 p-4">
+                <h2 className="text-xl font-bold font-heading heading-text border-b-2 border-[var(--page-accent-color)]/30 pb-2 mb-4 flex-shrink-0">Painel de Controle de Sessões</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label htmlFor="campaign-select" className="block text-sm font-medium text-gray-700">Campanha</label>
+                        <Select onValueChange={setSelectedCampaign} defaultValue={selectedCampaign}>
+                            <SelectTrigger id="campaign-select" className="w-full">
+                                <SelectValue placeholder="Selecione uma campanha" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {campaignsData.campaigns.map(campaign => (
+                                    <SelectItem key={campaign.id} value={campaign.id}>
+                                        {campaign.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-semibold">Sessões</h3>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+                                <span>Sessão 1: O Início</span>
+                                <Button variant="ghost" size="icon">
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                            </div>
+                            <div className="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+                                <span>Sessão 2: A Cripta</span>
+                                <Button variant="ghost" size="icon">
+                                    <Edit className="h-4 w-4" />
+                                </Button>
                             </div>
                         </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="flex">
-                            <span className="font-bold p-2 prompt-char rounded-l-md">&gt;</span>
-                            <input type="text" name="command-input" id="command-input" className="w-full p-2" placeholder={gameState.isLoading ? "Aguardando o destino..." : "O que fazes?"} autoComplete="off" disabled={gameState.isLoading} />
-                            <Button type="submit" className="font-bold p-2 button-game rounded-r-md" disabled={gameState.isLoading}>
-                                {gameState.isLoading ? 'AGUARDE' : 'AGIR'}
-                            </Button>
-                        </form>
-                    )}
+                    </div>
+                    <Button className="w-full">Nova Sessão</Button>
                 </div>
             </section>
 
