@@ -58,7 +58,7 @@ type LogEntry = {
   isPlayer?: boolean;
 }
 
-const MAX_AP_ON_TIMELINE = 50;
+const MAX_AP_ON_TIMELINE = 25;
 
 const allLinks = [...navData.mainLinks, ...navData.gmToolsLinks, profileLink];
 const bookColors = [...new Set(allLinks.filter(l => l.colorHue && typeof l.colorHue === 'string' && l.colorHue.match(/^\d/)).map(link => parseInt(link.colorHue.split(' ')[0], 10)))];
