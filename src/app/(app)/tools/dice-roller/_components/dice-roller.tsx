@@ -25,7 +25,7 @@ type RollResult = {
   timestamp: string;
 };
 
-const attributeDice = ['d10']; // Only d10 for attribute tests now
+const attributeDice = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
 const skillDiceCounts = Array.from({ length: 10 }, (_, i) => i + 1);
 
 const SuccessToast = ({ roll, successfulAttributes }: { roll: number, successfulAttributes: Stat[] }) => (
@@ -78,19 +78,13 @@ export function DiceRoller() {
   const { toast } = useToast();
 
   const handleAttributeRoll = (notation: string) => {
-    const [countStr, dieStr] = notation.toLowerCase().split('d');
-    const count = parseInt(countStr);
+    const [, dieStr] = notation.toLowerCase().split('d');
     const die = parseInt(dieStr);
 
-    if(count !== 1 || die !== 10) {
-      handleGenericRoll(notation);
-      return;
-    }
-
-    const roll = Math.floor(Math.random() * 10) + 1;
+    const roll = Math.floor(Math.random() * die) + 1;
 
     const newRoll: RollResult = {
-      notation: `1d10`,
+      notation: `1d${die}`,
       rolls: [roll],
       total: roll,
       timestamp: new Date().toLocaleTimeString(),
@@ -105,13 +99,13 @@ export function DiceRoller() {
     ];
     
     const successfulAttributes = allAttributes.filter(attr => attr.value >= roll);
-    const isSuccess = roll < 10; // Success if roll is 1-9. 10 is critical fail.
+    const isCriticalFailure = die === 10 && roll === 10;
 
     toast({
-        title: isSuccess ? "Teste de Atributo" : "Falha Crítica no Teste!",
-        description: isSuccess 
-            ? <SuccessToast roll={roll} successfulAttributes={successfulAttributes} /> 
-            : <FailureToast roll={roll} successfulAttributes={successfulAttributes} />,
+        title: isCriticalFailure ? "Falha Crítica no Teste!" : "Teste de Atributo",
+        description: isCriticalFailure 
+            ? <FailureToast roll={roll} successfulAttributes={successfulAttributes} /> 
+            : <SuccessToast roll={roll} successfulAttributes={successfulAttributes} />,
         duration: 5000,
     });
   }
@@ -162,7 +156,7 @@ export function DiceRoller() {
                <Card>
                 <CardHeader>
                   <CardTitle className='text-lg'>Teste de Atributo</CardTitle>
-                  <CardDescription>Clique no d10 para rolar um teste de atributo (menor ou igual).</CardDescription>
+                  <CardDescription>Clique no dado para rolar um teste de atributo (menor ou igual).</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                   {attributeDice.map(die => (
